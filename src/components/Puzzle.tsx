@@ -101,10 +101,33 @@ export function Puzzle({
 
   const dragging = useRef(false);
   const tapAnchor = useRef<number | null>(null);
+  // Mouse: where the button went down, and whether it has moved to another letter since.
+  const down = useRef<{ li: number; moved: boolean } | null>(null);
   const keyAnchor = useRef<number | null>(null);
   const tapStartRef = useRef(onTapStart);
   useLayoutEffect(() => {
     tapStartRef.current = onTapStart;
+  });
+  /**
+   * Tap or click one letter. First: it becomes the anchor. Same letter again: cancel. Another letter: check the
+   * range between them. Shared by touch taps, slow taps and mouse clicks so they all behave the same.
+   */
+  const tapRef = useRef((li: number) => {
+    const a = tapAnchor.current;
+    if (a == null) {
+      tapAnchor.current = li;
+      selRef.current = { a: li, b: li };
+      setSel(selRef.current);
+      tapStartRef.current();
+      tick(1);
+    } else if (a === li) {
+      tapAnchor.current = null;
+      setSel(null);
+    } else {
+      tapAnchor.current = null;
+      setSel(null);
+      pickRef.current(a, li);
+    }
   });
   // Where the finger is while a touch selection runs: drives the bubble above the finger.
   const [bubble, setBubble] = useState<{ x: number; y: number } | null>(null);
@@ -120,10 +143,29 @@ export function Puzzle({
   // Mouse and pen: drag with pointer events.
   useEffect(() => {
     const move = (e: globalThis.PointerEvent) => {
-      if (!dragging.current || e.pointerType === 'touch') return;
+      if (e.pointerType === 'touch' || disabledRef.current) return;
       const li = liAt(e.clientX, e.clientY);
+      // After a first click, the range follows the mouse so the second click is a sure thing.
+      if (!dragging.current) {
+        const a = tapAnchor.current;
+        if (a == null || li < 0 || li === selRef.current?.b) return;
+        selRef.current = { a, b: li };
+        setSel(selRef.current);
+        tick(span(selRef.current));
+        return;
+      }
       const s = selRef.current;
       if (li < 0 || !s || li === s.b) return;
+      const d = down.current;
+      if (d && !d.moved) {
+        // A real drag: it starts where the button went down, whatever was anchored before.
+        d.moved = true;
+        tapAnchor.current = null;
+        selRef.current = { a: d.li, b: li };
+        setSel(selRef.current);
+        tick(span(selRef.current));
+        return;
+      }
       selRef.current = { a: s.a, b: li };
       setSel(selRef.current);
       tick(span(selRef.current));
@@ -131,6 +173,14 @@ export function Puzzle({
     const up = (e: globalThis.PointerEvent) => {
       if (!dragging.current || e.pointerType === 'touch') return;
       dragging.current = false;
+      const d = down.current;
+      down.current = null;
+      if (e.type === 'pointercancel') {
+        tapAnchor.current = null;
+        return setSel(null);
+      }
+      // Pressed and released on one letter: a click, not a one letter guess.
+      if (d && !d.moved) return tapRef.current(d.li);
       const s = selRef.current;
       setSel(null);
       if (s) pickRef.current(s.a, s.b);
@@ -166,7 +216,6 @@ export function Puzzle({
     const begin = () => {
       if (!t || t.li < 0) return;
       t.mode = 'select';
-      tapAnchor.current = null;
       keyAnchor.current = null;
       dragging.current = true;
       selRef.current = { a: t.li, b: t.li };
@@ -229,6 +278,14 @@ export function Puzzle({
       const cur = t;
       reset();
       if (cur.mode === 'select') {
+        // Held a little long but never moved: that was a slow tap, not a one letter selection.
+        if (Math.hypot(cur.px - cur.x, cur.py - cur.y) <= TAP_SLOP) {
+          dragging.current = false;
+          setBubble(null);
+          if (tapAnchor.current == null) setSel(null);
+          return tapRef.current(cur.li);
+        }
+        tapAnchor.current = null;
         // A fast flick can lift before the next frame runs: settle on the letter under the last point.
         // (touchend coordinates are not reliable everywhere; the last move is.)
         const li = liNear(cur.px, cur.py);
@@ -240,17 +297,7 @@ export function Puzzle({
       const p = e.changedTouches[0];
       if (p && Math.hypot(p.clientX - cur.x, p.clientY - cur.y) > TAP_SLOP) return;
       // A tap: first letter, then last.
-      if (tapAnchor.current == null) {
-        tapAnchor.current = cur.li;
-        setSel({ a: cur.li, b: cur.li });
-        tapStartRef.current();
-        tick(1);
-      } else {
-        const a = tapAnchor.current;
-        tapAnchor.current = null;
-        setSel(null);
-        pickRef.current(a, cur.li);
-      }
+      tapRef.current(cur.li);
     };
     const cancel = () => {
       if (t?.mode === 'select') endSelect(false);
@@ -278,12 +325,14 @@ export function Puzzle({
     const li = liAt(e.clientX, e.clientY);
     if (e.button !== 0 || li < 0) return;
     e.preventDefault();
-    tapAnchor.current = null;
     keyAnchor.current = null;
     dragging.current = true;
+    down.current = { li, moved: false };
+    unlock();
+    // With an anchor, show the range it would check; otherwise this letter starts a drag.
+    if (tapAnchor.current != null) return;
     setSel({ a: li, b: li });
     onDragStart();
-    unlock();
     tick(1);
   };
 

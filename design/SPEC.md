@@ -58,11 +58,12 @@ Values are tokens from `tokens/tokens.css`. Prototype wins on visuals. This file
 ## 5. The puzzle interaction
 Paragraph renders one span per character. Letters carry `li` (index in lowercase letter stream `S`). Non letters carry `prev` and `next`.
 
-**Letter states:** idle transparent · selecting `--sel`/`--sel-fg` · found `--accent`/`--on-accent` · missed (after finish) `--miss` · hint `inset 0 -2px 0 var(--accent-ink)`. A non letter takes the state when both neighbours share it, so "a most" is one bar. r4, padding 2 0.
+**Letter states:** idle transparent · selecting `--sel`/`--sel-fg` · found `--accent`/`--on-accent` · missed (after finish) `--miss` · hint: whole letter, `--hint-bg` wash inside a 1.5px `--accent-ink` ring (selecting and found win the fill). A non letter takes the state when both neighbours share it, so "a most" is one bar. r4, padding 2 0.
 
 **Input**
-- Mouse/pen: pointerdown starts, window pointermove extends via `elementFromPoint`, pointerup evaluates. `user-select: none`.
-- Touch: tap first letter (copy `tapNext`), tap last letter evaluates. `touch-action: manipulation` so the page still scrolls.
+- Mouse/pen: drag (pointerdown starts, window pointermove extends via `elementFromPoint`, pointerup evaluates), or click first letter then last. After the first click the range follows the mouse. `user-select: none`.
+- Touch: swipe sideways, press and hold then drag, or tap first letter (copy `tapNext`) then last. A slow tap that never moves is still a tap. `touch-action: pan-y pinch-zoom` so the page still scrolls.
+- Tap or click the anchored letter again to cancel. Escape clears.
 
 **Evaluate** (`reference/engine.js` `check`):
 | Result | Action |

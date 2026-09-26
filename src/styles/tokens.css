@@ -25,6 +25,7 @@
   --accent-hover: #e0f56e;
   --on-accent: #0d0d0e;
   --accent-ink: #d4f04c;
+  --hint-bg: rgba(212, 240, 76, 0.16); /* Hinted letter: lime wash, ringed, never a found fill */
   --bar: #d4f04c;
   --cell: #d4f04c;
   --scrim: rgba(0,0,0,0.62);
@@ -53,6 +54,7 @@
   --accent-hover: #e0f56e;
   --on-accent: #0d0d0e;
   --accent-ink: #5a6b00;
+  --hint-bg: rgba(212, 240, 76, 0.38);
   --bar: #111113;
   --cell: #111113;
 }

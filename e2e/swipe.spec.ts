@@ -138,3 +138,64 @@ test('a bubble above the finger shows the letters being selected', async ({ page
   await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
   await expect(page.getByText(/^AMO$/)).toHaveCount(0);
 });
+
+test('slow taps, held past the long press, still work as first and last', async ({ page }) => {
+  await page.goto('/play/bible');
+  const i = await indexOf(page, 'amost');
+  const a = await centerOf(page, i);
+  const b = await centerOf(page, i + 3);
+  await touchPath(page, [{ ...a, wait: 450 }]);
+  await expect(page.locator(`[data-li="${i}"]`)).toHaveAttribute('data-state', 'selecting');
+  await touchPath(page, [{ ...b, wait: 450 }]);
+  await expect(page.locator(`[data-li="${i}"]`)).toHaveAttribute('data-state', 'found');
+});
+
+test('tapping the first letter again cancels it', async ({ page }) => {
+  await page.goto('/play/bible');
+  const i = await indexOf(page, 'amost');
+  const first = page.locator(`[data-li="${i}"]`);
+  await first.tap();
+  await expect(first).toHaveAttribute('data-state', 'selecting');
+  await first.tap();
+  await expect(first).not.toHaveAttribute('data-state');
+});
+
+test.describe('mouse', () => {
+  test.use({ hasTouch: false, isMobile: false, viewport: { width: 1280, height: 800 } });
+
+  test('click the first letter, then the last, with the range following the mouse', async ({ page }) => {
+    await page.goto('/play/bible');
+    const i = await indexOf(page, 'amost');
+    const first = page.locator(`[data-li="${i}"]`);
+    await first.click();
+    await expect(first).toHaveAttribute('data-state', 'selecting');
+    await expect(page.getByRole('status').first()).not.toContainText(/wrong|not/i);
+    await page.locator(`[data-li="${i + 3}"]`).hover();
+    await expect(page.locator(`[data-li="${i + 2}"]`)).toHaveAttribute('data-state', 'selecting');
+    await page.locator(`[data-li="${i + 3}"]`).click();
+    await expect(first).toHaveAttribute('data-state', 'found');
+  });
+
+  test('a drag after a stray click starts where the drag starts', async ({ page }) => {
+    await page.goto('/play/bible');
+    const i = await indexOf(page, 'amost');
+    await page.locator('[data-li="0"]').click();
+    const a = await centerOf(page, i);
+    const b = await centerOf(page, i + 3);
+    await page.mouse.move(a.x, a.y);
+    await page.mouse.down();
+    await page.mouse.move(b.x, b.y, { steps: 6 });
+    await page.mouse.up();
+    await expect(page.locator(`[data-li="${i}"]`)).toHaveAttribute('data-state', 'found');
+    await expect(page.locator('[data-li="0"]')).not.toHaveAttribute('data-state', 'selecting');
+  });
+
+  test('a hint lights up the whole letter', async ({ page }) => {
+    await page.goto('/play/bible');
+    await page.getByRole('button', { name: 'Give me a hint' }).click();
+    const hinted = page.locator('[data-hint]');
+    await expect(hinted).toHaveCount(1);
+    const bg = await hinted.evaluate((el) => getComputedStyle(el).backgroundColor);
+    expect(bg).not.toBe('rgba(0, 0, 0, 0)');
+  });
+});
