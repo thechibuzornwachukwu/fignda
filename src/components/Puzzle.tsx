@@ -35,10 +35,26 @@ const TAP_SLOP = 10;
 /** A touch that moves this far sideways before it moves vertically becomes a swipe selection. */
 const SWIPE_START = 8;
 
+/** Holding still this long on a letter starts a selection in any direction. */
+const LONG_PRESS_MS = 260;
+/** A first move counts as a selection when sideways travel is at least this share of vertical travel. */
+const SELECT_BIAS = 0.75;
+/** How far above the finger the selection bubble sits. */
+const BUBBLE_LIFT = 72;
+
 function liAt(x: number, y: number): number {
   const el = document.elementFromPoint(x, y);
   const t = el?.closest<HTMLElement>('[data-li]');
   return t ? Number(t.dataset.li) : -1;
+}
+
+/** The letter under a finger, or the nearest one above or below when it sits between lines. */
+function liNear(x: number, y: number): number {
+  for (const dy of [0, -8, 8, -16, 16]) {
+    const li = liAt(x, y + dy);
+    if (li >= 0) return li;
+  }
+  return -1;
 }
 
 /**
@@ -79,9 +95,15 @@ export function Puzzle({
   });
 
   const dragging = useRef(false);
-  const touch = useRef<{ x: number; y: number; li: number } | null>(null);
   const tapAnchor = useRef<number | null>(null);
   const keyAnchor = useRef<number | null>(null);
+  const tapStartRef = useRef(onTapStart);
+  useLayoutEffect(() => {
+    tapStartRef.current = onTapStart;
+  });
+  // Where the finger is while a touch selection runs: drives the bubble above the finger.
+  const [bubble, setBubble] = useState<{ x: number; y: number } | null>(null);
+  const stream = useMemo(() => chars.filter((c) => c.li >= 0).map((c) => c.ch).join(''), [chars]);
 
   useEffect(() => {
     if (!disabled) return;
@@ -90,32 +112,18 @@ export function Puzzle({
     keyAnchor.current = null;
   }, [disabled]);
 
+  // Mouse and pen: drag with pointer events.
   useEffect(() => {
     const move = (e: globalThis.PointerEvent) => {
-      // Touch: a sideways swipe that starts on a letter selects; a vertical one is left to the browser to scroll
-      // (the board is touch-action: pan-y, so sideways moves reach us and vertical ones pan the page).
-      const t = touch.current;
-      if (!dragging.current && t && e.pointerType === 'touch' && t.li >= 0 && !disabledRef.current) {
-        const dx = e.clientX - t.x;
-        const dy = e.clientY - t.y;
-        if (Math.abs(dx) < SWIPE_START || Math.abs(dx) <= Math.abs(dy)) return;
-        touch.current = null;
-        tapAnchor.current = null;
-        keyAnchor.current = null;
-        dragging.current = true;
-        selRef.current = { a: t.li, b: t.li };
-        setSel(selRef.current);
-        dragStartRef.current();
-      }
-      if (!dragging.current) return;
+      if (!dragging.current || e.pointerType === 'touch') return;
       const li = liAt(e.clientX, e.clientY);
       const s = selRef.current;
       if (li < 0 || !s || li === s.b) return;
       selRef.current = { a: s.a, b: li };
       setSel(selRef.current);
     };
-    const up = () => {
-      if (!dragging.current) return;
+    const up = (e: globalThis.PointerEvent) => {
+      if (!dragging.current || e.pointerType === 'touch') return;
       dragging.current = false;
       const s = selRef.current;
       setSel(null);
@@ -131,14 +139,134 @@ export function Puzzle({
     };
   }, []);
 
+  // Touch: native touch events, so a selection can own the gesture. With pointer events alone, iOS cancels a
+  // sideways drag the moment it drifts vertically (the page is allowed to scroll), which made selection jumpy.
+  //   Sideways first move, or press and hold ~260ms  -> selecting: every move is ours (scroll blocked).
+  //   Vertical first move                            -> scrolling: the browser has it.
+  //   Still and short                                -> a tap (tap first letter, then last).
+  useEffect(() => {
+    const board = boardRef.current;
+    if (!board) return;
+    type T = { x: number; y: number; li: number; mode: 'pending' | 'select' | 'scroll'; timer: number | null; raf: number | null; px: number; py: number };
+    let t: T | null = null;
+
+    const endSelect = (commit: boolean) => {
+      dragging.current = false;
+      const s = selRef.current;
+      setSel(null);
+      setBubble(null);
+      if (commit && s) pickRef.current(s.a, s.b);
+    };
+    const begin = () => {
+      if (!t || t.li < 0) return;
+      t.mode = 'select';
+      tapAnchor.current = null;
+      keyAnchor.current = null;
+      dragging.current = true;
+      selRef.current = { a: t.li, b: t.li };
+      setSel(selRef.current);
+      setBubble({ x: t.px, y: t.py });
+      dragStartRef.current();
+      navigator.vibrate?.(8);
+    };
+    const reset = () => {
+      if (t?.timer) window.clearTimeout(t.timer);
+      if (t?.raf) cancelAnimationFrame(t.raf);
+      t = null;
+    };
+
+    const start = (e: TouchEvent) => {
+      reset();
+      if (disabledRef.current || e.touches.length !== 1) return;
+      const p = e.touches[0]!;
+      const li = liNear(p.clientX, p.clientY);
+      t = { x: p.clientX, y: p.clientY, px: p.clientX, py: p.clientY, li, mode: 'pending', timer: null, raf: null };
+      if (li >= 0) t.timer = window.setTimeout(() => t?.mode === 'pending' && begin(), LONG_PRESS_MS);
+    };
+    const move = (e: TouchEvent) => {
+      if (!t) return;
+      if (e.touches.length !== 1) {
+        if (t.mode === 'select') endSelect(false);
+        reset();
+        return;
+      }
+      const p = e.touches[0]!;
+      t.px = p.clientX;
+      t.py = p.clientY;
+      if (t.mode === 'pending') {
+        const dx = p.clientX - t.x;
+        const dy = p.clientY - t.y;
+        if (Math.hypot(dx, dy) < SWIPE_START) return;
+        if (t.timer) window.clearTimeout(t.timer);
+        // Forgiving: a diagonal start still selects. Only a clearly vertical start scrolls.
+        if (t.li >= 0 && Math.abs(dx) >= Math.abs(dy) * SELECT_BIAS) begin();
+        else t.mode = 'scroll';
+      }
+      if (t.mode !== 'select') return;
+      e.preventDefault(); // the gesture is a selection now: no scrolling, no cancel
+      if (t.raf != null) return;
+      t.raf = requestAnimationFrame(() => {
+        if (!t) return;
+        t.raf = null;
+        setBubble({ x: t.px, y: t.py });
+        const li = liNear(t.px, t.py);
+        const s = selRef.current;
+        if (li < 0 || !s || li === s.b) return;
+        selRef.current = { a: s.a, b: li };
+        setSel(selRef.current);
+      });
+    };
+    const end = (e: TouchEvent) => {
+      if (!t) return;
+      const cur = t;
+      reset();
+      if (cur.mode === 'select') {
+        // A fast flick can lift before the next frame runs: settle on the letter under the last point.
+        // (touchend coordinates are not reliable everywhere; the last move is.)
+        const li = liNear(cur.px, cur.py);
+        const s = selRef.current;
+        if (li >= 0 && s) selRef.current = { a: s.a, b: li };
+        return endSelect(true);
+      }
+      if (cur.mode !== 'pending' || cur.li < 0 || disabledRef.current) return;
+      const p = e.changedTouches[0];
+      if (p && Math.hypot(p.clientX - cur.x, p.clientY - cur.y) > TAP_SLOP) return;
+      // A tap: first letter, then last.
+      if (tapAnchor.current == null) {
+        tapAnchor.current = cur.li;
+        setSel({ a: cur.li, b: cur.li });
+        tapStartRef.current();
+      } else {
+        const a = tapAnchor.current;
+        tapAnchor.current = null;
+        setSel(null);
+        pickRef.current(a, cur.li);
+      }
+    };
+    const cancel = () => {
+      if (t?.mode === 'select') endSelect(false);
+      reset();
+    };
+    const noMenu = (e: Event) => e.preventDefault();
+
+    board.addEventListener('touchstart', start, { passive: true });
+    board.addEventListener('touchmove', move, { passive: false });
+    board.addEventListener('touchend', end);
+    board.addEventListener('touchcancel', cancel);
+    board.addEventListener('contextmenu', noMenu);
+    return () => {
+      reset();
+      board.removeEventListener('touchstart', start);
+      board.removeEventListener('touchmove', move);
+      board.removeEventListener('touchend', end);
+      board.removeEventListener('touchcancel', cancel);
+      board.removeEventListener('contextmenu', noMenu);
+    };
+  }, []);
+
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
-    if (disabled) return;
+    if (disabled || e.pointerType === 'touch') return;
     const li = liAt(e.clientX, e.clientY);
-    if (e.pointerType === 'touch') {
-      // Evaluated on pointerup so a scroll that starts on a letter is not a tap.
-      touch.current = { x: e.clientX, y: e.clientY, li };
-      return;
-    }
     if (e.button !== 0 || li < 0) return;
     e.preventDefault();
     tapAnchor.current = null;
@@ -146,24 +274,6 @@ export function Puzzle({
     dragging.current = true;
     setSel({ a: li, b: li });
     onDragStart();
-  };
-
-  const onPointerUp = (e: PointerEvent<HTMLDivElement>) => {
-    if (e.pointerType !== 'touch') return;
-    const t = touch.current;
-    touch.current = null;
-    if (disabled || !t || t.li < 0) return;
-    if (Math.hypot(e.clientX - t.x, e.clientY - t.y) > TAP_SLOP) return;
-    if (tapAnchor.current == null) {
-      tapAnchor.current = t.li;
-      setSel({ a: t.li, b: t.li });
-      onTapStart();
-    } else {
-      const a = tapAnchor.current;
-      tapAnchor.current = null;
-      setSel(null);
-      onPick(a, t.li);
-    }
   };
 
   const letterEl = (li: number) => boardRef.current?.querySelector<HTMLElement>(`[data-li="${li}"]`) ?? null;
@@ -265,8 +375,6 @@ export function Puzzle({
       aria-describedby={describedBy}
       aria-disabled={disabled || undefined}
       onPointerDown={onPointerDown}
-      onPointerUp={onPointerUp}
-      onPointerCancel={() => (touch.current = null)}
       onKeyDown={onKeyDown}
       onFocus={() => caret < 0 && setCaret(0)}
     >
@@ -280,6 +388,19 @@ export function Puzzle({
           caret={c.li >= 0 && c.li === caret}
         />
       ))}
+      {bubble && sel && (
+        // The finger covers the letters it selects: show them above it, as word games do.
+        <span
+          className={styles.bubble}
+          aria-hidden="true"
+          style={{
+            left: Math.min(Math.max(bubble.x, 64), window.innerWidth - 64),
+            top: Math.max(bubble.y - BUBBLE_LIFT, 8),
+          }}
+        >
+          {stream.slice(Math.min(sel.a, sel.b), Math.max(sel.a, sel.b) + 1).toUpperCase()}
+        </span>
+      )}
     </div>
   );
 }

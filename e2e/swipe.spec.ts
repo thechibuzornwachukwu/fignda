@@ -74,3 +74,67 @@ test('tap first, tap last still works', async ({ page }) => {
   await page.locator(`[data-li="${i + 3}"]`).tap();
   await expect(page.locator(`[data-li="${i}"]`)).toHaveAttribute('data-state', 'found');
 });
+
+/** Low level touch path: points with optional pauses, ending wherever the last point is. */
+async function touchPath(page: Page, points: Array<{ x: number; y: number; wait?: number }>, opts: { keepDown?: boolean } = {}) {
+  const cdp = await page.context().newCDPSession(page);
+  const [first, ...rest] = points;
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: first!.x, y: first!.y, id: 1 }] });
+  if (first!.wait) await page.waitForTimeout(first!.wait);
+  for (const p of rest) {
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [{ x: p.x, y: p.y, id: 1 }] });
+    await page.waitForTimeout(p.wait ?? 16);
+  }
+  if (!opts.keepDown) await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  return cdp;
+}
+
+test('a sideways swipe that wobbles up and down mid-drag still selects', async ({ page }) => {
+  await page.goto('/play/bible');
+  const i = await indexOf(page, 'amost');
+  const a = await centerOf(page, i);
+  const b = await centerOf(page, i + 3);
+  // Sideways first, then a wobble of a whole line down and back: this used to cancel the selection on iOS.
+  await touchPath(page, [
+    { x: a.x, y: a.y },
+    { x: a.x + 20, y: a.y + 2 },
+    { x: a.x + 30, y: a.y + 40 },
+    { x: a.x + 45, y: a.y - 30 },
+    { x: b.x, y: b.y + 4 },
+  ]);
+  await expect(page.locator(`[data-li="${i}"]`)).toHaveAttribute('data-state', 'found');
+});
+
+test('press and hold, then drag down onto the next line, selects', async ({ page }) => {
+  await page.goto('/play/bible');
+  await page.locator('[data-li]').first().waitFor();
+  const target = await page.evaluate(() => {
+    const els = Array.from(document.querySelectorAll<HTMLElement>('[data-li]'));
+    const S = els.map((e) => e.textContent).join('').toLowerCase();
+    for (const w of ['judges', 'hebrews', 'esther', 'chronicles', 'philemon', 'lamentations', 'revelation', 'genesis', 'numbers', 'malachi']) {
+      let i = S.indexOf(w);
+      while (i >= 0) {
+        if (els[i + w.length - 1]!.getBoundingClientRect().top - els[i]!.getBoundingClientRect().top > 5) return { i, len: w.length };
+        i = S.indexOf(w, i + 1);
+      }
+    }
+    return null;
+  });
+  test.skip(!target, 'No answer wraps at this width');
+  const a = await centerOf(page, target!.i);
+  const b = await centerOf(page, target!.i + target!.len - 1);
+  // Hold still, then move straight down first (a vertical start would normally scroll).
+  await touchPath(page, [{ x: a.x, y: a.y, wait: 400 }, { x: a.x, y: b.y }, { x: b.x, y: b.y }]);
+  await expect(page.locator(`[data-li="${target!.i}"]`)).toHaveAttribute('data-state', 'found');
+});
+
+test('a bubble above the finger shows the letters being selected', async ({ page }) => {
+  await page.goto('/play/bible');
+  const i = await indexOf(page, 'amost');
+  const a = await centerOf(page, i);
+  const c = await centerOf(page, i + 2);
+  const cdp = await touchPath(page, [{ x: a.x, y: a.y }, { x: a.x + 12, y: a.y }, { x: c.x, y: c.y }], { keepDown: true });
+  await expect(page.getByText(/^AMO$/)).toBeVisible();
+  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  await expect(page.getByText(/^AMO$/)).toHaveCount(0);
+});

@@ -26,3 +26,21 @@
   outline: 2px solid var(--accent-ink);
   outline-offset: 1px;
 }
+
+/* Selection bubble above the finger (touch only). */
+.bubble {
+  position: fixed;
+  z-index: 20;
+  transform: translate(-50%, -100%);
+  padding: var(--space-2) var(--space-3h);
+  border-radius: var(--radius-lg);
+  background: var(--fg);
+  color: var(--bg);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  white-space: nowrap;
+  pointer-events: none;
+  box-shadow: 0 6px 20px var(--scrim);
+}
