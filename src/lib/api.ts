@@ -95,6 +95,106 @@ export async function fetchGameBoard(gameId: string, limit = 20): Promise<BoardR
   return data as BoardRow[];
 }
 
+// ---------------------------------------------------------------------------
+// Community: follows and discovery. Handles and names only; RLS guards writes.
+// ---------------------------------------------------------------------------
+
+export type PlayerRef = { handle: string; name: string };
+export type Summary = {
+  handle: string;
+  name: string;
+  created_at: string;
+  current_streak: number;
+  best_streak: number;
+  dailies: number;
+  perfect: number;
+  followers: number;
+  following: number;
+};
+
+export async function fetchSummary(handle: string): Promise<Summary | null> {
+  const { data, error } = await (await client()).rpc('profile_summary', { p_handle: handle });
+  if (error) throw error;
+  return (data as Summary[])[0] ?? null;
+}
+
+export async function fetchFollowers(handle: string): Promise<PlayerRef[]> {
+  const { data, error } = await (await client()).rpc('followers_of', { p_handle: handle, p_limit: 50 });
+  if (error) throw error;
+  return data as PlayerRef[];
+}
+
+export async function fetchFollowing(handle: string): Promise<PlayerRef[]> {
+  const { data, error } = await (await client()).rpc('following_of', { p_handle: handle, p_limit: 50 });
+  if (error) throw error;
+  return data as PlayerRef[];
+}
+
+async function idOf(handle: string): Promise<string | null> {
+  const { data } = await (await client()).from('profiles').select('id').eq('handle', handle).maybeSingle();
+  return data?.id ?? null;
+}
+
+export async function isFollowing(me: string, handle: string): Promise<boolean> {
+  const target = await idOf(handle);
+  if (!target) return false;
+  const { data } = await (await client())
+    .from('follows')
+    .select('followee_id')
+    .eq('follower_id', me)
+    .eq('followee_id', target)
+    .maybeSingle();
+  return !!data;
+}
+
+export async function follow(me: string, handle: string): Promise<boolean> {
+  const target = await idOf(handle);
+  if (!target) return false;
+  const { error } = await (await client()).from('follows').insert({ follower_id: me, followee_id: target });
+  return !error || error.code === '23505';
+}
+
+export async function unfollow(me: string, handle: string): Promise<boolean> {
+  const target = await idOf(handle);
+  if (!target) return false;
+  const { error } = await (await client()).from('follows').delete().eq('follower_id', me).eq('followee_id', target);
+  return !error;
+}
+
+/** Stop someone following you. */
+export async function removeFollower(me: string, handle: string): Promise<boolean> {
+  const who = await idOf(handle);
+  if (!who) return false;
+  const { error } = await (await client()).from('follows').delete().eq('follower_id', who).eq('followee_id', me);
+  return !error;
+}
+
+export async function fetchFollowingBoard(day: number): Promise<BoardRow[]> {
+  const { data, error } = await (await client()).rpc('following_board', { p_day: day, p_limit: 50 });
+  if (error) throw error;
+  return data as BoardRow[];
+}
+
+export async function searchPlayers(prefix: string): Promise<PlayerRef[]> {
+  const q = prefix.trim().toLowerCase().replace(/^@/, '');
+  if (!/^[a-z0-9._]{1,20}$/.test(q)) return [];
+  const { data, error } = await (await client()).rpc('players_search', { p_prefix: q, p_limit: 20 });
+  if (error) throw error;
+  return data as PlayerRef[];
+}
+
+export async function topPlayers(kind: 'streak' | 'perfect'): Promise<Array<PlayerRef & { value: number }>> {
+  const { data, error } = await (await client()).rpc('players_top', { p_kind: kind, p_limit: 10 });
+  if (error) throw error;
+  return data as Array<PlayerRef & { value: number }>;
+}
+
+export async function newPlayers(): Promise<Array<PlayerRef & { created_at: string }>> {
+  const { data, error } = await (await client()).rpc('players_new', { p_limit: 10 });
+  if (error) throw error;
+  return data as Array<PlayerRef & { created_at: string }>;
+}
+
 /** Day numbers of the user's stored dailies. */
 export async function fetchDailyDays(): Promise<number[]> {
   const { data, error } = await (await client()).from('plays').select('day_no').not('day_no', 'is', null);

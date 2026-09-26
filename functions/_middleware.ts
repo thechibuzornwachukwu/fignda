@@ -45,6 +45,49 @@ export function metaFor(path: string, today = dayNo()): Meta {
   return DEFAULT;
 }
 
+export type ProfileSummary = {
+  handle: string;
+  name: string;
+  current_streak: number;
+  dailies: number;
+  perfect: number;
+  followers: number;
+};
+
+/** Preview for /u/:handle. Built from the database summary only. */
+export function profileMeta(p: ProfileSummary): Meta {
+  const bits = [
+    `${p.current_streak} day streak`,
+    `${p.dailies} ${p.dailies === 1 ? 'daily' : 'dailies'}`,
+    `${p.perfect} perfect`,
+    `${p.followers} ${p.followers === 1 ? 'follower' : 'followers'}`,
+  ];
+  return {
+    title: `${p.name} (@${p.handle}) · Fignda`,
+    description: `${bits.join(' · ')}. Find hidden words with @${p.handle}.`,
+    image: DEFAULT.image,
+  };
+}
+
+async function profileSummary(handle: string, env: Env): Promise<ProfileSummary | null> {
+  if (!env.SUPABASE_URL || !env.SUPABASE_ANON_KEY || !/^[a-z0-9._]{2,20}$/.test(handle)) return null;
+  try {
+    const r = await fetch(`${env.SUPABASE_URL}/rest/v1/rpc/profile_summary`, {
+      method: 'POST',
+      headers: { apikey: env.SUPABASE_ANON_KEY, Authorization: `Bearer ${env.SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_handle: handle }),
+      signal: AbortSignal.timeout(1500),
+    });
+    if (!r.ok) return null;
+    const rows = (await r.json()) as ProfileSummary[];
+    return rows[0] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+type Env = { SUPABASE_URL?: string; SUPABASE_ANON_KEY?: string };
+
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 // Minimal types for the Pages runtime.
@@ -53,12 +96,14 @@ declare const HTMLRewriter: {
   new (): { on(sel: string, h: { element(e: Element): void }): InstanceType<typeof HTMLRewriter>; transform(r: Response): Response };
 };
 
-export const onRequest = async (ctx: { request: Request; next: () => Promise<Response> }) => {
+export const onRequest = async (ctx: { request: Request; next: () => Promise<Response>; env: Env }) => {
   const res = await ctx.next();
   if (ctx.request.method !== 'GET' || !(res.headers.get('content-type') ?? '').includes('text/html')) return res;
 
   const url = new URL(ctx.request.url);
-  const m = metaFor(url.pathname);
+  const who = url.pathname.match(/^\/u\/([a-z0-9._]{2,20})\/?$/);
+  const summary = who ? await profileSummary(who[1]!, ctx.env) : null;
+  const m = summary ? profileMeta(summary) : metaFor(url.pathname);
   const image = `${url.origin}${m.image}`;
   const tags = [
     ['og:type', 'website'],

@@ -7,7 +7,8 @@ import { dailyGameId, dayNo } from '../engine/daily';
 import { formatTime } from '../engine/time';
 import { dailyPool, games, getGameDef } from '../games/catalog';
 import { dailyDate } from '../games/daily';
-import { fetchDailyBoard, fetchDailyRank, fetchGameBoard, type BoardRow, type MyRank } from '../lib/api';
+import { fetchDailyBoard, fetchDailyRank, fetchFollowingBoard, fetchGameBoard, type BoardRow, type MyRank } from '../lib/api';
+import { Segmented } from '../components/Segmented';
 import { useAuth } from '../lib/auth';
 import styles from './Leaderboard.module.css';
 
@@ -87,17 +88,28 @@ export function Leaderboard() {
   const day = Number.isInteger(asked) && asked >= 1 && asked <= today ? asked : today;
   const game = getGameDef(dailyGameId(day, dailyPool));
   const me = auth.profile?.handle;
+  const circle = params.get('board') === 'following' && !!me;
 
-  const state = useBoard(`${day}|${me ?? ''}`, async () => {
+  const state = useBoard(`${day}|${me ?? ''}|${circle}`, async () => {
+    if (circle) return { rows: await fetchFollowingBoard(day), me: null };
     const [rows, mine] = await Promise.all([fetchDailyBoard(day), me ? fetchDailyRank(day, me) : Promise.resolve(null)]);
     return { rows, me: mine };
   });
 
   if (!auth.enabled) return <Navigate to="/play" replace />;
-  const go = (d: number) => setParams(d === today ? {} : { day: String(d) }, { replace: true });
+  const setQuery = (d: number, following: boolean) => {
+    const q: Record<string, string> = {};
+    if (d !== today) q.day = String(d);
+    if (following) q.board = 'following';
+    setParams(q, { replace: true });
+  };
+  const go = (d: number) => setQuery(d, circle);
 
   return (
     <div className={styles.page}>
+      <Link to="/players" className={styles.findPlayers}>
+        Find players
+      </Link>
       <h1 className={styles.title}>
         Leaderboard.
         <br />
@@ -124,6 +136,20 @@ export function Leaderboard() {
           </div>
         </div>
 
+        {me && (
+          <div className={styles.switch}>
+            <Segmented
+              label="Board"
+              hideLabel
+              options={[
+                ['everyone', 'Everyone'],
+                ['following', 'Following'],
+              ]}
+              value={circle ? 'following' : 'everyone'}
+              onChange={(v) => setQuery(day, v === 'following')}
+            />
+          </div>
+        )}
         {state.status === 'loading' && <div className={styles.loading} aria-busy="true" />}
         {state.status === 'error' && <p className={styles.empty}>The board did not load. Try again in a moment.</p>}
         {state.status === 'ready' && (
@@ -132,7 +158,15 @@ export function Leaderboard() {
             me={state.me}
             myHandle={me}
             empty={
-              day === today ? (
+              circle ? (
+                <>
+                  Nobody you follow has a verified score here yet.{' '}
+                  <Link to="/players" className={styles.inline}>
+                    Find players
+                  </Link>
+                  .
+                </>
+              ) : day === today ? (
                 <>
                   No verified scores yet today.{' '}
                   <Link to={`/d/${today}`} className={styles.inline}>

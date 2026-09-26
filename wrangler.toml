@@ -6,3 +6,8 @@ compatibility_date = "2026-09-01"
 [[services]]
 binding = "API"
 service = "fignda-api"
+
+# Public values for link previews of profiles (the anon key is public by design; RLS guards the data).
+[vars]
+SUPABASE_URL = "https://oeoytlqfkynaidxeskbn.supabase.co"
+SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9lb3l0bHFma3luYWlkeGVza2JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA0MDY0ODcsImV4cCI6MjEwNTk4MjQ4N30.ZO18NhGtPan25ooumoQsmdk-3a1s_Spi2wt-qVepGgs"

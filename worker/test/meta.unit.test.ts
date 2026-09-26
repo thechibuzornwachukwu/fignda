@@ -29,3 +29,16 @@ describe('link preview meta', () => {
     expect(metaFor('/d/0', 10)).toEqual(metaFor('/'));
   });
 });
+
+describe('profile preview', () => {
+  it('uses only summary fields and never an email', async () => {
+    const { profileMeta } = await import('../../functions/_middleware');
+    const m = profileMeta({ handle: 'ada', name: 'Ada Obi', current_streak: 5, dailies: 12, perfect: 3, followers: 1 });
+    expect(m).toEqual({
+      title: 'Ada Obi (@ada) · Fignda',
+      description: '5 day streak · 12 dailies · 3 perfect · 1 follower. Find hidden words with @ada.',
+      image: '/og/default.png',
+    });
+    expect(JSON.stringify(m)).not.toContain('@test');
+  });
+});

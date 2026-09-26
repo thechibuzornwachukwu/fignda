@@ -78,6 +78,22 @@
   opacity: 0.35;
 }
 
+.switch {
+  max-width: 320px;
+}
+.findPlayers {
+  align-self: flex-end;
+  margin-bottom: calc(-1 * var(--space-8));
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--line-3);
+}
+.findPlayers:hover {
+  color: var(--fg);
+}
 .board {
   margin: 0;
   padding: 0;

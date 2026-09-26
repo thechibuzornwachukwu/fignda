@@ -42,6 +42,9 @@ export function Header() {
           <NavLink to="/leaderboard" className={navCls}>
             Leaders
           </NavLink>
+          <NavLink to="/players" className={navCls}>
+            Players
+          </NavLink>
           <Link to="/#how" className={styles.navLink}>
             How it works
           </Link>

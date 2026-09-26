@@ -85,7 +85,13 @@ Check: 3 ratios export at 1080 wide. For example, Bible full 4:5 gives 4 images.
 Daily leaderboard from verified plays only (`plays_public`: handle, score, time). Today's top 20, your own rank and score when signed in, previous days browsable once they end. Per-game boards for curated puzzles. Guests and unverified merges never ranked. Ties: faster time first, then earlier finish. No emails or user ids exposed.
 Check: only verified plays appear; a signed-in player sees their rank; a guest sees the board and a sign-in prompt; today's board never reveals answers; rank query stays fast with many plays (index on day_no, score); RLS suite extended; 375px readable.
 
-**M10 Community**
+**M10 Community** ✅ Done and live 2026-09-26
+
+- [x] Follows (one-way, RLS: follow as yourself, remove your followers, no self follow, no duplicates, cap 2000, only real players). Follow / Following / Share on profiles, counts and lists.
+- [x] /players: handle prefix search (wildcards rejected), longest streaks, most perfect, new this week; all from verified plays. Players in the header.
+- [x] Leaderboard Everyone / Following switch. Profile link previews (name, streak, dailies, perfect, followers).
+- [x] Checks: 11 DB tests (`supabase/tests/community.test.ts`), 5 browser tests incl. a real two-player follow flow and axe (`e2e/community.spec.ts`).
+
 Share profiles: native share on phones, profile link previews (name, streak, dailies; data from the database by handle only, never query text). Discover players: `/players` with handle search, longest current streaks, most perfect dailies, new this week, all from verified plays. Handles everywhere link to profiles.
 Follow: one-way, no requests. Follow / Unfollow on profiles, follower and following counts, remove a follower. Leaderboard gets a "Following" tab (today's daily among people you follow). Invite link from your profile.
 Check: RLS: only you create or delete your own follows, anyone reads counts, no self follow, no duplicates; following board shows only followed players; profile link preview shows the right player and never an email; search is prefix-only, rate safe and indexed; lists exclude unverified play; 375px readable; axe clean.

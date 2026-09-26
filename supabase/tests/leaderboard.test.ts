@@ -53,7 +53,9 @@ describe('daily board', () => {
     const { data } = await anon().rpc('daily_rank', { p_day: DAY, p_handle: h('ada') });
     expect(data).toHaveLength(1);
     expect(data[0]).toMatchObject({ handle: h('ada'), score: 500 });
-    expect(data[0].rank).toBe(data[0].players);
+    // Ada is behind this run's three better players; earlier test runs may add more on the same day.
+    expect(data[0].rank).toBeGreaterThanOrEqual(4);
+    expect(data[0].rank).toBeLessThanOrEqual(data[0].players);
     const none = await anon().rpc('daily_rank', { p_day: DAY, p_handle: h('dele') });
     expect(none.data).toEqual([]);
   });

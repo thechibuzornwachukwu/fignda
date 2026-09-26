@@ -8,7 +8,7 @@ import { dailyDate } from '../games/daily';
 import { fetchOwnPlays, fetchProfileByHandle, fetchPublicPlays, type PublicProfile } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { profileStats, type PlayRow } from '../lib/profileStats';
-import { copyText } from '../lib/share';
+import { SocialActions, SocialCounts, SocialLists, useSocial } from './ProfileSocial';
 import styles from './Profile.module.css';
 
 type State = { status: 'loading' } | { status: 'missing' } | { status: 'ready'; profile: PublicProfile; plays: PlayRow[] };
@@ -34,6 +34,7 @@ export function Profile() {
   const own = auth.profile?.handle === handle;
   const [state, setState] = useState<State>({ status: 'loading' });
   const [note, setNote] = useState('');
+  const social = useSocial(handle);
 
   useEffect(() => {
     let alive = true;
@@ -79,21 +80,9 @@ export function Profile() {
           <span className={styles.handle}>
             @{profile.handle} · Playing since {monthYear(profile.created_at)}
           </span>
+          <SocialCounts social={social} />
         </div>
-        {own && (
-          <div className={styles.ownActions}>
-            <Button variant="secondary" size="sm" to="/settings">
-              Settings
-            </Button>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={async () => setNote((await copyText(window.location.href)) ? 'Link copied.' : window.location.href)}
-            >
-              Copy link
-            </Button>
-          </div>
-        )}
+        <SocialActions handle={profile.handle} name={profile.name} own={own} social={social} onNote={setNote} />
       </header>
       <span className={styles.note} role="status">
         {note}
@@ -185,6 +174,8 @@ export function Profile() {
           </ul>
         )}
       </section>
+
+      <SocialLists own={own} social={social} />
     </div>
   );
 }
