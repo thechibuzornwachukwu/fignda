@@ -216,3 +216,34 @@ for (const [dx, dy] of [[4, 1], [9, 3], [12, 3], [16, 4], [3, 12], [14, 14]] as 
     await expect(page.locator(`[data-li="${i}"]`)).toHaveAttribute('data-state', 'found');
   });
 }
+
+test('tap first, tap last: the whole range connects on screen, then is checked', async ({ page }) => {
+  await page.goto('/play/bible');
+  const i = await indexOf(page, 'amost');
+  await page.locator(`[data-li="${i}"]`).tap();
+  await page.locator(`[data-li="${i + 3}"]`).tap();
+  // Every letter between the two taps lights up, not only the ends.
+  const states = await page.evaluate((i) => [0, 1, 2, 3].map((k) => document.querySelector(`[data-li="${i + k}"]`)!.getAttribute('data-state')), i);
+  expect(states.every((s) => s === 'selecting' || s === 'found')).toBe(true);
+  await expect(page.locator(`[data-li="${i + 2}"]`)).toHaveAttribute('data-state', 'found');
+});
+
+test('a wrong tapped range still shows what was connected before it clears', async ({ page }) => {
+  await page.goto('/play/bible');
+  const i = await indexOf(page, 'amost');
+  await page.locator(`[data-li="${i + 1}"]`).tap();
+  await page.locator(`[data-li="${i + 5}"]`).tap();
+  const mid = await page.evaluate((i) => document.querySelector(`[data-li="${i + 3}"]`)!.getAttribute('data-state'), i);
+  expect(mid).toBe('selecting');
+  await expect(page.locator(`[data-li="${i + 3}"]`)).not.toHaveAttribute('data-state');
+});
+
+test('a quick next tap right after a pair checks the pair first', async ({ page }) => {
+  await page.goto('/play/bible');
+  const i = await indexOf(page, 'amost');
+  await page.locator(`[data-li="${i}"]`).tap();
+  await page.locator(`[data-li="${i + 3}"]`).tap();
+  await page.locator('[data-li="0"]').tap();
+  await expect(page.locator(`[data-li="${i}"]`)).toHaveAttribute('data-state', 'found');
+  await expect(page.locator('[data-li="0"]')).toHaveAttribute('data-state', 'selecting');
+});

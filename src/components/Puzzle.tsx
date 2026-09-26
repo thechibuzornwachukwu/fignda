@@ -1,6 +1,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import type { Char } from '../engine/text';
 import { Letter, type LetterState } from './Letter';
+import { durationMs } from '../lib/media';
 import { armSound, tick, unlock } from '../lib/sound';
 import styles from './Puzzle.module.css';
 
@@ -113,7 +114,18 @@ export function Puzzle({
    * Tap or click one letter. First: it becomes the anchor. Same letter again: cancel. Another letter: check the
    * range between them. Shared by touch taps, slow taps and mouse clicks so they all behave the same.
    */
+  // A tapped range waiting to be checked. Any new touch, click or key checks it first.
+  const pending = useRef<{ timer: number; run: () => void } | null>(null);
+  const flushRef = useRef(() => {
+    const p = pending.current;
+    if (!p) return;
+    pending.current = null;
+    window.clearTimeout(p.timer);
+    p.run();
+  });
+  useEffect(() => () => window.clearTimeout(pending.current?.timer), []);
   const tapRef = useRef((li: number) => {
+    flushRef.current();
     const a = tapAnchor.current;
     if (a == null) {
       tapAnchor.current = li;
@@ -125,9 +137,24 @@ export function Puzzle({
       tapAnchor.current = null;
       setSel(null);
     } else {
+      // Connect first to last on screen, so the player sees what is checked, then check it.
       tapAnchor.current = null;
-      setSel(null);
-      pickRef.current(a, li);
+      const range = { a, b: li };
+      selRef.current = range;
+      setSel(range);
+      tick(span(range));
+      const run = () => {
+        selRef.current = null;
+        setSel(null);
+        pickRef.current(a, li);
+      };
+      pending.current = {
+        run,
+        timer: window.setTimeout(() => {
+          pending.current = null;
+          run();
+        }, durationMs('--dur-connect')),
+      };
     }
   });
   // Where the finger is while a touch selection runs: drives the bubble above the finger.
@@ -233,6 +260,7 @@ export function Puzzle({
     };
 
     const start = (e: TouchEvent) => {
+      flushRef.current();
       reset();
       if (disabledRef.current || e.touches.length !== 1) return;
       const p = e.touches[0]!;
@@ -324,6 +352,7 @@ export function Puzzle({
   }, []);
 
   const onPointerDown = (e: PointerEvent<HTMLDivElement>) => {
+    flushRef.current();
     if (disabled || e.pointerType === 'touch') return;
     const li = liAt(e.clientX, e.clientY);
     if (e.button !== 0 || li < 0) return;
@@ -365,6 +394,7 @@ export function Puzzle({
   };
 
   const onKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    flushRef.current();
     if (disabled) return;
     const from = caret < 0 ? 0 : caret;
     let next: number;

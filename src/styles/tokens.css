@@ -90,6 +90,7 @@
   --dur-letter: 180ms;      /* Letter bg, color */
   --dur-clock: 300ms;       /* Clock finish color */
   --dur-flip: 420ms;        /* WordList reorder, other rows */
+  --dur-connect: 220ms;    /* Tap first, tap last: the whole range shows before it is checked. Not motion, so it stays under reduced motion */
   --dur-flip-lead: 520ms;   /* WordList reorder, found row */
 }
 @media (prefers-reduced-motion: reduce) {

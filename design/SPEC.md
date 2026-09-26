@@ -64,6 +64,7 @@ Paragraph renders one span per character. Letters carry `li` (index in lowercase
 - Mouse/pen: drag (pointerdown starts, window pointermove extends via `elementFromPoint`, pointerup evaluates), or click first letter then last. After the first click the range follows the mouse. `user-select: none`.
 - Touch: swipe sideways, press and hold then drag, or tap first letter (copy `tapNext`) then last. A slow tap that never moves is still a tap. `touch-action: pan-y pinch-zoom` so the page still scrolls.
 - Tap or click the anchored letter again to cancel. Escape clears.
+- Second tap or click: the whole range shows as selecting for `--dur-connect` (220ms), then is checked. Any new touch, click or key checks it at once.
 
 **Evaluate** (`reference/engine.js` `check`):
 | Result | Action |
