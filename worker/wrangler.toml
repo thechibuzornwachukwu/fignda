@@ -1,0 +1,20 @@
+name = "fignda-api"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Workers AI: free daily allowance. On the Workers free plan it stops at the allowance, never bills.
+[ai]
+binding = "AI"
+
+# Public settings. Secrets are NOT here: set them with `npx wrangler secret put NAME`.
+#   SUPABASE_SERVICE_ROLE_KEY  (required)
+#   ANTHROPIC_API_KEY          (only if AI_PROVIDER = "anthropic"; pay per use)
+[vars]
+SUPABASE_URL = "https://oeoytlqfkynaidxeskbn.supabase.co"
+# Comma separated. Only these origins are served.
+APP_ORIGINS = "http://localhost:5173,http://localhost:4173"
+# "workers-ai" (free) | "anthropic" (paid) | "off"
+AI_PROVIDER = "workers-ai"
+
+# Local dev (`npm run worker:dev`) reads secrets from worker/.dev.vars (gitignored, blocked by the commit guard).

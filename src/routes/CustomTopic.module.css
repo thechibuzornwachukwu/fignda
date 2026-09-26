@@ -1,0 +1,61 @@
+.custom {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3h);
+  max-width: 760px;
+}
+.label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--subtle);
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  border-bottom: 2px solid var(--line-3);
+  padding-bottom: var(--space-2);
+}
+.input {
+  composes: row from '../styles/type.module.css';
+  flex: 1;
+  min-width: 0;
+  height: 56px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--fg);
+  font-family: inherit;
+  outline: none;
+}
+.row:focus-within {
+  border-bottom-color: var(--line-4);
+}
+.go {
+  height: 44px;
+  padding: 0 var(--space-4);
+  flex: none;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--fg);
+  color: var(--bg);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color var(--dur-base) var(--ease-std);
+}
+.go:hover:not(:disabled) {
+  background: var(--fg-strong);
+}
+.go:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+.err {
+  margin: 0;
+  min-height: 1.4em;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+}

@@ -24,7 +24,11 @@ export type SavedSession = {
   endAt: number | null;
   /** Picked once at finish, then fixed. */
   resultTitle: string | null;
+  /** Play log for server verification: selections and hint times, ms since start. */
+  log?: PlayLog;
 };
+
+export type PlayLog = { events: Array<{ a: number; b: number; t: number }>; hints: number[] };
 
 export type Session = SavedSession & { msg: string };
 
@@ -41,6 +45,7 @@ export const newSession = (now: number): Session => ({
   startAt: now,
   endAt: null,
   resultTitle: null,
+  log: { events: [], hints: [] },
   msg: '',
 });
 
@@ -121,6 +126,13 @@ function sanitize(saved: SavedSession, keys: ReadonlySet<string>): Session {
   return { ...newSession(Date.now()), ...saved, found, msg: '' };
 }
 
+/** Append to the play log, capped at the server's 500 event limit. */
+function withLog(next: Session, cur: Session, add: (l: PlayLog) => PlayLog): Session {
+  const l = cur.log ?? { events: [], hints: [] };
+  if (l.events.length + l.hints.length >= 500) return next;
+  return { ...next, log: add(l) };
+}
+
 type Options<P> = {
   mod: GameModule<P>;
   puzzle: P;
@@ -167,7 +179,11 @@ export function useGameSession<P>({ mod, puzzle, dailyN, beforeHit, copy = copyD
     const found = new Set(cur.found.map((f) => f.key));
     const ev = mod.check(puzzle, a, b, found);
     if (ev.kind === 'hit') beforeHit?.(ev.key);
-    const next = applyPick(cur, ev, { now: Date.now(), total, daily, copy });
+    const now = Date.now();
+    const next = withLog(applyPick(cur, ev, { now, total, daily, copy }), cur, (l) => ({
+      ...l,
+      events: [...l.events, { a, b, t: now - cur.startAt }],
+    }));
     commit(next);
     if (isFinished(next)) window.setTimeout(scrollToTop, durationMs('--dur-slower'));
   };
@@ -175,7 +191,8 @@ export function useGameSession<P>({ mod, puzzle, dailyN, beforeHit, copy = copyD
   const hint = () => {
     const cur = ref.current;
     const found = new Set(cur.found.map((f) => f.key));
-    commit(applyHint(cur, mod.hint(puzzle, found), copy));
+    const next = applyHint(cur, mod.hint(puzzle, found), copy);
+    commit(next === cur ? cur : withLog(next, cur, (l) => ({ ...l, hints: [...l.hints, Date.now() - cur.startAt] })));
   };
 
   const finish = () => {

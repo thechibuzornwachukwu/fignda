@@ -45,9 +45,18 @@ Stop after each milestone. It is done when its checks pass.
 - To do (owner): reset DB password; dashboard auth settings (email code template, OTP 6 / 600s, Google, URLs); custom SMTP before real users.
 - Open: exact "5 tries then 15 min lock" needs a Worker check (M6). Multiplayer: possible with Supabase Realtime, not in SPEC, plan as its own milestone.
 
-**M6 Worker**
-`/api/generate`, `/api/plays`, `/api/og`, rate limits, validation.
-Check: 429, tampered log, schema reject.
+**M6 Worker** ✅ Built and tested locally 2026-09-26 (not deployed yet)
+
+- [x] `/api/plays`: replays the play log with the shared engine, recomputes score, stores verified plays. Daily: today only, once.
+- [x] `/api/generate`: provider-agnostic (Workers AI free by default, Claude optional, or off). Topic cleaning, 24h cache, strict JSON validation, profanity filter, real hits only, share codes.
+- [x] Rate limits in Postgres (5/h guest IP, 20/h user, plays 120/h). CORS: app origins only.
+- [x] Check: 429 on the 6th guest generate (`worker/test/api.db.test.ts`).
+- [x] Check: tampered logs rejected (duplicates, bursts under 150ms, finish before last event, >500 events, out of range).
+- [x] Check: schema rejects (bad AI output and tampered request bodies), nothing saved.
+- [x] App: plays sent on finish when signed in; "Or any topic" shown only when generation is on; `/p/:code` opens custom games.
+- Moved to M7: `/api/og` (renders the share card layout).
+- To do: Cloudflare account + `wrangler login` (owner), then deploy; `npx supabase db push` for the new migration (owner, asks for the DB password).
+- Known limit: Supabase verifies email codes directly, so an exact "5 tries then 15 min lock" cannot be enforced by the Worker. Supabase's per-IP limit on code checks applies instead.
 
 **M7 Share**
 Share sheet, ShareCard, PNG export, Web Share, `/p/:code`, `/d/:n`, OG tags.

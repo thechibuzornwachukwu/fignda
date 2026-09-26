@@ -4,7 +4,7 @@ import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { Landing } from './routes/Landing';
 import { Games } from './routes/Games';
-import { DailyGame, GameById } from './routes/Game';
+import { DailyGame, GameByCode, GameById } from './routes/Game';
 import { SignIn } from './routes/SignIn';
 import { Account } from './routes/Account';
 import { prefersReducedMotion } from './lib/media';
@@ -41,6 +41,7 @@ export function App() {
         <Route path="play" element={<Games />} />
         <Route path="play/:id" element={<GameById />} />
         <Route path="d/:n" element={<DailyGame />} />
+        <Route path="p/:code" element={<GameByCode />} />
         <Route path="signin" element={<SignIn />} />
         <Route path="account" element={<Account />} />
         <Route path="*" element={<Navigate to="/" replace />} />

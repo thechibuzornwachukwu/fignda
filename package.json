@@ -12,23 +12,28 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "e2e": "playwright test",
-    "db:start": "supabase start -x studio,postgres-meta,logflare,vector,imgproxy,storage-api,edge-runtime,realtime,supavisor",
+    "db:start": "supabase start --ignore-health-check -x studio,postgres-meta,logflare,vector,imgproxy,storage-api,edge-runtime,realtime,supavisor",
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:seed:gen": "tsx scripts/gen-seed.ts",
     "test:db": "vitest run --config vitest.db.config.ts",
     "prepare": "git config core.hooksPath .githooks",
     "check:secrets": "node scripts/check-secrets.mjs --all && node scripts/check-secrets.mjs --history",
-    "verify": "node scripts/check-secrets.mjs --all && npm run lint && npm run typecheck && npm test && npm audit --audit-level=high"
+    "verify": "node scripts/check-secrets.mjs --all && npm run lint && npm run typecheck && npm test && npm audit --audit-level=high",
+    "worker:dev": "wrangler dev --config worker/wrangler.toml --port 8787",
+    "worker:deploy": "wrangler deploy --config worker/wrangler.toml"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.128.0",
     "@fontsource/manrope": "^5.3.0",
     "lucide-react": "^1.48.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
-    "react-router-dom": "^7.18.4"
+    "react-router-dom": "^7.18.4",
+    "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20260926.1",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.63.0",
     "@supabase/supabase-js": "^2.117.2",
@@ -49,6 +54,7 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.70.1",
     "vite": "^8.3.1",
-    "vitest": "^5.0.2"
+    "vitest": "^5.0.2",
+    "wrangler": "^4.141.0"
   }
 }

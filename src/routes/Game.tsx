@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef } from 'react';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Link, Navigate, useParams } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { BigClock, Elapsed } from '../components/BigClock';
@@ -12,7 +12,7 @@ import { getGameDef, type GameDef } from '../games/catalog';
 import { dailyInfo } from '../games/daily';
 import { registry } from '../games/registry';
 import { scoreOf, secondsOf, useGameSession } from '../games/session';
-import { mergeGuestDailies } from '../lib/api';
+import { fetchCustomGame, mergeGuestDailies, submitPlay } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { useCoarsePointer } from '../lib/media';
 import { GameResults } from './GameResults';
@@ -35,6 +35,37 @@ export function DailyGame() {
   return <GameScreen key={`d${num}`} def={info.def} dailyN={num} />;
 }
 
+/** A custom game opened by its share code. */
+export function GameByCode() {
+  const { code = '' } = useParams();
+  const [def, setDef] = useState<GameDef | null | undefined>(undefined);
+  useEffect(() => {
+    let alive = true;
+    fetchCustomGame(code).then((g) => {
+      if (!alive) return;
+      setDef(
+        g && {
+          id: g.id,
+          type: 'hidden-words',
+          category: 'Custom',
+          title: g.title,
+          noun: g.noun,
+          difficulty: 'Medium',
+          expectedAnswers: [],
+          dict: g.dict,
+          text: g.text,
+        },
+      );
+    });
+    return () => {
+      alive = false;
+    };
+  }, [code]);
+  if (def === undefined) return <div className={styles.screen} aria-busy="true" />;
+  if (!def) return <Navigate to="/play" replace />;
+  return <GameScreen key={def.id} def={def} />;
+}
+
 function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
   const mod = registry[def.type];
   const puzzle = useMemo(() => mod.build(def), [mod, def]);
@@ -46,10 +77,25 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
   const auth = useAuth();
   const signedIn = !!auth.profile;
 
-  // Signed in: a finished daily goes to the account now (unverified until the Worker lands in M6).
+  // Signed in: send the play log once per finished game. The Worker replays it and stores a verified score.
+  // Today's daily only; if that fails for a reason other than "already played", keep it as an unverified merge.
+  const sent = useRef<number | null>(null);
   useEffect(() => {
-    if (daily && finished && signedIn) mergeGuestDailies().catch(() => {});
-  }, [daily, finished, signedIn]);
+    if (!finished || !signedIn || s.endAt == null || sent.current === s.startAt) return;
+    sent.current = s.startAt;
+    const isToday = daily && dailyN === dayNo();
+    if (daily && !isToday) {
+      mergeGuestDailies().catch(() => {});
+      return;
+    }
+    const log = s.log ?? { events: [], hints: [] };
+    void submitPlay({
+      game: daily ? { type: 'daily', day_no: dailyN! } : { type: 'game', id: def.id },
+      log: { events: log.events, hints: log.hints, finish: Math.max(1, s.endAt - s.startAt) },
+    }).then((r) => {
+      if (daily && !r.ok && r.status !== 409) mergeGuestDailies().catch(() => {});
+    });
+  }, [finished, signedIn, s.endAt, s.startAt, s.log, daily, dailyN, def.id]);
 
   const foundCount = s.found.length;
   const count = daily && !finished ? `${foundCount} found` : `${foundCount} / ${total}`;

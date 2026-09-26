@@ -4,6 +4,7 @@ import { GameRow } from '../components/GameRow';
 import { buttonClass } from '../components/buttonClass';
 import { filters, games, getPuzzle } from '../games/catalog';
 import { loadDaily, today } from '../games/daily';
+import { CustomTopic } from './CustomTopic';
 import styles from './Games.module.css';
 
 function DailyCard() {
@@ -64,6 +65,8 @@ export function Games() {
           ))}
         </ul>
       </section>
+
+      <CustomTopic />
     </div>
   );
 }

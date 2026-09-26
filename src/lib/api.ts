@@ -72,6 +72,75 @@ export async function mergeGuestDailies(): Promise<number> {
   return data as number;
 }
 
+// ---------------------------------------------------------------------------
+// Worker API (/api). Same origin in production; Vite proxies it to `wrangler dev` locally.
+// ---------------------------------------------------------------------------
+
+const API = (import.meta.env.VITE_API_URL ?? '/api').replace(/\/$/, '');
+
+async function authHeader(): Promise<Record<string, string>> {
+  const token = (await supabase?.auth.getSession())?.data.session?.access_token;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+/** Whether custom topics are switched on (an AI provider is configured). False if the API is unreachable. */
+export async function generateAvailable(): Promise<boolean> {
+  try {
+    const r = await fetch(`${API}/health`, { signal: AbortSignal.timeout(4000) });
+    if (!r.ok) return false;
+    return ((await r.json()) as { generate?: boolean }).generate === true;
+  } catch {
+    return false;
+  }
+}
+
+export type GenerateResult = { ok: true; code: string } | { ok: false; error: string };
+
+export async function generatePuzzle(topic: string): Promise<GenerateResult> {
+  try {
+    const r = await fetch(`${API}/generate`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...(await authHeader()) },
+      body: JSON.stringify({ topic }),
+    });
+    const body = (await r.json().catch(() => ({}))) as { code?: string; error?: string };
+    return r.ok && body.code ? { ok: true, code: body.code } : { ok: false, error: body.error ?? `http_${r.status}` };
+  } catch {
+    return { ok: false, error: 'network' };
+  }
+}
+
+export type PlaySubmission = {
+  game: { type: 'daily'; day_no: number } | { type: 'game'; id: string };
+  log: { events: Array<{ a: number; b: number; t: number }>; hints: number[]; finish: number };
+};
+
+/** Signed-in only. The server replays the log and stores a verified play. */
+export async function submitPlay(p: PlaySubmission): Promise<{ ok: boolean; status: number }> {
+  const auth = await authHeader();
+  if (!auth.Authorization) return { ok: false, status: 401 };
+  try {
+    const r = await fetch(`${API}/plays`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...auth },
+      body: JSON.stringify(p),
+    });
+    return { ok: r.ok, status: r.status };
+  } catch {
+    return { ok: false, status: 0 };
+  }
+}
+
+export type CustomGame = { id: string; title: string; noun: string; text: string; dict: string[]; code: string };
+
+/** Anyone with the share code can open a custom game. */
+export async function fetchCustomGame(code: string): Promise<CustomGame | null> {
+  if (!supabase || !/^[A-Za-z2-7]{8}$/.test(code)) return null;
+  const { data, error } = await supabase.rpc('get_game_by_code', { p_code: code });
+  const g = !error && Array.isArray(data) ? data[0] : null;
+  return g ? { id: g.id, title: g.title, noun: g.noun, text: g.text, dict: g.dict, code: g.share_code } : null;
+}
+
 export async function deleteAccount(): Promise<void> {
   const { error } = await client().rpc('delete_account');
   if (error) throw error;
