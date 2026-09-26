@@ -82,20 +82,38 @@ describe('TextLink', () => {
 });
 
 describe('Header', () => {
-  it('has nav, account link and theme toggle', () => {
+  const at = (path: string) =>
     render(
-      <MemoryRouter initialEntries={['/play']}>
+      <MemoryRouter initialEntries={[path]}>
         <AuthProvider>
           <Header />
         </AuthProvider>
       </MemoryRouter>,
     );
+
+  it('in the app: app links, account link and theme toggle, no landing anchors', () => {
+    at('/play');
     const nav = screen.getByRole('navigation', { name: 'Main' });
-    expect(nav).toHaveTextContent('Games');
-    expect(nav).toHaveTextContent('How it works');
-    expect(nav).toHaveTextContent('About');
+    expect(nav).toHaveTextContent('GamesLeadersPlayers');
+    expect(nav).not.toHaveTextContent('How it works');
     expect(screen.getByRole('link', { name: 'Games' }).className).toContain('active');
     expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/signin?next=%2Fplay');
     expect(screen.getByRole('button', { name: /Switch to/ })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Play' })).toBeNull();
+  });
+
+  it('on the landing page: its own sections and one way in', () => {
+    at('/');
+    expect(screen.queryByRole('navigation', { name: 'Main' })).toBeNull();
+    const nav = screen.getByRole('navigation', { name: 'On this page' });
+    expect(nav).toHaveTextContent('How it worksAbout');
+    expect(screen.getByRole('link', { name: 'Play' })).toHaveAttribute('href', '/play');
+  });
+
+  it('on a puzzle the nav is marked to step aside on phones', () => {
+    at('/play/bible');
+    expect(screen.getByRole('navigation', { name: 'Main' }).className).toContain('focus');
+    at('/leaderboard');
+    expect(screen.getAllByRole('navigation', { name: 'Main' })[1]!.className).not.toContain('focus');
   });
 });

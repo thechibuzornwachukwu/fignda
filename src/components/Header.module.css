@@ -1,5 +1,14 @@
 .header {
+  position: sticky;
+  top: 0;
+  z-index: var(--z-header);
+  background: var(--bg);
   border-bottom: 1px solid var(--header-line);
+  transition: transform var(--dur-slow) var(--ease-out);
+}
+/* Quick return: out of the way while reading down, back on the first scroll up. */
+.tucked {
+  transform: translateY(-100%);
 }
 .inner {
   max-width: var(--page-max);
@@ -78,5 +87,9 @@
     width: 100%;
     flex-wrap: wrap;
     gap: var(--space-2) var(--space-5);
+  }
+  /* On a puzzle the board comes first. The screen has its own All games link. */
+  .focus {
+    display: none;
   }
 }
