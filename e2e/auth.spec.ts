@@ -55,7 +55,7 @@ async function createProfile(page: Page, name: string, handle: string) {
   await page.getByRole('button', { name: 'Start finding' }).click();
 }
 
-test('email code sign in, profile, return to next, account, sign out', async ({ page }) => {
+test('email code sign in, profile page, settings, sign out', async ({ page }) => {
   const email = `e2e-${uid()}@test.fignda.local`;
   const handle = `ada_${uid()}`;
   await signIn(page, email, '/play/bible');
@@ -64,9 +64,16 @@ test('email code sign in, profile, return to next, account, sign out', async ({ 
   await expect(page).toHaveURL(/\/play\/bible$/);
   await expect(page.getByRole('link', { name: /Ada/ }).first()).toBeVisible();
 
+  // Old /account links open your public profile.
   await page.goto('/account');
+  await expect(page).toHaveURL(new RegExp(`/u/${handle}$`));
   await expect(page.getByRole('heading', { name: 'Ada Obi' })).toBeVisible();
-  await expect(page.getByText(`@${handle} · ${email}`)).toBeVisible();
+  await expect(page.getByText(new RegExp(`@${handle} · Playing since`))).toBeVisible();
+  // The profile never shows the email; settings shows it to its owner.
+  await expect(page.getByText(email)).toHaveCount(0);
+  await page.getByRole('link', { name: 'Settings' }).click();
+  await expect(page).toHaveURL(/\/settings$/);
+  await expect(page.getByText(email)).toBeVisible();
 
   await page.getByRole('button', { name: 'Sign out' }).click();
   await expect(page).toHaveURL(/\/$/);
@@ -137,12 +144,12 @@ test('guest dailies merge into the account on sign in', async ({ page }) => {
 
   await signIn(page, `e2e-${uid()}@test.fignda.local`, '/account');
   await createProfile(page, 'Gbenga', `gb_${uid()}`);
-  await expect(page).toHaveURL(/\/account$/);
+  await expect(page).toHaveURL(/\/u\/gb_/);
 
   // Survives a wipe of this browser: the play now lives on the server.
   await page.evaluate(() => localStorage.removeItem(Object.keys(localStorage).find((k) => k.startsWith('fignda-daily-'))!));
   await page.reload();
-  const played = page.getByText('Dailies played').locator('..');
+  const played = page.getByText('Dailies', { exact: true }).locator('..');
   await expect(played).toContainText('1');
 });
 
@@ -150,13 +157,16 @@ test('edit name, then delete the account', async ({ page }) => {
   const email = `e2e-${uid()}@test.fignda.local`;
   await signIn(page, email, '/account');
   await createProfile(page, 'Kemi', `km_${uid()}`);
-  await expect(page).toHaveURL(/\/account$/);
+  await expect(page).toHaveURL(/\/u\/km_/);
 
-  await page.getByRole('link', { name: 'Edit name' }).click();
+  await page.getByRole('link', { name: 'Settings' }).click();
   await expect(page.getByLabel('Name')).toHaveValue('Kemi');
   await page.getByLabel('Name').fill('Kemi Ade');
   await page.getByRole('button', { name: 'Save' }).click();
+  await expect(page.getByRole('status').filter({ hasText: 'Saved.' })).toBeVisible();
+  await page.getByRole('link', { name: 'View your profile' }).click();
   await expect(page.getByRole('heading', { name: 'Kemi Ade' })).toBeVisible();
+  await page.getByRole('link', { name: 'Settings' }).click();
 
   // Esc closes the confirm without deleting.
   await page.getByRole('button', { name: 'Delete account' }).click();

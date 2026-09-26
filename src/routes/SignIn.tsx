@@ -5,7 +5,7 @@ import { Field } from '../components/Field';
 import { TextLink } from '../components/TextLink';
 import { saveProfile } from '../lib/api';
 import { useAuth } from '../lib/auth';
-import { HANDLE_RE, RESERVED_HANDLES, handleFromName, safeNext } from '../lib/streak';
+import { checkProfile, handleFromName, safeNext } from '../lib/streak';
 import { getSupabase } from '../lib/supabase';
 import styles from './SignIn.module.css';
 
@@ -129,20 +129,16 @@ export function SignIn() {
 
   const save = async (e: FormEvent) => {
     e.preventDefault();
-    const n = name.trim().replace(/\s+/g, ' ');
-    const h = handle.trim().toLowerCase().replace(/^@/, '');
-    if (!n) return setErr('Add a name. First name is fine.');
-    if (n.length > 40) return setErr('Keep your name under 40 letters.');
-    if (h.length < 2) return setErr('Handles need at least 2 letters or numbers.');
-    if (!HANDLE_RE.test(h)) return setErr('Handles use a to z, 0 to 9, dots and underscores. Up to 20.');
-    if (RESERVED_HANDLES.includes(h)) return setErr('That handle is taken. Try another.');
+    const c = checkProfile(name, handle);
+    if ('error' in c) return setErr(c.error);
+    const { name: n, handle: h } = c;
     setBusy(true);
     const res = await saveProfile({ id: auth.session!.user.id, name: n, handle: h }, !!auth.profile);
     setBusy(false);
     if (res === 'taken') return setErr('That handle is taken. Try another.');
     if (res) return setErr('We could not save that. Try again.');
     await auth.refreshProfile();
-    nav(editing ? '/account' : next, { replace: true });
+    nav(editing ? '/settings' : next, { replace: true });
   };
 
   if (current === 'profile') {

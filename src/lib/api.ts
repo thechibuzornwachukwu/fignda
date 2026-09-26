@@ -1,6 +1,7 @@
 // Data calls. Everything here runs as the signed-in user; RLS decides what is allowed.
 
 import type { SavedSession } from '../games/session';
+import type { PlayRow } from './profileStats';
 import { storage } from './storage';
 import { getSupabase } from './supabase';
 
@@ -30,6 +31,45 @@ export async function saveProfile(p: Profile, exists: boolean): Promise<SaveProf
   if (error.code === '23505') return 'taken';
   if (error.code === '23514') return 'invalid';
   return 'failed';
+}
+
+export type PublicProfile = Profile & { created_at: string };
+
+/** Anyone can open a profile by handle. Name and handle only; never the email. */
+export async function fetchProfileByHandle(handle: string): Promise<PublicProfile | null> {
+  if (!/^[a-z0-9._]{2,20}$/.test(handle)) return null;
+  const { data, error } = await (await client())
+    .from('profiles')
+    .select('id, name, handle, created_at')
+    .eq('handle', handle)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+const PLAY_COLS = 'game_id, day_no, found, total, score, secs, created_at';
+
+/** Verified plays anyone can see. Today's daily total is masked by the database. */
+export async function fetchPublicPlays(handle: string, limit = 400): Promise<PlayRow[]> {
+  const { data, error } = await (await client())
+    .from('plays_public')
+    .select(PLAY_COLS)
+    .eq('handle', handle)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return data as PlayRow[];
+}
+
+/** All of the signed-in player's own plays, verified or not (RLS: own rows only). */
+export async function fetchOwnPlays(limit = 400): Promise<PlayRow[]> {
+  const { data, error } = await (await client())
+    .from('plays')
+    .select(`${PLAY_COLS}, verified`)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (error) throw error;
+  return data as PlayRow[];
 }
 
 /** Day numbers of the user's stored dailies. */

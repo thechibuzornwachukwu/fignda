@@ -61,12 +61,21 @@ Stop after each milestone. It is done when its checks pass.
 - Deploy: `npm run deploy:site`, `npm run deploy:api`.
 - Known limit: Supabase verifies email codes directly, so an exact "5 tries then 15 min lock" cannot be enforced by the Worker. Supabase's per-IP limit on code checks applies instead.
 
-**M7 Share**
-Share sheet, ShareCard, PNG export, Web Share, `/p/:code`, `/d/:n`, OG tags.
+**M7 Share** ✅ Done and live 2026-09-26
+
+- [x] Share sheet, ShareCard (Result / Puzzle, 1:1 4:5 9:16, Excerpt / Full, Show my finds), PNG export at 1080 wide, Web Share with files, download fallback, Copy link. `/p/:code`, `/d/:n`.
+- [x] Link previews: 43 pre-rendered 1200x630 images + per-page meta tags (Pages middleware). Future dailies and custom puzzles never leak. Replaces a runtime /api/og (faster, free).
+- [x] Checks (`e2e/share.spec.ts`): 3 ratios export 1080 wide; Bible full 4:5 gives 4 images; daily locks finds; every card for all 21 games readable (text >= 38px, nothing clipped) at every ratio and mode; sheet fits 375px.
 Check: 3 ratios export at 1080 wide. For example, Bible full 4:5 gives 4 images. Daily locks finds. Ensure all edge cases are tested for readability and ease in the views, exports across screen sizes or ratios selected
 
-**M8 Launch**
-Headers, CSP, axe pass, Lighthouse 95+ on landing, privacy page, deploy Pages + Worker.
+**M8 Launch** ✅ Done and live 2026-09-26 (https://fignda.pages.dev)
+
+- [x] Headers + CSP (`public/_headers`), zero CSP violations on every route including PNG export.
+- [x] axe: zero WCAG 2.2 AA violations, both themes, all screens (`e2e/a11y.spec.ts`).
+- [x] Lighthouse landing: desktop 100/100/100/100; mobile accessibility, best practices, SEO 100, performance 92 measured on this machine (route + auth code splitting, guests never load Supabase).
+- [x] Privacy page, robots.txt, app icons, branded code email (applies once custom SMTP is set).
+- [x] Deployed: Pages + Worker. Mobile swipe to select. Profile (/u/:handle) and Settings split.
+- Owner: custom SMTP (Brevo free) so emails carry codes; reset DB password.
 
 **M9 Leaderboards**
 Daily leaderboard from verified plays only (`plays_public`: handle, score, time). Today's top 20, your own rank and score when signed in, previous days browsable once they end. Per-game boards for curated puzzles. Guests and unverified merges never ranked. Ties: faster time first, then earlier finish. No emails or user ids exposed.

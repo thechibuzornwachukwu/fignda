@@ -360,9 +360,37 @@ describe('plays', () => {
   it('the public view shows handle, score and time for verified plays only', async () => {
     const { data, error } = await anon().from('plays_public').select('*');
     expect(error).toBeNull();
-    expect(Object.keys(data![0]!).sort()).toEqual(['created_at', 'day_no', 'game_id', 'handle', 'id', 'score', 'secs']);
+    expect(Object.keys(data![0]!).sort()).toEqual([
+      'created_at',
+      'day_no',
+      'found',
+      'game_id',
+      'handle',
+      'hints',
+      'id',
+      'score',
+      'secs',
+      'total',
+    ]);
     const aRows = data!.filter((r) => r.handle === aHandle);
     expect(aRows.map((r) => r.score)).toEqual([300]); // the unverified 100 is not ranked
+  });
+
+  it("hides today's daily total in the public view, shows past totals", async () => {
+    const u = await makeUser('pub');
+    const h = uniqueHandle('p');
+    await makeProfile(u, 'Pat', h);
+    const svc = admin();
+    const game = async (d: number) => (await svc.from('daily').select('game_id').eq('day_no', d).single()).data!.game_id;
+    await svc.from('plays').insert([
+      { user_id: u.id, game_id: await game(T), day_no: T, found: 3, total: 9, secs: 60, score: 300, verified: true, source: 'worker' },
+      { user_id: u.id, game_id: await game(T - 1), day_no: T - 1, found: 4, total: 11, secs: 60, score: 400, verified: true, source: 'worker' },
+    ]);
+    const { data } = await anon().from('plays_public').select('day_no, found, total').eq('handle', h).order('day_no');
+    expect(data).toEqual([
+      { day_no: T - 1, found: 4, total: 11 },
+      { day_no: T, found: 3, total: null },
+    ]);
   });
 
   it('clients cannot write through the public view', async () => {

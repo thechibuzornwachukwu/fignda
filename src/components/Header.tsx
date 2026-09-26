@@ -12,7 +12,7 @@ function AccountLink() {
   const { pathname } = useLocation();
   if (profile) {
     return (
-      <Link to="/account" className={styles.account}>
+      <Link to={`/u/${profile.handle}`} className={styles.account}>
         <span className={styles.avatar} aria-hidden="true">
           {profile.name.charAt(0).toUpperCase()}
         </span>

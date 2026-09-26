@@ -51,7 +51,7 @@ export function Privacy() {
       <section className={styles.section}>
         <h2 className={styles.h2}>Deleting everything</h2>
         <p>
-          Delete your account from the <Link to="/account">account page</Link>. It removes your profile, plays,
+          Delete your account from <Link to="/settings">Settings</Link>. It removes your profile, plays,
           shared cards and custom puzzles at once. It cannot be undone. Signing out also clears Fignda data from this
           browser.
         </p>
