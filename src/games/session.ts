@@ -5,6 +5,7 @@ import { useCallback, useMemo, useRef, useState } from 'react';
 import * as copyDefault from '../copy';
 import { score } from '../engine/score';
 import { durationMs, scrollToTop } from '../lib/media';
+import { chime } from '../lib/sound';
 import { loadDaily, saveDaily } from './daily';
 import type { Evaluation, GameModule } from './registry';
 
@@ -178,7 +179,10 @@ export function useGameSession<P>({ mod, puzzle, dailyN, beforeHit, copy = copyD
     if (isFinished(cur)) return;
     const found = new Set(cur.found.map((f) => f.key));
     const ev = mod.check(puzzle, a, b, found);
-    if (ev.kind === 'hit') beforeHit?.(ev.key);
+    if (ev.kind === 'hit') {
+      beforeHit?.(ev.key);
+      chime();
+    }
     const now = Date.now();
     const next = withLog(applyPick(cur, ev, { now, total, daily, copy }), cur, (l) => ({
       ...l,

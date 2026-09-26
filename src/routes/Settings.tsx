@@ -1,12 +1,14 @@
-import { useState, type FormEvent } from 'react';
+import { useState, useSyncExternalStore, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Dialog } from '../components/Dialog';
 import { Field } from '../components/Field';
 import { Segmented } from '../components/Segmented';
+import { Toggle } from '../components/Toggle';
 import { saveProfile } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { checkProfile } from '../lib/streak';
+import { setSound, soundOn, subscribeSound } from '../lib/sound';
 import { currentTheme, setTheme, type Theme } from '../lib/theme';
 import styles from './Settings.module.css';
 
@@ -150,6 +152,7 @@ export function Settings() {
               setThemeState(t);
             }}
           />
+          <SoundSetting />
         </div>
       </section>
 
@@ -209,4 +212,9 @@ export function Settings() {
       </Dialog>
     </div>
   );
+}
+
+function SoundSetting() {
+  const on = useSyncExternalStore(subscribeSound, soundOn, () => true);
+  return <Toggle label="Sounds" note="A soft tick per letter as you select, a chime when you find a word." checked={on} onChange={setSound} />;
 }

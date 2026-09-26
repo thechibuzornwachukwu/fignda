@@ -77,6 +77,7 @@ Streak resets on wrong pick and on hint. `onFound` picks: first find, last one l
 
 **Hint:** marks first letter of the earliest unfound answer, `hint` line, -25.
 **Finish:** "I'm done" or last find. Missed answers shade. Result title picked once from `titlePerfect|titleGood|titleLow|titleZero`, then fixed.
+**Sound:** Web Audio, synthesized, no files (`src/lib/sound.ts`). A soft triangle tick per new letter in a selection, pitch up a semitone per letter from 660 Hz (cap 2 octaves), ticks under 25ms apart merge. A find plays C6 then G6. Misses are silent. On by default, `fignda-sound`=`off` mutes. Audio wakes on the first gesture only. Mute: speaker button on the puzzle screen (aria-pressed) and a Sounds switch in Settings. Safari ambient session: the iPhone silent switch mutes it.
 
 ## 6. Screens (prototype file in brackets)
 

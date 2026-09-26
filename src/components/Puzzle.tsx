@@ -1,7 +1,11 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import type { Char } from '../engine/text';
 import { Letter, type LetterState } from './Letter';
+import { armSound, tick, unlock } from '../lib/sound';
 import styles from './Puzzle.module.css';
+
+/** Letters in a selection, for the rising tick. */
+const span = (s: { a: number; b: number }) => Math.abs(s.b - s.a) + 1;
 
 export type Span = readonly [number, number];
 
@@ -77,6 +81,7 @@ export function Puzzle({
   size = 'game',
 }: PuzzleProps) {
   const boardRef = useRef<HTMLDivElement>(null);
+  useEffect(armSound, []);
   const [rawSel, setSel] = useState<Sel | null>(null);
   // Any selection in progress is dropped when the game ends.
   const sel = disabled ? null : rawSel;
@@ -121,6 +126,7 @@ export function Puzzle({
       if (li < 0 || !s || li === s.b) return;
       selRef.current = { a: s.a, b: li };
       setSel(selRef.current);
+      tick(span(selRef.current));
     };
     const up = (e: globalThis.PointerEvent) => {
       if (!dragging.current || e.pointerType === 'touch') return;
@@ -168,6 +174,7 @@ export function Puzzle({
       setBubble({ x: t.px, y: t.py });
       dragStartRef.current();
       navigator.vibrate?.(8);
+      tick(1);
     };
     const reset = () => {
       if (t?.timer) window.clearTimeout(t.timer);
@@ -214,6 +221,7 @@ export function Puzzle({
         if (li < 0 || !s || li === s.b) return;
         selRef.current = { a: s.a, b: li };
         setSel(selRef.current);
+        tick(span(selRef.current));
       });
     };
     const end = (e: TouchEvent) => {
@@ -236,6 +244,7 @@ export function Puzzle({
         tapAnchor.current = cur.li;
         setSel({ a: cur.li, b: cur.li });
         tapStartRef.current();
+        tick(1);
       } else {
         const a = tapAnchor.current;
         tapAnchor.current = null;
@@ -274,6 +283,8 @@ export function Puzzle({
     dragging.current = true;
     setSel({ a: li, b: li });
     onDragStart();
+    unlock();
+    tick(1);
   };
 
   const letterEl = (li: number) => boardRef.current?.querySelector<HTMLElement>(`[data-li="${li}"]`) ?? null;
@@ -328,6 +339,7 @@ export function Puzzle({
     if (e.shiftKey) {
       if (keyAnchor.current == null) keyAnchor.current = from;
       setSel({ a: keyAnchor.current, b: next });
+      tick(Math.abs(next - keyAnchor.current) + 1);
     } else {
       keyAnchor.current = null;
       setSel(null);

@@ -16,6 +16,7 @@ import { fetchCustomGame, mergeGuestDailies, submitPlay } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { useCoarsePointer } from '../lib/media';
 import { ShareSheet, type ShareGame } from '../components/ShareSheet';
+import { SoundToggle } from '../components/SoundToggle';
 import { dailyDate } from '../games/daily';
 import { sharePath } from '../lib/share';
 import { GameResults } from './GameResults';
@@ -143,8 +144,11 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
             <Icon icon={ArrowLeft} size={16} />
             All games
           </Link>
-          <span className={styles.level}>
-            {def.category} · {puzzle.difficulty}
+          <span className={styles.metaEnd}>
+            <span className={styles.level}>
+              {def.category} · {puzzle.difficulty}
+            </span>
+            <SoundToggle />
           </span>
         </div>
         <div className={styles.titleRow}>

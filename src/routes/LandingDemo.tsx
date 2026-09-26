@@ -9,6 +9,7 @@ import type { GameDef } from '../games/catalog';
 import { registry } from '../games/registry';
 import { applyHint, applyPick, newSession, type Session } from '../games/session';
 import { useCoarsePointer } from '../lib/media';
+import { chime } from '../lib/sound';
 import styles from './LandingDemo.module.css';
 
 const TEXT =
@@ -53,8 +54,11 @@ export function LandingDemo() {
   const showing = !!next && s.hintLi === next.at;
 
   // Copy picks happen here, never inside a state updater (StrictMode runs updaters twice).
-  const pick = (a: number, b: number) =>
-    setS(applyPick(s, mod.check(puzzle, a, b, foundSet), { now: Date.now(), total, daily: false, copy }));
+  const pick = (a: number, b: number) => {
+    const ev = mod.check(puzzle, a, b, foundSet);
+    if (ev.kind === 'hit') chime();
+    setS(applyPick(s, ev, { now: Date.now(), total, daily: false, copy }));
+  };
 
   const onHint = () => {
     if (done) return setS(newSession(0));

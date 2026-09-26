@@ -9,6 +9,11 @@
   flex-direction: column;
   gap: var(--space-5);
 }
+.metaEnd {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
 .meta {
   display: flex;
   justify-content: space-between;
