@@ -60,7 +60,7 @@ Stop after each milestone. It is done when its checks pass.
 
 **M7 Share**
 Share sheet, ShareCard, PNG export, Web Share, `/p/:code`, `/d/:n`, OG tags.
-Check: 3 ratios export at 1080 wide. Bible full 4:5 gives 4 images. Daily locks finds.
+Check: 3 ratios export at 1080 wide. For example, Bible full 4:5 gives 4 images. Daily locks finds. Ensure all edge cases are tested for readability and ease in the views, exports across screen sizes or ratios selected
 
 **M8 Launch**
 Headers, CSP, axe pass, Lighthouse 95+ on landing, privacy page, deploy Pages + Worker.
