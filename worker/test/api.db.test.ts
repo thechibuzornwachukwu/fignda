@@ -7,7 +7,7 @@ import { buildHiddenWords } from '../../src/engine/hiddenWords';
 import { dailyPool, getGameDef } from '../../src/games/catalog';
 import { forgedJwt, makeUser, type TestUser } from '../../supabase/tests/helpers';
 import { userMessage, type AiGenerate } from '../src/ai';
-import { handle, LIMITS, type Deps } from '../src/app';
+import { crossesWords, handle, LIMITS, type Deps } from '../src/app';
 
 const APP = 'http://localhost:5173';
 const db = createClient(process.env.SB_URL!, process.env.SB_SERVICE!, { auth: { persistSession: false } });
@@ -119,12 +119,15 @@ describe('POST /api/generate', () => {
       ['more than 20 words', JSON.stringify({ title: 'T', paragraph: para, words: Array(21).fill('Atom') })],
       ['empty title', JSON.stringify({ title: '', paragraph: para, words: ['Atom'] })],
       ['fewer than 4 real hits', JSON.stringify({ title: 'T', paragraph: para, words: ['Atom', 'Heat', 'Zebra', 'Giraffe'] })],
+      ['words only visible, never hidden across words', JSON.stringify({ title: 'T', paragraph: 'The big spoon holders sat on kitchen counters. People cut open plastic bags.', words: ['Spoon', 'Kitchen', 'Counters', 'Plastic', 'Bags'] })],
       ['profanity in the text', JSON.stringify({ title: 'T', paragraph: `${para} Shit happens.`, words: science.dict.slice(0, 8) })],
     ])('%s', async (_, reply) => {
       const t = topic();
-      const r = await handle(post('/api/generate', { topic: t }), deps(fakeAi(reply).ai));
+      const { ai, calls } = fakeAi(reply);
+      const r = await handle(post('/api/generate', { topic: t }), deps(ai));
       expect(r.status).toBe(422);
       expect(await r.json()).toEqual({ error: 'generate_failed' });
+      expect(calls.length).toBeLessThanOrEqual(2);
       const saved = await db.from('games').select('id').eq('topic_key', t);
       expect(saved.data).toEqual([]);
     });
@@ -139,6 +142,8 @@ describe('POST /api/generate', () => {
     expect(g.code).toMatch(/^[A-Z2-7]{8}$/);
     expect(g.dict).not.toContain('Zebra');
     expect(g.dict).toEqual(buildHiddenWords({ text: science.text, dict: g.dict }).answers.map((a) => a.label));
+    const p = buildHiddenWords({ text: science.text, dict: g.dict });
+    expect(p.answers.every((a) => crossesWords(p.chars, a.spans))).toBe(true);
 
     const pub = await anon.rpc('get_game_by_code', { p_code: g.code });
     expect(pub.data[0].id).toBe(g.id);

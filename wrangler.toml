@@ -1,0 +1,8 @@
+# Cloudflare Pages project for the site. The API Worker has its own config in worker/wrangler.toml.
+name = "fignda"
+pages_build_output_dir = "dist"
+compatibility_date = "2026-09-01"
+
+[[services]]
+binding = "API"
+service = "fignda-api"

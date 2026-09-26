@@ -13,8 +13,10 @@ binding = "AI"
 [vars]
 SUPABASE_URL = "https://oeoytlqfkynaidxeskbn.supabase.co"
 # Comma separated. Only these origins are served.
-APP_ORIGINS = "http://localhost:5173,http://localhost:4173"
+APP_ORIGINS = "https://fignda.pages.dev,http://localhost:5173,http://localhost:4173"
 # "workers-ai" (free) | "anthropic" (paid) | "off"
-AI_PROVIDER = "workers-ai"
+# Off for now: the free Workers AI models tested could not hide words across word boundaries.
+# Set "workers-ai" to retry free models (optionally with AI_MODEL), or "anthropic" with a key and a spending cap.
+AI_PROVIDER = "off"
 
 # Local dev (`npm run worker:dev`) reads secrets from worker/.dev.vars (gitignored, blocked by the commit guard).

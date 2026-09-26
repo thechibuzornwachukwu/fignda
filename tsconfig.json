@@ -17,5 +17,5 @@
     "noEmit": true,
     "types": ["vite/client", "node", "vitest/globals", "@testing-library/jest-dom"]
   },
-  "include": ["src", "e2e", "scripts", "supabase/tests", "worker", "vite.config.ts", "vitest.db.config.ts", "playwright.config.ts", "eslint.config.js"]
+  "include": ["src", "e2e", "scripts", "supabase/tests", "worker", "functions", "vite.config.ts", "vitest.db.config.ts", "playwright.config.ts", "eslint.config.js"]
 }

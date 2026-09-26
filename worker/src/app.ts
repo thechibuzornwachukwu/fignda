@@ -114,6 +114,28 @@ export const AiPuzzle = z
   })
   .strict();
 
+/** True when some occurrence of the answer runs across a space or punctuation (the point of the game). */
+export function crossesWords(chars: readonly { li: number }[], spans: ReadonlyArray<readonly [number, number]>): boolean {
+  const at = new Map<number, number>();
+  chars.forEach((c, i) => c.li >= 0 && at.set(c.li, i));
+  return spans.some(([a, b]) => at.get(b)! - at.get(a)! > b - a);
+}
+
+const AI_ATTEMPTS = 2;
+
+/** One AI round: validated, filtered, at least 4 hidden words that cross word boundaries. */
+async function draft(ai: AiGenerate, topic: string) {
+  const raw = await ai(topic).catch(() => null);
+  const parsed = raw == null ? null : AiPuzzle.safeParse(extractJson(raw));
+  if (!parsed?.success) return null;
+  const { title, paragraph, words } = parsed.data;
+  if (isProfane(title, paragraph, words.join(' '))) return null;
+  const puzzle = buildHiddenWords({ text: paragraph, dict: words });
+  const hidden = puzzle.answers.filter((a) => crossesWords(puzzle.chars, a.spans));
+  if (hidden.length < 4) return null;
+  return { title, paragraph, dict: hidden.map((a) => a.label) };
+}
+
 function extractJson(text: string): unknown {
   const m = text.match(/\{[\s\S]*\}/);
   if (!m) return null;
@@ -154,16 +176,11 @@ async function generate(req: Request, deps: Deps) {
     .maybeSingle();
   if (cached.data) return json({ ...gameOut(cached.data), cached: true });
 
-  const raw = await deps.ai(topic).catch(() => null);
-  const parsed = raw == null ? null : AiPuzzle.safeParse(extractJson(raw));
-  if (!parsed?.success) throw new HttpError(422, 'generate_failed');
-  const { title, paragraph, words } = parsed.data;
-  if (isProfane(title, paragraph, words.join(' '))) throw new HttpError(422, 'generate_failed');
-
-  // The engine decides what really hides. Keep real hits only.
-  const puzzle = buildHiddenWords({ text: paragraph, dict: words });
-  if (puzzle.answers.length < 4) throw new HttpError(422, 'generate_failed');
-  const dict = puzzle.answers.map((a) => a.label);
+  // The engine decides what really hides. Keep real hits that cross word boundaries only.
+  let made: Awaited<ReturnType<typeof draft>> = null;
+  for (let i = 0; i < AI_ATTEMPTS && !made; i++) made = await draft(deps.ai, topic);
+  if (!made) throw new HttpError(422, 'generate_failed');
+  const { title, paragraph, dict } = made;
 
   for (let attempt = 0; attempt < 3; attempt++) {
     const code = shareCode();

@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="color-scheme" content="dark light" />
     <title>Fignda</title>
-    <!-- Theme boot. Runs before first paint so there is no flash. Keep in sync with src/lib/theme.ts. -->
-    <script>(function(){var d=document.documentElement,t=null;try{t=localStorage.getItem('fignda-theme')}catch(e){}if(t!=='light'&&t!=='dark')t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';d.setAttribute('data-theme',t)})();</script>
+    <!-- Theme boot: sets data-theme before first paint. External for CSP. -->
+    <script src="/theme-boot.js"></script>
   </head>
   <body>
     <div id="root"></div>

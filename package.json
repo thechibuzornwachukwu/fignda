@@ -21,7 +21,8 @@
     "check:secrets": "node scripts/check-secrets.mjs --all && node scripts/check-secrets.mjs --history",
     "verify": "node scripts/check-secrets.mjs --all && npm run lint && npm run typecheck && npm test && npm audit --audit-level=high",
     "worker:dev": "wrangler dev --config worker/wrangler.toml --port 8787",
-    "worker:deploy": "wrangler deploy --config worker/wrangler.toml"
+    "deploy:site": "node scripts/deploy-site.mjs",
+    "deploy:api": "wrangler deploy --config worker/wrangler.toml"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.128.0",
