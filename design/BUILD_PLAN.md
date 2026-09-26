@@ -95,3 +95,14 @@ Check: only verified plays appear; a signed-in player sees their rank; a guest s
 Share profiles: native share on phones, profile link previews (name, streak, dailies; data from the database by handle only, never query text). Discover players: `/players` with handle search, longest current streaks, most perfect dailies, new this week, all from verified plays. Handles everywhere link to profiles.
 Follow: one-way, no requests. Follow / Unfollow on profiles, follower and following counts, remove a follower. Leaderboard gets a "Following" tab (today's daily among people you follow). Invite link from your profile.
 Check: RLS: only you create or delete your own follows, anyone reads counts, no self follow, no duplicates; following board shows only followed players; profile link preview shows the right player and never an email; search is prefix-only, rate safe and indexed; lists exclude unverified play; 375px readable; axe clean.
+
+## After M10: polish from play testing
+- [x] SEO and GEO: per page titles and dares by category, JSON-LD, crawler text, sitemap.xml, llms.txt, AI crawlers welcome, no topic leads (`worker/test/meta.unit.test.ts`).
+- [x] Mobile selection: own the gesture once selecting, press and hold, frame batched, snap to nearest letter, bubble above the finger. Taps survive real fingers (a short touch over at most 2 letters is a tap). iOS: no double tap zoom on the board.
+- [x] Tap or click first letter then last: the whole range connects on screen, then is checked. Mouse click-then-click with range preview. Tap the anchor again to cancel (`e2e/swipe.spec.ts`).
+- [x] Hint lights the whole letter.
+- [x] Header by context: landing gets its sections and Play, the app gets Games, Leaders, Players. Quick return on scroll. Nav steps aside on puzzles on phones (`e2e/header.spec.ts`).
+- [x] Board sounds: rising tick per letter, chime on a find, mute on the puzzle and in Settings (`src/lib/sound.test.ts`, `e2e/sound.spec.ts`).
+- [x] Google sign in hidden until the provider is configured (`VITE_GOOGLE_AUTH=1`).
+- Needs a real device check: tap first then last on an iPhone (emulators pass).
+- Proposed, not built: bottom tab bar with icons on phones; head-to-head challenge links; live co-op room.
