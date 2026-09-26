@@ -9,6 +9,8 @@ interface ImportMetaEnv {
   readonly VITE_API_URL?: string;
   /** "1" only in e2e builds: enables the test card harness. */
   readonly VITE_E2E?: string;
+  /** "1" shows Continue with Google. Set it only once the Google provider is configured in Supabase. */
+  readonly VITE_GOOGLE_AUTH?: string;
 }
 
 interface ImportMeta {

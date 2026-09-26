@@ -91,6 +91,13 @@ test('a wrong code is refused', async ({ page }) => {
   await expect(page.getByText(/Send a new code in \d+s/)).toBeVisible();
 });
 
+test('no Google button while the provider is not configured', async ({ page }) => {
+  await page.goto('/signin');
+  await expect(page.getByRole('button', { name: 'Email me a code' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Google/ })).toHaveCount(0);
+  await expect(page.getByText('or', { exact: true })).toHaveCount(0);
+});
+
 test('a bad email is caught before sending', async ({ page }) => {
   await page.goto('/signin');
   await page.getByLabel('Email').fill('not-an-email');

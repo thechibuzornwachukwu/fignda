@@ -11,6 +11,8 @@ import styles from './SignIn.module.css';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const RESEND_AFTER = 30;
+/** Google sign in shows only when the provider is configured. */
+const GOOGLE = import.meta.env.VITE_GOOGLE_AUTH === '1';
 
 type Step = 'start' | 'code' | 'profile';
 
@@ -249,14 +251,18 @@ export function SignIn() {
         </p>
       </div>
       <form className={styles.fields} onSubmit={sendCode} noValidate>
-        <Button variant="secondary" onClick={google} className={styles.tall}>
-          Continue with Google
-        </Button>
-        <div className={styles.or}>
-          <span />
-          or
-          <span />
-        </div>
+        {GOOGLE && (
+          <>
+            <Button variant="secondary" onClick={google} className={styles.tall}>
+              Continue with Google
+            </Button>
+            <div className={styles.or}>
+              <span />
+              or
+              <span />
+            </div>
+          </>
+        )}
         <Field
           label="Email"
           type="email"
