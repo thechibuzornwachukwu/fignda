@@ -274,7 +274,7 @@ export function Puzzle({
         tick(span(selRef.current));
       });
     };
-    const end = () => {
+    const end = (e: TouchEvent) => {
       if (!t) return;
       const cur = t;
       reset();
@@ -284,6 +284,8 @@ export function Puzzle({
       const short = Math.hypot(cur.px - cur.x, cur.py - cur.y) <= TAP_TRAVEL;
       const tiny = cur.mode !== 'select' || !s0 || Math.abs(s0.b - s0.a) < 2;
       if (short && tiny && cur.li >= 0 && !disabledRef.current) {
+        // Ours: no double tap zoom, no delayed click, no text selection on iOS.
+        if (e.cancelable) e.preventDefault();
         if (cur.mode === 'select') {
           dragging.current = false;
           setBubble(null);

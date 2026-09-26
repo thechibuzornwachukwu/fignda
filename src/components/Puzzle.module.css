@@ -3,7 +3,10 @@
   color: var(--text-puzzle);
   user-select: none;
   -webkit-user-select: none;
-  /* Vertical swipes scroll the page and pinch zooms; sideways swipes select letters. */
+  /* Vertical swipes scroll the page and pinch zooms; sideways swipes select letters.
+     iOS Safari only understands auto and manipulation: it drops the second line and keeps the first,
+     which still turns off double tap zoom, so tapping the first letter then the last is never a zoom. */
+  touch-action: manipulation;
   touch-action: pan-y pinch-zoom;
   -webkit-touch-callout: none;
   cursor: text;
