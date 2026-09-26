@@ -6,7 +6,7 @@ import { TextLink } from '../components/TextLink';
 import { saveProfile } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { HANDLE_RE, RESERVED_HANDLES, handleFromName, safeNext } from '../lib/streak';
-import { supabase } from '../lib/supabase';
+import { getSupabase } from '../lib/supabase';
 import styles from './SignIn.module.css';
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -81,7 +81,7 @@ export function SignIn() {
     setBusy(true);
     setErr('');
     // The email carries a code; until custom SMTP is set up it may carry a link instead, which lands back here.
-    const { error } = await supabase!.auth.signInWithOtp({
+    const { error } = await (await getSupabase())!.auth.signInWithOtp({
       email: addr,
       options: { shouldCreateUser: true, emailRedirectTo: `${window.location.origin}/signin?next=${encodeURIComponent(next)}` },
     });
@@ -95,7 +95,7 @@ export function SignIn() {
   const verify = async (value: string) => {
     setBusy(true);
     setErr('');
-    const { error } = await supabase!.auth.verifyOtp({ email: email.trim(), token: value, type: 'email' });
+    const { error } = await (await getSupabase())!.auth.verifyOtp({ email: email.trim(), token: value, type: 'email' });
     setBusy(false);
     if (error) {
       setCode('');
@@ -114,7 +114,7 @@ export function SignIn() {
 
   const google = async () => {
     setErr('');
-    const { error } = await supabase!.auth.signInWithOAuth({
+    const { error } = await (await getSupabase())!.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo: `${window.location.origin}/signin?next=${encodeURIComponent(next)}` },
     });

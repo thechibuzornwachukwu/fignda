@@ -180,7 +180,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
         <div className={styles.main}>
           <p id={instructionId} className={styles.instruction}>
             {coarse
-              ? 'Tap the first letter of a word, then the last.'
+              ? 'Swipe across the letters. Or tap the first letter of a word, then the last.'
               : 'Drag across the letters. Answers can run across spaces and punctuation.'}
           </p>
           <Board
@@ -240,7 +240,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
           count={count}
           progress={hideProgress ? 0 : progress}
           time={<Elapsed startAt={s.startAt} endAt={s.endAt} />}
-          message={s.msg || (coarse ? 'Tap first letter, then last' : 'Drag across the letters')}
+          message={s.msg || (coarse ? 'Swipe across letters, or tap first then last' : 'Drag across the letters')}
           onHint={g.hint}
           onDone={g.finish}
         />

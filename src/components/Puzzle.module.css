@@ -3,7 +3,9 @@
   color: var(--text-puzzle);
   user-select: none;
   -webkit-user-select: none;
-  touch-action: manipulation;
+  /* Vertical swipes scroll the page and pinch zooms; sideways swipes select letters. */
+  touch-action: pan-y pinch-zoom;
+  -webkit-touch-callout: none;
   cursor: text;
   text-wrap: pretty;
   overflow-wrap: anywhere;

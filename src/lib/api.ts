@@ -2,17 +2,18 @@
 
 import type { SavedSession } from '../games/session';
 import { storage } from './storage';
-import { supabase } from './supabase';
+import { getSupabase } from './supabase';
 
 export type Profile = { id: string; name: string; handle: string };
 
-function client() {
-  if (!supabase) throw new Error('Sign in is not set up.');
-  return supabase;
+async function client() {
+  const sb = await getSupabase();
+  if (!sb) throw new Error('Sign in is not set up.');
+  return sb;
 }
 
 export async function fetchProfile(id: string): Promise<Profile | null> {
-  const { data, error } = await client().from('profiles').select('id, name, handle').eq('id', id).maybeSingle();
+  const { data, error } = await (await client()).from('profiles').select('id, name, handle').eq('id', id).maybeSingle();
   if (error) throw error;
   return data;
 }
@@ -20,9 +21,10 @@ export async function fetchProfile(id: string): Promise<Profile | null> {
 export type SaveProfileError = 'taken' | 'invalid' | 'failed';
 
 export async function saveProfile(p: Profile, exists: boolean): Promise<SaveProfileError | null> {
+  const sb = await client();
   const q = exists
-    ? client().from('profiles').update({ name: p.name, handle: p.handle }).eq('id', p.id)
-    : client().from('profiles').insert(p);
+    ? sb.from('profiles').update({ name: p.name, handle: p.handle }).eq('id', p.id)
+    : sb.from('profiles').insert(p);
   const { error } = await q;
   if (!error) return null;
   if (error.code === '23505') return 'taken';
@@ -32,7 +34,7 @@ export async function saveProfile(p: Profile, exists: boolean): Promise<SaveProf
 
 /** Day numbers of the user's stored dailies. */
 export async function fetchDailyDays(): Promise<number[]> {
-  const { data, error } = await client().from('plays').select('day_no').not('day_no', 'is', null);
+  const { data, error } = await (await client()).from('plays').select('day_no').not('day_no', 'is', null);
   if (error) throw error;
   return data.map((r) => r.day_no as number);
 }
@@ -67,7 +69,7 @@ export async function mergeGuestDailies(): Promise<number> {
     secs: Math.max(0, Math.floor(((s.endAt ?? s.startAt) - s.startAt) / 1000)),
   }));
   if (!items.length) return 0;
-  const { data, error } = await client().rpc('merge_guest_plays', { items });
+  const { data, error } = await (await client()).rpc('merge_guest_plays', { items });
   if (error) throw error;
   return data as number;
 }
@@ -79,7 +81,8 @@ export async function mergeGuestDailies(): Promise<number> {
 const API = (import.meta.env.VITE_API_URL ?? '/api').replace(/\/$/, '');
 
 async function authHeader(): Promise<Record<string, string>> {
-  const token = (await supabase?.auth.getSession())?.data.session?.access_token;
+  const sb = await getSupabase();
+  const token = (await sb?.auth.getSession())?.data.session?.access_token;
   return token ? { Authorization: `Bearer ${token}` } : {};
 }
 
@@ -135,14 +138,15 @@ export type CustomGame = { id: string; title: string; noun: string; text: string
 
 /** Anyone with the share code can open a custom game. */
 export async function fetchCustomGame(code: string): Promise<CustomGame | null> {
-  if (!supabase || !/^[A-Za-z2-7]{8}$/.test(code)) return null;
-  const { data, error } = await supabase.rpc('get_game_by_code', { p_code: code });
+  const sb = await getSupabase();
+  if (!sb || !/^[A-Za-z2-7]{8}$/.test(code)) return null;
+  const { data, error } = await sb.rpc('get_game_by_code', { p_code: code });
   const g = !error && Array.isArray(data) ? data[0] : null;
   return g ? { id: g.id, title: g.title, noun: g.noun, text: g.text, dict: g.dict, code: g.share_code } : null;
 }
 
 export async function deleteAccount(): Promise<void> {
-  const { error } = await client().rpc('delete_account');
+  const { error } = await (await client()).rpc('delete_account');
   if (error) throw error;
 }
 

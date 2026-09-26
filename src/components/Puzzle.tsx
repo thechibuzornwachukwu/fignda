@@ -32,6 +32,8 @@ export type PuzzleProps = {
 type Sel = { a: number; b: number };
 
 const TAP_SLOP = 10;
+/** A touch that moves this far sideways before it moves vertically becomes a swipe selection. */
+const SWIPE_START = 8;
 
 function liAt(x: number, y: number): number {
   const el = document.elementFromPoint(x, y);
@@ -41,7 +43,7 @@ function liAt(x: number, y: number): number {
 
 /**
  * The hidden-words board. One span per character.
- * Mouse/pen: drag. Touch: tap first letter, then last. Keyboard: arrows move a caret,
+ * Mouse/pen: drag. Touch: swipe sideways across letters, or tap first letter then last. Keyboard: arrows move a caret,
  * Shift+arrows extend, Enter checks, Escape clears.
  */
 export function Puzzle({
@@ -67,9 +69,13 @@ export function Puzzle({
   // Latest values for window listeners.
   const selRef = useRef(sel);
   const pickRef = useRef(onPick);
+  const dragStartRef = useRef(onDragStart);
+  const disabledRef = useRef(disabled);
   useLayoutEffect(() => {
     selRef.current = sel;
     pickRef.current = onPick;
+    dragStartRef.current = onDragStart;
+    disabledRef.current = disabled;
   });
 
   const dragging = useRef(false);
@@ -86,11 +92,27 @@ export function Puzzle({
 
   useEffect(() => {
     const move = (e: globalThis.PointerEvent) => {
+      // Touch: a sideways swipe that starts on a letter selects; a vertical one is left to the browser to scroll
+      // (the board is touch-action: pan-y, so sideways moves reach us and vertical ones pan the page).
+      const t = touch.current;
+      if (!dragging.current && t && e.pointerType === 'touch' && t.li >= 0 && !disabledRef.current) {
+        const dx = e.clientX - t.x;
+        const dy = e.clientY - t.y;
+        if (Math.abs(dx) < SWIPE_START || Math.abs(dx) <= Math.abs(dy)) return;
+        touch.current = null;
+        tapAnchor.current = null;
+        keyAnchor.current = null;
+        dragging.current = true;
+        selRef.current = { a: t.li, b: t.li };
+        setSel(selRef.current);
+        dragStartRef.current();
+      }
       if (!dragging.current) return;
       const li = liAt(e.clientX, e.clientY);
       const s = selRef.current;
       if (li < 0 || !s || li === s.b) return;
-      setSel({ a: s.a, b: li });
+      selRef.current = { a: s.a, b: li };
+      setSel(selRef.current);
     };
     const up = () => {
       if (!dragging.current) return;

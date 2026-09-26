@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { clearLocalCache, deleteAccount, fetchProfile, mergeGuestDailies, type Profile } from './api';
-import { supabase } from './supabase';
+import { getSupabase, supabaseEnabled } from './supabase';
 
 type Auth = {
   /** False when Supabase env is not set. Everyone is a guest. */
@@ -20,11 +20,12 @@ const AuthContext = createContext<Auth | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(!!supabase);
+  const [loading, setLoading] = useState(supabaseEnabled);
 
   useEffect(() => {
-    if (!supabase) return;
+    if (!supabaseEnabled) return;
     let alive = true;
+    let unsubscribe = () => {};
     const load = async (s: Session | null) => {
       if (!alive) return;
       setSession(s);
@@ -45,16 +46,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (alive) setLoading(false);
       }
     };
-    supabase.auth.getSession().then(({ data }) => load(data.session));
-    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
+    void getSupabase().then((supabase) => {
+      if (!supabase || !alive) return;
+      supabase.auth.getSession().then(({ data }) => load(data.session));
+      const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
       if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
         // Defer: Supabase warns against awaiting its API inside this callback.
         setTimeout(() => load(s), 0);
       } else if (event === 'TOKEN_REFRESHED') setSession(s);
+      });
+      unsubscribe = () => sub.subscription.unsubscribe();
     });
     return () => {
       alive = false;
-      sub.subscription.unsubscribe();
+      unsubscribe();
     };
   }, []);
 
@@ -69,7 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     // Save any dailies played while signed in before the local copy goes.
     if (profile) await mergeGuestDailies().catch(() => {});
-    await supabase?.auth.signOut();
+    await (await getSupabase())?.auth.signOut();
     clearLocalCache();
     setSession(null);
     setProfile(null);
@@ -82,7 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<Auth>(
     () => ({
-      enabled: !!supabase,
+      enabled: supabaseEnabled,
       loading,
       session,
       email: session?.user.email ?? null,

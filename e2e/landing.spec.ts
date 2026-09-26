@@ -3,6 +3,7 @@ import { expect, test, type Page } from '@playwright/test';
 const DEMO = ['amos', 'atom', 'data', 'rome', 'gold'];
 
 async function letters(page: Page): Promise<string> {
+  await page.locator('[aria-label="Demo sentence"] [data-li]').first().waitFor();
   return page.evaluate(() =>
     Array.from(document.querySelectorAll<HTMLElement>('[aria-label="Demo sentence"] [data-li]'))
       .map((el) => el.textContent ?? '')
@@ -14,6 +15,9 @@ async function letters(page: Page): Promise<string> {
 async function dragWord(page: Page, S: string, word: string) {
   const i = S.indexOf(word);
   expect(i, word).toBeGreaterThanOrEqual(0);
+  // Scroll the word into view first, as a player would.
+  await page.locator(`[data-li="${i + word.length - 1}"]`).scrollIntoViewIfNeeded();
+  await page.locator(`[data-li="${i}"]`).scrollIntoViewIfNeeded();
   const at = async (li: number) => {
     const b = (await page.locator(`[data-li="${li}"]`).boundingBox())!;
     return { x: b.x + b.width / 2, y: b.y + b.height / 2 };
@@ -83,7 +87,7 @@ test.describe('touch', () => {
 
   test('demo by two taps, no horizontal scroll', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByText('Tap the first letter, then the last.', { exact: false })).toBeVisible();
+    await expect(page.getByText('Swipe across the letters, or tap the first and then the last.', { exact: false })).toBeVisible();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow).toBeLessThanOrEqual(0);
     const S = await letters(page);

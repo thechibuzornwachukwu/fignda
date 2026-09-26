@@ -2,6 +2,8 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 
 /** Letter-stream index range of the first occurrence of `word` on the board. */
 async function spanOf(page: Page, word: string): Promise<[number, number]> {
+  // Screens load on demand: wait for the board before reading it.
+  await page.locator('[data-li]').first().waitFor();
   const S = await page.evaluate(() =>
     Array.from(document.querySelectorAll<HTMLElement>('[data-li]'))
       .map((el) => el.textContent ?? '')
@@ -21,6 +23,8 @@ async function center(l: Locator) {
 }
 
 async function drag(page: Page, a: number, b: number) {
+  await letter(page, b).scrollIntoViewIfNeeded();
+  await letter(page, a).scrollIntoViewIfNeeded();
   const from = await center(letter(page, a));
   const to = await center(letter(page, b));
   await page.mouse.move(from.x, from.y);
@@ -137,7 +141,7 @@ test.describe('touch', () => {
 
   test('"a most" found as Amos by two taps', async ({ page }) => {
     await page.goto('/play/bible');
-    await expect(page.getByText('Tap the first letter of a word, then the last.')).toBeVisible();
+    await expect(page.getByText('Swipe across the letters. Or tap the first letter of a word, then the last.')).toBeVisible();
     const [a] = await spanOf(page, 'amost');
     await letter(page, a).tap();
     await expect(letter(page, a)).toHaveAttribute('data-state', 'selecting');

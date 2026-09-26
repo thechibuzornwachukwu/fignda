@@ -87,7 +87,7 @@ export function LandingDemo() {
       <div className={styles.main}>
         <p id={instructionId} className={styles.instruction}>
           {coarse
-            ? 'Five words are hidden below. Tap the first letter, then the last.'
+            ? 'Five words are hidden below. Swipe across the letters, or tap the first and then the last.'
             : 'Five words are hidden below. Drag across the letters to find them.'}
         </p>
         <mod.Board

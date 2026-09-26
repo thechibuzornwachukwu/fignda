@@ -3,13 +3,17 @@ import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
 import { Landing } from './routes/Landing';
-import { Games } from './routes/Games';
-import { DailyGame, GameByCode, GameById } from './routes/Game';
-import { SignIn } from './routes/SignIn';
-import { Account } from './routes/Account';
-import { Privacy } from './routes/Privacy';
 import { prefersReducedMotion } from './lib/media';
 import styles from './App.module.css';
+
+// Landing loads first and alone; every other screen is fetched when visited.
+const Games = lazy(() => import('./routes/Games').then((m) => ({ default: m.Games })));
+const GameById = lazy(() => import('./routes/Game').then((m) => ({ default: m.GameById })));
+const DailyGame = lazy(() => import('./routes/Game').then((m) => ({ default: m.DailyGame })));
+const GameByCode = lazy(() => import('./routes/Game').then((m) => ({ default: m.GameByCode })));
+const SignIn = lazy(() => import('./routes/SignIn').then((m) => ({ default: m.SignIn })));
+const Account = lazy(() => import('./routes/Account').then((m) => ({ default: m.Account })));
+const Privacy = lazy(() => import('./routes/Privacy').then((m) => ({ default: m.Privacy })));
 
 // Test-only card harness. VITE_E2E is set only by the e2e build, so production compiles this away.
 const CardsHarness = import.meta.env.VITE_E2E === '1' ? lazy(() => import('./routes/CardsHarness').then((m) => ({ default: m.CardsHarness }))) : null;
@@ -31,7 +35,9 @@ function Layout() {
     <>
       <Header />
       <main className={pathname === '/' ? styles.bleed : styles.main}>
-        <Outlet />
+        <Suspense fallback={<div className={styles.loading} aria-busy="true" />}>
+          <Outlet />
+        </Suspense>
       </main>
       {pathname === '/' && <Footer />}
     </>

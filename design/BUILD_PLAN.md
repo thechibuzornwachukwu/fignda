@@ -67,3 +67,7 @@ Check: 3 ratios export at 1080 wide. For example, Bible full 4:5 gives 4 images.
 
 **M8 Launch**
 Headers, CSP, axe pass, Lighthouse 95+ on landing, privacy page, deploy Pages + Worker.
+
+**M9 Leaderboards**
+Daily leaderboard from verified plays only (`plays_public`: handle, score, time). Today's top 20, your own rank and score when signed in, previous days browsable once they end. Per-game boards for curated puzzles. Guests and unverified merges never ranked. Ties: faster time first, then earlier finish. No emails or user ids exposed.
+Check: only verified plays appear; a signed-in player sees their rank; a guest sees the board and a sign-in prompt; today's board never reveals answers; rank query stays fast with many plays (index on day_no, score); RLS suite extended; 375px readable.
