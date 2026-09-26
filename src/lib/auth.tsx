@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { clearLocalCache, deleteAccount, fetchProfile, mergeGuestDailies, type Profile } from './api';
-import { getSupabase, supabaseEnabled } from './supabase';
+import { getSupabase, needsAuthNow, onSupabaseReady, supabaseEnabled } from './supabase';
 
 type Auth = {
   /** False when Supabase env is not set. Everyone is a guest. */
@@ -20,7 +20,8 @@ const AuthContext = createContext<Auth | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [loading, setLoading] = useState(supabaseEnabled);
+  // Guests with no stored session never load the auth client until a screen asks for it.
+  const [loading, setLoading] = useState(() => needsAuthNow());
 
   useEffect(() => {
     if (!supabaseEnabled) return;
@@ -46,8 +47,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (alive) setLoading(false);
       }
     };
-    void getSupabase().then((supabase) => {
-      if (!supabase || !alive) return;
+    const attach = (supabase: NonNullable<Awaited<ReturnType<typeof getSupabase>>>) => {
+      if (!alive || attached) return;
+      attached = true;
       supabase.auth.getSession().then(({ data }) => load(data.session));
       const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
       if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
@@ -56,9 +58,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else if (event === 'TOKEN_REFRESHED') setSession(s);
       });
       unsubscribe = () => sub.subscription.unsubscribe();
-    });
+    };
+    let attached = false;
+    const off = onSupabaseReady(attach);
+    if (needsAuthNow()) void getSupabase();
     return () => {
       alive = false;
+      off();
       unsubscribe();
     };
   }, []);

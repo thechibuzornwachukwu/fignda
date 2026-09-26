@@ -97,3 +97,13 @@ test.describe('touch', () => {
     await expect(list(page)).toContainText('1 / 5');
   });
 });
+
+test('a guest on the landing page never loads the auth client', async ({ page }) => {
+  const calls: string[] = [];
+  page.on('request', (r) => {
+    if (r.url().includes(':54321') || r.url().includes('supabase')) calls.push(r.url());
+  });
+  await page.goto('/');
+  await page.waitForLoadState('networkidle');
+  expect(calls).toEqual([]);
+});
