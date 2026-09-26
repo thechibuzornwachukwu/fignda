@@ -199,3 +199,20 @@ test.describe('mouse', () => {
     expect(bg).not.toBe('rgba(0, 0, 0, 0)');
   });
 });
+
+/** A real finger tap: lands, slides a little while pressed, lifts. */
+async function fingerTap(page: Page, p: { x: number; y: number }, dx: number, dy: number) {
+  await touchPath(page, [p, { x: p.x + dx / 3, y: p.y + dy / 3 }, { x: p.x + (2 * dx) / 3, y: p.y + (2 * dy) / 3 }, { x: p.x + dx, y: p.y + dy }]);
+  await page.waitForTimeout(50);
+}
+
+for (const [dx, dy] of [[4, 1], [9, 3], [12, 3], [16, 4], [3, 12], [14, 14]] as const) {
+  test(`tap first and last with a finger that slides ${dx}px across, ${dy}px down`, async ({ page }) => {
+    await page.goto('/play/bible');
+    const i = await indexOf(page, 'amost');
+    await fingerTap(page, await centerOf(page, i), dx, dy);
+    await expect(page.locator(`[data-li="${i}"]`)).toHaveAttribute('data-state', 'selecting');
+    await fingerTap(page, await centerOf(page, i + 3), -dx, dy);
+    await expect(page.locator(`[data-li="${i}"]`)).toHaveAttribute('data-state', 'found');
+  });
+}

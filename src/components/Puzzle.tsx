@@ -35,7 +35,8 @@ export type PuzzleProps = {
 
 type Sel = { a: number; b: number };
 
-const TAP_SLOP = 10;
+/** A touch that travels less than this (and covers at most 2 letters) is a tap. Real fingers slide 10 to 16px. */
+const TAP_TRAVEL = 20;
 /** A touch that moves this far sideways before it moves vertically becomes a swipe selection. */
 const SWIPE_START = 8;
 
@@ -273,18 +274,23 @@ export function Puzzle({
         tick(span(selRef.current));
       });
     };
-    const end = (e: TouchEvent) => {
+    const end = () => {
       if (!t) return;
       const cur = t;
       reset();
-      if (cur.mode === 'select') {
-        // Held a little long but never moved: that was a slow tap, not a one letter selection.
-        if (Math.hypot(cur.px - cur.x, cur.py - cur.y) <= TAP_SLOP) {
+      // Real fingers slide while they tap, and letters are about 11px wide on a phone. A short touch that
+      // covers at most 2 letters is a tap on the letter it landed on: 2 letters can never be an answer anyway.
+      const s0 = selRef.current;
+      const short = Math.hypot(cur.px - cur.x, cur.py - cur.y) <= TAP_TRAVEL;
+      const tiny = cur.mode !== 'select' || !s0 || Math.abs(s0.b - s0.a) < 2;
+      if (short && tiny && cur.li >= 0 && !disabledRef.current) {
+        if (cur.mode === 'select') {
           dragging.current = false;
           setBubble(null);
-          if (tapAnchor.current == null) setSel(null);
-          return tapRef.current(cur.li);
         }
+        return tapRef.current(cur.li);
+      }
+      if (cur.mode === 'select') {
         tapAnchor.current = null;
         // A fast flick can lift before the next frame runs: settle on the letter under the last point.
         // (touchend coordinates are not reliable everywhere; the last move is.)
@@ -293,11 +299,6 @@ export function Puzzle({
         if (li >= 0 && s) selRef.current = { a: s.a, b: li };
         return endSelect(true);
       }
-      if (cur.mode !== 'pending' || cur.li < 0 || disabledRef.current) return;
-      const p = e.changedTouches[0];
-      if (p && Math.hypot(p.clientX - cur.x, p.clientY - cur.y) > TAP_SLOP) return;
-      // A tap: first letter, then last.
-      tapRef.current(cur.li);
     };
     const cancel = () => {
       if (t?.mode === 'select') endSelect(false);
