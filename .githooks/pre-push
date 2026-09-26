@@ -1,0 +1,6 @@
+#!/bin/sh
+# Local CI. GitHub Actions is off for this repo, so these run on every `git push`.
+# Same checks the workflow had: secrets, lint, types, unit tests, dependency audit.
+# The database security suite needs Docker; run it yourself with `npm run test:db` after DB changes.
+echo "Checking before push. This takes a minute."
+npm run verify || { echo; echo "Push stopped. Fix the problem above, then push again."; exit 1; }

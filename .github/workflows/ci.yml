@@ -1,9 +1,9 @@
 name: CI
 
+# Off: the GitHub account cannot run Actions. The same checks run locally on every push
+# (.githooks/pre-push -> npm run verify). Switch back to push/pull_request triggers if Actions is ever available.
 on:
-  push:
-    branches: [main]
-  pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
