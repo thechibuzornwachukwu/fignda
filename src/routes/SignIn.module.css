@@ -1,0 +1,85 @@
+.screen {
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  padding: var(--auth-top) 0 var(--space-20);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.title {
+  margin: 0;
+  font-size: clamp(40px, 8vw, 56px);
+  line-height: 0.95;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+}
+.sub {
+  color: var(--subtle);
+}
+.lead {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.strong {
+  color: var(--fg);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.tall {
+  height: 52px;
+  width: 100%;
+}
+.full {
+  height: 52px;
+  width: 100%;
+}
+.or {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 13px;
+  color: var(--subtle);
+}
+.or span {
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+.err {
+  margin: 0;
+  min-height: 1.4em;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-6);
+}
+.guest {
+  width: max-content;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--line-3);
+}
+.guest:hover {
+  color: var(--fg);
+}

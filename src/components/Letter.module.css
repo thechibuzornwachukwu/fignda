@@ -1,0 +1,20 @@
+.letter {
+  border-radius: var(--radius-sm);
+  padding: var(--space-0h) 0;
+  transition: background-color var(--dur-letter) var(--ease-std), color var(--dur-letter) var(--ease-std);
+}
+.letter[data-state='selecting'] {
+  background: var(--sel);
+  color: var(--sel-fg);
+}
+.letter[data-state='found'] {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.letter[data-state='missed'] {
+  background: var(--miss);
+  color: var(--fg);
+}
+.letter[data-hint] {
+  box-shadow: inset 0 -2px 0 var(--accent-ink);
+}

@@ -1,0 +1,66 @@
+.screen {
+  padding: var(--screen-top) 0 var(--space-30);
+  display: flex;
+  flex-direction: column;
+  gap: var(--screen-gap);
+}
+.heading {
+  composes: display from '../styles/type.module.css';
+  margin: 0;
+}
+.sub {
+  color: var(--subtle);
+}
+
+.daily {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5) var(--space-8);
+  padding: var(--card-pad);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  color: var(--fg);
+  transition: border-color var(--dur-base) var(--ease-std);
+}
+.daily:hover {
+  border-color: var(--line-4);
+  color: var(--fg);
+}
+.dailyText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1 1 280px;
+  min-width: 0;
+}
+.kicker {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent-ink);
+}
+.dailyTitle {
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+.dailySub {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.rows {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  border-top: 2px solid var(--fg);
+}

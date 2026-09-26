@@ -1,0 +1,26 @@
+.board {
+  composes: puzzle from '../styles/type.module.css';
+  color: var(--text-puzzle);
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  cursor: text;
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
+}
+.hero {
+  composes: board;
+  composes: puzzleHero from '../styles/type.module.css';
+  min-height: 3em;
+}
+.board[aria-disabled] {
+  cursor: default;
+}
+.board:focus-visible {
+  outline-offset: var(--space-2);
+  border-radius: var(--radius-sm);
+}
+.board:focus-visible [data-caret] {
+  outline: 2px solid var(--accent-ink);
+  outline-offset: 1px;
+}

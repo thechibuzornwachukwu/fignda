@@ -1,0 +1,5 @@
+html, body { min-height: 100%; }
+body { font-size: 16px; font-weight: 500; line-height: 1.55; }
+button, input, textarea, select { font-family: inherit; }
+input::placeholder { color: var(--subtle); }
+#root { min-height: 100vh; display: flex; flex-direction: column; }

@@ -1,0 +1,60 @@
+.button {
+  height: 48px;
+  padding: 0 var(--space-5);
+  border-radius: var(--radius-lg);
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color var(--dur-base) var(--ease-std), color var(--dur-base) var(--ease-std);
+}
+.button:disabled,
+.button[aria-disabled='true'] {
+  cursor: default;
+  opacity: 0.6;
+}
+.sm {
+  height: 36px;
+  padding: 0 var(--space-4);
+  font-size: 14px;
+}
+.touch {
+  height: 44px;
+  padding: 0 var(--space-3h);
+  font-size: 14px;
+}
+
+.primary,
+.primary:hover {
+  background: var(--fg);
+  color: var(--bg);
+}
+.primary:hover:not(:disabled) {
+  background: var(--fg-strong);
+}
+
+.accent,
+.accent:hover {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.accent:hover:not(:disabled) {
+  background: var(--accent-hover);
+}
+
+.secondary,
+.secondary:hover {
+  background: transparent;
+  color: var(--fg);
+  box-shadow: inset 0 0 0 1px var(--line-3);
+}
+.secondary:hover:not(:disabled) {
+  background: var(--surface-2);
+}

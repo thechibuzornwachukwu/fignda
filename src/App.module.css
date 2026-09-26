@@ -1,0 +1,12 @@
+.main {
+  flex: 1;
+  width: 100%;
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+/* Landing has full-bleed sections; each one centres its own content. */
+.bleed {
+  flex: 1;
+  width: 100%;
+}

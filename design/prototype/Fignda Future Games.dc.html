@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>Fignda Future Games</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<script>(function(){var d=document.documentElement,t=null;try{t=localStorage.getItem('fignda-theme')}catch(e){}if(!t)t=matchMedia('(prefers-color-scheme: light)').matches?'light':'dark';d.setAttribute('data-theme',t);if(!window.__figTheme){window.__figTheme=1;document.addEventListener('click',function(e){var b=e.target.closest&&e.target.closest('[data-theme-toggle]');if(!b)return;var n=d.getAttribute('data-theme')==='light'?'dark':'light';d.setAttribute('data-theme',n);try{localStorage.setItem('fignda-theme',n)}catch(e){}})}})();</script>
+<style>
+:root,[data-theme=dark]{color-scheme:dark;--bg:#0d0d0e;--surface:#151517;--surface-hover:#18181b;--surface-2:#1c1c1f;--line:#232327;--line-2:#2a2a2f;--line-3:#34343a;--line-4:#3a3a40;--header-line:#1f1f22;--fg:#ededee;--fg-strong:#ffffff;--text-puzzle:#cfcfd4;--muted:#a1a1a8;--subtle:#7d7d85;--track:#26262a;--sel:#3a3a40;--sel-fg:#ffffff;--miss:#2c2c31;--accent:#d4f04c;--on-accent:#0d0d0e;--accent-ink:#d4f04c;--bar:#d4f04c}
+[data-theme=light]{color-scheme:light;--bg:#f6f6f7;--surface:#ffffff;--surface-hover:#f0f0f2;--surface-2:#ececef;--line:#e3e3e7;--line-2:#d6d6db;--line-3:#c4c4ca;--line-4:#a8a8b0;--header-line:#e3e3e7;--fg:#111113;--fg-strong:#000000;--text-puzzle:#2a2a2e;--muted:#55555c;--subtle:#6a6a72;--track:#e3e3e7;--sel:#111113;--sel-fg:#ffffff;--miss:#dcdce1;--accent:#d4f04c;--on-accent:#0d0d0e;--accent-ink:#5a6b00;--bar:#111113}
+html,body{margin:0;background:var(--bg);color:var(--fg);font-family:'Manrope',sans-serif;-webkit-font-smoothing:antialiased}
+*{box-sizing:border-box}
+a{color:var(--fg);text-decoration:none}a:hover{color:var(--fg-strong)}
+::selection{background:var(--line-3)}
+:focus-visible{outline:2px solid var(--accent-ink);outline-offset:2px}
+textarea::placeholder{color:var(--subtle)}
+</style>
+</helmet>
+<div style="min-height:100vh;background:var(--bg);color:var(--fg);font-family:'Manrope',sans-serif">
+  <div style="max-width:1200px;margin:0 auto;padding:40px 24px 96px;display:flex;flex-direction:column;gap:clamp(64px,9vw,120px)">
+
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:16px">
+      <a href="Fignda Landing.dc.html" style="display:flex;align-items:center;gap:10px"><svg width="30" height="30" viewBox="0 0 64 64" fill="none" aria-hidden="true" style="flex:none;display:block"><g transform="translate(1 2)"><circle cx="27" cy="30" r="13" fill="var(--accent)" stroke="currentColor" stroke-width="7"></circle><path d="M40 30V14a10 10 0 0 1 10-10h3M40 20h12M40 30v15a11 11 0 0 1-11 11h-5" stroke="currentColor" stroke-width="7"></path></g></svg><span style="font-weight:800;font-size:18px;letter-spacing:-0.03em">fignda</span></a>
+      <div style="display:flex;align-items:center;gap:20px">
+        <a href="Fignda.dc.html" style="font-size:14px;font-weight:600;color:var(--muted)" style-hover="color:var(--fg)">Play</a>
+        <button data-theme-toggle="" aria-label="Switch theme" title="Switch theme" style="width:36px;height:36px;border-radius:8px;border:1px solid var(--line-2);background:transparent;color:var(--fg);cursor:pointer;display:flex;align-items:center;justify-content:center;flex:none" style-hover="background:var(--surface-2)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 18a6 6 0 0 0 0-12v12z"></path></svg></button>
+      </div>
+    </div>
+
+    <header style="display:flex;flex-direction:column;gap:24px;max-width:900px">
+      <div style="font-size:13px;font-weight:600;color:var(--subtle)">Future games</div>
+      <h1 style="margin:0;font-size:clamp(52px,10vw,136px);line-height:0.92;font-weight:800;letter-spacing:-0.055em">What we hide<br><span style="color:var(--subtle)">next.</span></h1>
+      <p style="margin:0;font-size:18px;line-height:1.55;color:var(--muted);max-width:560px;text-wrap:pretty">Seven games that could come after buried words. Some reuse what we have. One has never been made.</p>
+    </header>
+
+    <section style="display:flex;flex-direction:column;gap:32px">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;border-top:2px solid var(--fg);padding-top:16px;flex-wrap:wrap">
+        <h2 style="margin:0;font-size:clamp(32px,4vw,48px);font-weight:800;letter-spacing:-0.04em;line-height:1">Never been done</h2>
+        <span style="font-size:14px;font-weight:600;color:var(--subtle)">01</span>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:clamp(32px,5vw,72px);align-items:flex-start">
+        <div style="flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:20px">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span style="font-size:clamp(40px,6vw,72px);font-weight:800;letter-spacing:-0.05em;line-height:0.95">Bury it</span><span style="font-size:12px;font-weight:700;padding:3px 7px;border-radius:4px;background:var(--accent);color:var(--on-accent)">Flagship idea</span></div>
+          <p style="margin:0;font-size:20px;line-height:1.45;font-weight:600;letter-spacing:-0.015em;text-wrap:pretty">You make the puzzle. We give you three words. Write one normal sentence that hides all of them.</p>
+          <ol style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;font-size:15px;line-height:1.5;color:var(--muted)">
+            <li style="display:flex;gap:14px"><span style="width:20px;flex:none;font-weight:700;color:var(--subtle)">1</span><span>Get three words. Everyone gets the same three today.</span></li>
+            <li style="display:flex;gap:14px"><span style="width:20px;flex:none;font-weight:700;color:var(--subtle)">2</span><span>Write a sentence that hides them. Writing a word plainly does not count.</span></li>
+            <li style="display:flex;gap:14px"><span style="width:20px;flex:none;font-weight:700;color:var(--subtle)">3</span><span>Other players try to find them. The longer they take, the more you score.</span></li>
+          </ol>
+          <p style="margin:0;font-size:14px;line-height:1.55;color:var(--subtle);max-width:440px;text-wrap:pretty">Word games have always had a setter and a solver. Here every player is both, and a good hider beats a fast finder.</p>
+          <div style="display:flex;gap:20px;flex-wrap:wrap;font-size:13px;font-weight:600;color:var(--subtle);padding-top:8px;border-top:1px solid var(--line)"><span>Board: Text you write</span><span>Input: Typing</span><span>Build: Medium</span></div>
+        </div>
+        <div style="flex:1 1 420px;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:clamp(20px,3vw,32px);display:flex;flex-direction:column;gap:20px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap"><span style="font-size:13px;font-weight:700;color:var(--accent-ink)">Try it</span><span style="font-size:13px;font-weight:600;color:var(--subtle)">{{ buryCount }} / 3 buried</span></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{ buryWords }}" as="w" hint-placeholder-count="3">
+              <span style="height:36px;padding:0 14px;border-radius:6px;display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;letter-spacing:0.02em;transition:background-color .25s ease,color .25s ease;background:{{ w.bg }};color:{{ w.fg }};border:1px solid {{ w.bd }}">{{ w.label }}<span style="font-size:12px;font-weight:600;opacity:0.8">{{ w.note }}</span></span>
+            </sc-for>
+          </div>
+          <textarea value="{{ buryText }}" onChange="{{ onBury }}" rows="4" placeholder="Start typing your sentence" aria-label="Your sentence" style="width:100%;resize:vertical;background:transparent;border:none;border-bottom:2px solid var(--line-3);color:var(--fg);font-family:'Manrope',sans-serif;font-size:clamp(20px,2.3vw,26px);font-weight:600;letter-spacing:-0.015em;line-height:1.5;padding:4px 0 12px;outline:none" style-focus="border-bottom-color:var(--fg)"></textarea>
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+            <span aria-live="polite" style="font-size:14px;color:var(--subtle);min-height:20px">{{ buryMsg }}</span>
+            <button onClick="{{ buryExample }}" style="all:unset;cursor:pointer;font-size:14px;font-weight:600;color:var(--muted);text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--line-3)" style-hover="color:var(--fg)">{{ buryExampleLabel }}</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="display:flex;flex-direction:column;gap:32px">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;border-top:2px solid var(--fg);padding-top:16px;flex-wrap:wrap">
+        <div style="display:flex;flex-direction:column;gap:8px"><h2 style="margin:0;font-size:clamp(32px,4vw,48px);font-weight:800;letter-spacing:-0.04em;line-height:1">Same engine, new rules</h2><span style="font-size:15px;color:var(--muted)">These use the drag and find we already have. Small builds.</span></div>
+        <span style="font-size:14px;font-weight:600;color:var(--subtle)">02</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:20px">
+
+        <article style="border:1px solid var(--line);border-radius:12px;padding:clamp(20px,3vw,28px);display:flex;flex-direction:column;gap:20px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><span style="font-size:32px;font-weight:800;letter-spacing:-0.04em">Mirror</span><span style="font-size:13px;font-weight:600;color:var(--subtle)">Buried words, backwards</span></div>
+          <div style="background:var(--surface);border-radius:8px;padding:24px;display:flex;flex-direction:column;gap:14px">
+            <div style="font-size:13px;font-weight:600;color:var(--muted)">Find 3 animals. They read right to left.</div>
+            <p style="margin:0;font-size:24px;font-weight:600;line-height:1.7;letter-spacing:-0.015em;color:var(--text-puzzle)"><span style="background:var(--accent);color:var(--on-accent);border-radius:4px">Go d</span>ash to the s<span style="box-shadow:inset 0 -2px 0 var(--line-4)">tar</span>t line, <span style="box-shadow:inset 0 -2px 0 var(--line-4)">Tab</span>.</p>
+            <div style="display:flex;gap:8px;font-size:13px;font-weight:700"><span style="padding:2px 6px;border-radius:4px;background:var(--accent);color:var(--on-accent)">DOG</span><span style="padding:2px 6px;color:var(--line-4)">•••</span><span style="padding:2px 6px;color:var(--line-4)">•••</span></div>
+          </div>
+          <p style="margin:0;font-size:15px;line-height:1.55;color:var(--muted)">Drag from the last letter to the first. The engine just reads the stream in reverse.</p>
+          <div style="display:flex;gap:20px;flex-wrap:wrap;font-size:13px;font-weight:600;color:var(--subtle)"><span>Build: Tiny</span><span>Status: Next</span></div>
+        </article>
+
+        <article style="border:1px solid var(--line);border-radius:12px;padding:clamp(20px,3vw,28px);display:flex;flex-direction:column;gap:20px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><span style="font-size:32px;font-weight:800;letter-spacing:-0.04em">Liar</span><span style="font-size:13px;font-weight:600;color:var(--subtle)">One word is not there</span></div>
+          <div style="background:var(--surface);border-radius:8px;padding:24px;display:flex;flex-direction:column;gap:14px">
+            <div style="font-size:13px;font-weight:600;color:var(--muted)">Five books are listed. Four are hiding. Which one lies?</div>
+            <p style="margin:0;font-size:22px;font-weight:600;line-height:1.7;letter-spacing:-0.015em;color:var(--text-puzzle)">The <span style="background:var(--accent);color:var(--on-accent);border-radius:4px">job</span> was done. <span style="background:var(--accent);color:var(--on-accent);border-radius:4px">Mark</span>, eleven, gave me the facts in a most boring way.</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;font-size:13px;font-weight:700">
+              <span style="padding:2px 6px;border-radius:4px;background:var(--accent);color:var(--on-accent)">JOB</span>
+              <span style="padding:2px 6px;border-radius:4px;background:var(--accent);color:var(--on-accent)">MARK</span>
+              <span style="padding:2px 6px;border-radius:4px;border:1px solid var(--line-3)">ACTS</span>
+              <span style="padding:2px 6px;border-radius:4px;border:1px solid var(--line-3)">AMOS</span>
+              <span style="padding:2px 6px;border-radius:4px;border:1px solid var(--line-3)">RUTH</span>
+            </div>
+          </div>
+          <p style="margin:0;font-size:15px;line-height:1.55;color:var(--muted)">Find the four, or call the liar early for a bonus. Call it wrong and the game ends.</p>
+          <div style="display:flex;gap:20px;flex-wrap:wrap;font-size:13px;font-weight:600;color:var(--subtle)"><span>Build: Small</span><span>Status: Next</span></div>
+        </article>
+
+        <article style="border:1px solid var(--line);border-radius:12px;padding:clamp(20px,3vw,28px);display:flex;flex-direction:column;gap:20px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><span style="font-size:32px;font-weight:800;letter-spacing:-0.04em">Relay</span><span style="font-size:13px;font-weight:600;color:var(--subtle)">Each find picks the next</span></div>
+          <div style="background:var(--surface);border-radius:8px;padding:24px;display:flex;flex-direction:column;gap:18px">
+            <div style="font-size:13px;font-weight:600;color:var(--muted)">The last letter of each find starts the next one.</div>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:20px;font-weight:800;letter-spacing:-0.02em">
+              <span style="padding:4px 10px;border-radius:6px;background:var(--accent);color:var(--on-accent)">AMOS</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="color:var(--subtle)"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+              <span style="padding:4px 10px;border-radius:6px;background:var(--accent);color:var(--on-accent)">SAMUEL</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="color:var(--subtle)"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+              <span style="padding:4px 10px;border-radius:6px;background:var(--accent);color:var(--on-accent)">LUKE</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="color:var(--subtle)"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+              <span style="padding:4px 10px;border-radius:6px;border:1px dashed var(--line-4);color:var(--subtle)">E . . .</span>
+            </div>
+            <div style="font-size:14px;color:var(--subtle)">Next starts with E. 3 in the chain.</div>
+          </div>
+          <p style="margin:0;font-size:15px;line-height:1.55;color:var(--muted)">Order matters, so the list stays hidden. The longest chain wins, not the most finds.</p>
+          <div style="display:flex;gap:20px;flex-wrap:wrap;font-size:13px;font-weight:600;color:var(--subtle)"><span>Build: Small</span><span>Status: Later</span></div>
+        </article>
+
+        <article style="border:1px solid var(--line);border-radius:12px;padding:clamp(20px,3vw,28px);display:flex;flex-direction:column;gap:20px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><span style="font-size:32px;font-weight:800;letter-spacing:-0.04em">Buried sums</span><span style="font-size:13px;font-weight:600;color:var(--subtle)">Math, same drag</span></div>
+          <div style="background:var(--surface);border-radius:8px;padding:24px;display:flex;flex-direction:column;gap:16px">
+            <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap"><span style="font-size:13px;font-weight:600;color:var(--muted)">Find 3 runs that add up to</span><span style="font-size:32px;font-weight:800;letter-spacing:-0.04em;line-height:0.9">15</span></div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px;font-size:26px;font-weight:700;font-variant-numeric:tabular-nums">
+              <span style="width:34px;text-align:center;border-radius:4px;background:var(--accent);color:var(--on-accent)">3</span><span style="width:34px;text-align:center;border-radius:4px;background:var(--accent);color:var(--on-accent)">8</span><span style="width:34px;text-align:center;border-radius:4px;background:var(--accent);color:var(--on-accent)">4</span>
+              <span style="width:34px;text-align:center;color:var(--text-puzzle)">1</span>
+              <span style="width:34px;text-align:center;border-radius:4px;background:var(--sel);color:var(--sel-fg)">6</span><span style="width:34px;text-align:center;border-radius:4px;background:var(--sel);color:var(--sel-fg)">2</span>
+              <span style="width:34px;text-align:center;color:var(--text-puzzle)">7</span><span style="width:34px;text-align:center;color:var(--text-puzzle)">5</span><span style="width:34px;text-align:center;color:var(--text-puzzle)">9</span><span style="width:34px;text-align:center;color:var(--text-puzzle)">1</span><span style="width:34px;text-align:center;color:var(--text-puzzle)">4</span><span style="width:34px;text-align:center;color:var(--text-puzzle)">3</span><span style="width:34px;text-align:center;color:var(--text-puzzle)">2</span><span style="width:34px;text-align:center;color:var(--text-puzzle)">8</span><span style="width:34px;text-align:center;color:var(--text-puzzle)">6</span>
+            </div>
+            <div style="font-size:14px;color:var(--subtle);font-variant-numeric:tabular-nums">6 + 2 = 8. Keep going.</div>
+          </div>
+          <p style="margin:0;font-size:15px;line-height:1.55;color:var(--muted)">Digits replace letters, a running total replaces spelling. Harder levels add minus signs.</p>
+          <div style="display:flex;gap:20px;flex-wrap:wrap;font-size:13px;font-weight:600;color:var(--subtle)"><span>Build: Small</span><span>Status: Next</span></div>
+        </article>
+
+      </div>
+    </section>
+
+    <section style="display:flex;flex-direction:column;gap:32px">
+      <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px;border-top:2px solid var(--fg);padding-top:16px;flex-wrap:wrap">
+        <div style="display:flex;flex-direction:column;gap:8px"><h2 style="margin:0;font-size:clamp(32px,4vw,48px);font-weight:800;letter-spacing:-0.04em;line-height:1">New boards</h2><span style="font-size:15px;color:var(--muted)">Different input, same shell around it.</span></div>
+        <span style="font-size:14px;font-weight:600;color:var(--subtle)">03</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:20px">
+
+        <article style="border:1px solid var(--line);border-radius:12px;padding:clamp(20px,3vw,28px);display:flex;flex-direction:column;gap:20px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><span style="font-size:32px;font-weight:800;letter-spacing:-0.04em">Unmask</span><span style="font-size:13px;font-weight:600;color:var(--subtle)">Hangman, without the gallows</span></div>
+          <div style="background:var(--surface);border-radius:8px;padding:24px;display:flex;flex-direction:column;gap:20px">
+            <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
+              <span style="font-size:13px;font-weight:600;color:var(--muted)">{{ unCat }}</span>
+              <div style="display:flex;gap:4px" aria-label="Misses left">
+                <sc-for list="{{ unLives }}" as="l" hint-placeholder-count="6"><span style="width:14px;height:4px;border-radius:2px;background:{{ l.bg }};transition:background-color .25s ease"></span></sc-for>
+              </div>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px;row-gap:12px">
+              <sc-for list="{{ unSlots }}" as="c" hint-placeholder-count="12"><span style="width:{{ c.w }};height:40px;display:flex;align-items:flex-end;justify-content:center;font-size:26px;font-weight:800;padding-bottom:4px;border-bottom:{{ c.bd }};color:{{ c.fg }};transition:color .25s ease">{{ c.ch }}</span></sc-for>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px">
+              <sc-for list="{{ unKeys }}" as="k" hint-placeholder-count="26"><button onClick="{{ k.press }}" disabled="{{ k.used }}" aria-label="{{ k.k }}" style="all:unset;width:32px;height:36px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;cursor:pointer;background:{{ k.bg }};color:{{ k.fg }};transition:background-color .2s ease,color .2s ease" style-hover="background:var(--surface-2)">{{ k.k }}</button></sc-for>
+            </div>
+            <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:center">
+              <span aria-live="polite" style="font-size:14px;color:var(--subtle)">{{ unMsg }}</span>
+              <button onClick="{{ unReset }}" style="all:unset;cursor:pointer;font-size:14px;font-weight:600;color:var(--muted);text-decoration:underline;text-underline-offset:4px;text-decoration-color:var(--line-3)" style-hover="color:var(--fg)">New phrase</button>
+            </div>
+          </div>
+          <p style="margin:0;font-size:15px;line-height:1.55;color:var(--muted)">Guess letters to reveal a phrase. The twist: the topic starts hidden and only shows after your second miss.</p>
+          <div style="display:flex;gap:20px;flex-wrap:wrap;font-size:13px;font-weight:600;color:var(--subtle)"><span>Board: Slots + keys</span><span>Build: Small</span><span>Status: Next</span></div>
+        </article>
+
+        <article style="border:1px solid var(--line);border-radius:12px;padding:clamp(20px,3vw,28px);display:flex;flex-direction:column;gap:20px">
+          <div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px"><span style="font-size:32px;font-weight:800;letter-spacing:-0.04em">Trace</span><span style="font-size:13px;font-weight:600;color:var(--subtle)">Shapes buried in a grid</span></div>
+          <div style="background:var(--surface);border-radius:8px;padding:24px;display:flex;flex-direction:column;gap:16px">
+            <div style="font-size:13px;font-weight:600;color:var(--muted)">Find an L, a T and a square. Shapes can touch.</div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;max-width:320px">
+              <sc-for list="{{ traceCells }}" as="c" hint-placeholder-count="35"><span style="aspect-ratio:1;border-radius:3px;background:{{ c.bg }};border:1px solid {{ c.bd }}"></span></sc-for>
+            </div>
+            <div style="display:flex;gap:8px;font-size:13px;font-weight:700"><span style="padding:2px 6px;border-radius:4px;background:var(--accent);color:var(--on-accent)">L</span><span style="padding:2px 6px;border-radius:4px;border:1px solid var(--line-3)">T</span><span style="padding:2px 6px;border-radius:4px;border:1px solid var(--line-3)">SQUARE</span></div>
+          </div>
+          <p style="margin:0;font-size:15px;line-height:1.55;color:var(--muted)">Drag across cells to outline a shape. Decoy cells make near misses. Any rotation counts.</p>
+          <div style="display:flex;gap:20px;flex-wrap:wrap;font-size:13px;font-weight:600;color:var(--subtle)"><span>Board: Grid</span><span>Build: Medium</span><span>Status: Later</span></div>
+        </article>
+
+      </div>
+    </section>
+
+    <section style="display:flex;flex-wrap:wrap;gap:clamp(32px,5vw,72px);border-top:2px solid var(--fg);padding-top:16px">
+      <div style="flex:1 1 260px;display:flex;flex-direction:column;gap:8px"><h2 style="margin:0;font-size:clamp(32px,4vw,48px);font-weight:800;letter-spacing:-0.04em;line-height:1">Every new game</h2><span style="font-size:15px;color:var(--muted)">The test before we build one.</span></div>
+      <ol style="flex:2 1 460px;margin:0;padding:0;list-style:none;display:flex;flex-direction:column">
+        <li style="display:flex;gap:20px;padding:18px 0;border-bottom:1px solid var(--line);font-size:clamp(18px,2vw,22px);font-weight:600;letter-spacing:-0.015em;line-height:1.35"><span style="width:28px;flex:none;font-size:14px;font-weight:700;color:var(--subtle);padding-top:4px">01</span><span>Something is hidden and you find it.</span></li>
+        <li style="display:flex;gap:20px;padding:18px 0;border-bottom:1px solid var(--line);font-size:clamp(18px,2vw,22px);font-weight:600;letter-spacing:-0.015em;line-height:1.35"><span style="width:28px;flex:none;font-size:14px;font-weight:700;color:var(--subtle);padding-top:4px">02</span><span>Rules fit in one line.</span></li>
+        <li style="display:flex;gap:20px;padding:18px 0;border-bottom:1px solid var(--line);font-size:clamp(18px,2vw,22px);font-weight:600;letter-spacing:-0.015em;line-height:1.35"><span style="width:28px;flex:none;font-size:14px;font-weight:700;color:var(--subtle);padding-top:4px">03</span><span>It uses the shared clock, progress, hints, results and share card.</span></li>
+        <li style="display:flex;gap:20px;padding:18px 0;border-bottom:1px solid var(--line);font-size:clamp(18px,2vw,22px);font-weight:600;letter-spacing:-0.015em;line-height:1.35"><span style="width:28px;flex:none;font-size:14px;font-weight:700;color:var(--subtle);padding-top:4px">04</span><span>It works on any topic, or it is not a Fignda game.</span></li>
+      </ol>
+    </section>
+
+    <footer style="display:flex;gap:20px;flex-wrap:wrap;font-size:13px;color:var(--subtle);border-top:1px solid var(--header-line);padding-top:24px">
+      <a href="Fignda Landing.dc.html" style="color:var(--subtle)" style-hover="color:var(--fg)">Landing</a>
+      <a href="Fignda.dc.html" style="color:var(--subtle)" style-hover="color:var(--fg)">Product</a>
+      <a href="Fignda Game Logic.dc.html" style="color:var(--subtle)" style-hover="color:var(--fg)">Game logic</a>
+      <a href="Fignda Brand System.dc.html" style="color:var(--subtle)" style-hover="color:var(--fg)">Brand</a>
+    </footer>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const BURY = ['ROME', 'GOLD', 'ATOM'];
+const BURY_EX = 'Bro, merely a tomb is left. Big old ruins.';
+const PHRASES = [
+  { p: 'THE MILKY WAY', c: 'Space' },
+  { p: 'SHARP EYES', c: 'Fignda' },
+  { p: 'OFFSIDE RULE', c: 'Football' },
+  { p: 'BLOOD PRESSURE', c: 'Health' },
+  { p: 'NEURAL NETWORK', c: 'AI' }
+];
+const TRACE = [
+  'a','a','.','.','x','x','x',
+  'a','.','.','x','.','x','.',
+  'a','.','x','x','.','.','.',
+  '.','.','x','x','x','.','x',
+  'x','x','.','.','.','.','x'
+];
+class Component extends DCLogic {
+  state = { text: '', pi: 0, guessed: {} };
+  renderVals() {
+    const s = this.state;
+    const stream = s.text.toUpperCase().replace(/[^A-Z]/g, '');
+    const plain = ' ' + s.text.toUpperCase().replace(/[^A-Z]+/g, ' ') + ' ';
+    const res = BURY.map(w => ({ w, hit: stream.includes(w), plain: plain.includes(' ' + w + ' ') }));
+    const buried = res.filter(r => r.hit && !r.plain).length;
+    const obvious = res.some(r => r.plain);
+    const buryWords = res.map(r => {
+      const ok = r.hit && !r.plain;
+      return { label: r.w, note: r.plain ? 'too plain' : ok ? 'hidden' : '', bg: ok ? 'var(--accent)' : 'transparent', fg: ok ? 'var(--on-accent)' : r.plain ? 'var(--subtle)' : 'var(--fg)', bd: ok ? 'var(--accent)' : 'var(--line-3)' };
+    });
+    const buryMsg = !s.text.trim() ? 'Hide Rome, Gold and Atom in one sentence.' : obvious ? 'Written plainly. Split it across words.' : buried === 3 ? 'All three buried. Ready to share.' : buried ? buried + ' hidden. Keep going.' : 'Nothing hidden yet.';
+
+    const ph = PHRASES[s.pi];
+    const letters = new Set(ph.p.replace(/ /g, ''));
+    const misses = Object.keys(s.guessed).filter(k => !letters.has(k)).length;
+    const won = [...letters].every(l => s.guessed[l]);
+    const lost = misses >= 6;
+    const over = won || lost;
+    const unSlots = ph.p.split('').map(ch => ch === ' '
+      ? { ch: '', w: '14px', bd: 'none', fg: 'var(--fg)' }
+      : { ch: s.guessed[ch] || lost ? ch : '', w: '26px', bd: '2px solid var(--line-3)', fg: s.guessed[ch] ? 'var(--fg)' : 'var(--subtle)' });
+    const unKeys = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').map(k => {
+      const g = s.guessed[k], hit = g && letters.has(k);
+      return { k, used: !!g || over, bg: hit ? 'var(--accent)' : g ? 'transparent' : 'var(--bg)', fg: hit ? 'var(--on-accent)' : g ? 'var(--line-4)' : 'var(--fg)',
+        press: () => this.setState(st => ({ guessed: Object.assign({}, st.guessed, { [k]: true }) })) };
+    });
+    const unLives = Array.from({ length: 6 }, (_, i) => ({ bg: i < 6 - misses ? 'var(--fg)' : 'var(--line-3)' }));
+    const unMsg = won ? 'Unmasked. ' + (6 - misses) + ' misses to spare.' : lost ? 'It got away this time.' : misses ? (6 - misses) + ' misses left' : 'Pick a letter';
+    const traceCells = TRACE.map(c => ({ bg: c === 'a' ? 'var(--accent)' : c === 'x' ? 'var(--line-3)' : 'transparent', bd: c === '.' ? 'var(--line)' : 'transparent' }));
+
+    return {
+      buryWords, buryCount: buried, buryText: s.text, buryMsg,
+      onBury: e => this.setState({ text: e.target.value }),
+      buryExampleLabel: s.text === BURY_EX ? 'Clear' : 'Show an example',
+      buryExample: () => this.setState({ text: s.text === BURY_EX ? '' : BURY_EX }),
+      unCat: misses >= 2 || over ? 'Topic: ' + ph.c : 'Topic: hidden until 2 misses',
+      unSlots, unKeys, unLives, unMsg,
+      unReset: () => this.setState(st => ({ pi: (st.pi + 1) % PHRASES.length, guessed: {} })),
+      traceCells
+    };
+  }
+}
+</script>
+</body>
+</html>

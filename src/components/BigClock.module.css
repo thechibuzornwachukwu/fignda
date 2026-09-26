@@ -1,0 +1,27 @@
+.clock {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-1h);
+}
+.label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--subtle);
+  white-space: nowrap;
+}
+.digits {
+  composes: clock from '../styles/type.module.css';
+  color: var(--subtle);
+  transition: color var(--dur-clock) var(--ease-std);
+}
+.digits[data-done] {
+  color: var(--fg);
+}
+
+@media (max-width: 760px) {
+  .clock {
+    display: none;
+  }
+}

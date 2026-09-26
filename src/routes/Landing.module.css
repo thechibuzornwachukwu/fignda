@@ -1,0 +1,97 @@
+.wrap {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+}
+.columns {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--column-gap);
+}
+.sub {
+  color: var(--subtle);
+}
+
+.hero {
+  padding-top: var(--landing-hero-top);
+}
+/* Prototype hero runs larger than the SPEC display step. */
+.display {
+  composes: display from '../styles/type.module.css';
+  margin: 0;
+  font-size: clamp(52px, 11vw, 150px);
+}
+
+.how {
+  padding: var(--landing-demo-top) 0 var(--section-gap);
+  scroll-margin-top: var(--space-6);
+}
+
+.band {
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  padding: var(--landing-band-pad) 0;
+}
+.side {
+  flex: 1 1 260px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.h2 {
+  composes: h2 from '../styles/type.module.css';
+  margin: 0;
+}
+.steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.steps li {
+  display: flex;
+  gap: var(--space-3);
+}
+.stepNo {
+  color: var(--subtle);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.games {
+  flex: 3 1 520px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--line-2);
+}
+
+.about {
+  padding: var(--section-gap) 0;
+}
+.aboutLabel {
+  flex: 1 1 260px;
+  margin: 0;
+  padding-top: var(--space-2h);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--subtle);
+}
+.aboutText {
+  flex: 3 1 520px;
+  min-width: 0;
+  margin: 0;
+  font-size: clamp(22px, 2.6vw, 32px);
+  line-height: 1.4;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+  text-wrap: pretty;
+}

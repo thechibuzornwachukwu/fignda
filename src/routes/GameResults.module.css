@@ -1,0 +1,74 @@
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding-bottom: var(--results-pad);
+}
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.title {
+  composes: resultTitle from '../styles/type.module.css';
+  margin: 0;
+}
+.line {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--stat-gap);
+}
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--stat-gap);
+  margin: 0;
+  flex: 1 1 auto;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.statLabel {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--subtle);
+}
+.statValue {
+  composes: stat from '../styles/type.module.css';
+  margin: 0;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2h);
+}
+.guest {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-6);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--line);
+}
+.guestText {
+  flex: 1 1 260px;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.signin {
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--line-3);
+}

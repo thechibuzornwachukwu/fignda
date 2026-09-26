@@ -1,0 +1,116 @@
+.screen {
+  padding: var(--screen-top-game) 0 var(--space-30);
+  display: flex;
+  flex-direction: column;
+  gap: var(--screen-gap-game);
+}
+.top {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  font-size: 14px;
+  font-weight: 600;
+}
+.back {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1h);
+  white-space: nowrap;
+  color: var(--muted);
+  transition: color var(--dur-base) var(--ease-std);
+}
+.back:hover {
+  color: var(--fg);
+}
+.level {
+  color: var(--subtle);
+  white-space: nowrap;
+}
+.titleRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--space-8);
+}
+.title {
+  composes: gameTitle from '../styles/type.module.css';
+  margin: 0;
+  flex: 1;
+  min-width: 0;
+  text-wrap: balance;
+}
+
+.progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-6);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--subtle);
+  font-variant-numeric: tabular-nums;
+}
+.count {
+  font-size: 15px;
+  color: var(--fg);
+}
+
+.columns {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--column-gap);
+}
+.main {
+  flex: 3 1 520px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+.instruction {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-6);
+  font-size: 14px;
+}
+.msg {
+  font-weight: 500;
+  color: var(--subtle);
+}
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .screen {
+    padding-bottom: calc(var(--mobile-bar-space) + env(safe-area-inset-bottom));
+  }
+  .actions {
+    display: none;
+  }
+}

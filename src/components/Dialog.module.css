@@ -1,0 +1,17 @@
+.dialog {
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--fg);
+  max-width: min(820px, calc(100% - var(--space-6)));
+  width: 100%;
+}
+.dialog::backdrop {
+  background: var(--scrim);
+}
+.panel {
+  background: var(--bg);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-sheet);
+  padding: var(--sheet-pad);
+}

@@ -1,0 +1,34 @@
+.demo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: var(--column-gap);
+}
+.main {
+  flex: 3 1 520px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.instruction {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  font-size: 14px;
+}
+.msg {
+  font-weight: 500;
+  color: var(--subtle);
+}
+.cta {
+  margin-top: var(--space-5);
+  justify-content: space-between;
+}

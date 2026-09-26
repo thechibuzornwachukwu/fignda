@@ -1,0 +1,76 @@
+/* Fignda tokens. Single source. Components read var(--*) only; never hard-code hex. */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+
+:root, [data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0d0d0e;
+  --surface: #151517;
+  --surface-hover: #18181b;
+  --surface-2: #1c1c1f;
+  --line: #232327;
+  --line-2: #2a2a2f;
+  --line-3: #34343a;
+  --line-4: #3a3a40;
+  --header-line: #1f1f22;
+  --fg: #ededee;
+  --fg-strong: #ffffff;
+  --text-puzzle: #cfcfd4;
+  --muted: #a1a1a8;
+  --subtle: #7d7d85;
+  --track: #26262a;
+  --sel: #3a3a40;
+  --sel-fg: #ffffff;
+  --miss: #2c2c31;
+  --accent: #d4f04c;
+  --accent-hover: #e0f56e;
+  --on-accent: #0d0d0e;
+  --accent-ink: #d4f04c;
+  --bar: #d4f04c;
+  --cell: #d4f04c;
+  --scrim: rgba(0,0,0,0.62);
+}
+[data-theme="light"] {
+  color-scheme: light;
+  --bg: #f6f6f7;
+  --surface: #ffffff;
+  --surface-hover: #f0f0f2;
+  --surface-2: #ececef;
+  --line: #e3e3e7;
+  --line-2: #d6d6db;
+  --line-3: #c4c4ca;
+  --line-4: #a8a8b0;
+  --header-line: #e3e3e7;
+  --fg: #111113;
+  --fg-strong: #000000;
+  --text-puzzle: #2a2a2e;
+  --muted: #55555c;
+  --subtle: #6a6a72;
+  --track: #e3e3e7;
+  --sel: #111113;
+  --sel-fg: #ffffff;
+  --miss: #dcdce1;
+  --accent: #d4f04c;
+  --accent-hover: #e0f56e;
+  --on-accent: #0d0d0e;
+  --accent-ink: #5a6b00;
+  --bar: #111113;
+  --cell: #111113;
+}
+:root {
+  --font: 'Manrope', system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --radius-xs: 3px; --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px; --radius-xl: 12px; --radius-sheet: 14px;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px; --space-12: 48px; --space-14: 56px; --space-18: 72px; --space-20: 80px; --space-24: 96px; --space-30: 120px;
+  --page-max: 1200px; --gutter: 24px;
+  --dur-fast: 150ms; --dur-base: 200ms; --dur-slow: 250ms; --dur-slower: 400ms;
+  --ease-std: ease; --ease-out: cubic-bezier(.2,.8,.2,1);
+  --icon-stroke: 1.75;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --dur-fast: 0ms; --dur-base: 0ms; --dur-slow: 0ms; --dur-slower: 0ms; }
+}
+html, body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); -webkit-font-smoothing: antialiased; }
+*, *::before, *::after { box-sizing: border-box; }
+a { color: var(--fg); text-decoration: none; } a:hover { color: var(--fg-strong); }
+:focus-visible { outline: 2px solid var(--accent-ink); outline-offset: 2px; }
+::selection { background: var(--line-3); }

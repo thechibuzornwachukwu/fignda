@@ -1,0 +1,24 @@
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  font-size: 14px;
+  font-weight: 600;
+}
+.tab {
+  padding: 0 0 var(--space-1);
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: var(--subtle);
+  font: inherit;
+  cursor: pointer;
+  transition: color var(--dur-base) var(--ease-std), border-color var(--dur-base) var(--ease-std);
+}
+.tab:hover {
+  color: var(--fg);
+}
+.tab[aria-pressed='true'] {
+  color: var(--fg);
+  border-bottom-color: var(--fg);
+}

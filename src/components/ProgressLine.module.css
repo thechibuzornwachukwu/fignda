@@ -1,0 +1,10 @@
+.track {
+  height: 2px;
+  background: var(--line);
+  overflow: hidden;
+}
+.fill {
+  height: 100%;
+  background: var(--bar);
+  transition: width var(--dur-slower) var(--ease-std);
+}

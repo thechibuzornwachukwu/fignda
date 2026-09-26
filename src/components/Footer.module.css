@@ -1,0 +1,33 @@
+.footer {
+  border-top: 1px solid var(--line);
+}
+.inner {
+  max-width: var(--page-max);
+  margin: 0 auto;
+  padding: var(--space-10) var(--gutter);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--space-6);
+  flex-wrap: wrap;
+}
+.cta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  transition: color var(--dur-base) var(--ease-std);
+}
+.cta:hover {
+  color: var(--fg-strong);
+}
+.meta {
+  display: flex;
+  gap: var(--space-5);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--subtle);
+}

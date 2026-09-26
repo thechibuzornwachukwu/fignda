@@ -1,0 +1,92 @@
+.aside {
+  flex: 1 1 260px;
+  min-width: 0;
+  position: sticky;
+  top: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  border-top: 2px solid var(--fg);
+}
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-3h) 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.count {
+  font-variant-numeric: tabular-nums;
+}
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: min(62vh, 640px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.row {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2h) 0;
+  border-bottom: 1px solid var(--line);
+  background: var(--bg);
+}
+.index {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--subtle);
+  font-variant-numeric: tabular-nums;
+}
+.chip {
+  min-width: 0;
+  padding: var(--space-0h) var(--space-1h);
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+  transition: background-color var(--dur-slow) var(--ease-std), color var(--dur-slow) var(--ease-std);
+}
+.chip[data-state='found'] {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.chip[data-state='missed'] {
+  background: var(--miss);
+  color: var(--fg);
+}
+.chip[data-state='hidden'] {
+  background: transparent;
+  color: var(--line-4);
+}
+.more {
+  padding: var(--space-3h) 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--subtle);
+}
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 760px) {
+  .aside {
+    position: static;
+  }
+  .list {
+    max-height: none;
+  }
+}

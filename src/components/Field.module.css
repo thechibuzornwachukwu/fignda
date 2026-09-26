@@ -1,0 +1,54 @@
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--subtle);
+}
+.box {
+  display: flex;
+  align-items: center;
+  height: 52px;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  transition: border-color var(--dur-base) var(--ease-std);
+}
+.box:focus-within {
+  border-color: var(--line-4);
+}
+.boxCode {
+  composes: box;
+  height: 64px;
+}
+.prefix {
+  font-size: 16px;
+  color: var(--subtle);
+}
+.input {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: 16px;
+  font-weight: 500;
+  outline: none;
+}
+.boxCode .input {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: 0.4em;
+  font-variant-numeric: tabular-nums;
+}
+.box:has(.input:focus-visible) {
+  outline: 2px solid var(--accent-ink);
+  outline-offset: 2px;
+}

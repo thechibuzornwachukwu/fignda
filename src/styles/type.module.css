@@ -1,0 +1,72 @@
+/* Type scale from SPEC section 2. Use with `composes: display from '../styles/type.module.css';` */
+
+.display {
+  font-size: clamp(52px, 10vw, 136px);
+  font-weight: 800;
+  letter-spacing: -0.055em;
+  line-height: 0.92;
+}
+.gameTitle {
+  font-size: clamp(40px, 7vw, 96px);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 0.95;
+}
+.clock {
+  font-size: clamp(48px, 7vw, 96px);
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  line-height: 0.85;
+  font-variant-numeric: tabular-nums;
+}
+.resultTitle {
+  font-size: clamp(32px, 5vw, 64px);
+  font-weight: 800;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+.stat {
+  font-size: clamp(36px, 5vw, 56px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.h2 {
+  font-size: clamp(32px, 4vw, 48px);
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+.row {
+  font-size: clamp(24px, 3.2vw, 40px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+}
+.puzzle {
+  font-size: clamp(20px, 2.3vw, 27px);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.7;
+}
+/* tokens.json type.puzzleHero: the landing demo. */
+.puzzleHero {
+  font-size: clamp(24px, 3.4vw, 40px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.55;
+}
+.body {
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.55;
+}
+.small {
+  font-size: 14px;
+  font-weight: 600;
+}
+.label {
+  font-size: 13px;
+  font-weight: 600;
+}
