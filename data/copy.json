@@ -94,5 +94,13 @@
   ],
   "reveal": [
     "{w} was hiding there."
+  ],
+  "teamFound": [
+    "{name} found {w}.",
+    "{w}, spotted by {name}.",
+    "{name} got {w}."
+  ],
+  "teamJoined": [
+    "{name} is in. Find them together."
   ]
 }

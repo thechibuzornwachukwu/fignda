@@ -13,3 +13,9 @@
 .loading {
   min-height: 60vh;
 }
+/* Room for the phone tab bar so the last row is never under it. */
+@media (max-width: 640px) {
+  .tabbed {
+    padding-bottom: calc(var(--tabbar-h) + var(--space-6) + env(safe-area-inset-bottom));
+  }
+}

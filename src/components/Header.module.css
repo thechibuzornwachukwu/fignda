@@ -40,6 +40,9 @@
 .active {
   color: var(--fg);
 }
+.acct {
+  display: contents;
+}
 .spacer {
   flex: 1;
 }
@@ -87,6 +90,11 @@
     width: 100%;
     flex-wrap: wrap;
     gap: var(--space-2) var(--space-5);
+  }
+  /* In the app on phones, the tab bar carries the links and the account. */
+  .app,
+  .appOnly {
+    display: none;
   }
   /* On a puzzle the board comes first. The screen has its own All games link. */
   .focus {

@@ -68,6 +68,7 @@
   --dur-fast: 150ms; --dur-base: 200ms; --dur-slow: 250ms; --dur-slower: 400ms;
   --ease-std: ease; --ease-out: cubic-bezier(.2,.8,.2,1);
   --icon-stroke: 1.75;
+  --tabbar-h: 56px; /* Phone tab bar row, above the safe area */
   --z-header: 15; /* Above the mobile bar, below the selection bubble */
 
   /* Added in M3. Values from SPEC sections 3, 4 and 8 and the prototype. */

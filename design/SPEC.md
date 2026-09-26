@@ -81,6 +81,10 @@ Streak resets on wrong pick and on hint. `onFound` picks: first find, last one l
 **Finish:** "I'm done" or last find. Missed answers shade. Result title picked once from `titlePerfect|titleGood|titleLow|titleZero`, then fixed.
 **Sound:** Web Audio, synthesized, no files (`src/lib/sound.ts`). A soft triangle tick per new letter in a selection, pitch up a semitone per letter from 660 Hz (cap 2 octaves), ticks under 25ms apart merge. A find plays C6 then G6. Misses are silent. On by default, `fignda-sound`=`off` mutes. Audio wakes on the first gesture only. Mute: speaker button on the puzzle screen (aria-pressed) and a Sounds switch in Settings. Safari ambient session: the iPhone silent switch mutes it.
 
+**Together:** `?vs=handle` shows that player's best verified score (plays_public) above the board, then won / lost / level at the end; dailies show the score only until you finish. `?room=CODE` (6 chars, no 0 O 1 I L) joins a live room: Play together button on non-daily puzzles, room bar (who is in, Invite, Leave, Not ranked). Spans broadcast and re-checked with the engine; `teamFound` / `teamJoined` copy pools. Room plays are never submitted.
+
+**Tab bar (phones, app pages):** Games, Leaders, Players, You (or Sign in); icons 20 over 12/700 labels; fixed bottom with safe area. Hidden on landing and puzzles.
+
 ## 6. Screens (prototype file in brackets)
 
 **Landing `/`** [Fignda Landing]

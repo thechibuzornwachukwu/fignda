@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
+import { isPuzzle } from '../lib/routes';
 import { Button } from './Button';
 import { Logo } from './Logo';
 import { ThemeToggle } from './ThemeToggle';
@@ -76,9 +77,6 @@ function useTucked(ref: RefObject<HTMLElement | null>, pathname: string) {
   return tucked;
 }
 
-/** Puzzle screens: the board comes first, so the nav steps aside on phones. */
-const isPuzzle = (p: string) => /^\/(play\/[^/]+|d\/\d+|p\/[^/]+)\/?$/.test(p);
-
 /**
  * Two headers, by context. The landing page is a pitch: its own sections and one way in.
  * Everywhere else is the app: where to play, who is winning, who is playing.
@@ -105,7 +103,7 @@ export function Header() {
             </Link>
           </nav>
         ) : (
-          <nav className={[styles.nav, isPuzzle(pathname) && styles.focus].filter(Boolean).join(' ')} aria-label="Main">
+          <nav className={[styles.nav, styles.app, isPuzzle(pathname) && styles.focus].filter(Boolean).join(' ')} aria-label="Main">
             <NavLink to="/play" className={navCls}>
               Games
             </NavLink>
@@ -119,7 +117,9 @@ export function Header() {
         )}
         <div className={styles.spacer} />
         <div className={styles.end}>
-          <AccountLink />
+          <span className={landing ? styles.acct : `${styles.acct} ${styles.appOnly}`}>
+            <AccountLink />
+          </span>
           <ThemeToggle />
           {landing && (
             <Button to="/play" size="sm">

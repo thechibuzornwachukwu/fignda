@@ -24,6 +24,8 @@ export type ShareGame = {
   daily?: { n: number; date: string };
   /** Public path for the link, e.g. /d/269. */
   path: string;
+  /** Signed in: the sharer's handle. The link becomes a head-to-head challenge (`?vs=`). */
+  vs?: string;
 };
 
 export type ShareResult = {
@@ -93,6 +95,8 @@ export function ShareSheet({ open, onClose, game, result, player }: Props) {
 
   const found = result.answers.filter((a) => a.found).length;
   const total = result.answers.length;
+  // The card prints the plain path; the link carries the challenge.
+  const link = shareUrl(game.vs ? `${game.path}?vs=${encodeURIComponent(game.vs)}` : game.path);
   const text =
     kind === 'result'
       ? `Fignda · ${game.title}\n${daily ? `${found} found` : `${found}/${total}`} · ${formatTime(result.secs)} · ${result.score.toLocaleString('en-US')}\nCan you beat it?`
@@ -108,7 +112,7 @@ export function ShareSheet({ open, onClose, game, result, player }: Props) {
           cardToFile(exportRefs.current[i]!, c.w, c.h, `fignda-${slug}-${kind}-${ratio.replace(':', 'x')}${cards.length > 1 ? `-${i + 1}` : ''}.png`),
         ),
       );
-      const r = await deliver(files, text, shareUrl(game.path));
+      const r = await deliver(files, text, link);
       setNote(r === 'shared' ? 'Shared.' : r === 'saved' ? (files.length > 1 ? `Saved ${files.length} images.` : 'Saved.') : '');
     } catch {
       setNote('Could not make the image. Try Copy link.');
@@ -117,7 +121,7 @@ export function ShareSheet({ open, onClose, game, result, player }: Props) {
     }
   };
 
-  const copy = async () => setNote((await copyText(shareUrl(game.path))) ? 'Link copied.' : shareUrl(game.path));
+  const copy = async () => setNote((await copyText(link)) ? 'Link copied.' : link);
 
   const modeNote =
     mode === 'full'

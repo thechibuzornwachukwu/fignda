@@ -61,6 +61,18 @@ export async function fetchPublicPlays(handle: string, limit = 400): Promise<Pla
   return data as PlayRow[];
 }
 
+export type Challenger = { handle: string; score: number; found: number; secs: number };
+
+/** A challenger's best verified play on this puzzle or daily. Null when they have none or the handle is not valid. */
+export async function fetchChallenger(handle: string, game: { id: string } | { day: number }): Promise<Challenger | null> {
+  if (!/^[a-z0-9._]{2,20}$/.test(handle)) return null;
+  let q = (await client()).from('plays_public').select('handle, score, found, secs').eq('handle', handle);
+  q = 'day' in game ? q.eq('day_no', game.day) : q.eq('game_id', game.id).is('day_no', null);
+  const { data, error } = await q.order('score', { ascending: false }).limit(1);
+  if (error) return null;
+  return (data?.[0] as Challenger | undefined) ?? null;
+}
+
 /** All of the signed-in player's own plays, verified or not (RLS: own rows only). */
 export async function fetchOwnPlays(limit = 400): Promise<PlayRow[]> {
   const { data, error } = await (await client())

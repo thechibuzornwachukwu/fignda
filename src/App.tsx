@@ -2,6 +2,8 @@ import { lazy, Suspense, useEffect } from 'react';
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { Header } from './components/Header';
 import { Footer } from './components/Footer';
+import { TabBar } from './components/TabBar';
+import { hasTabBar } from './lib/routes';
 import { Landing } from './routes/Landing';
 import { prefersReducedMotion } from './lib/media';
 import styles from './App.module.css';
@@ -39,12 +41,13 @@ function Layout() {
   return (
     <>
       <Header />
-      <main className={pathname === '/' ? styles.bleed : styles.main}>
+      <main className={[pathname === '/' ? styles.bleed : styles.main, hasTabBar(pathname) && styles.tabbed].filter(Boolean).join(' ')}>
         <Suspense fallback={<div className={styles.loading} aria-busy="true" />}>
           <Outlet />
         </Suspense>
       </main>
       {pathname === '/' && <Footer />}
+      <TabBar />
     </>
   );
 }

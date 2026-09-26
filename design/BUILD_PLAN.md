@@ -105,4 +105,6 @@ Check: RLS: only you create or delete your own follows, anyone reads counts, no 
 - [x] Board sounds: rising tick per letter, chime on a find, mute on the puzzle and in Settings (`src/lib/sound.test.ts`, `e2e/sound.spec.ts`).
 - [x] Google sign in hidden until the provider is configured (`VITE_GOOGLE_AUTH=1`).
 - Needs a real device check: tap first then last on an iPhone (emulators pass).
-- Proposed, not built: bottom tab bar with icons on phones; head-to-head challenge links; live co-op room.
+- [x] Phone tab bar (Games, Leaders, Players, You) on app pages under 640px; header links on desktop (`e2e/together.spec.ts`).
+- [x] Head to head: shared links carry `?vs=handle`; the friend sees your best verified score, then the verdict when they finish.
+- [x] Play together: live rooms (`?room=CODE`, Supabase Realtime broadcast + presence, free). Finds re-checked by the engine on every device, late joiners synced, forged finds ignored, not ranked, no rooms on dailies.

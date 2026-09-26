@@ -1,6 +1,6 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
-import { Link, Navigate, useParams } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { ArrowLeft, UsersRound } from 'lucide-react';
 import { BigClock, Elapsed } from '../components/BigClock';
 import { Icon } from '../components/Icon';
 import { MobileBar } from '../components/MobileBar';
@@ -19,6 +19,10 @@ import { ShareSheet, type ShareGame } from '../components/ShareSheet';
 import { SoundToggle } from '../components/SoundToggle';
 import { dailyDate } from '../games/daily';
 import { sharePath } from '../lib/share';
+import * as copy from '../copy';
+import { joinRoom, newRoomCode, ROOM_RE, type Peer, type Room } from '../lib/room';
+import { Challenge } from './Challenge';
+import { RoomBar } from './RoomBar';
 import { GameResults } from './GameResults';
 import styles from './Game.module.css';
 
@@ -74,19 +78,63 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
   const mod = registry[def.type];
   const puzzle = useMemo(() => mod.build(def), [mod, def]);
   const listRef = useRef<WordListHandle>(null);
-  const g = useGameSession({ mod, puzzle, dailyN, beforeHit: (k) => listRef.current?.capture(k) });
+  const auth = useAuth();
+  const [params] = useSearchParams();
+  const navigate = useNavigate();
+  const roomCode = dailyN == null ? (params.get('room') ?? '') : '';
+  const inRoom = auth.enabled && ROOM_RE.test(roomCode);
+  const roomRef = useRef<Room | null>(null);
+  const [peers, setPeers] = useState<Peer[]>([]);
+  const g = useGameSession({
+    mod,
+    puzzle,
+    dailyN,
+    beforeHit: (k) => listRef.current?.capture(k),
+    onHit: (a, b) => roomRef.current?.sendFind(a, b),
+  });
   const { s, foundSet, total, answers, daily, finished } = g;
   const coarse = useCoarsePointer();
   const instructionId = useId();
-  const auth = useAuth();
   const signedIn = !!auth.profile;
   const [sharing, setSharing] = useState(false);
+  const vs = params.get('vs');
+  const challenge = auth.enabled && vs && vs !== auth.profile?.handle ? vs : null;
+
+  // Play together: join the room in the link. Finds go out as spans and come back through the engine.
+  const gRef = useRef(g);
+  useLayoutEffect(() => {
+    gRef.current = g;
+  });
+  const myName = auth.profile?.name;
+  useEffect(() => {
+    if (!inRoom) return;
+    let alive = true;
+    const me: Peer = { id: crypto.randomUUID(), name: myName ?? 'A friend' };
+    void joinRoom(roomCode, me, {
+      onFind: (a, b, from) => gRef.current.teamPick(a, b, from.name),
+      onPeers: (p) => alive && setPeers(p),
+      onJoin: (who) => {
+        gRef.current.say(copy.pick('teamJoined', { name: who.name }));
+        roomRef.current?.sendSync(gRef.current.s.found.map((f) => f.span));
+      },
+    }).then((r) => {
+      if (!alive) return r?.leave();
+      roomRef.current = r;
+    });
+    return () => {
+      alive = false;
+      roomRef.current?.leave();
+      roomRef.current = null;
+      setPeers([]);
+    };
+  }, [inRoom, roomCode, myName]);
 
   // Signed in: send the play log once per finished game. The Worker replays it and stores a verified score.
   // Today's daily only; if that fails for a reason other than "already played", keep it as an unverified merge.
   const sent = useRef<number | null>(null);
   useEffect(() => {
-    if (!finished || !signedIn || s.endAt == null || sent.current === s.startAt) return;
+    // Rooms are not ranked: finds by teammates are not yours to score.
+    if (!finished || !signedIn || inRoom || s.endAt == null || sent.current === s.startAt) return;
     sent.current = s.startAt;
     const isToday = daily && dailyN === dayNo();
     if (daily && !isToday) {
@@ -100,7 +148,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
     }).then((r) => {
       if (daily && !r.ok && r.status !== 409) mergeGuestDailies().catch(() => {});
     });
-  }, [finished, signedIn, s.endAt, s.startAt, s.log, daily, dailyN, def.id]);
+  }, [finished, signedIn, inRoom, s.endAt, s.startAt, s.log, daily, dailyN, def.id]);
 
   const foundCount = s.found.length;
   const count = daily && !finished ? `${foundCount} found` : `${foundCount} / ${total}`;
@@ -148,6 +196,12 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
             <span className={styles.level}>
               {def.category} · {puzzle.difficulty}
             </span>
+            {auth.enabled && !daily && !inRoom && !finished && (
+              <button type="button" className={styles.together} onClick={() => navigate(`?room=${newRoomCode()}`)}>
+                <Icon icon={UsersRound} size={16} />
+                Play together
+              </button>
+            )}
             <SoundToggle />
           </span>
         </div>
@@ -156,6 +210,16 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
           <BigClock startAt={s.startAt} endAt={s.endAt} />
         </div>
       </div>
+
+      {inRoom && <RoomBar code={roomCode} peers={peers} path={sharePath({ id: def.id, code: def.id.startsWith('c-') ? def.id.slice(2).toUpperCase() : undefined })} />}
+
+      {challenge && !inRoom && (
+        <Challenge
+          vs={challenge}
+          game={daily ? { day: dailyN! } : { id: def.id }}
+          mine={finished ? scoreOf(s, total, daily, secondsOf(s, s.endAt!)) : null}
+        />
+      )}
 
       <div className={styles.progress}>
         <div className={styles.stats}>
@@ -226,7 +290,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
         <ShareSheet
           open={sharing}
           onClose={() => setSharing(false)}
-          game={shareGame(def, puzzle.difficulty, dailyN)}
+          game={{ ...shareGame(def, puzzle.difficulty, dailyN), vs: auth.profile?.handle }}
           result={{
             answers: puzzle.answers.map((a) => {
               const f = s.found.find((x) => x.key === a.key);

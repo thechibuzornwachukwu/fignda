@@ -1,7 +1,7 @@
 // Play state for one game. Transitions are pure and take the copy picker as a parameter,
 // so feedback lines are picked exactly once per action (never inside a React updater).
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import * as copyDefault from '../copy';
 import { score } from '../engine/score';
 import { durationMs, scrollToTop } from '../lib/media';
@@ -95,6 +95,22 @@ export function applyPick(s: Session, ev: Evaluation, { now, total, daily, copy 
   }
 }
 
+/** A teammate's find in a room. Re-checked here with the engine, never trusted. No streak, no log. */
+export function applyTeamFind(s: Session, ev: Evaluation, o: { now: number; total: number; copy: Copy; name: string }): Session {
+  if (isFinished(s) || ev.kind !== 'hit') return s;
+  const found = [...s.found, { key: ev.key, label: ev.label, span: [ev.span[0], ev.span[1]] as [number, number] }];
+  const done = found.length === o.total;
+  const hintCovered = s.hintLi >= ev.span[0] && s.hintLi <= ev.span[1];
+  return {
+    ...s,
+    found,
+    msg: o.copy.pick('teamFound', { name: o.name, w: ev.label }),
+    hintLi: hintCovered || done ? -1 : s.hintLi,
+    endAt: done ? o.now : null,
+    resultTitle: done ? o.copy.resultTitle(found.length, o.total) : s.resultTitle,
+  };
+}
+
 export function applyHint(s: Session, target: { key: string; at: number } | null, copy: Copy): Session {
   if (isFinished(s) || !target) return s;
   return {
@@ -141,10 +157,16 @@ type Options<P> = {
   dailyN?: number;
   /** Called just before a find is committed (WordList FLIP capture). */
   beforeHit?: (key: string) => void;
+  /** Called after your own find, with its span (rooms send it to teammates). */
+  onHit?: (a: number, b: number) => void;
   copy?: Copy;
 };
 
-export function useGameSession<P>({ mod, puzzle, dailyN, beforeHit, copy = copyDefault }: Options<P>) {
+export function useGameSession<P>({ mod, puzzle, dailyN, beforeHit, onHit, copy = copyDefault }: Options<P>) {
+  const onHitRef = useRef(onHit);
+  useLayoutEffect(() => {
+    onHitRef.current = onHit;
+  });
   const daily = dailyN != null;
   const answers = mod.answers(puzzle);
   const total = answers.length;
@@ -189,8 +211,25 @@ export function useGameSession<P>({ mod, puzzle, dailyN, beforeHit, copy = copyD
       events: [...l.events, { a, b, t: now - cur.startAt }],
     }));
     commit(next);
+    if (ev.kind === 'hit') onHitRef.current?.(a, b);
     if (isFinished(next)) window.setTimeout(scrollToTop, durationMs('--dur-slower'));
   };
+
+  /** A teammate's span. Only a real, new hit lands. */
+  const teamPick = (a: number, b: number, name: string) => {
+    const cur = ref.current;
+    if (isFinished(cur)) return;
+    const found = new Set(cur.found.map((f) => f.key));
+    const ev = mod.check(puzzle, a, b, found);
+    if (ev.kind !== 'hit') return;
+    beforeHit?.(ev.key);
+    chime();
+    const next = applyTeamFind(cur, ev, { now: Date.now(), total, copy, name });
+    commit(next);
+    if (isFinished(next)) window.setTimeout(scrollToTop, durationMs('--dur-slower'));
+  };
+
+  const say = (msg: string) => commit({ ...ref.current, msg });
 
   const hint = () => {
     const cur = ref.current;
@@ -215,5 +254,5 @@ export function useGameSession<P>({ mod, puzzle, dailyN, beforeHit, copy = copyD
     window.scrollTo(0, 0);
   };
 
-  return { s, foundSet, total, answers, daily, finished: isFinished(s), pick, hint, finish, tapStart, dragStart, replay };
+  return { s, foundSet, total, answers, daily, finished: isFinished(s), pick, teamPick, say, hint, finish, tapStart, dragStart, replay };
 }
