@@ -15,10 +15,12 @@ type Props = {
   canReplay: boolean;
   onReplay: () => void;
   onShare: () => void;
+  /** Where this game's board lives, if it has one. */
+  boardPath?: string;
   guest: boolean;
 };
 
-export function GameResults({ title, line, score, found, total, secs, canReplay, onReplay, onShare, guest }: Props) {
+export function GameResults({ title, line, score, found, total, secs, canReplay, onReplay, onShare, boardPath, guest }: Props) {
   const { pathname } = useLocation();
   return (
     <section className={styles.results} aria-labelledby="results-title">
@@ -26,7 +28,17 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
         <h2 id="results-title" className={styles.title}>
           {title}
         </h2>
-        <p className={styles.line}>{line}</p>
+        <p className={styles.line}>
+          {line}
+          {boardPath && (
+            <>
+              {' '}
+              <Link to={boardPath} className={styles.board}>
+                See the leaderboard
+              </Link>
+            </>
+          )}
+        </p>
       </div>
       <div className={styles.row}>
         <dl className={styles.stats}>

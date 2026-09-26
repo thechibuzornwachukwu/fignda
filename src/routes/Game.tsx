@@ -172,6 +172,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
           canReplay={!daily}
           onReplay={g.replay}
           onShare={() => setSharing(true)}
+          boardPath={auth.enabled ? (daily ? `/leaderboard?day=${dailyN}` : getGameDef(def.id) ? `/leaderboard/${def.id}` : undefined) : undefined}
           guest={!signedIn}
         />
       )}

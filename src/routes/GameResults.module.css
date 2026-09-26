@@ -72,3 +72,10 @@
   text-underline-offset: 4px;
   text-decoration-color: var(--line-3);
 }
+.board {
+  color: var(--fg);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--line-3);
+  white-space: nowrap;
+}

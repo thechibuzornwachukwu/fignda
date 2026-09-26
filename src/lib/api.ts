@@ -72,6 +72,29 @@ export async function fetchOwnPlays(limit = 400): Promise<PlayRow[]> {
   return data as PlayRow[];
 }
 
+export type BoardRow = { rank: number; handle: string; score: number; secs: number; found: number; total: number | null };
+export type MyRank = BoardRow & { players: number };
+
+/** Top verified scores for one daily. Today's totals are masked by the database. */
+export async function fetchDailyBoard(day: number, limit = 20): Promise<BoardRow[]> {
+  const { data, error } = await (await client()).rpc('daily_board', { p_day: day, p_limit: limit });
+  if (error) throw error;
+  return data as BoardRow[];
+}
+
+export async function fetchDailyRank(day: number, handle: string): Promise<MyRank | null> {
+  const { data, error } = await (await client()).rpc('daily_rank', { p_day: day, p_handle: handle });
+  if (error) throw error;
+  return (data as MyRank[])[0] ?? null;
+}
+
+/** Best verified play per player on one puzzle. */
+export async function fetchGameBoard(gameId: string, limit = 20): Promise<BoardRow[]> {
+  const { data, error } = await (await client()).rpc('game_board', { p_game: gameId, p_limit: limit });
+  if (error) throw error;
+  return data as BoardRow[];
+}
+
 /** Day numbers of the user's stored dailies. */
 export async function fetchDailyDays(): Promise<number[]> {
   const { data, error } = await (await client()).from('plays').select('day_no').not('day_no', 'is', null);
