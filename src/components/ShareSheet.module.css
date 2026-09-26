@@ -1,0 +1,101 @@
+.sheet {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+}
+.previewCol {
+  flex: 1 1 280px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3h);
+}
+.pager {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  font-size: 14px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.pageBtn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line-3);
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+  transition: background-color var(--dur-base) var(--ease-std);
+}
+.pageBtn:hover {
+  background: var(--surface-2);
+}
+.controls {
+  flex: 1 1 280px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.title {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.close {
+  min-height: 44px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color var(--dur-base) var(--ease-std);
+}
+.close:hover {
+  color: var(--fg);
+}
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.note {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--subtle);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.send {
+  flex: 1 1 140px;
+}
+.status {
+  min-height: 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.export {
+  position: fixed;
+  left: -100000px;
+  top: 0;
+  pointer-events: none;
+}

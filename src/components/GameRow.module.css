@@ -57,3 +57,7 @@
     padding-left: 0;
   }
 }
+/* The landing list sits on --surface, where --subtle drops under 4.5:1. */
+.rowMd .meta {
+  color: var(--muted);
+}

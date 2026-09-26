@@ -151,6 +151,11 @@ export type PuzzleCardInput = CardInput & {
   /** Show my finds. */
   show?: boolean;
   noun?: string;
+  /**
+   * Multiplies the char budgets. The share card lowers it when text still overflows at the minimum
+   * font size, so the text moves onto more pages instead of shrinking below 38px. Default 1.
+   */
+  budgetScale?: number;
 };
 
 /** Pages of whole sentences. Excerpt: the one window with the most target answers. Full: every sentence, paged. */
@@ -165,8 +170,11 @@ export function puzzleCards(o: PuzzleCardInput) {
   const show = !!o.show;
   const target = (a: SpanAnswer) => (show ? !!a.found : true);
 
+  const k = Math.min(1, Math.max(0.3, o.budgetScale ?? 1));
+  const first = Math.floor(r.first * k);
+  const next = Math.floor(r.next * k);
   const ranges: Range[] =
-    o.mode === 'full' ? paginate(sents, r.first, r.next) : [excerptRange(sents, answers, r.first, target)!];
+    o.mode === 'full' ? paginate(sents, first, next) : [excerptRange(sents, answers, first, target)!];
   const pages = ranges.length;
   const [r0s, r0e] = ranges[0]!;
   const whole = o.mode === 'full' || (r0s === 0 && r0e === sents.length - 1);

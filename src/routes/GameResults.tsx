@@ -1,5 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 import { Button } from '../components/Button';
+import { Icon } from '../components/Icon';
 import { formatTime } from '../engine/time';
 import styles from './GameResults.module.css';
 
@@ -12,10 +14,11 @@ type Props = {
   secs: number;
   canReplay: boolean;
   onReplay: () => void;
+  onShare: () => void;
   guest: boolean;
 };
 
-export function GameResults({ title, line, score, found, total, secs, canReplay, onReplay, guest }: Props) {
+export function GameResults({ title, line, score, found, total, secs, canReplay, onReplay, onShare, guest }: Props) {
   const { pathname } = useLocation();
   return (
     <section className={styles.results} aria-labelledby="results-title">
@@ -51,7 +54,10 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
           <Button variant="secondary" to="/play">
             More games
           </Button>
-          {/* Share (accent) arrives with the share sheet in M7. */}
+          <Button variant="accent" onClick={onShare}>
+            Share
+            <Icon icon={ArrowRight} size={16} />
+          </Button>
         </div>
       </div>
       {guest && (

@@ -1,0 +1,47 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--subtle);
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.track {
+  display: flex;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  border-radius: var(--radius-seg);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.option {
+  flex: 1;
+  min-width: 0;
+  height: 36px;
+  border: none;
+  border-radius: var(--radius-seg-option);
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color var(--dur-base) var(--ease-std), color var(--dur-base) var(--ease-std);
+}
+.option:hover {
+  color: var(--fg);
+}
+.option[aria-checked='true'] {
+  background: var(--fg);
+  color: var(--bg);
+}

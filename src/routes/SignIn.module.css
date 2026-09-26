@@ -83,3 +83,9 @@
 .guest:hover {
   color: var(--fg);
 }
+.inline {
+  color: var(--fg);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--line-3);
+}

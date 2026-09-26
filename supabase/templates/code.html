@@ -1,4 +1,53 @@
-<h2>Your Fignda code</h2>
-<p>Enter this code to sign in. It works for 10 minutes.</p>
-<p style="font-size:32px;font-weight:800;letter-spacing:0.3em">{{ .Token }}</p>
-<p>If you did not ask for it, ignore this email.</p>
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light only" />
+    <meta name="supported-color-schemes" content="light" />
+    <title>Your Fignda code</title>
+  </head>
+  <!-- Fignda sign-in code. Light theme tokens (src/styles/tokens.css). Tables and inline styles for email clients. -->
+  <body style="margin:0;padding:0;background:#f6f6f7;">
+    <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#f6f6f7;">Your Fignda code is {{ .Token }}. It works for 10 minutes.</div>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#f6f6f7;">
+      <tr>
+        <td align="center" style="padding:40px 16px;">
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:480px;">
+            <tr>
+              <td style="padding:0 0 24px;">
+                <img src="https://fignda.pages.dev/brand/email-lockup.png" width="112" height="30" alt="fignda" style="display:block;border:0;outline:none;" />
+              </td>
+            </tr>
+            <tr>
+              <td style="background:#ffffff;border:1px solid #e3e3e7;border-radius:14px;padding:32px;">
+                <h1 style="margin:0 0 12px;font-family:Manrope,'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:40px;line-height:0.95;font-weight:800;letter-spacing:-0.05em;color:#111113;">
+                  Your code.
+                </h1>
+                <p style="margin:0 0 28px;font-family:Manrope,'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:1.55;font-weight:500;color:#55555c;">
+                  Enter it on Fignda to sign in. It works for 10 minutes.
+                </p>
+                <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+                  <tr>
+                    <td align="center" style="background:#0d0d0e;border-radius:8px;padding:22px 12px 22px 23px;font-family:Manrope,'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:36px;line-height:1;font-weight:800;letter-spacing:0.3em;color:#d4f04c;font-variant-numeric:tabular-nums;">
+                      {{ .Token }}
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin:28px 0 0;padding-top:20px;border-top:1px solid #e3e3e7;font-family:Manrope,'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:1.55;font-weight:500;color:#6a6a72;">
+                  Did not ask for this? Ignore this email. Nobody can sign in without the code.
+                </p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:24px 4px 0;font-family:Manrope,'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;line-height:1.5;font-weight:600;color:#6a6a72;">
+                Find it. Figure it out.
+                <a href="{{ .SiteURL }}" style="color:#6a6a72;text-decoration:underline;">fignda.pages.dev</a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

@@ -80,7 +80,11 @@ export function SignIn() {
     if (!EMAIL_RE.test(addr)) return setErr('That email looks off. Check it and try again.');
     setBusy(true);
     setErr('');
-    const { error } = await supabase!.auth.signInWithOtp({ email: addr, options: { shouldCreateUser: true } });
+    // The email carries a code; until custom SMTP is set up it may carry a link instead, which lands back here.
+    const { error } = await supabase!.auth.signInWithOtp({
+      email: addr,
+      options: { shouldCreateUser: true, emailRedirectTo: `${window.location.origin}/signin?next=${encodeURIComponent(next)}` },
+    });
     setBusy(false);
     if (error) return setErr(authError(error) || 'We could not send a code. Try again in a moment.');
     setCode('');
@@ -193,7 +197,8 @@ export function SignIn() {
         <div className={styles.head}>
           <h1 className={styles.title}>Check your inbox.</h1>
           <p className={styles.lead}>
-            We sent a 6 digit code to <strong className={styles.strong}>{email.trim()}</strong>.
+            We sent an email to <strong className={styles.strong}>{email.trim()}</strong>. Open the link in it on this
+            device, or type the 6 digit code if it has one.
           </p>
         </div>
         <div className={styles.fields}>
@@ -239,7 +244,13 @@ export function SignIn() {
           <br />
           <span className={styles.sub}>Keep your streak.</span>
         </h1>
-        <p className={styles.lead}>Save scores, keep daily streaks and put your name on shared cards.</p>
+        <p className={styles.lead}>
+          Save scores, keep daily streaks and put your name on shared cards. See what we keep in{' '}
+          <Link to="/privacy" className={styles.inline}>
+            Privacy
+          </Link>
+          .
+        </p>
       </div>
       <form className={styles.fields} onSubmit={sendCode} noValidate>
         <Button variant="secondary" onClick={google} className={styles.tall}>

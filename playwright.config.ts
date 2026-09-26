@@ -19,6 +19,7 @@ export default defineConfig({
     command: `npm run build && npx vite preview --port ${PORT} --strictPort`,
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
+    env: { VITE_E2E: '1' },
     timeout: 120_000,
   },
 });

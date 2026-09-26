@@ -12,6 +12,9 @@ export function Footer() {
           <Icon icon={ArrowRight} size="em" />
         </Link>
         <div className={styles.meta}>
+          <Link to="/privacy" className={styles.metaLink}>
+            Privacy
+          </Link>
           <span>© 2026 Fignda</span>
         </div>
       </div>

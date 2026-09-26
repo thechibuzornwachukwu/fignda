@@ -1,0 +1,56 @@
+.page {
+  max-width: 680px;
+  padding: var(--screen-top) 0 var(--space-20);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.title {
+  composes: display from '../styles/type.module.css';
+  margin: 0;
+  color: var(--fg);
+}
+.lead {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.5;
+  color: var(--fg);
+}
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.section p {
+  margin: 0;
+}
+.section a {
+  color: var(--fg);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--line-3);
+}
+.h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--fg);
+}
+.list {
+  margin: 0;
+  padding-left: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1h);
+}
+.updated {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--subtle);
+}

@@ -77,13 +77,18 @@ export function WordList({ title, count, rows, moreHiding, footer, ref }: Props)
         <span>{title}</span>
         <span className={styles.count}>{count}</span>
       </div>
-      <ol ref={listRef} className={styles.list}>
+      {/* Focusable so keyboard users can scroll a long list. */}
+      <ol ref={listRef} className={styles.list} tabIndex={0} aria-label={`${title}, ${count}`}>
         {rows.map((r, i) => (
           <li key={r.key} data-row={r.key} className={styles.row}>
             <span className={styles.index}>{r.lead ?? String(i + 1).padStart(2, '0')}</span>
             {r.state === 'hidden' ? (
               <span className={styles.chip} data-state="hidden">
-                <span aria-hidden="true">{Array(r.length).fill('•').join(' ')}</span>
+                <span className={styles.dots} aria-hidden="true">
+                  {Array.from({ length: r.length }, (_, k) => (
+                    <span key={k} className={styles.dot} />
+                  ))}
+                </span>
                 <span className={styles.sr}>{r.length} letters, not found yet</span>
               </span>
             ) : (

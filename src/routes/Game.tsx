@@ -15,6 +15,9 @@ import { scoreOf, secondsOf, useGameSession } from '../games/session';
 import { fetchCustomGame, mergeGuestDailies, submitPlay } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { useCoarsePointer } from '../lib/media';
+import { ShareSheet, type ShareGame } from '../components/ShareSheet';
+import { dailyDate } from '../games/daily';
+import { sharePath } from '../lib/share';
 import { GameResults } from './GameResults';
 import styles from './Game.module.css';
 
@@ -76,6 +79,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
   const instructionId = useId();
   const auth = useAuth();
   const signedIn = !!auth.profile;
+  const [sharing, setSharing] = useState(false);
 
   // Signed in: send the play log once per finished game. The Worker replays it and stores a verified score.
   // Today's daily only; if that fails for a reason other than "already played", keep it as an unverified merge.
@@ -167,6 +171,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
           secs={secondsOf(s, s.endAt!)}
           canReplay={!daily}
           onReplay={g.replay}
+          onShare={() => setSharing(true)}
           guest={!signedIn}
         />
       )}
@@ -212,6 +217,24 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
         />
       </div>
 
+      {finished && (
+        <ShareSheet
+          open={sharing}
+          onClose={() => setSharing(false)}
+          game={shareGame(def, puzzle.difficulty, dailyN)}
+          result={{
+            answers: puzzle.answers.map((a) => {
+              const f = s.found.find((x) => x.key === a.key);
+              return { key: a.key, span: f?.span ?? a.spans[0]!, found: !!f, hinted: s.hinted.includes(a.key) };
+            }),
+            secs: secondsOf(s, s.endAt!),
+            score: scoreOf(s, total, daily, secondsOf(s, s.endAt!)),
+            hints: s.hints,
+          }}
+          player={{ name: auth.profile?.name, handle: auth.profile?.handle }}
+        />
+      )}
+
       {!finished && (
         <MobileBar
           count={count}
@@ -224,4 +247,19 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
       )}
     </div>
   );
+}
+
+/** What the share sheet needs to know about this game. */
+function shareGame(def: GameDef, difficulty: string, dailyN?: number): ShareGame {
+  const code = def.id.startsWith('c-') ? def.id.slice(2).toUpperCase() : undefined;
+  return {
+    id: def.id,
+    title: def.title,
+    noun: def.noun,
+    category: def.category,
+    difficulty,
+    text: def.text,
+    daily: dailyN ? { n: dailyN, date: dailyDate(dailyN) } : undefined,
+    path: sharePath({ id: def.id, daily: dailyN, code }),
+  };
 }

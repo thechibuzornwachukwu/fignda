@@ -31,3 +31,10 @@
   font-weight: 600;
   color: var(--subtle);
 }
+.metaLink {
+  color: var(--subtle);
+  transition: color var(--dur-base) var(--ease-std);
+}
+.metaLink:hover {
+  color: var(--fg);
+}

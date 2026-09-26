@@ -67,6 +67,22 @@
   background: transparent;
   color: var(--line-4);
 }
+/* Unfound: one dot per letter, drawn as shapes (not text) so they stay decorative. */
+.dots {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1h);
+  height: 1.2em;
+}
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--line-4);
+}
+.list:focus-visible {
+  outline-offset: var(--space-1);
+}
 .more {
   padding: var(--space-3h) 0;
   font-size: 14px;
