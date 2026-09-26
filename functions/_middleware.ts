@@ -1,73 +1,11 @@
-// Link previews. Crawlers do not run JavaScript, so the right title, description and image are
-// written into the HTML on the way out. Data comes from data/games.json only, never from the URL
-// beyond a known id or day number. Custom puzzles (/p/:code) get the default preview.
+// SEO, GEO and link previews for every HTML response. Crawlers and link previewers mostly do not run
+// JavaScript, so each page's title, description, preview image, canonical link, structured data and
+// a readable text version are written into the HTML on the way out. Data comes from data/games.json
+// and, for profiles, the public profile summary. Never from free text in the URL.
 
-import gamesFile from '../data/games.json';
-import { dailyGameId, dayNo } from '../src/engine/daily';
-import { buildHiddenWords } from '../src/engine/hiddenWords';
+import { esc, pageFor, profilePage, type Page, type ProfileSummary } from '../src/seo/pages';
 
-type Game = { id: string; title: string; noun: string; text: string; dict: string[] };
-const { games, dailyPool } = gamesFile as unknown as { games: Game[]; dailyPool: string[] };
-
-type Meta = { title: string; description: string; image: string };
-
-const DEFAULT: Meta = {
-  title: 'Fignda · Find it. Figure it out.',
-  description: 'Find words hidden across letters, spaces and punctuation. A new puzzle every day.',
-  image: '/og/default.png',
-};
-
-export function metaFor(path: string, today = dayNo()): Meta {
-  const play = path.match(/^\/play\/([a-z0-9-]{2,40})\/?$/);
-  if (play) {
-    const g = games.find((x) => x.id === play[1]);
-    if (!g) return DEFAULT;
-    const n = buildHiddenWords(g).answers.length;
-    return {
-      title: `${g.title} · Fignda`,
-      description: `Can you find ${n} ${g.noun}? Words hide across spaces and punctuation.`,
-      image: `/og/${g.id}.png`,
-    };
-  }
-  const daily = path.match(/^\/d\/(\d{1,6})\/?$/);
-  if (daily) {
-    const n = Number(daily[1]);
-    // Future days stay secret: no title or image that would reveal tomorrow's game.
-    if (n < 1 || n > today) return DEFAULT;
-    const g = games.find((x) => x.id === dailyGameId(n, dailyPool));
-    if (!g) return DEFAULT;
-    return {
-      title: `Daily #${n} · Fignda`,
-      description: `How many ${g.noun} can you find? One try. A new puzzle at midnight.`,
-      image: `/og/daily-${g.id}.png`,
-    };
-  }
-  return DEFAULT;
-}
-
-export type ProfileSummary = {
-  handle: string;
-  name: string;
-  current_streak: number;
-  dailies: number;
-  perfect: number;
-  followers: number;
-};
-
-/** Preview for /u/:handle. Built from the database summary only. */
-export function profileMeta(p: ProfileSummary): Meta {
-  const bits = [
-    `${p.current_streak} day streak`,
-    `${p.dailies} ${p.dailies === 1 ? 'daily' : 'dailies'}`,
-    `${p.perfect} perfect`,
-    `${p.followers} ${p.followers === 1 ? 'follower' : 'followers'}`,
-  ];
-  return {
-    title: `${p.name} (@${p.handle}) · Fignda`,
-    description: `${bits.join(' · ')}. Find hidden words with @${p.handle}.`,
-    image: DEFAULT.image,
-  };
-}
+type Env = { SUPABASE_URL?: string; SUPABASE_ANON_KEY?: string };
 
 async function profileSummary(handle: string, env: Env): Promise<ProfileSummary | null> {
   if (!env.SUPABASE_URL || !env.SUPABASE_ANON_KEY || !/^[a-z0-9._]{2,20}$/.test(handle)) return null;
@@ -79,19 +17,49 @@ async function profileSummary(handle: string, env: Env): Promise<ProfileSummary 
       signal: AbortSignal.timeout(1500),
     });
     if (!r.ok) return null;
-    const rows = (await r.json()) as ProfileSummary[];
-    return rows[0] ?? null;
+    return ((await r.json()) as ProfileSummary[])[0] ?? null;
   } catch {
     return null;
   }
 }
 
-type Env = { SUPABASE_URL?: string; SUPABASE_ANON_KEY?: string };
+/** JSON inside <script type="application/ld+json">: escape so text can never close the tag. */
+const ldJson = (o: object) => JSON.stringify(o).replace(/</g, '\\u003c').replace(/>/g, '\\u003e').replace(/&/g, '\\u0026');
 
-const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+export function headTags(p: Page, origin: string): string {
+  const image = `${origin}${p.image}`;
+  const url = `${origin}${p.canonical}`;
+  const prop = (k: string, v: string) => `<meta property="${k}" content="${esc(v)}" />`;
+  const name = (k: string, v: string) => `<meta name="${k}" content="${esc(v)}" />`;
+  return [
+    `<link rel="canonical" href="${esc(url)}" />`,
+    p.noindex ? name('robots', 'noindex, follow') : '',
+    prop('og:type', 'website'),
+    prop('og:site_name', 'Fignda'),
+    prop('og:locale', 'en_GB'),
+    prop('og:title', p.title),
+    prop('og:description', p.description),
+    prop('og:url', url),
+    prop('og:image', image),
+    prop('og:image:width', '1200'),
+    prop('og:image:height', '630'),
+    prop('og:image:alt', p.imageAlt),
+    name('twitter:card', 'summary_large_image'),
+    name('twitter:title', p.title),
+    name('twitter:description', p.description),
+    name('twitter:image', image),
+    name('twitter:image:alt', p.imageAlt),
+    ...p.jsonLd.map((o) => `<script type="application/ld+json">${ldJson(o)}</script>`),
+  ].join('');
+}
 
 // Minimal types for the Pages runtime.
-type Element = { setInnerContent(s: string): void; setAttribute(k: string, v: string): void; append(s: string, o: { html: boolean }): void };
+type Element = {
+  setInnerContent(s: string): void;
+  setAttribute(k: string, v: string): void;
+  append(s: string, o: { html: boolean }): void;
+  prepend(s: string, o: { html: boolean }): void;
+};
 declare const HTMLRewriter: {
   new (): { on(sel: string, h: { element(e: Element): void }): InstanceType<typeof HTMLRewriter>; transform(r: Response): Response };
 };
@@ -103,32 +71,13 @@ export const onRequest = async (ctx: { request: Request; next: () => Promise<Res
   const url = new URL(ctx.request.url);
   const who = url.pathname.match(/^\/u\/([a-z0-9._]{2,20})\/?$/);
   const summary = who ? await profileSummary(who[1]!, ctx.env) : null;
-  const m = summary ? profileMeta(summary) : metaFor(url.pathname);
-  const image = `${url.origin}${m.image}`;
-  const tags = [
-    ['og:type', 'website'],
-    ['og:site_name', 'Fignda'],
-    ['og:title', m.title],
-    ['og:description', m.description],
-    ['og:url', `${url.origin}${url.pathname}`],
-    ['og:image', image],
-    ['og:image:width', '1200'],
-    ['og:image:height', '630'],
-  ]
-    .map(([p, c]) => `<meta property="${p}" content="${esc(c!)}" />`)
-    .concat(
-      [
-        ['twitter:card', 'summary_large_image'],
-        ['twitter:title', m.title],
-        ['twitter:description', m.description],
-        ['twitter:image', image],
-      ].map(([n, c]) => `<meta name="${n}" content="${esc(c!)}" />`),
-    )
-    .join('');
+  const page = summary ? profilePage(url.origin, summary) : pageFor(url.pathname, url.origin);
 
   return new HTMLRewriter()
-    .on('title', { element: (e) => e.setInnerContent(m.title) })
-    .on('meta[name="description"]', { element: (e) => e.setAttribute('content', m.description) })
-    .on('head', { element: (e) => e.append(tags, { html: true }) })
+    .on('title', { element: (e) => e.setInnerContent(page.title) })
+    .on('meta[name="description"]', { element: (e) => e.setAttribute('content', page.description) })
+    .on('head', { element: (e) => e.append(headTags(page, url.origin), { html: true }) })
+    // Readable text for crawlers and previewers that do not run JavaScript. People see the app.
+    .on('body', { element: (e) => e.prepend(`<noscript><main>${page.body}</main></noscript>`, { html: true }) })
     .transform(res);
 };

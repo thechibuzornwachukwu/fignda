@@ -30,10 +30,10 @@ async function dragWord(page: Page, S: string, word: string) {
   await page.mouse.up();
 }
 
-const cta = (page: Page) => page.getByRole('link', { name: 'Now find thirty' });
+const cta = (page: Page) => page.getByRole('link', { name: 'That was the warm up. Now find 26.' });
 const list = (page: Page) => page.getByRole('complementary', { name: 'Hidden above' });
 
-test('demo completes by drag and links to /play/bible', async ({ page }) => {
+test('demo completes by drag and links to the hard puzzle', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Find it\.\s*Figure it out\./);
   const S = await letters(page);
@@ -45,11 +45,11 @@ test('demo completes by drag and links to /play/bible', async ({ page }) => {
   }
 
   await expect(cta(page)).toBeVisible();
-  await expect(cta(page)).toHaveAttribute('href', '/play/bible');
+  await expect(cta(page)).toHaveAttribute('href', '/play/nigeria');
   await expect(page.getByRole('button', { name: 'Play again' })).toBeVisible();
   await cta(page).click();
-  await expect(page).toHaveURL(/\/play\/bible$/);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Find 30 books of the Bible');
+  await expect(page).toHaveURL(/\/play\/nigeria$/);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Find 26 Nigerian names');
 });
 
 test('hint cycles Give me a hint, Show it, Play again', async ({ page }) => {

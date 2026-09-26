@@ -16,11 +16,11 @@ const TEXT =
 
 /** Demo words in list order, each with the category it teases. */
 const WORDS = [
-  { word: 'Amos', lead: 'Bible' },
   { word: 'Atom', lead: 'Science' },
   { word: 'Data', lead: 'AI' },
   { word: 'Rome', lead: 'History' },
   { word: 'Gold', lead: 'General' },
+  { word: 'Amos', lead: 'Bible' },
 ] as const;
 
 const DEF: GameDef = {
@@ -116,8 +116,8 @@ export function LandingDemo() {
         rows={rows}
         footer={
           done && (
-            <Button variant="accent" to="/play/bible" className={styles.cta}>
-              Now find thirty
+            <Button variant="accent" to="/play/nigeria" className={styles.cta}>
+              That was the warm up. Now find 26.
               <Icon icon={ArrowRight} size={16} />
             </Button>
           )

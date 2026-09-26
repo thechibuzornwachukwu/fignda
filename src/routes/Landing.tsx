@@ -5,15 +5,15 @@ import styles from './Landing.module.css';
 
 /** Landing list: a friendly name per curated game. Counts and levels come from the engine. */
 const PICKS = [
-  ['bible', 'Books of the Bible'],
+  ['general', 'General knowledge'],
+  ['science', 'Science'],
+  ['football', 'Football'],
   ['nigeria', 'Nigerian names'],
   ['french', 'French names'],
-  ['football', 'Football'],
   ['health', 'Medicine and nursing'],
-  ['science', 'Science'],
   ['ai', 'AI'],
   ['history', 'History'],
-  ['general', 'General knowledge'],
+  ['bible', 'Books of the Bible'],
 ] as const;
 
 const STEPS = ['Choose your topic', 'Pick a game', 'Start finding'];

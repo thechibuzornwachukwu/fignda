@@ -1,14 +1,14 @@
 {
   "filters": [
     "All",
-    "Bible",
+    "General",
+    "Science",
     "Names",
     "Football",
     "Health",
-    "Science",
     "AI",
     "History",
-    "General"
+    "Bible"
   ],
   "dailyPool": [
     "bible",

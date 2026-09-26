@@ -1,5 +1,27 @@
+# Search engines and AI assistants are welcome to read and cite Fignda's public pages.
 User-agent: *
 Allow: /
 Disallow: /account
 Disallow: /settings
+Disallow: /signin
 Disallow: /api/
+
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Claude-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://fignda.pages.dev/sitemap.xml

@@ -25,7 +25,7 @@ export function OgCard({ input }: { input: OgInput }) {
             <span className={styles.sub}>Figure it out.</span>
           </div>
         </div>
-        <Foot left="Words hide across letters, spaces and punctuation." />
+        <Foot left="The words are in plain sight. You will miss them." />
       </div>
     );
   }
