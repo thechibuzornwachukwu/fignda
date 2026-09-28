@@ -51,3 +51,64 @@
 .status:empty {
   display: none;
 }
+.live {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1h);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.live::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--line-4);
+}
+/* Lime means it works: connected. */
+.live[data-status='live']::before {
+  background: var(--accent);
+}
+.players {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  font-size: 14px;
+  font-weight: 700;
+}
+.player {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1h);
+}
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+.player[data-away] .dot {
+  background: var(--line-4);
+}
+.player[data-away] {
+  color: var(--muted);
+}
+.name {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.state {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.rank {
+  min-width: 1.2em;
+  font-variant-numeric: tabular-nums;
+  color: var(--subtle);
+}

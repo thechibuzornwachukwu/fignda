@@ -87,7 +87,8 @@ test.describe('play together', () => {
     const url = host.url();
     const room = host.getByRole('region', { name: 'Playing together' });
     await expect(room).toContainText('Waiting for a friend');
-    await expect(room).toContainText('Not ranked');
+    await expect(room).toContainText('Not on the leaderboard');
+    await expect(room.locator('[data-status="live"]')).toHaveText('Live');
 
     const guest = await context.newPage();
     await guest.goto(url.replace(/^https?:\/\/[^/]+/, ''));
@@ -117,10 +118,87 @@ test.describe('play together', () => {
     await expect(host.locator('[data-li="0"]')).not.toHaveAttribute('data-state', 'found');
     await expect(host.getByRole('complementary').getByText(/1 \/ /)).toBeVisible();
 
+    // A later find reaches everyone, including the late joiner.
+    const m = await indexOf(host, 'mark');
+    await clickPair(host, m, m + 3);
+    await expect(late.locator(`[data-li="${m}"]`)).toHaveAttribute('data-state', 'found', { timeout: 12000 });
+
+    // Scoreboard: the guest found 1 word; host found 1 too (Mark), so both show 1 word.
+    const board = room.getByRole('list', { name: 'Room scoreboard' });
+    await expect(board.locator('li[data-you]')).toContainText('1 word');
+    await expect(board).toContainText('A friend');
+
+    // Away: the guest switches apps; the host sees it.
+    await guest.evaluate(() => {
+      Object.defineProperty(document, 'visibilityState', { value: 'hidden', configurable: true });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    await expect(board.locator('li[data-away]')).toHaveCount(1);
+    await guest.evaluate(() => {
+      Object.defineProperty(document, 'visibilityState', { value: 'visible', configurable: true });
+      document.dispatchEvent(new Event('visibilitychange'));
+    });
+    await expect(board.locator('li[data-away]')).toHaveCount(0);
+
     // Leave drops you out of the room.
     await guest.getByRole('link', { name: 'Leave' }).click();
     await expect(guest).toHaveURL(/\/play\/bible$/);
     await expect(room.locator('[data-peers="1"]')).toBeVisible();
+  });
+
+  test('four players finding at the same moment end with the same board and a fair scoreboard', async ({ context }) => {
+    const host = await context.newPage();
+    await host.goto('/play/bible');
+    await host.getByRole('button', { name: 'Play together' }).click();
+    await expect(host).toHaveURL(/room=/);
+    const path = host.url().replace(/^https?:\/\/[^/]+/, '');
+    const others = await Promise.all([0, 1, 2].map(() => context.newPage()));
+    await Promise.all(others.map((p) => p.goto(path)));
+    const all = [host, ...others];
+    for (const p of all) await expect(p.locator('[data-peers="3"]')).toBeVisible();
+
+    const S = await host.evaluate(() => Array.from(document.querySelectorAll('[data-li]'), (e) => e.textContent).join('').toLowerCase());
+    const at = (w: string) => S.indexOf(w);
+    const words = ['amost', 'mark', 'ruth', 'job'].map((w) => [at(w), at(w) + (w === 'amost' ? 3 : w.length - 1)] as const);
+    for (const [a] of words) expect(a).toBeGreaterThanOrEqual(0);
+    // Everyone fires at once: 4 different words, and 2 players race for the same one (Ruth).
+    await Promise.all([
+      clickPair(all[0]!, ...words[0]!),
+      clickPair(all[1]!, ...words[1]!),
+      clickPair(all[2]!, ...words[2]!),
+      (async () => {
+        await clickPair(all[3]!, ...words[2]!);
+        await clickPair(all[3]!, ...words[3]!);
+      })(),
+    ]);
+    // Every board converges on the same 4 finds, each once.
+    for (const p of all) {
+      for (const [a] of words) await expect(p.locator(`[data-li="${a}"]`)).toHaveAttribute('data-state', 'found');
+      await expect(p.getByRole('complementary')).toContainText('4 / 30');
+    }
+    const found = await Promise.all(all.map((p) => p.evaluate(() => Array.from(document.querySelectorAll('[data-state="found"]'), (e) => e.getAttribute('data-li')).join())));
+    expect(new Set(found).size).toBe(1);
+    // Scoreboards agree on who is on it, and nobody has more than they found.
+    for (const p of all) await expect(p.getByRole('list', { name: 'Room scoreboard' }).locator('li')).toHaveCount(4);
+  });
+
+  test('a signed up player shows by name, linked to their profile', async ({ context }) => {
+    const host = await context.newPage();
+    const handle = await newPlayer(host, 'Chidi');
+    await host.goto('/play/bible');
+    await host.getByRole('button', { name: 'Play together' }).click();
+    await expect(host).toHaveURL(/room=/);
+    const path = host.url().replace(/^https?:\/\/[^/]+/, '');
+    // Test rooms run over BroadcastChannel, which only reaches tabs of one browser, so the second player is
+    // Chidi in another tab: enough to prove the name and handle travel with each find.
+    const guest = await context.newPage();
+    await guest.goto(path);
+    const board = guest.getByRole('list', { name: 'Room scoreboard' });
+    await expect(board.getByRole('link', { name: 'Chidi' })).toHaveAttribute('href', `/u/${handle}`);
+    const S = await host.evaluate(() => Array.from(document.querySelectorAll('[data-li]'), (e) => e.textContent).join('').toLowerCase());
+    const i = S.indexOf('amost');
+    await clickPair(host, i, i + 3);
+    await expect(guest.getByRole('status').filter({ hasText: /Chidi (found|got) Amos|Amos, spotted by Chidi/ }).first()).toBeAttached();
   });
 
   test('dailies have no Play together', async ({ page }) => {

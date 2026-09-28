@@ -20,7 +20,7 @@ import { SoundToggle } from '../components/SoundToggle';
 import { dailyDate } from '../games/daily';
 import { sharePath } from '../lib/share';
 import * as copy from '../copy';
-import { joinRoom, newRoomCode, ROOM_RE, type Peer, type Room } from '../lib/room';
+import { joinRoom, newRoomCode, ROOM_RE, type Peer, type Room, type RoomStats, type RoomStatus } from '../lib/room';
 import { Challenge } from './Challenge';
 import { RoomBar } from './RoomBar';
 import { GameResults } from './GameResults';
@@ -85,6 +85,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
   const inRoom = auth.enabled && ROOM_RE.test(roomCode);
   const roomRef = useRef<Room | null>(null);
   const [peers, setPeers] = useState<Peer[]>([]);
+  const [roomStatus, setRoomStatus] = useState<RoomStatus>('connecting');
   const g = useGameSession({
     mod,
     puzzle,
@@ -100,34 +101,65 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
   const vs = params.get('vs');
   const challenge = auth.enabled && vs && vs !== auth.profile?.handle ? vs : null;
 
+  // Your line on the room scoreboard: your own finds (not teammates'), seconds per word, hints.
+  const myFinds = s.found.filter((f) => !f.by).length;
+  const pace = myFinds && s.lastFindAt ? Math.round((s.lastFindAt - s.startAt) / 1000 / myFinds) : 0;
+  const myStats = useMemo<RoomStats>(() => ({ finds: myFinds, hints: s.hints, pace }), [myFinds, s.hints, pace]);
+  const statsRef = useRef(myStats);
+  useEffect(() => {
+    statsRef.current = myStats;
+    roomRef.current?.setStats(myStats);
+  }, [myStats]);
+
   // Play together: join the room in the link. Finds go out as spans and come back through the engine.
   const gRef = useRef(g);
   useLayoutEffect(() => {
     gRef.current = g;
   });
   const myName = auth.profile?.name;
+  const myHandle = auth.profile?.handle;
   useEffect(() => {
     if (!inRoom) return;
     let alive = true;
-    const me: Peer = { id: crypto.randomUUID(), name: myName ?? 'A friend' };
+    const syncOut = () => {
+      const spans = gRef.current.s.found.map((f) => f.span);
+      if (spans.length) roomRef.current?.sendSync(spans);
+    };
+    const me: Peer = { id: crypto.randomUUID(), name: myName ?? 'A friend', handle: myHandle };
     void joinRoom(roomCode, me, {
       onFind: (a, b, from) => gRef.current.teamPick(a, b, from.name),
       onPeers: (p) => alive && setPeers(p),
       onJoin: (who) => {
         gRef.current.say(copy.pick('teamJoined', { name: who.name }));
-        roomRef.current?.sendSync(gRef.current.s.found.map((f) => f.span));
+        syncOut();
       },
+      onAsk: syncOut,
+      onStatus: (st) => alive && setRoomStatus(st),
     }).then((r) => {
       if (!alive) return r?.leave();
       roomRef.current = r;
+      r?.setStats(statsRef.current);
     });
+    // Phones drop the connection in the background (sharing the invite in WhatsApp does it). Coming back asks
+    // everyone for their finds, and every few seconds each player resends theirs, so boards always converge.
+    const back = () => {
+      const hidden = document.visibilityState === 'hidden';
+      roomRef.current?.setAway(hidden);
+      if (!hidden) roomRef.current?.ask();
+    };
+    document.addEventListener('visibilitychange', back);
+    window.addEventListener('online', back);
+    const resend = window.setInterval(syncOut, 8000);
     return () => {
       alive = false;
+      document.removeEventListener('visibilitychange', back);
+      window.removeEventListener('online', back);
+      window.clearInterval(resend);
       roomRef.current?.leave();
       roomRef.current = null;
       setPeers([]);
     };
-  }, [inRoom, roomCode, myName]);
+  }, [inRoom, roomCode, myName, myHandle]);
 
   // Signed in: send the play log once per finished game. The Worker replays it and stores a verified score.
   // Today's daily only; if that fails for a reason other than "already played", keep it as an unverified merge.
@@ -211,7 +243,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
         </div>
       </div>
 
-      {inRoom && <RoomBar code={roomCode} peers={peers} path={sharePath({ id: def.id, code: def.id.startsWith('c-') ? def.id.slice(2).toUpperCase() : undefined })} />}
+      {inRoom && <RoomBar code={roomCode} peers={peers} status={roomStatus} me={myStats} path={sharePath({ id: def.id, code: def.id.startsWith('c-') ? def.id.slice(2).toUpperCase() : undefined })} />}
 
       {challenge && !inRoom && (
         <Challenge

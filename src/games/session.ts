@@ -9,7 +9,8 @@ import { chime } from '../lib/sound';
 import { loadDaily, saveDaily } from './daily';
 import type { Evaluation, GameModule } from './registry';
 
-export type FoundEntry = { key: string; label: string; span: [number, number] };
+/** `by`: a teammate's name when the find came from a room. Your own finds have none. */
+export type FoundEntry = { key: string; label: string; span: [number, number]; by?: string };
 
 export type SavedSession = {
   /** In find order. */
@@ -98,7 +99,7 @@ export function applyPick(s: Session, ev: Evaluation, { now, total, daily, copy 
 /** A teammate's find in a room. Re-checked here with the engine, never trusted. No streak, no log. */
 export function applyTeamFind(s: Session, ev: Evaluation, o: { now: number; total: number; copy: Copy; name: string }): Session {
   if (isFinished(s) || ev.kind !== 'hit') return s;
-  const found = [...s.found, { key: ev.key, label: ev.label, span: [ev.span[0], ev.span[1]] as [number, number] }];
+  const found = [...s.found, { key: ev.key, label: ev.label, span: [ev.span[0], ev.span[1]] as [number, number], by: o.name }];
   const done = found.length === o.total;
   const hintCovered = s.hintLi >= ev.span[0] && s.hintLi <= ev.span[1];
   return {
