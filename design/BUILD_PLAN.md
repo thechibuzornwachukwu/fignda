@@ -3,15 +3,13 @@
 What is left. Everything built so far is recorded in git history and `SPEC.md`. A piece of work is done when its checks pass.
 
 Deploy: `npm run deploy:site`, `npm run deploy:api`. Database: `npx supabase db push`.
+Seed (after `npm run db:seed:gen`): `npx supabase db query --linked -f supabase/seed.sql`. `db push --include-seed` only records the file's hash, it does not run it.
 
-## To ship what is built (7 Oct 2026)
+## Live since 7 Oct 2026
 
-Built and passing locally, not yet live: room games on the Together board, holiday dailies, streak lines, reminders, friend streaks with invite links and nudges, room invites, points, the new player profile, "only 8% found", player-made puzzles, answers pages, 4 Naija packs.
+Room games on the Together board, holiday dailies, streak lines, friend streaks with invite links and nudges, room invites, points, the new player profile, "only 8% found", player-made puzzles, answers pages, 4 Naija packs.
 
-- [ ] `npx supabase db push` (6 new migrations, `20261007000100` to `000600`).
-- [ ] Load `supabase/seed.sql` on production: 4 new puzzles and the holiday days. Until this runs, the new packs open but their scores are not saved, and on a holiday the server would still hold the rotation puzzle, so that day's plays would not verify (first one: Halloween, 31 Oct).
-- [ ] `npm run deploy:api`, then `npm run deploy:site`.
-- [ ] Reminders stay off until a key pair exists: `npm run push:keys`, put the public key and `VAPID_SUBJECT` in `worker/wrangler.toml`, `npx wrangler secret put VAPID_PRIVATE_KEY --config worker/wrangler.toml`, deploy the API again. Then check one real push on a phone.
+- [ ] Reminders are built but off until a key pair exists: `npm run push:keys`, put the public key and `VAPID_SUBJECT` in `worker/wrangler.toml`, `npx wrangler secret put VAPID_PRIVATE_KEY --config worker/wrangler.toml`, `npm run deploy:api`. Then check one real push on a phone.
 
 ## Owner
 
