@@ -16,8 +16,8 @@ Deploy: `npm run deploy:site`, `npm run deploy:api`. Database: `npx supabase db 
 
 ## To build next
 
-
-- Rooms and room scores are not on the leaderboard.(WHYY?. Please fix this pronto)
+- [ ] Put room games on the leaderboard (owner: "fix this pronto"). Today they are left off because the leaderboard only ranks plays the server has replayed, and in a room a teammate's find would count as yours. Fix: each player sends their own play log from a room; the server replays it and counts only that player's own finds; a Together board per puzzle then ranks teams (words found together, then time) and shows each player's verified share. Checks: a forged or duplicated find never counts; a teammate's find is never credited to you; solo boards are unchanged; guests in a room are shown but not ranked.
+- [ ] Identify the best free model for any-topic puzzles (owner note). Test Google Gemini's free tier, Groq and OpenRouter's free models on the real bar: 10 topics each, every word hidden across word boundaries, checked by the engine. Pick by pass rate, then daily free limit.
 - [ ] Holiday dailies: on a holiday, the daily is a puzzle inspired by it (4 July: America; 1 October: Nigeria; 25 December: Christmas; 14 February: Valentine's; 31 October: Halloween).
   - Structure: one calendar file, `data/holidays.json`, listing each holiday as a date rule (fixed like `12-25`, or a dated list for moving ones like Easter and Eid), a name, and the puzzle to use. `src/engine/daily.ts` checks the calendar first and falls back to the normal rotation. The seed generator (`npm run db:seed:gen`) reads the same file, so the server's daily and its answers always match the client.
   - Phase 1, no AI: point each holiday at the closest existing puzzle (Christmas and Easter: Bible; 1 October: Nigerian names; and so on), and label the daily card and results with the holiday ("Independence Day daily").
