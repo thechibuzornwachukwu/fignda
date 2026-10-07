@@ -13,7 +13,7 @@ Values are tokens from `tokens/tokens.css`. Prototype wins on visuals. This file
 ```
 - Lockup: mark 30 + "fignda" 18/800, tracking -0.03em, gap 10.
 - App icon: mark 72% on `#0d0d0e`, radius 25%. Export 16, 32, 180, 512.
-- Icons used: ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Contrast, Lightbulb, Clock, Flag, Search, Check, X.
+- Icons used: ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Contrast, Lightbulb, Clock, Flag, Search, Check, X, Bell, Award.
 
 ## 2. Type
 
@@ -106,6 +106,10 @@ Streak resets on wrong pick and on hint. `onFound` picks: first find, last one l
 **Make a puzzle:** `/make`, signed in (linked under the games list). Title, What is hidden, Paragraph (60 to 900), Hidden words (4 to 20, 3 to 12 letters). Each word shows a check or a cross and why: Hidden, Not in your paragraph, In plain sight, Typed twice. Accent "Publish puzzle" opens `/p/CODE`. Below: Your puzzles (words, plays, liked it). Under the result of a player-made puzzle: "Made by @handle" and Good one / Not for me (one each, never your own).
 
 **Answers:** `/d/N/answers` for days that are over: the paragraph, every answer, "N% found it" from 5 players up, accent "Play today's daily". Linked from past days on the leaderboard and listed in the sitemap (last 60).
+
+**Notifications:** signed in, a bell in the header (36 square, radius 8, before the theme toggle; on phones too). New ones show a count on it (`--fg` on `--bg`, "9+" past 9), checked on each page and once a minute. `/notifications`: newest first, avatar (or an Award icon for a badge), one sentence, how long ago; new rows are full strength with a 2px `--fg` bar on the leading edge. Opening the page marks all read. Kinds: "NAME followed you." (their profile), "NAME wants a streak with you." and "Your streak with NAME has started." (friend streaks), "NAME has played today and nudged you." (today's daily), "NAME invited you to play TITLE together." (the room for an hour, then the puzzle), "New badge: LABEL." (your badges).
+
+**Badges:** earned once from verified plays: First game, Perfect daily, streaks of 7, 30, 50, 100, 365, points of 1,000, 5,000, 10,000, 25,000, 50,000, 100,000. Profile section Badges (`#badges`): earned ones as `--fg` pills; on your own page the next 3 as outlined pills.
 
 **Circles:** `/circles` (yours, start one: name 2 to 40 chars) and `/c/CODE` (invite page for non members; members see Today and 7 days tables, Play today, Invite, Leave; owner sees Remove on members still to play). Up to 50 members, 20 circles each. Linked from the leaderboard.
 

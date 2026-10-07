@@ -71,6 +71,41 @@
   text-overflow: ellipsis;
 }
 
+.bell {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line-2);
+  color: var(--fg);
+  transition: background-color var(--dur-base) var(--ease-std);
+}
+.bell:hover,
+.bell[aria-current='page'] {
+  background: var(--surface-2);
+}
+.count {
+  position: absolute;
+  top: calc(-1 * var(--space-1h));
+  right: calc(-1 * var(--space-1h));
+  min-width: 18px;
+  height: 18px;
+  padding: 0 var(--space-1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-pill);
+  background: var(--fg);
+  color: var(--bg);
+  font-size: 11px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
 /* One row on a phone: logo on the left; you, the theme and Play on the right.
    The landing page's section links are a scroll away, and the app's links live in the tab bar. */
 @media (max-width: 640px) {

@@ -26,6 +26,8 @@ Risks: leaked keys, faked scores, AI endpoint abuse, injected text in shared con
 | room_plays, room_finds | through `together_board()` only | Worker only |
 | push_subs | own rows | own rows; endpoint must be a known push service |
 | friend_streaks, streak_links, game_invites, puzzle_ratings | through functions only | through functions only |
+| notifications | own, through `my_notifications()` | database triggers only; a client can only mark its own read |
+| badges | all, through `badges_of()` | database trigger on verified plays only |
 
 - Email lives only in `auth.users`.
 - Handle: unique, 2 to 20, `[a-z0-9._]`, reserved list (admin, fignda, support, root, help).

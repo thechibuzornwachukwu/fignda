@@ -35,6 +35,7 @@ Room games on the Together board, holiday dailies, streak lines, friend streaks 
 ## Ideas parked
 
 - Seasonal avatar touches could switch on by date (a Santa hat row that appears in December), and a few special ones could be earned or sold. Everything that helps someone look like themselves stays free.
+- Notifications by push as well as in the app (a follow, a streak ask, a badge), once reminders are switched on. Each kind needs its own off switch first.
 - A home screen widget or app badge showing the run. Duolingo's biggest single lift after the streak itself.
 - Friend streak milestones (7, 30, 100 days together) with a card to share.
 

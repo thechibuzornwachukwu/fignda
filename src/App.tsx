@@ -23,6 +23,7 @@ const Players = lazy(() => import('./routes/Players').then((m) => ({ default: m.
 const Circles = lazy(() => import('./routes/Circles').then((m) => ({ default: m.Circles })));
 const Circle = lazy(() => import('./routes/Circles').then((m) => ({ default: m.Circle })));
 const Answers = lazy(() => import('./routes/Answers').then((m) => ({ default: m.Answers })));
+const Notifications = lazy(() => import('./routes/Notifications').then((m) => ({ default: m.Notifications })));
 const Make = lazy(() => import('./routes/Make').then((m) => ({ default: m.Make })));
 const StreakInvite = lazy(() => import('./routes/StreakInvite').then((m) => ({ default: m.StreakInvite })));
 const Privacy = lazy(() => import('./routes/Privacy').then((m) => ({ default: m.Privacy })));
@@ -78,6 +79,7 @@ export function App() {
         <Route path="c/:code" element={<Circle />} />
         <Route path="s/:code" element={<StreakInvite />} />
         <Route path="make" element={<Make />} />
+        <Route path="notifications" element={<Notifications />} />
         <Route path="privacy" element={<Privacy />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

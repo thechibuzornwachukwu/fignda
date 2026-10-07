@@ -139,3 +139,48 @@ test('puzzle board switches between Solo and Together', async ({ page }) => {
   await expect(page.getByText(/Guests are not ranked\./)).toBeVisible();
   await audit(page, 'together board');
 });
+
+test('notifications: a follow rings the bell, the list explains it, opening it clears the count', async ({ page, browser }) => {
+  const me = await newPlayer(page, 'Zainab');
+  await expect(page.locator('header').getByRole('link', { name: 'Notifications', exact: true })).toBeVisible();
+  await page.goto('/notifications');
+  await expect(page.getByText('Nothing yet.')).toBeVisible();
+  await audit(page, 'notifications empty');
+
+  // Someone follows Zainab.
+  const ctx = await browser.newContext();
+  const other = await ctx.newPage();
+  await newPlayer(other, 'Emeka');
+  await other.goto(`/u/${me}`);
+  await other.getByRole('button', { name: 'Follow' }).click();
+  await expect(other.getByRole('button', { name: 'Following' })).toBeVisible();
+  await ctx.close();
+
+  await page.goto('/play');
+  const bell = page.locator('header').getByRole('link', { name: 'Notifications, 1 new' });
+  await expect(bell).toBeVisible();
+  await bell.click();
+  const row = page.getByRole('listitem').filter({ hasText: 'Emeka followed you.' });
+  await expect(row).toBeVisible();
+  await expect(row.getByRole('link')).toHaveAttribute('href', /^\/u\/emeka_/);
+  await audit(page, 'notifications');
+  // Read now: the count is gone, here and on the next page.
+  await expect(page.locator('header').getByRole('link', { name: 'Notifications', exact: true })).toBeVisible();
+  await page.goto('/play');
+  await expect(page.locator('header').getByRole('link', { name: 'Notifications', exact: true })).toBeVisible();
+});
+
+test.describe('phone', () => {
+  test.use({ hasTouch: true, isMobile: true, viewport: { width: 375, height: 740 } });
+
+  test('the header stays one row with the bell, signed in', async ({ page }) => {
+    await newPlayer(page, 'Tolu');
+    for (const path of ['/', '/play', '/notifications']) {
+      await page.goto(path);
+      await expect(page.locator('header').getByRole('link', { name: 'Notifications', exact: true })).toBeVisible();
+      const box = (await page.locator('header').first().boundingBox())!;
+      expect(box.height, path).toBeLessThanOrEqual(66);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), path).toBe(true);
+    }
+  });
+});

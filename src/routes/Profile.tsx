@@ -5,14 +5,15 @@ import { dayNo } from '../engine/daily';
 import { formatTime } from '../engine/time';
 import { getGameDef } from '../games/catalog';
 import { dailyDate } from '../games/daily';
-import { fetchOwnPlays, fetchProfileByHandle, fetchPublicPlays, type PublicProfile } from '../lib/api';
+import { fetchBadges, fetchOwnPlays, fetchProfileByHandle, fetchPublicPlays, type PublicProfile } from '../lib/api';
+import { BADGES } from '../lib/notifications';
 import { useAuth } from '../lib/auth';
 import { profileStats, type PlayRow } from '../lib/profileStats';
 import { SocialActions, SocialCounts, SocialLists, useSocial } from './ProfileSocial';
 import { Avatar } from '../components/Avatar';
 import styles from './Profile.module.css';
 
-type State = { status: 'loading' } | { status: 'missing' } | { status: 'ready'; profile: PublicProfile; plays: PlayRow[] };
+type State = { status: 'loading' } | { status: 'missing' } | { status: 'ready'; profile: PublicProfile; plays: PlayRow[]; badges: string[] };
 
 const monthYear = (iso: string) => new Date(iso).toLocaleDateString('en-GB', { month: 'short', year: 'numeric' });
 
@@ -45,7 +46,8 @@ export function Profile() {
       if (!profile) return setState({ status: 'missing' });
       // Your own page counts every play of yours; everyone else sees verified plays only.
       const plays = await (own ? fetchOwnPlays() : fetchPublicPlays(handle)).catch(() => []);
-      if (alive) setState({ status: 'ready', profile, plays });
+      const badges = await fetchBadges(handle).catch(() => []);
+      if (alive) setState({ status: 'ready', profile, plays, badges });
     })();
     return () => {
       alive = false;
@@ -66,7 +68,10 @@ export function Profile() {
     );
   }
 
-  const { profile, plays } = state;
+  const { profile, plays, badges } = state;
+  const earned = BADGES.filter((b) => badges.includes(b.code));
+  // Your own page also shows the next few to aim for.
+  const next = own ? BADGES.filter((b) => !badges.includes(b.code)).slice(0, 3) : [];
   const today = dayNo();
   const s = profileStats(plays, today);
 
@@ -138,6 +143,27 @@ export function Profile() {
           <dd className={styles.statValue}>{s.perfect}</dd>
         </div>
       </dl>
+
+      {(earned.length > 0 || next.length > 0) && (
+        <section id="badges" className={styles.section} aria-labelledby="badges-title">
+          <h2 id="badges-title" className={styles.h2}>
+            Badges
+          </h2>
+          <ul className={styles.badges}>
+            {earned.map((b) => (
+              <li key={b.code} className={styles.badge}>
+                {b.label}
+              </li>
+            ))}
+            {next.map((b) => (
+              <li key={b.code} className={styles.badge} data-locked title={b.how}>
+                {b.label}
+                <span className={styles.srOnly}>. Not earned yet. {b.how}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <section className={styles.section} aria-labelledby="days-title">
         <div className={styles.sectionHead}>

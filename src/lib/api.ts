@@ -3,6 +3,7 @@
 import type { SavedSession } from '../games/session';
 import type { PlayRow } from './profileStats';
 import { storage } from './storage';
+import type { Note } from './notifications';
 import type { WordStat } from './wordStats';
 import { getSupabase } from './supabase';
 
@@ -328,6 +329,30 @@ export async function myGameInvites(): Promise<GameInvite[]> {
   const { data, error } = await (await client()).rpc('my_game_invites');
   if (error) throw error;
   return (data ?? []) as GameInvite[];
+}
+
+// Notifications and badges. Rows are written by database triggers; clients only read and mark read.
+export async function fetchNotifications(limit = 30): Promise<Note[]> {
+  const { data, error } = await (await client()).rpc('my_notifications', { p_limit: limit });
+  if (error) throw error;
+  return (data ?? []) as Note[];
+}
+
+export async function fetchUnread(): Promise<number> {
+  const { data, error } = await (await client()).rpc('unread_notifications');
+  if (error) throw error;
+  return (data as number) ?? 0;
+}
+
+export async function markNotificationsRead(): Promise<void> {
+  await (await client()).rpc('read_notifications');
+}
+
+/** Badge codes a player has earned, oldest first. */
+export async function fetchBadges(handle: string): Promise<string[]> {
+  const { data, error } = await (await client()).rpc('badges_of', { p_handle: handle });
+  if (error) throw error;
+  return ((data ?? []) as Array<{ code: string }>).map((b) => b.code);
 }
 
 export async function searchPlayers(prefix: string): Promise<PlayerRef[]> {

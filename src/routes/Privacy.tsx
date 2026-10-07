@@ -32,6 +32,7 @@ export function Privacy() {
           </li>
           <li>Friend streaks: who you keep one with. You each see whether the other has played today.</li>
           <li>Invites into a room, kept for a day, and puzzles you make and the thumbs you give.</li>
+          <li>Your notifications (the newest 100) and the badges you earn. Badges show on your profile.</li>
           <li>
             Reminders, only if you turn them on: an address your browser gives us for notifications, your time zone and the hour you chose.
             Turning reminders off or signing out removes it.
