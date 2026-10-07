@@ -12,6 +12,7 @@ import {
 } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { copyText } from '../lib/share';
+import { Avatar } from '../components/Avatar';
 import styles from './Profile.module.css';
 
 export type Social = {
@@ -144,9 +145,7 @@ export function SocialLists({ own, social }: { own: boolean; social: ReturnType<
         {people.map((p) => (
           <li key={p.handle} className={styles.person}>
             <Link to={`/u/${p.handle}`} className={styles.personLink}>
-              <span className={styles.miniAvatar} aria-hidden="true">
-                {p.name.charAt(0).toUpperCase()}
-              </span>
+              <Avatar handle={p.handle} size={32} />
               <span className={styles.personText}>
                 <span className={styles.personName}>{p.name}</span>
                 <span className={styles.personHandle}>@{p.handle}</span>

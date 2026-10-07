@@ -3,6 +3,7 @@ import { Link, Navigate } from 'react-router-dom';
 import { Field } from '../components/Field';
 import { newPlayers, searchPlayers, topPlayers, type PlayerRef } from '../lib/api';
 import { useAuth } from '../lib/auth';
+import { Avatar } from '../components/Avatar';
 import styles from './Players.module.css';
 
 type Row = PlayerRef & { stat?: string };
@@ -15,9 +16,7 @@ function List({ rows, empty }: { rows: Row[] | null; empty: string }) {
       {rows.map((p) => (
         <li key={p.handle}>
           <Link to={`/u/${p.handle}`} className={styles.row}>
-            <span className={styles.avatar} aria-hidden="true">
-              {p.name.charAt(0).toUpperCase()}
-            </span>
+            <Avatar handle={p.handle} size={40} />
             <span className={styles.who}>
               <span className={styles.name}>{p.name}</span>
               <span className={styles.handle}>@{p.handle}</span>

@@ -1,0 +1,75 @@
+.lead {
+  margin: 0;
+  max-width: 62ch;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 2px solid var(--fg);
+}
+.circle {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2) var(--space-4);
+  padding: var(--space-4) var(--space-2);
+  border-bottom: 1px solid var(--line);
+}
+.circle:hover .circleName {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.circleName {
+  font-size: 17px;
+  font-weight: 700;
+}
+.circleMeta {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-3);
+  max-width: 520px;
+}
+.form > :first-child {
+  flex: 1 1 240px;
+}
+.err {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.err:empty {
+  display: none;
+}
+.actions {
+  display: flex;
+  gap: var(--space-2);
+}
+.remove,
+.leave {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.remove:hover,
+.leave:hover {
+  color: var(--fg);
+}

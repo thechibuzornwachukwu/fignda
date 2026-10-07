@@ -79,3 +79,12 @@
   text-decoration-color: var(--line-3);
   white-space: nowrap;
 }
+.note {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.note:empty {
+  display: none;
+}

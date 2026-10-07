@@ -10,6 +10,7 @@ import { dailyDate } from '../games/daily';
 import { fetchDailyBoard, fetchDailyRank, fetchFollowingBoard, fetchGameBoard, type BoardRow, type MyRank } from '../lib/api';
 import { Segmented } from '../components/Segmented';
 import { useAuth } from '../lib/auth';
+import { Avatar } from '../components/Avatar';
 import styles from './Leaderboard.module.css';
 
 type Load = { status: 'loading' } | { status: 'error' } | { status: 'ready'; rows: BoardRow[]; me: MyRank | null };
@@ -21,6 +22,7 @@ function Board({ rows, me, myHandle, empty }: { rows: BoardRow[]; me: MyRank | n
     <li key={`${r.rank}-${r.handle}`} className={styles.row} data-mine={mine || undefined}>
       <span className={styles.rank}>{String(r.rank).padStart(2, '0')}</span>
       <Link to={`/u/${r.handle}`} className={styles.handle}>
+        <Avatar handle={r.handle} size={28} />
         @{r.handle}
         {mine && <span className={styles.you}>You</span>}
       </Link>
@@ -107,9 +109,14 @@ export function Leaderboard() {
 
   return (
     <div className={styles.page}>
-      <Link to="/players" className={styles.findPlayers}>
-        Find players
-      </Link>
+      <div className={styles.topLinks}>
+        <Link to="/circles" className={styles.findPlayers}>
+          Your circles
+        </Link>
+        <Link to="/players" className={styles.findPlayers}>
+          Find players
+        </Link>
+      </div>
       <h1 className={styles.title}>
         Leaderboard.
         <br />

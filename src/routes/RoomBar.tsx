@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { UsersRound } from 'lucide-react';
+import { Avatar } from '../components/Avatar';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
 import { rankRoom, type Peer, type RoomStats, type RoomStatus, type Row } from '../lib/room';
@@ -48,6 +49,7 @@ export function RoomBar({ code, peers, path, status, me }: Props) {
               <li key={p.id} className={styles.player} data-away={p.away || undefined} data-you={p.you || undefined}>
                 <span className={styles.rank}>{i + 1}</span>
                 <span className={styles.dot} aria-hidden="true" />
+                {p.handle && <Avatar handle={p.handle} size={24} />}
                 {p.handle ? (
                   <Link to={`/u/${p.handle}`} className={styles.name}>
                     {p.name}

@@ -5,6 +5,7 @@ import { isPuzzle } from '../lib/routes';
 import { Button } from './Button';
 import { Logo } from './Logo';
 import { ThemeToggle } from './ThemeToggle';
+import { Avatar } from './Avatar';
 import styles from './Header.module.css';
 
 const navCls = ({ isActive }: { isActive: boolean }) =>
@@ -16,9 +17,7 @@ function AccountLink() {
   if (profile) {
     return (
       <Link to={`/u/${profile.handle}`} className={styles.account}>
-        <span className={styles.avatar} aria-hidden='true'>
-          {profile.name.charAt(0).toUpperCase()}
-        </span>
+        <Avatar handle={profile.handle} size={28} />
         {profile.name.split(/\s+/)[0]}
       </Link>
     );

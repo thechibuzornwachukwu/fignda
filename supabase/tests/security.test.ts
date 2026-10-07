@@ -89,10 +89,10 @@ describe('emails stay in auth.users', () => {
     }
   });
 
-  it('profiles expose name and handle only', async () => {
+  it('profiles expose name, handle and the avatar design, never the email', async () => {
     const { data, error } = await anon().from('profiles').select('*').eq('id', a.id).single();
     expect(error).toBeNull();
-    expect(Object.keys(data!).sort()).toEqual(['created_at', 'handle', 'id', 'name', 'updated_at']);
+    expect(Object.keys(data!).sort()).toEqual(['avatar', 'created_at', 'handle', 'id', 'name', 'updated_at']);
     expect(JSON.stringify(data)).not.toContain('@test.fignda.local');
   });
 

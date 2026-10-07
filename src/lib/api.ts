@@ -5,7 +5,7 @@ import type { PlayRow } from './profileStats';
 import { storage } from './storage';
 import { getSupabase } from './supabase';
 
-export type Profile = { id: string; name: string; handle: string };
+export type Profile = { id: string; name: string; handle: string; /** Avatar design code, or null before the player designs one. */ avatar?: string | null };
 
 async function client() {
   const sb = await getSupabase();
@@ -14,7 +14,7 @@ async function client() {
 }
 
 export async function fetchProfile(id: string): Promise<Profile | null> {
-  const { data, error } = await (await client()).from('profiles').select('id, name, handle').eq('id', id).maybeSingle();
+  const { data, error } = await (await client()).from('profiles').select('id, name, handle, avatar').eq('id', id).maybeSingle();
   if (error) throw error;
   return data;
 }
@@ -25,12 +25,18 @@ export async function saveProfile(p: Profile, exists: boolean): Promise<SaveProf
   const sb = await client();
   const q = exists
     ? sb.from('profiles').update({ name: p.name, handle: p.handle }).eq('id', p.id)
-    : sb.from('profiles').insert(p);
+    : sb.from('profiles').insert({ id: p.id, name: p.name, handle: p.handle });
   const { error } = await q;
   if (!error) return null;
   if (error.code === '23505') return 'taken';
   if (error.code === '23514') return 'invalid';
   return 'failed';
+}
+
+/** Save the signed-in player's avatar design. The database only accepts the part code alphabet. */
+export async function saveAvatar(id: string, code: string): Promise<boolean> {
+  const { error } = await (await client()).from('profiles').update({ avatar: code }).eq('id', id);
+  return !error;
 }
 
 export type PublicProfile = Profile & { created_at: string };
@@ -185,6 +191,65 @@ export async function fetchFollowingBoard(day: number): Promise<BoardRow[]> {
   const { data, error } = await (await client()).rpc('following_board', { p_day: day, p_limit: 50 });
   if (error) throw error;
   return data as BoardRow[];
+}
+
+// Circles: a private daily table for a family, class, church or office. Members only; joined by a link.
+export type CircleInfo = { code: string; name: string; members: number; is_member: boolean; is_owner: boolean };
+export type CircleRow = { rank: number | null; handle: string; name: string; score: number | null; secs: number | null; found: number | null; total: number | null };
+export type CircleWeekRow = { rank: number; handle: string; name: string; score: number; days: number };
+export const CIRCLE_RE = /^[A-HJ-NP-Z2-9]{6}$/;
+
+export async function fetchCircle(code: string): Promise<CircleInfo | null> {
+  if (!CIRCLE_RE.test(code)) return null;
+  const { data, error } = await (await client()).rpc('circle_info', { p_code: code });
+  if (error) throw error;
+  return (data as CircleInfo[] | null)?.[0] ?? null;
+}
+
+export async function myCircles(): Promise<Array<Pick<CircleInfo, 'code' | 'name' | 'members' | 'is_owner'>>> {
+  const { data, error } = await (await client()).rpc('my_circles');
+  if (error) throw error;
+  return data ?? [];
+}
+
+/** Returns the new circle code, or why it failed. */
+export async function createCircle(name: string): Promise<{ code: string } | { error: 'limit' | 'invalid' | 'failed' }> {
+  const { data, error } = await (await client()).rpc('create_circle', { p_name: name });
+  if (!error && typeof data === 'string') return { code: data };
+  if (error?.message.includes('circle limit')) return { error: 'limit' };
+  if (error?.code === '23514') return { error: 'invalid' };
+  return { error: 'failed' };
+}
+
+export async function joinCircle(code: string): Promise<'joined' | 'full' | 'limit' | 'missing' | 'failed'> {
+  if (!CIRCLE_RE.test(code)) return 'missing';
+  const { data, error } = await (await client()).rpc('join_circle', { p_code: code });
+  if (!error) return data ? 'joined' : 'missing';
+  if (error.message.includes('circle full')) return 'full';
+  if (error.message.includes('circle limit')) return 'limit';
+  return 'failed';
+}
+
+export async function leaveCircle(code: string): Promise<boolean> {
+  const { error } = await (await client()).rpc('leave_circle', { p_code: code });
+  return !error;
+}
+
+export async function removeFromCircle(code: string, handle: string): Promise<boolean> {
+  const { data, error } = await (await client()).rpc('remove_circle_member', { p_code: code, p_handle: handle });
+  return !error && !!data;
+}
+
+export async function fetchCircleBoard(code: string, day: number): Promise<CircleRow[]> {
+  const { data, error } = await (await client()).rpc('circle_board', { p_code: code, p_day: day });
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function fetchCircleWeek(code: string): Promise<CircleWeekRow[]> {
+  const { data, error } = await (await client()).rpc('circle_week', { p_code: code });
+  if (error) throw error;
+  return data ?? [];
 }
 
 export async function searchPlayers(prefix: string): Promise<PlayerRef[]> {

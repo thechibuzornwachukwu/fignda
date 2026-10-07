@@ -24,6 +24,9 @@ export function Privacy() {
           <li>The name and handle you choose. They show on cards you share and next to verified scores.</li>
           <li>Your plays: which puzzle, what you found, hints, time and score. We use them for your streak.</li>
           <li>Custom puzzles you create and cards you share.</li>
+          <li>The character you design. It is saved as a short code of your choices, never a photo, and shows next to your name.</li>
+          <li>Who you follow, and the circles you join. Members of a circle see each other’s names and verified daily scores.</li>
+          <li>Rooms keep nothing. While you play together, the others in the room see your name and what you find.</li>
         </ul>
         <p>
           When you sign in, dailies you played as a guest in this browser move to your account. They are marked
@@ -57,7 +60,7 @@ export function Privacy() {
         </p>
       </section>
 
-      <p className={styles.updated}>Updated 26 Sept 2026.</p>
+      <p className={styles.updated}>Updated 7 Oct 2026.</p>
     </article>
   );
 }

@@ -104,7 +104,17 @@ Check: RLS: only you create or delete your own follows, anyone reads counts, no 
 - [x] Header by context: landing gets its sections and Play, the app gets Games, Leaders, Players. Quick return on scroll. Nav steps aside on puzzles on phones (`e2e/header.spec.ts`).
 - [x] Board sounds: rising tick per letter, chime on a find, mute on the puzzle and in Settings (`src/lib/sound.test.ts`, `e2e/sound.spec.ts`).
 - [x] Google sign in hidden until the provider is configured (`VITE_GOOGLE_AUTH=1`).
-- Needs a real device check: tap first then last on an iPhone (emulators pass).
+- [x] Real device check: tap first then last on an iPhone (owner tested, passes).
 - [x] Phone tab bar (Games, Leaders, Players, You) on app pages under 640px; header links on desktop (`e2e/together.spec.ts`).
 - [x] Head to head: shared links carry `?vs=handle`; the friend sees your best verified score, then the verdict when they finish.
 - [x] Play together: live rooms (`?room=CODE`, Supabase Realtime broadcast + presence, free). Finds re-checked by the engine on every device, late joiners synced, forged finds ignored, not ranked, no rooms on dailies.
+
+## Community core (from the growth study: Wordle, Duolingo, 4 Pics 1 Word)
+- [x] Text result: "Copy result" on the results screen. Spoiler free story of the game (find, miss, hint in play order), score line and a challenge link. Phones open the share sheet (`src/engine/shareText.ts`, 5 unit tests).
+- [x] Circles: a private daily table for a family, class, church or office. Start one, invite by link, today and last 7 days, members still to play shown last, owner can remove, last one out closes it. All through functions, tables default deny (`supabase/tests/circles.test.ts`, 14 DB tests; `e2e/circles.spec.ts`).
+- [x] Avatars: a character the player designs from 12 parts (41 hair and headwear styles, 14 outfits, skin marks including tribal marks, and more). Saved as a short code, drawn as shapes, never an upload. Every look is free. Shown on boards, profiles, players, rooms and circles. Designer in Settings: fixed preview, swipeable tabs, one scrolling grid (`src/avatar`, 20 unit tests).
+- Next, not built: streak reminders and friend streaks; "only 8% found this word"; player-made puzzles.
+
+## Owner plan (business)
+1. Reset the database password (Supabase, Database, Settings). 2. Buy a domain. 3. Brevo SMTP so emails carry codes. 4. Free AI key (Google AI Studio or Groq) for any-topic puzzles. 5. Search traffic: answers pages for past dailies, Nigerian packs. 6. Paystack: streak freeze, archive, make your own puzzle, remove ads forever. 7. AdSense footer ad, one per page, never near the puzzle. 8. Sponsored puzzles.
+Rule for all of it: nothing sold or shown may affect scores.

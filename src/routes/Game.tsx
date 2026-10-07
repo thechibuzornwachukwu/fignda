@@ -18,7 +18,8 @@ import { useCoarsePointer } from '../lib/media';
 import { ShareSheet, type ShareGame } from '../components/ShareSheet';
 import { SoundToggle } from '../components/SoundToggle';
 import { dailyDate } from '../games/daily';
-import { sharePath } from '../lib/share';
+import { copyText, sharePath, shareUrl } from '../lib/share';
+import { shareText, storyMarks } from '../engine/shareText';
 import * as copy from '../copy';
 import { joinRoom, newRoomCode, ROOM_RE, type Peer, type Room, type RoomStats, type RoomStatus } from '../lib/room';
 import { Challenge } from './Challenge';
@@ -207,6 +208,31 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
     return foundRows.concat(rest);
   }, [answers, s.found, daily, finished, mod, puzzle, foundSet]);
 
+  // The text result: paste it in a chat. Phones open the share sheet (WhatsApp is one tap), desktops copy.
+  const sendText = async (): Promise<string> => {
+    const secs = secondsOf(s, s.endAt ?? Date.now());
+    const base = shareGame(def, puzzle.difficulty, dailyN).path;
+    const text = shareText({
+      title: def.title,
+      daily: dailyN,
+      found: s.found.length,
+      total,
+      secs,
+      score: scoreOf(s, total, daily, secs),
+      marks: storyMarks(s.log?.events ?? [], s.log?.hints ?? [], s.found.filter((f) => !f.by).map((f) => f.span)),
+      url: shareUrl(auth.profile ? `${base}?vs=${auth.profile.handle}` : base),
+    });
+    if (coarse && navigator.share) {
+      try {
+        await navigator.share({ text });
+        return '';
+      } catch {
+        /* closed the sheet: fall back to copying */
+      }
+    }
+    return (await copyText(text)) ? 'Copied. Paste it in your group.' : 'Could not copy. Use Share.';
+  };
+
   const Board = mod.Board;
   const perfect = foundCount === total;
   const resultLine =
@@ -272,6 +298,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
           canReplay={!daily}
           onReplay={g.replay}
           onShare={() => setSharing(true)}
+          onText={sendText}
           boardPath={auth.enabled ? (daily ? `/leaderboard?day=${dailyN}` : getGameDef(def.id) ? `/leaderboard/${def.id}` : undefined) : undefined}
           guest={!signedIn}
         />

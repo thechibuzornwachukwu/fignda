@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '../components/Button';
@@ -15,13 +16,16 @@ type Props = {
   canReplay: boolean;
   onReplay: () => void;
   onShare: () => void;
+  /** Copies or shares the text result. Resolves to the line to show ("Copied."). */
+  onText: () => Promise<string>;
   /** Where this game's board lives, if it has one. */
   boardPath?: string;
   guest: boolean;
 };
 
-export function GameResults({ title, line, score, found, total, secs, canReplay, onReplay, onShare, boardPath, guest }: Props) {
+export function GameResults({ title, line, score, found, total, secs, canReplay, onReplay, onShare, onText, boardPath, guest }: Props) {
   const { pathname } = useLocation();
+  const [note, setNote] = useState('');
   return (
     <section className={styles.results} aria-labelledby="results-title">
       <div className={styles.head}>
@@ -66,12 +70,18 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
           <Button variant="secondary" to="/play">
             More games
           </Button>
+          <Button variant="secondary" onClick={() => void onText().then(setNote)}>
+            Copy result
+          </Button>
           <Button variant="accent" onClick={onShare}>
             Share
             <Icon icon={ArrowRight} size={16} />
           </Button>
         </div>
       </div>
+      <p className={styles.note} role="status">
+        {note}
+      </p>
       {guest && (
         <div className={styles.guest}>
           <span className={styles.guestText}>

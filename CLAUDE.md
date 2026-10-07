@@ -26,6 +26,7 @@ src/styles/tokens.css
 src/engine/      pure TS: hiddenWords, check, score, daily, excerpt, paginate
 src/copy/        pools + picker
 src/games/       registry: type -> { build, check, Board }
+src/avatar/      player characters: shapes, parts (append only lists), draw, store
 src/components/  Logo Icon Button TextLink FilterTabs GameRow Puzzle Letter WordList
                  ProgressLine BigClock MobileBar ShareSheet ShareCard Segmented Toggle
                  ThemeToggle Header Footer Dialog

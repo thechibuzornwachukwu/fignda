@@ -10,6 +10,7 @@ import { useAuth } from '../lib/auth';
 import { checkProfile } from '../lib/streak';
 import { setSound, soundOn, subscribeSound } from '../lib/sound';
 import { currentTheme, setTheme, type Theme } from '../lib/theme';
+import { AvatarDesigner } from './AvatarDesigner';
 import styles from './Settings.module.css';
 
 /** /settings. Private account housekeeping. The public side of a player lives on /u/:handle. */
@@ -116,6 +117,13 @@ export function Settings() {
             </span>
           </div>
         </form>
+      </section>
+
+      <section className={styles.section} aria-labelledby="s-avatar">
+        <h2 id="s-avatar" className={styles.h2}>
+          Your character
+        </h2>
+        <AvatarDesigner id={auth.profile.id} handle={auth.profile.handle} code={auth.profile.avatar} onSaved={() => void auth.refreshProfile()} />
       </section>
 
       <section className={styles.section} aria-labelledby="s-account">

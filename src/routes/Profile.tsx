@@ -9,6 +9,7 @@ import { fetchOwnPlays, fetchProfileByHandle, fetchPublicPlays, type PublicProfi
 import { useAuth } from '../lib/auth';
 import { profileStats, type PlayRow } from '../lib/profileStats';
 import { SocialActions, SocialCounts, SocialLists, useSocial } from './ProfileSocial';
+import { Avatar } from '../components/Avatar';
 import styles from './Profile.module.css';
 
 type State = { status: 'loading' } | { status: 'missing' } | { status: 'ready'; profile: PublicProfile; plays: PlayRow[] };
@@ -72,9 +73,7 @@ export function Profile() {
   return (
     <div className={styles.page}>
       <header className={styles.who}>
-        <span className={styles.avatar} aria-hidden="true">
-          {profile.name.charAt(0).toUpperCase()}
-        </span>
+        <Avatar handle={profile.handle} size={88} />
         <div className={styles.names}>
           <h1 className={styles.name}>{profile.name}</h1>
           <span className={styles.handle}>
