@@ -104,3 +104,45 @@ describe('public community functions', () => {
     expect(left.data).toEqual([]);
   });
 });
+
+describe('people to follow', () => {
+  const S: Record<string, { u: TestUser; h: string }> = {};
+  beforeAll(async () => {
+    for (const n of ['xi', 'yo', 'zed']) {
+      const u = await makeUser(n);
+      const handle = uniqueHandle(`${n}s`);
+      await makeProfile(u, n.toUpperCase(), handle);
+      S[n] = { u, h: handle };
+    }
+    // xi follows yo, yo follows zed: zed is a friend of a friend for xi.
+    await S.xi!.u.client.from('follows').insert({ follower_id: S.xi!.u.id, followee_id: S.yo!.u.id });
+    await S.yo!.u.client.from('follows').insert({ follower_id: S.yo!.u.id, followee_id: S.zed!.u.id });
+  });
+
+  it('leaves out you and the people you already follow; friends of friends come first', async () => {
+    const { data, error } = await S.xi!.u.client.rpc('players_suggested', { p_limit: 50 });
+    expect(error).toBeNull();
+    const handles = data.map((r: { handle: string }) => r.handle);
+    expect(handles).not.toContain(S.xi!.h);
+    expect(handles).not.toContain(S.yo!.h);
+    expect(data[0]).toMatchObject({ handle: S.zed!.h, mutuals: 1, followers: 1 });
+  });
+
+  it('guests get suggestions too, with profile fields only, and the limit is capped', async () => {
+    const { data, error } = await anon().rpc('players_suggested', { p_limit: 9999 });
+    expect(error).toBeNull();
+    expect(data.length).toBeGreaterThan(0);
+    expect(data.length).toBeLessThanOrEqual(50);
+    expect(Object.keys(data[0]).sort()).toEqual(['followers', 'handle', 'mutuals', 'name', 'plays']);
+    expect(JSON.stringify(data)).not.toContain('@test.fignda.local');
+    expect(data.every((r: { mutuals: number }) => Number(r.mutuals) === 0)).toBe(true);
+  });
+
+  it('a registered player who has never played is still suggested (all time, not only the active)', async () => {
+    // xi has no plays. zed follows yo, and yo follows xi, so xi is a friend of a friend for zed.
+    await S.yo!.u.client.from('follows').insert({ follower_id: S.yo!.u.id, followee_id: S.xi!.u.id });
+    await S.zed!.u.client.from('follows').insert({ follower_id: S.zed!.u.id, followee_id: S.yo!.u.id });
+    const { data } = await S.zed!.u.client.rpc('players_suggested', { p_limit: 5 });
+    expect(data[0]).toMatchObject({ handle: S.xi!.h, plays: 0, mutuals: 1 });
+  });
+});

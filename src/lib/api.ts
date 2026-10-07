@@ -193,6 +193,15 @@ export async function fetchFollowingBoard(day: number): Promise<BoardRow[]> {
   return data as BoardRow[];
 }
 
+export type Suggested = PlayerRef & { plays: number; followers: number; mutuals: number };
+
+/** Everyone registered, all time, minus you and the people you follow. Friends of friends first. */
+export async function suggestedPlayers(limit = 12): Promise<Suggested[]> {
+  const { data, error } = await (await client()).rpc('players_suggested', { p_limit: limit });
+  if (error) throw error;
+  return data ?? [];
+}
+
 // Circles: a private daily table for a family, class, church or office. Members only; joined by a link.
 export type CircleInfo = { code: string; name: string; members: number; is_member: boolean; is_owner: boolean };
 export type CircleRow = { rank: number | null; handle: string; name: string; score: number | null; secs: number | null; found: number | null; total: number | null };

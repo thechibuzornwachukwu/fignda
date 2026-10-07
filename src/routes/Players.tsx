@@ -1,20 +1,49 @@
 import { useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { Field } from '../components/Field';
-import { newPlayers, searchPlayers, topPlayers, type PlayerRef } from '../lib/api';
+import { follow, isFollowing, newPlayers, searchPlayers, suggestedPlayers, topPlayers, unfollow, type PlayerRef } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { Avatar } from '../components/Avatar';
 import styles from './Players.module.css';
 
 type Row = PlayerRef & { stat?: string };
 
-function List({ rows, empty }: { rows: Row[] | null; empty: string }) {
+/** Follow or unfollow from a row, without opening the profile. */
+function FollowButton({ me, handle, name, check }: { me: string; handle: string; name: string; check: boolean }) {
+  const [on, setOn] = useState(false);
+  const [busy, setBusy] = useState(false);
+  // Suggestions never include people you follow; search results can, so those rows ask.
+  useEffect(() => {
+    if (!check) return;
+    let alive = true;
+    isFollowing(me, handle)
+      .then((f) => alive && setOn(f))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [check, me, handle]);
+  const toggle = async () => {
+    setBusy(true);
+    const ok = await (on ? unfollow(me, handle) : follow(me, handle)).catch(() => false);
+    setBusy(false);
+    if (ok) setOn(!on);
+  };
+  return (
+    <button type="button" className={styles.follow} aria-pressed={on} aria-label={`${on ? 'Following' : 'Follow'} ${name}`} disabled={busy} onClick={() => void toggle()}>
+      {on ? 'Following' : 'Follow'}
+    </button>
+  );
+}
+
+/** `me` (your user id) adds a Follow button to every row but your own. */
+function List({ rows, empty, me, myHandle, check = false }: { rows: Row[] | null; empty: string; me?: string; myHandle?: string; check?: boolean }) {
   if (rows == null) return <div className={styles.loading} aria-busy="true" />;
   if (rows.length === 0) return <p className={styles.muted}>{empty}</p>;
   return (
     <ul className={styles.list}>
       {rows.map((p) => (
-        <li key={p.handle}>
+        <li key={p.handle} className={styles.item}>
           <Link to={`/u/${p.handle}`} className={styles.row}>
             <Avatar handle={p.handle} size={40} />
             <span className={styles.who}>
@@ -23,6 +52,7 @@ function List({ rows, empty }: { rows: Row[] | null; empty: string }) {
             </span>
             {p.stat && <span className={styles.stat}>{p.stat}</span>}
           </Link>
+          {me && p.handle !== myHandle && <FollowButton me={me} handle={p.handle} name={p.name} check={check} />}
         </li>
       ))}
     </ul>
@@ -37,6 +67,9 @@ export function Players() {
   const [streaks, setStreaks] = useState<Row[] | null>(null);
   const [perfect, setPerfect] = useState<Row[] | null>(null);
   const [fresh, setFresh] = useState<Row[] | null>(null);
+  const [suggested, setSuggested] = useState<Row[] | null>(null);
+  const me = auth.profile?.id;
+  const myHandle = auth.profile?.handle;
 
   useEffect(() => {
     let alive = true;
@@ -53,6 +86,27 @@ export function Players() {
       alive = false;
     };
   }, []);
+
+  // Suggestions depend on who is asking: they leave out you and the people you already follow.
+  useEffect(() => {
+    let alive = true;
+    suggestedPlayers()
+      .then(
+        (r) =>
+          alive &&
+          setSuggested(
+            r.map((s) => ({
+              handle: s.handle,
+              name: s.name,
+              stat: s.mutuals > 0 ? `Followed by ${s.mutuals} you follow` : s.plays > 0 ? `${s.plays} ${s.plays === 1 ? 'play' : 'plays'}` : 'New here',
+            })),
+          ),
+      )
+      .catch(() => alive && setSuggested([]));
+    return () => {
+      alive = false;
+    };
+  }, [me]);
 
   // Search as you type, a beat after the last key.
   useEffect(() => {
@@ -96,8 +150,25 @@ export function Players() {
             setHits(null);
           }}
         />
-        {searching && <List rows={hits} empty={`No handle starts with @${q.trim().toLowerCase()}.`} />}
+        {searching && <List rows={hits} empty={`No handle starts with @${q.trim().toLowerCase()}.`} me={me} myHandle={myHandle} check />}
       </section>
+
+      {!searching && (
+        <section className={styles.section} aria-labelledby="suggested-title">
+          <h2 id="suggested-title" className={styles.h2}>
+            People to follow
+          </h2>
+          <List rows={suggested} empty="Nobody else has joined yet. Invite a friend and they will show up here." me={me} myHandle={myHandle} />
+          {!me && !auth.loading && !!suggested?.length && (
+            <p className={styles.muted}>
+              <Link to="/signin?next=%2Fplayers" className={styles.signin}>
+                Sign in
+              </Link>{' '}
+              to follow players and see them on your own leaderboard.
+            </p>
+          )}
+        </section>
+      )}
 
       {!searching && (
         <div className={styles.grid}>

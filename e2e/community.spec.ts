@@ -70,3 +70,42 @@ test.describe('phone', () => {
     }
   });
 });
+
+test('people to follow: follow from the list without opening a profile', async ({ page, browser }) => {
+  const other = await browser.newPage();
+  const b = await newPlayer(other, 'Bola');
+  await other.close();
+  const me = await newPlayer(page, 'Kunle');
+  await page.goto('/players');
+  const suggested = page.getByRole('region', { name: 'People to follow' });
+  await expect(suggested.getByRole('listitem').first()).toBeVisible();
+  // Nobody is offered themselves.
+  await expect(suggested.getByText(`@${me}`, { exact: true })).toHaveCount(0);
+
+  // Follow straight from a search row.
+  await page.getByLabel('Search by handle').fill(b);
+  const row = page.getByRole('listitem').filter({ hasText: `@${b}` });
+  await row.getByRole('button', { name: 'Follow Bola' }).click();
+  await expect(row.getByRole('button', { name: 'Following Bola' })).toHaveAttribute('aria-pressed', 'true');
+
+  // It is a real follow: the profile agrees, and a fresh search remembers it.
+  await page.goto(`/u/${b}`);
+  await expect(page.getByRole('button', { name: 'Following' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByRole('link', { name: /1 follower$/ })).toBeVisible();
+  await page.goto('/players');
+  await page.getByLabel('Search by handle').fill(b);
+  await expect(page.getByRole('listitem').filter({ hasText: `@${b}` }).getByRole('button', { name: 'Following Bola' })).toBeVisible();
+  // And once followed, they leave the suggestions.
+  await page.getByLabel('Search by handle').fill('');
+  const list = page.getByRole('region', { name: 'People to follow' });
+  await expect(list.getByRole('listitem').first()).toBeVisible();
+  await expect(list.getByText(`@${b}`, { exact: true })).toHaveCount(0);
+});
+
+test('guests see people to follow and are asked to sign in', async ({ page }) => {
+  await page.goto('/players');
+  const suggested = page.getByRole('region', { name: 'People to follow' });
+  await expect(suggested.getByRole('listitem').first()).toBeVisible();
+  await expect(suggested.getByRole('button')).toHaveCount(0);
+  await expect(suggested.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/signin?next=%2Fplayers');
+});

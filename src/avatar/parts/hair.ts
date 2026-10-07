@@ -26,6 +26,10 @@ const CAP = 'M29 45v-1a19 19 0 0 1 38 0v1c-4-8-11-11-19-11s-15 3-19 11z';
 /** The sides of the head, for fades. */
 const SIDES = 'M29 53v-9a19 19 0 0 1 38 0v9c-1-8-3-13-6-16-4-2-8-3-13-3s-9 1-13 3c-3 3-5 8-6 16z';
 const BUN_TIE = [[48, 26, 7, 2.6]] as const;
+/** Square partings for box braids: three rows front to back, one across. */
+const BOX_PARTS = 'M38.5 27.5l-1.5 8M48 25.5v8.5M57.5 27.5l1.5 8M33 33.5c5-3.5 10-5 15-5s10 1.5 15 5';
+/** Where braids hang: three by each ear, tight together, the inner ones just over the edge of the face. */
+const BRAID_XS = [19.6, 23.2, 26.8, 65.8, 69.4, 73] as const;
 
 const cap = (k: Kit) => p(CAP, { fill: k.hair });
 /** A parting: a thin line of scalp. */
@@ -37,6 +41,17 @@ const sheen = (d: string, opacity: number) => p(d, { fill: 'none', stroke: WHITE
 /** Hanging strands: one rounded bar per x. */
 const strands = (k: Kit, xs: readonly number[], y: number, width: number, height: (x: number) => number) =>
   xs.map((x) => rect({ x, y, width, height: height(x), rx: width / 2, fill: k.hair }));
+
+/**
+ * Braids falling in front of the ears: tight bars with staggered ends, and a faint line between each so they
+ * read as separate braids against the hair behind them.
+ */
+const braidFall = (k: Kit, length: number, stagger: readonly number[]): Shape[] => [
+  ...BRAID_XS.map((x, i) => rect({ x, y: 40, width: 3.4, height: length + stagger[i % 3]!, rx: 1.7, fill: k.hair })),
+  ...[23.1, 26.7, 69.3, 72.9].map((x) => sheen(`M${x} 43v${length - 6}`, 0.26)),
+];
+/** Gold cuffs clipped onto braids. */
+const cuffs = (at: ReadonlyArray<readonly [number, number]>): Shape[] => at.map(([x, y]) => rect({ x: x - 1.9, y, width: 3.8, height: 2.4, rx: 0.8, fill: GOLD }));
 
 export const HAIR_STYLES: readonly HairStyle[] = [
   { name: 'low cut', front: (k) => [cap(k)] },
@@ -177,14 +192,16 @@ export const HAIR_STYLES: readonly HairStyle[] = [
   },
   { name: 'side part cut', front: (k) => [shadow(k, SIDES), cap(k), part(k, 'M39 26.5l-3 10')] },
   {
+    // Many thin braids falling close to the head in a full curtain, past the shoulders, with square partings.
     name: 'box braids',
-    behind: (k) => strands(k, [18.5, 23, 27.5, 65, 69.5, 74], 32, 3.6, () => 56),
-    front: (k) => [cap(k), part(k, 'M48 25.5v9M41 27l-2 9M55 27l2 9M34.5 31l-2.5 8M61.5 31l2.5 8')],
+    behind: (k) => [p('M21 45a27 23 0 0 1 54 0v47h-54z', { fill: k.hair })],
+    front: (k) => [cap(k), part(k, BOX_PARTS), ...braidFall(k, 54, [0, 4, -3]), ...cuffs([[21.3, 63], [28.5, 74], [67.5, 68], [74.7, 78]])],
   },
   {
+    // The same braids cut blunt at the jaw, each finished with a bead.
     name: 'bob braids',
-    behind: (k) => strands(k, [20.5, 24.5, 28.5, 64, 68, 72], 32, 3.6, () => 31),
-    front: (k) => [cap(k), part(k, 'M48 25.5v9M41 27l-2 9M55 27l2 9M34.5 31l-2.5 8M61.5 31l2.5 8')],
+    behind: (k) => [p('M21 45a27 23 0 0 1 54 0v20a4 4 0 0 1-4 4h-46a4 4 0 0 1-4-4z', { fill: k.hair })],
+    front: (k) => [cap(k), part(k, BOX_PARTS), ...braidFall(k, 27, [0, 2, 1]), ...BRAID_XS.map((x, i) => c(x + 1.7, 67 + [0, 2, 1][i % 3]! + 1.6, 1.9, GOLD))],
   },
   {
     // A centre braid, rows sweeping to the sides, and beaded braids by the ears.

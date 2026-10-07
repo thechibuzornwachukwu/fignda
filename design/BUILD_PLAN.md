@@ -113,6 +113,7 @@ Check: RLS: only you create or delete your own follows, anyone reads counts, no 
 - [x] Text result: "Copy result" on the results screen. Spoiler free story of the game (find, miss, hint in play order), score line and a challenge link. Phones open the share sheet (`src/engine/shareText.ts`, 5 unit tests).
 - [x] Circles: a private daily table for a family, class, church or office. Start one, invite by link, today and last 7 days, members still to play shown last, owner can remove, last one out closes it. All through functions, tables default deny (`supabase/tests/circles.test.ts`, 14 DB tests; `e2e/circles.spec.ts`).
 - [x] Avatars: a character the player designs from 12 parts (41 hair and headwear styles, 14 outfits, skin marks including tribal marks, and more). Saved as a short code, drawn as shapes, never an upload. Every look is free. Shown on boards, profiles, players, rooms and circles. Designer in Settings: fixed preview, swipeable tabs, one scrolling grid (`src/avatar`, 20 unit tests).
+- [x] People to follow: everyone registered, all time, minus you and the people you follow; friends of friends first. Follow button on every row of the Players page, including search (`players_suggested`, 3 DB tests, 2 browser tests).
 - Next, not built: streak reminders and friend streaks; "only 8% found this word"; player-made puzzles.
 
 ## Owner plan (business)

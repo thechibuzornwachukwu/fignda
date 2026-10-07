@@ -87,6 +87,8 @@ Streak resets on wrong pick and on hint. `onFound` picks: first find, last one l
 
 **Circles:** `/circles` (yours, start one: name 2 to 40 chars) and `/c/CODE` (invite page for non members; members see Today and 7 days tables, Play today, Invite, Leave; owner sees Remove on members still to play). Up to 50 members, 20 circles each. Linked from the leaderboard.
 
+**People to follow:** first section of `/players`. Up to 12 registered players, never you or anyone you follow. Row stat: "Followed by N you follow", else "N plays", else "New here". Signed in rows carry a Follow / Following button (h36, pressed = `--fg` fill); guests get a Sign in line. Search rows carry the same button.
+
 **Avatars:** drawn from parts in `src/avatar` (see the header of `draw.ts`). Saved as a code of positions, so part lists are append only. Starter avatar from the handle until designed. Sizes: 24 room, 28 header and boards, 32 follow lists, 40 players, 88 profile, 120 designer preview. Designer (Settings, Your character): preview with Keep this look and Surprise me, a tab per part (swipes sideways, arrows move), one grid of named choices in a box that scrolls on its own (max 46vh).
 
 **Tab bar (phones, app pages):** Games, Leaders, Players, You (or Sign in); icons 20 over 12/700 labels; fixed bottom with safe area. Hidden on landing and puzzles.

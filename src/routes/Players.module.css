@@ -38,12 +38,19 @@
   list-style: none;
   border-top: 2px solid var(--fg);
 }
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  border-bottom: 1px solid var(--line);
+}
 .row {
+  flex: 1;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: var(--space-3);
   padding: var(--space-3) 0;
-  border-bottom: 1px solid var(--line);
   transition: padding-left var(--dur-slow) var(--ease-std);
 }
 .row:hover {
@@ -89,4 +96,32 @@
   .row:hover {
     padding-left: 0;
   }
+}
+.follow {
+  flex: none;
+  height: 36px;
+  padding: 0 var(--space-4);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-lg);
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color var(--dur-base) var(--ease-std), color var(--dur-base) var(--ease-std);
+}
+.follow:hover {
+  background: var(--surface-2);
+}
+.follow[aria-pressed='true'] {
+  background: var(--fg);
+  border-color: var(--fg);
+  color: var(--bg);
+}
+.signin {
+  font-weight: 700;
+  color: var(--fg);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
