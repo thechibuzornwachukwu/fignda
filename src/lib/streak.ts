@@ -10,6 +10,21 @@ export function dailyStats(days: Iterable<number>, today: number): { played: num
   return { played: set.size, streak };
 }
 
+/** Run lengths worth a bigger line. */
+export const MILESTONES: readonly number[] = [7, 30, 50, 100, 365];
+
+/**
+ * Which copy pool speaks after today's daily, and the number it carries. A milestone beats the plain count;
+ * a first day after a real run points at the best run instead of the loss.
+ */
+export function streakPool(streak: number, best: number): { pool: 'streakMilestone' | 'streakDay' | 'streakBack' | 'streakStart'; n: number } | null {
+  if (streak < 1) return null;
+  if (MILESTONES.includes(streak)) return { pool: 'streakMilestone', n: streak };
+  if (streak >= 2) return { pool: 'streakDay', n: streak };
+  if (best >= 3) return { pool: 'streakBack', n: best };
+  return { pool: 'streakStart', n: 1 };
+}
+
 /** Only same-site paths. Blocks open redirects like `//evil.com` or `https://evil.com`. */
 export function safeNext(next: string | null | undefined, fallback = '/play'): string {
   if (!next || !next.startsWith('/') || next.startsWith('//') || next.startsWith('/\\')) return fallback;

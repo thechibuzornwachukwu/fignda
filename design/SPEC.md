@@ -81,9 +81,31 @@ Streak resets on wrong pick and on hint. `onFound` picks: first find, last one l
 **Finish:** "I'm done" or last find. Missed answers shade. Result title picked once from `titlePerfect|titleGood|titleLow|titleZero`, then fixed.
 **Sound:** Web Audio, synthesized, no files (`src/lib/sound.ts`). A soft triangle tick per new letter in a selection, pitch up a semitone per letter from 660 Hz (cap 2 octaves), ticks under 25ms apart merge. A find plays C6 then G6. Misses are silent. On by default, `fignda-sound`=`off` mutes. Audio wakes on the first gesture only. Mute: speaker button on the puzzle screen (aria-pressed) and a Sounds switch in Settings. Safari ambient session: the iPhone silent switch mutes it.
 
-**Together:** `?vs=handle` shows that player's best verified score (plays_public) above the board, then won / lost / level at the end; dailies show the score only until you finish. `?room=CODE` (6 chars, no 0 O 1 I L) joins a live room: Play together button on non-daily puzzles, room bar (who is in, Invite, Leave, Not ranked). Spans broadcast and re-checked with the engine; `teamFound` / `teamJoined` copy pools. Room plays are never submitted.
+**Together:** `?vs=handle` shows that player's best verified score (plays_public) above the board, then won / lost / level at the end; dailies show the score only until you finish. `?room=CODE` (6 chars, no 0 O 1 I L) joins a live room: Play together button on non-daily puzzles, room bar (who is in, Invite, Leave, Not ranked). Spans broadcast and re-checked with the engine; `teamFound` / `teamJoined` copy pools. When the game ends each signed in player sends their own play log with the room code; the server replays it for the Together board and never for the solo boards. Under the room bar, "Invite someone you follow" opens a list of the people you follow with an Invite button each.
 
 **Text result:** Copy result button on results (secondary). Lines: title (dailies: `Fignda Daily #n`), `found · time · score` (dailies never print the total), marks in play order 🟩 find ⬜ miss 💡 hint in rows of 10 (max 40), `Beat it: <link>` (adds `?vs=handle` when signed in). Coarse pointers use the share sheet, others copy.
+
+**Together board:** `/leaderboard/:id?board=together` (Segmented Solo / Together on every puzzle board). A team is 2 or more signed in players in one room. Rank: words found together, then the faster team, then the earlier finish. Each player's count is the words they found first. Guests are shown in the room and never ranked.
+
+**Holiday dailies:** `data/holidays.json` (fixed `date` MM-DD, or `dates` for moving ones; `since` keeps days already played as they were). On a holiday the daily card kicker, the game meta line, the result line, the leaderboard kicker and link previews say "Christmas daily" in place of "Daily". The day before and after keep the rotation.
+
+**Streaks:** the run is consecutive UTC days with a finished daily. Daily card, unplayed, run of 2 or more: sub line from `streakKeep`. After today's daily, one line under the result: `streakMilestone` at 7, 30, 50, 100, 365; `streakDay` from 2; `streakBack` on day 1 after a best run of 3 or more; else `streakStart`.
+
+**Reminders:** web push, signed in only. Settings, Reminders: Toggle "Daily reminder" and, when on, Segmented When (Morning 8, Midday 13, Evening 19, the player's own clock). Under today's result: TextLink "Remind me tomorrow" when this browser has not chosen yet. One push a day at most, only if today's daily is not played. Lines: `inviteGame` (a fresh room invite), else `remindFriend` (a streak friend has played), else `remindStreak` (run of 2 or more), else `remind`. Tapping opens today's daily or the room.
+
+**Friend streaks:** first section of `/players` when signed in (`#friend-streaks`). Two players, one count: it grows each day both have a verified daily, from the day it started; up to 5 each. Start: "Invite a friend" shares your link `/s/CODE` (one tap for the friend starts it, new players sign up first), or "Start a streak" on a profile (the other player says yes). Rows: avatar, name, whose turn today, days; actions Start / No (asked of you), Cancel (asked by you), Nudge (you played, they have not; one a day) and End.
+
+**Room invites:** `/play`, signed in: rooms you were asked into in the last hour, above the daily card, each with Join. A push goes out only when you follow the inviter back.
+
+**Points:** lifetime tally from verified plays. Every daily counts; another puzzle counts its best score, so replays cannot farm. A game ended with "I'm done" adds what it earned. Shown above the profile stats and as "Most points" on `/players`.
+
+**New player profile:** with no plays, the stats and the 14 day strip are replaced by one block: h2 ("Your run starts with one puzzle." on your own page, "NAME is new here." on another's), a line, and one button (accent "Play today's daily" on your own).
+
+**Rare find:** after a daily, one line under the result from `rareFind`: the rarest word you found, when at least 5 verified players are counted and half or fewer found it.
+
+**Make a puzzle:** `/make`, signed in (linked under the games list). Title, What is hidden, Paragraph (60 to 900), Hidden words (4 to 20, 3 to 12 letters). Each word shows a check or a cross and why: Hidden, Not in your paragraph, In plain sight, Typed twice. Accent "Publish puzzle" opens `/p/CODE`. Below: Your puzzles (words, plays, liked it). Under the result of a player-made puzzle: "Made by @handle" and Good one / Not for me (one each, never your own).
+
+**Answers:** `/d/N/answers` for days that are over: the paragraph, every answer, "N% found it" from 5 players up, accent "Play today's daily". Linked from past days on the leaderboard and listed in the sitemap (last 60).
 
 **Circles:** `/circles` (yours, start one: name 2 to 40 chars) and `/c/CODE` (invite page for non members; members see Today and 7 days tables, Play today, Invite, Leave; owner sees Remove on members still to play). Up to 50 members, 20 circles each. Linked from the leaderboard.
 

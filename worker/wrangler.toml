@@ -18,5 +18,13 @@ APP_ORIGINS = "https://fignda.pages.dev,http://localhost:5173,http://localhost:4
 # Off for now: the free Workers AI models tested could not hide words across word boundaries.
 # Set "workers-ai" to retry free models (optionally with AI_MODEL), or "anthropic" with a key and a spending cap.
 AI_PROVIDER = "off"
+# Daily reminders (web push). Off until a key pair exists: run `npm run push:keys`, paste the public key and
+# subject here, and store the private one with `npx wrangler secret put VAPID_PRIVATE_KEY --config worker/wrangler.toml`.
+# VAPID_PUBLIC_KEY = ""
+# VAPID_SUBJECT = "https://fignda.pages.dev"
+
+# The reminder check, once an hour. Free plan friendly: one short run.
+[triggers]
+crons = ["0 * * * *"]
 
 # Local dev (`npm run worker:dev`) reads secrets from worker/.dev.vars (gitignored, blocked by the commit guard).

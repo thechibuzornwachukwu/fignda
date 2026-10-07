@@ -1,6 +1,6 @@
 import { getPuzzle } from './catalog';
 import { registry } from './registry';
-import { applyFinish, applyHint, applyPick, newSession, type Copy, type Session } from './session';
+import { applyFinish, applyHint, applyPick, isLogged, newSession, type Copy, type Session } from './session';
 
 const mod = registry['hidden-words'];
 const bible = getPuzzle('bible')!;
@@ -41,6 +41,15 @@ describe('session transitions', () => {
   it('already found', () => {
     const s = pick(newSession(0), ...spanOf('amos'));
     expect(pick(s, ...spanOf('amos')).msg).toBe('pick:already');
+  });
+
+  it('only real picks go in the play log: a repeat would make the server refuse the play', () => {
+    const [a, b] = spanOf('amos');
+    expect(isLogged(mod.check(bible, a, b, new Set()))).toBe(true);
+    expect(isLogged(mod.check(bible, a, b, new Set(['amos'])))).toBe(false);
+    expect(isLogged(mod.check(bible, a, a + 1, new Set()))).toBe(false);
+    expect(isLogged({ kind: 'wrong' })).toBe(true);
+    expect(isLogged({ kind: 'close' })).toBe(true);
   });
 
   it('wrong resets the streak; only the daily counts misses', () => {

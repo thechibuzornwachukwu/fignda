@@ -2,8 +2,8 @@ import { games } from '../games/catalog';
 import { buildHiddenWords, difficultyOf, norm } from './hiddenWords';
 
 describe('buildHiddenWords against data/games.json', () => {
-  it('has 21 games', () => {
-    expect(games).toHaveLength(21);
+  it('has 25 games', () => {
+    expect(games).toHaveLength(25);
   });
 
   it.each(games.map((g) => [g.id, g] as const))('%s returns exactly its expectedAnswers in order', (_, g) => {

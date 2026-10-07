@@ -144,6 +144,10 @@ function sanitize(saved: SavedSession, keys: ReadonlySet<string>): Session {
   return { ...newSession(Date.now()), ...saved, found, msg: '' };
 }
 
+/** Whether a pick goes in the play log. A word picked twice is not a second find, and the server refuses a
+ * whole play for one, so repeats and too-short picks are left out. */
+export const isLogged = (ev: Evaluation) => ev.kind !== 'already' && ev.kind !== 'ignore';
+
 /** Append to the play log, capped at the server's 500 event limit. */
 function withLog(next: Session, cur: Session, add: (l: PlayLog) => PlayLog): Session {
   const l = cur.log ?? { events: [], hints: [] };
@@ -207,10 +211,10 @@ export function useGameSession<P>({ mod, puzzle, dailyN, beforeHit, onHit, copy 
       chime();
     }
     const now = Date.now();
-    const next = withLog(applyPick(cur, ev, { now, total, daily, copy }), cur, (l) => ({
-      ...l,
-      events: [...l.events, { a, b, t: now - cur.startAt }],
-    }));
+    const picked = applyPick(cur, ev, { now, total, daily, copy });
+    const next = isLogged(ev)
+      ? withLog(picked, cur, (l) => ({ ...l, events: [...l.events, { a, b, t: now - cur.startAt }] }))
+      : picked;
     commit(next);
     if (ev.kind === 'hit') onHitRef.current?.(a, b);
     if (isFinished(next)) window.setTimeout(scrollToTop, durationMs('--dur-slower'));

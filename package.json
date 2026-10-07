@@ -25,7 +25,8 @@
     "deploy:api": "wrangler deploy --config worker/wrangler.toml",
     "og:render": "node scripts/render-og.mjs",
     "brand:render": "node scripts/render-brand.mjs",
-    "avatars:render": "tsx scripts/render-avatars.mjs"
+    "avatars:render": "tsx scripts/render-avatars.mjs",
+    "push:keys": "node scripts/push-keys.mjs"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.128.0",

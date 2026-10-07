@@ -2,13 +2,15 @@
 // Transport: Supabase Realtime broadcast + presence (free tier). E2E builds use BroadcastChannel so two tabs
 // can play together without a server.
 // Trust: nothing received is applied as is. Spans go back through the engine on each device (session.teamPick),
-// so a room can only ever mark words that really are in the text. Rooms are unranked: no plays are sent.
+// so a room can only ever mark words that really are in the text.
+// Ranking: each signed-in player sends their own play log when the game ends; the server replays it for the
+// Together board (worker/src/app.ts). Nothing said in the room is used for ranking.
 
 import { getSupabase } from './supabase';
 
 /** A player in the room. Signed in players carry their name and handle; guests are "A friend". */
 export type Peer = { id: string; name: string; handle?: string; away?: boolean } & Partial<RoomStats>;
-/** What each player reports for the room scoreboard. Rooms are unranked, so this is for bragging only. */
+/** What each player reports for the room scoreboard. This is the live view only; the Together board uses the server's replay. */
 export type RoomStats = { finds: number; hints: number; /** Seconds per word, from your start to your last find. */ pace: number };
 export type RoomHandlers = {
   onFind: (a: number, b: number, from: Peer) => void;

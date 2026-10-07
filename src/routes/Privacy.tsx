@@ -26,7 +26,16 @@ export function Privacy() {
           <li>Custom puzzles you create and cards you share.</li>
           <li>The character you design. It is saved as a short code of your choices, never a photo, and shows next to your name.</li>
           <li>Who you follow, and the circles you join. Members of a circle see each other’s names and verified daily scores.</li>
-          <li>Rooms keep nothing. While you play together, the others in the room see your name and what you find.</li>
+          <li>
+            Rooms: while you play together, the others in the room see your name and what you find. When the game ends, signed in players’ own
+            finds are saved so the team can go on the Together board.
+          </li>
+          <li>Friend streaks: who you keep one with. You each see whether the other has played today.</li>
+          <li>Invites into a room, kept for a day, and puzzles you make and the thumbs you give.</li>
+          <li>
+            Reminders, only if you turn them on: an address your browser gives us for notifications, your time zone and the hour you chose.
+            Turning reminders off or signing out removes it.
+          </li>
         </ul>
         <p>
           When you sign in, dailies you played as a guest in this browser move to your account. They are marked

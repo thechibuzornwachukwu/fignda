@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '../components/Button';
@@ -21,9 +21,15 @@ type Props = {
   /** Where this game's board lives, if it has one. */
   boardPath?: string;
   guest: boolean;
+  /** Your run of dailies, said once after a daily. */
+  streak?: string;
+  /** "Only 8% found Habakkuk." */
+  rare?: string;
+  /** Extra actions under the result (the reminder ask). */
+  children?: ReactNode;
 };
 
-export function GameResults({ title, line, score, found, total, secs, canReplay, onReplay, onShare, onText, boardPath, guest }: Props) {
+export function GameResults({ title, line, score, found, total, secs, canReplay, onReplay, onShare, onText, boardPath, guest, streak, rare, children }: Props) {
   const { pathname } = useLocation();
   const [note, setNote] = useState('');
   return (
@@ -43,6 +49,8 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
             </>
           )}
         </p>
+        {rare && <p className={styles.streak}>{rare}</p>}
+        {streak && <p className={styles.streak}>{streak}</p>}
       </div>
       <div className={styles.row}>
         <dl className={styles.stats}>
@@ -82,6 +90,7 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
       <p className={styles.note} role="status">
         {note}
       </p>
+      {children}
       {guest && (
         <div className={styles.guest}>
           <span className={styles.guestText}>

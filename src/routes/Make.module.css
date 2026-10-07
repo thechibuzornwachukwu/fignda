@@ -1,0 +1,133 @@
+.page {
+  padding: var(--screen-top) 0 var(--space-30);
+  display: flex;
+  flex-direction: column;
+  gap: var(--screen-gap);
+  max-width: 760px;
+}
+.title {
+  composes: display from '../styles/type.module.css';
+  margin: 0;
+}
+.sub {
+  color: var(--subtle);
+}
+.lead {
+  margin: calc(-1 * var(--space-6)) 0 0;
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.area {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.label {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--subtle);
+}
+.count {
+  font-variant-numeric: tabular-nums;
+}
+.text {
+  width: 100%;
+  padding: var(--space-3h) var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  color: var(--fg);
+  font: inherit;
+  font-size: 16px;
+  line-height: 1.55;
+  resize: vertical;
+  transition: border-color var(--dur-base) var(--ease-std);
+}
+.text:focus {
+  outline: none;
+  border-color: var(--line-4);
+}
+.words {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 2px solid var(--fg);
+}
+.word {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2h);
+  padding: var(--space-2h) 0;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+}
+.word[data-ok] {
+  color: var(--fg);
+}
+.wordText {
+  font-size: 16px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.why {
+  margin-left: auto;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: right;
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+}
+.note,
+.muted {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.h2 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 2px solid var(--fg);
+}
+.item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0h);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--line);
+}
+.itemTitle {
+  font-size: 17px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.itemMeta {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--subtle);
+}

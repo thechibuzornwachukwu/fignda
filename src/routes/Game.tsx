@@ -9,10 +9,11 @@ import { TextLink } from '../components/TextLink';
 import { WordList, type WordListHandle, type WordRow } from '../components/WordList';
 import { dayNo } from '../engine/daily';
 import { getGameDef, type GameDef } from '../games/catalog';
-import { dailyInfo } from '../games/daily';
+import { dailyInfo, dailyLabel } from '../games/daily';
 import { registry } from '../games/registry';
 import { scoreOf, secondsOf, useGameSession } from '../games/session';
-import { fetchCustomGame, mergeGuestDailies, submitPlay } from '../lib/api';
+import { fetchCustomGame, fetchWordStats, mergeGuestDailies, submitPlay } from '../lib/api';
+import { rarestFound } from '../lib/wordStats';
 import { useAuth } from '../lib/auth';
 import { useCoarsePointer } from '../lib/media';
 import { ShareSheet, type ShareGame } from '../components/ShareSheet';
@@ -24,6 +25,10 @@ import * as copy from '../copy';
 import { joinRoom, newRoomCode, ROOM_RE, type Peer, type Room, type RoomStats, type RoomStatus } from '../lib/room';
 import { Challenge } from './Challenge';
 import { RoomBar } from './RoomBar';
+import { ReminderAsk } from './ReminderAsk';
+import { RatePuzzle } from './RatePuzzle';
+import { streakPool } from '../lib/streak';
+import { useStreak } from '../lib/useStreak';
 import { GameResults } from './GameResults';
 import styles from './Game.module.css';
 
@@ -165,9 +170,10 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
   // Signed in: send the play log once per finished game. The Worker replays it and stores a verified score.
   // Today's daily only; if that fails for a reason other than "already played", keep it as an unverified merge.
   const sent = useRef<number | null>(null);
+  // Set once the server has answered for this play, so the word stats can include it.
+  const [answered, setAnswered] = useState(false);
   useEffect(() => {
-    // Rooms are not ranked: finds by teammates are not yours to score.
-    if (!finished || !signedIn || inRoom || s.endAt == null || sent.current === s.startAt) return;
+    if (!finished || !signedIn || s.endAt == null || sent.current === s.startAt) return;
     sent.current = s.startAt;
     const isToday = daily && dailyN === dayNo();
     if (daily && !isToday) {
@@ -178,10 +184,14 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
     void submitPlay({
       game: daily ? { type: 'daily', day_no: dailyN! } : { type: 'game', id: def.id },
       log: { events: log.events, hints: log.hints, finish: Math.max(1, s.endAt - s.startAt) },
+      // In a room the log holds only your own picks. The server replays it for the Together board and never
+      // for the solo boards: a teammate's find is not yours to score.
+      ...(inRoom ? { room: roomCode } : {}),
     }).then((r) => {
       if (daily && !r.ok && r.status !== 409) mergeGuestDailies().catch(() => {});
+      setAnswered(true);
     });
-  }, [finished, signedIn, inRoom, s.endAt, s.startAt, s.log, daily, dailyN, def.id]);
+  }, [finished, signedIn, inRoom, roomCode, s.endAt, s.startAt, s.log, daily, dailyN, def.id]);
 
   const foundCount = s.found.length;
   const count = daily && !finished ? `${foundCount} found` : `${foundCount} / ${total}`;
@@ -233,9 +243,38 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
     return (await copyText(text)) ? 'Copied. Paste it in your group.' : 'Could not copy. Use Share.';
   };
 
+  // After today's daily: where the run stands. Picked once per finish.
+  const isToday = daily && dailyN === dayNo();
+  const run = useStreak(finished ? s.endAt : 0);
+  const streakLine = useMemo(() => {
+    const p = isToday && finished ? streakPool(run.streak, run.best) : null;
+    return p ? copy.pick(p.pool, { n: p.n }) : '';
+  }, [isToday, finished, run.streak, run.best]);
+
+  // "Only 8% found Habakkuk": the rarest word you found on this daily. Picked once.
+  // Guests and past days send nothing, so there is nothing to wait for.
+  const settled = finished && (!signedIn || !isToday || answered);
+  const [rare, setRare] = useState('');
+  useEffect(() => {
+    if (!daily || !settled || !auth.enabled) return;
+    let alive = true;
+    fetchWordStats(dailyN!)
+      .then((stats) => {
+        const r = rarestFound(stats, gRef.current.s.found.map((f) => f.key));
+        const label = r && gRef.current.s.found.find((f) => f.key === r.key)?.label;
+        if (alive && r && label) setRare(copy.pick('rareFind', { p: r.pct, w: label }));
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [daily, settled, dailyN, auth.enabled]);
+
   const Board = mod.Board;
   const perfect = foundCount === total;
+  const holiday = dailyN != null && dailyLabel(dailyN) !== 'Daily' ? dailyLabel(dailyN) : '';
   const resultLine =
+    (holiday ? `${holiday}. ` : '') +
     (perfect ? 'Every answer found.' : 'The ones you missed are shaded below.') +
     (daily
       ? (s.misses ? ` ${s.misses} ${s.misses === 1 ? 'wrong pick.' : 'wrong picks.'}` : '') +
@@ -252,6 +291,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
           </Link>
           <span className={styles.metaEnd}>
             <span className={styles.level}>
+              {holiday ? `${holiday} · ` : ''}
               {def.category} · {puzzle.difficulty}
             </span>
             {auth.enabled && !daily && !inRoom && !finished && (
@@ -269,7 +309,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
         </div>
       </div>
 
-      {inRoom && <RoomBar code={roomCode} peers={peers} status={roomStatus} me={myStats} path={sharePath({ id: def.id, code: def.id.startsWith('c-') ? def.id.slice(2).toUpperCase() : undefined })} />}
+      {inRoom && <RoomBar gameId={def.id} code={roomCode} peers={peers} status={roomStatus} me={myStats} path={sharePath({ id: def.id, code: def.id.startsWith('c-') ? def.id.slice(2).toUpperCase() : undefined })} />}
 
       {challenge && !inRoom && (
         <Challenge
@@ -299,9 +339,14 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
           onReplay={g.replay}
           onShare={() => setSharing(true)}
           onText={sendText}
-          boardPath={auth.enabled ? (daily ? `/leaderboard?day=${dailyN}` : getGameDef(def.id) ? `/leaderboard/${def.id}` : undefined) : undefined}
+          boardPath={auth.enabled ? (daily ? `/leaderboard?day=${dailyN}` : getGameDef(def.id) ? `/leaderboard/${def.id}${inRoom ? '?board=together' : ''}` : undefined) : undefined}
           guest={!signedIn}
-        />
+          streak={streakLine}
+          rare={rare}
+        >
+          {isToday && signedIn && <ReminderAsk />}
+          {auth.enabled && def.id.startsWith('c-') && <RatePuzzle code={def.id.slice(2).toUpperCase()} />}
+        </GameResults>
       )}
 
       <div className={styles.columns}>

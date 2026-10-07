@@ -3,11 +3,11 @@ import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
-import { dailyGameId, dayNo } from '../engine/daily';
+import { dayNo } from '../engine/daily';
 import { formatTime } from '../engine/time';
-import { dailyPool, games, getGameDef } from '../games/catalog';
-import { dailyDate } from '../games/daily';
-import { fetchDailyBoard, fetchDailyRank, fetchFollowingBoard, fetchGameBoard, type BoardRow, type MyRank } from '../lib/api';
+import { dailyIdFor, games, getGameDef } from '../games/catalog';
+import { dailyDate, dailyLabel } from '../games/daily';
+import { fetchDailyBoard, fetchDailyRank, fetchFollowingBoard, fetchGameBoard, fetchTogetherBoard, type BoardRow, type MyRank, type TeamRow } from '../lib/api';
 import { Segmented } from '../components/Segmented';
 import { useAuth } from '../lib/auth';
 import { Avatar } from '../components/Avatar';
@@ -88,7 +88,7 @@ export function Leaderboard() {
   const today = dayNo();
   const asked = Number(params.get('day'));
   const day = Number.isInteger(asked) && asked >= 1 && asked <= today ? asked : today;
-  const game = getGameDef(dailyGameId(day, dailyPool));
+  const game = getGameDef(dailyIdFor(day));
   const me = auth.profile?.handle;
   const circle = params.get('board') === 'following' && !!me;
 
@@ -127,7 +127,7 @@ export function Leaderboard() {
         <div className={styles.head}>
           <div className={styles.headText}>
             <span className={styles.kicker}>
-              {day === today ? 'Today' : dailyDate(day)} · Daily #{day}
+              {day === today ? 'Today' : dailyDate(day)} · {dailyLabel(day)} #{day}
             </span>
             <h2 id="daily-title" className={styles.h2}>
               {game ? (day === today ? `Hidden ${game.noun}` : game.title) : 'Daily'}
@@ -187,7 +187,15 @@ export function Leaderboard() {
             }
           />
         )}
-        {day === today && <p className={styles.meta}>Today's totals stay hidden until midnight.</p>}
+        {day === today ? (
+          <p className={styles.meta}>Today's totals stay hidden until midnight.</p>
+        ) : (
+          <p className={styles.meta}>
+            <Link to={`/d/${day}/answers`} className={styles.inline}>
+              See that day's answers
+            </Link>
+          </p>
+        )}
         <GuestNote next="/leaderboard" />
       </section>
 
@@ -210,12 +218,58 @@ export function Leaderboard() {
   );
 }
 
-/** /leaderboard/:id. Best verified play per player on one curated puzzle. */
+function TeamBoard({ rows, myHandle }: { rows: TeamRow[]; myHandle?: string }) {
+  if (rows.length === 0) {
+    return <p className={styles.empty}>No teams on this puzzle yet. Open it, choose Play together and send the invite.</p>;
+  }
+  return (
+    <ol className={styles.board} aria-label="Top teams">
+      {rows.map((t) => (
+        <li key={t.rank} className={styles.team} data-mine={t.players.some((p) => p.handle === myHandle) || undefined}>
+          <span className={styles.rank}>{String(t.rank).padStart(2, '0')}</span>
+          <ul className={styles.members} aria-label="Team">
+            {t.players.map((p) => (
+              <li key={p.handle} className={styles.member}>
+                <Link to={`/u/${p.handle}`} className={styles.handle}>
+                  <Avatar handle={p.handle} size={28} />
+                  @{p.handle}
+                </Link>
+                <span className={styles.found}>{p.finds === 1 ? '1 word' : `${p.finds} words`}</span>
+              </li>
+            ))}
+          </ul>
+          <span className={styles.time}>{formatTime(t.secs)}</span>
+          <span className={styles.score}>
+            {t.words}/{t.total}
+          </span>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+type GameLoad = { status: 'loading' } | { status: 'error' } | { status: 'solo'; rows: BoardRow[] } | { status: 'together'; rows: TeamRow[] };
+
+/** /leaderboard/:id. Best verified play per player on one curated puzzle, or its teams with ?board=together. */
 export function GameLeaderboard() {
   const { id = '' } = useParams();
   const auth = useAuth();
+  const [params, setParams] = useSearchParams();
+  const together = params.get('board') === 'together';
   const g = getGameDef(id);
-  const state = useBoard(id, async () => ({ rows: await fetchGameBoard(id), me: null }));
+  const key = `${id}|${together}`;
+  const [loaded, setLoaded] = useState<{ key: string; load: GameLoad } | null>(null);
+  useEffect(() => {
+    let alive = true;
+    const load: Promise<GameLoad> = together
+      ? fetchTogetherBoard(id).then((rows) => ({ status: 'together', rows }))
+      : fetchGameBoard(id).then((rows) => ({ status: 'solo', rows }));
+    load.then((l) => alive && setLoaded({ key, load: l })).catch(() => alive && setLoaded({ key, load: { status: 'error' } }));
+    return () => {
+      alive = false;
+    };
+  }, [id, together, key]);
+  const state: GameLoad = loaded?.key === key ? loaded.load : { status: 'loading' };
 
   if (!auth.enabled || !g) return <Navigate to="/leaderboard" replace />;
 
@@ -228,18 +282,31 @@ export function GameLeaderboard() {
       <h1 className={styles.title}>
         {g.title}.
         <br />
-        <span className={styles.sub}>Best scores.</span>
+        <span className={styles.sub}>{together ? 'Best teams.' : 'Best scores.'}</span>
       </h1>
       <section className={styles.section} aria-label={`${g.title} board`}>
+        <div className={styles.switch}>
+          <Segmented
+            label="Board"
+            hideLabel
+            options={[
+              ['solo', 'Solo'],
+              ['together', 'Together'],
+            ]}
+            value={together ? 'together' : 'solo'}
+            onChange={(v) => setParams(v === 'together' ? { board: 'together' } : {}, { replace: true })}
+          />
+        </div>
         {state.status === 'loading' && <div className={styles.loading} aria-busy="true" />}
         {state.status === 'error' && <p className={styles.empty}>The board did not load. Try again in a moment.</p>}
-        {state.status === 'ready' && (
-          <Board
-            rows={state.rows}
-            me={null}
-            myHandle={auth.profile?.handle}
-            empty={<>No verified scores on this puzzle yet.</>}
-          />
+        {state.status === 'solo' && (
+          <Board rows={state.rows} me={null} myHandle={auth.profile?.handle} empty={<>No verified scores on this puzzle yet.</>} />
+        )}
+        {state.status === 'together' && <TeamBoard rows={state.rows} myHandle={auth.profile?.handle} />}
+        {together && (
+          <p className={styles.meta}>
+            Most words found together, then the faster team. Each player's count is the words they found first. Guests are not ranked.
+          </p>
         )}
         <div>
           <Button to={`/play/${g.id}`}>Play {g.title}</Button>

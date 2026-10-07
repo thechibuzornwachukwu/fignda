@@ -68,7 +68,12 @@ describe('sitemap and llms.txt', () => {
   it('lists main pages, every puzzle and the last 14 dailies, never profiles', () => {
     const paths = sitemapPaths(100).map((u) => u.path);
     expect(paths).toContain('/play/bible');
-    expect(paths.filter((p) => p.startsWith('/d/'))).toHaveLength(14);
+    expect(paths.filter((p) => /^\/d\/\d+$/.test(p))).toHaveLength(14);
+    // Answers pages: the last 60 finished days, never today.
+    const answers = paths.filter((p) => p.endsWith('/answers'));
+    expect(answers).toHaveLength(60);
+    expect(answers[0]).toBe('/d/99/answers');
+    expect(answers).not.toContain('/d/100/answers');
     expect(paths.some((p) => p.startsWith('/u/'))).toBe(false);
   });
 
@@ -78,5 +83,25 @@ describe('sitemap and llms.txt', () => {
     expect(t).toContain(`${O}/play/bible`);
     expect(t).toContain('Is Fignda free?');
     expect(t).not.toMatch(/[\u2014!]/);
+  });
+});
+
+describe('answers pages', () => {
+  it('a past daily lists every answer and its paragraph', () => {
+    const p = pageFor('/d/5/answers', O, 10);
+    expect(p.title).toMatch(/^Fignda Daily #5 answers \(5 January 2026\) · Fignda$/);
+    expect(p.canonical).toBe('/d/5/answers');
+    expect(p.noindex).toBeUndefined();
+    expect(p.body).toMatch(/<ol>(<li>[^<]+<\/li>)+<\/ol>/);
+    expect(p.body).toContain('<blockquote>');
+  });
+
+  it("today's and future answers are never written out", () => {
+    for (const n of [10, 11, 500]) {
+      const p = pageFor(`/d/${n}/answers`, O, 10);
+      expect(p.noindex).toBe(true);
+      expect(p.body).not.toContain('<blockquote>');
+      expect(p.title).not.toContain('answers');
+    }
   });
 });

@@ -3,6 +3,7 @@
 import type { SavedSession } from '../games/session';
 import type { PlayRow } from './profileStats';
 import { storage } from './storage';
+import type { WordStat } from './wordStats';
 import { getSupabase } from './supabase';
 
 export type Profile = { id: string; name: string; handle: string; /** Avatar design code, or null before the player designs one. */ avatar?: string | null };
@@ -111,6 +112,22 @@ export async function fetchGameBoard(gameId: string, limit = 20): Promise<BoardR
   const { data, error } = await (await client()).rpc('game_board', { p_game: gameId, p_limit: limit });
   if (error) throw error;
   return data as BoardRow[];
+}
+
+export type TeamRow = { rank: number; words: number; total: number; secs: number; players: Array<PlayerRef & { finds: number }> };
+
+/** Teams on one puzzle: rooms of two or more signed-in players, each with their own replayed finds. */
+export async function fetchTogetherBoard(gameId: string, limit = 20): Promise<TeamRow[]> {
+  const { data, error } = await (await client()).rpc('together_board', { p_game: gameId, p_limit: limit });
+  if (error) throw error;
+  return (data ?? []) as TeamRow[];
+}
+
+/** How many verified players found each word of a daily. Empty for today until you have played it. */
+export async function fetchWordStats(day: number): Promise<WordStat[]> {
+  const { data, error } = await (await client()).rpc('daily_word_stats', { p_day: day });
+  if (error) throw error;
+  return (data ?? []) as WordStat[];
 }
 
 // ---------------------------------------------------------------------------
@@ -261,6 +278,58 @@ export async function fetchCircleWeek(code: string): Promise<CircleWeekRow[]> {
   return data ?? [];
 }
 
+// Friend streaks: two players, one streak. It grows on each day both have a verified daily.
+export type FriendStreak = PlayerRef & { state: 'active' | 'incoming' | 'outgoing'; streak: number; you_today: boolean; them_today: boolean };
+
+export async function myFriendStreaks(): Promise<FriendStreak[]> {
+  const { data, error } = await (await client()).rpc('my_friend_streaks');
+  if (error) throw error;
+  return (data ?? []) as FriendStreak[];
+}
+
+/** Ask a player, or say yes if they asked first. */
+export async function askFriendStreak(handle: string): Promise<'asked' | 'started' | 'exists' | 'limit' | 'failed'> {
+  const { data, error } = await (await client()).rpc('friend_streak_ask', { p_handle: handle });
+  if (!error) return data as 'asked' | 'started' | 'exists';
+  return error.message.includes('limit') ? 'limit' : 'failed';
+}
+
+/** End a streak, take back an ask, or say no. */
+export async function endFriendStreak(handle: string): Promise<boolean> {
+  const { data, error } = await (await client()).rpc('friend_streak_end', { p_handle: handle });
+  return !error && !!data;
+}
+
+/** Your reusable streak link code. Whoever opens the link and says yes starts a streak with you. */
+export async function myStreakLink(): Promise<string | null> {
+  const { data, error } = await (await client()).rpc('my_streak_link');
+  return !error && typeof data === 'string' ? data : null;
+}
+
+export const STREAK_LINK_RE = /^[A-HJ-NP-Z2-9]{8}$/;
+
+export async function streakLinkInfo(code: string): Promise<PlayerRef | null> {
+  if (!STREAK_LINK_RE.test(code)) return null;
+  const { data, error } = await (await client()).rpc('streak_link_info', { p_code: code });
+  if (error) throw error;
+  return (data as PlayerRef[] | null)?.[0] ?? null;
+}
+
+export async function joinStreakLink(code: string): Promise<'started' | 'exists' | 'self' | 'limit' | 'failed'> {
+  const { data, error } = await (await client()).rpc('friend_streak_join', { p_code: code });
+  if (!error) return data as 'started' | 'exists' | 'self';
+  return error.message.includes('limit') ? 'limit' : 'failed';
+}
+
+export type GameInvite = PlayerRef & { game_id: string; title: string; room_code: string; created_at: string };
+
+/** Invites into rooms from the last hour. */
+export async function myGameInvites(): Promise<GameInvite[]> {
+  const { data, error } = await (await client()).rpc('my_game_invites');
+  if (error) throw error;
+  return (data ?? []) as GameInvite[];
+}
+
 export async function searchPlayers(prefix: string): Promise<PlayerRef[]> {
   const q = prefix.trim().toLowerCase().replace(/^@/, '');
   if (!/^[a-z0-9._]{1,20}$/.test(q)) return [];
@@ -269,8 +338,11 @@ export async function searchPlayers(prefix: string): Promise<PlayerRef[]> {
   return data as PlayerRef[];
 }
 
-export async function topPlayers(kind: 'streak' | 'perfect'): Promise<Array<PlayerRef & { value: number }>> {
-  const { data, error } = await (await client()).rpc('players_top', { p_kind: kind, p_limit: 10 });
+export async function topPlayers(kind: 'streak' | 'perfect' | 'points'): Promise<Array<PlayerRef & { value: number }>> {
+  const { data, error } =
+    kind === 'points'
+      ? await (await client()).rpc('players_points', { p_limit: 10 })
+      : await (await client()).rpc('players_top', { p_kind: kind, p_limit: 10 });
   if (error) throw error;
   return data as Array<PlayerRef & { value: number }>;
 }
@@ -365,6 +437,8 @@ export async function generatePuzzle(topic: string): Promise<GenerateResult> {
 export type PlaySubmission = {
   game: { type: 'daily'; day_no: number } | { type: 'game'; id: string };
   log: { events: Array<{ a: number; b: number; t: number }>; hints: number[]; finish: number };
+  /** Room code when the game was played together. Goes to the Together board only. */
+  room?: string;
 };
 
 /** Signed-in only. The server replays the log and stores a verified play. */
@@ -382,6 +456,60 @@ export async function submitPlay(p: PlaySubmission): Promise<{ ok: boolean; stat
     return { ok: false, status: 0 };
   }
 }
+
+async function postApi(path: string, body: unknown): Promise<{ ok: boolean; status: number; error?: string }> {
+  const auth = await authHeader();
+  if (!auth.Authorization) return { ok: false, status: 401 };
+  try {
+    const r = await fetch(`${API}${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...auth }, body: JSON.stringify(body) });
+    const out = (await r.json().catch(() => ({}))) as { error?: string };
+    return { ok: r.ok, status: r.status, error: out.error };
+  } catch {
+    return { ok: false, status: 0 };
+  }
+}
+
+export type MadePuzzle = { ok: true; code: string } | { ok: false; error: string; words?: string[] };
+
+/** Publish your own puzzle. The server runs the engine over it again before saving. */
+export async function publishPuzzle(p: { title: string; noun: string; text: string; words: string[] }): Promise<MadePuzzle> {
+  const auth = await authHeader();
+  if (!auth.Authorization) return { ok: false, error: 'sign_in_required' };
+  try {
+    const r = await fetch(`${API}/puzzles`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...auth }, body: JSON.stringify(p) });
+    const body = (await r.json().catch(() => ({}))) as { code?: string; error?: string; words?: string[] };
+    return r.ok && body.code ? { ok: true, code: body.code } : { ok: false, error: body.error ?? `http_${r.status}`, words: body.words };
+  } catch {
+    return { ok: false, error: 'network' };
+  }
+}
+
+export type MyPuzzle = { code: string; title: string; words: number; created_at: string; plays: number; ups: number; downs: number };
+
+export async function myPuzzles(): Promise<MyPuzzle[]> {
+  const { data, error } = await (await client()).rpc('my_puzzles');
+  if (error) throw error;
+  return (data ?? []) as MyPuzzle[];
+}
+
+export type PuzzleRating = { ups: number; downs: number; mine: boolean | null; maker: string | null; own: boolean };
+
+export async function fetchPuzzleRating(code: string): Promise<PuzzleRating | null> {
+  const { data, error } = await (await client()).rpc('puzzle_rating', { p_code: code });
+  if (error) return null;
+  return (data as PuzzleRating[] | null)?.[0] ?? null;
+}
+
+export async function ratePuzzle(code: string, up: boolean): Promise<boolean> {
+  const { data, error } = await (await client()).rpc('rate_puzzle', { p_code: code, p_up: up });
+  return !error && !!data;
+}
+
+/** Ask a player you follow into your room. */
+export const inviteToRoom = (handle: string, game: string, room: string) => postApi('/invite', { handle, game, room });
+
+/** Nudge a streak friend who has not played today. One a day. */
+export const nudgeFriend = (handle: string) => postApi('/nudge', { handle });
 
 export type CustomGame = { id: string; title: string; noun: string; text: string; dict: string[]; code: string };
 

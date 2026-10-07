@@ -6,9 +6,10 @@ import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
 import { rankRoom, type Peer, type RoomStats, type RoomStatus, type Row } from '../lib/room';
 import { copyText } from '../lib/share';
+import { InviteFollowing } from './GameInvites';
 import styles from './RoomBar.module.css';
 
-type Props = { code: string; peers: Peer[]; path: string; status: RoomStatus; me: RoomStats };
+type Props = { code: string; peers: Peer[]; path: string; status: RoomStatus; me: RoomStats; gameId: string };
 
 const line = (r: Row) =>
   [`${r.finds ?? 0} ${r.finds === 1 ? 'word' : 'words'}`, r.finds ? `${r.pace ?? 0}s a word` : '', `${r.hints ?? 0} ${r.hints === 1 ? 'hint' : 'hints'}`]
@@ -17,8 +18,8 @@ const line = (r: Row) =>
 
 const STATUS: Record<RoomStatus, string> = { connecting: 'Connecting', live: 'Live', offline: 'Reconnecting' };
 
-/** Who is in the room, the invite, and the way out. Room games are not ranked. */
-export function RoomBar({ code, peers, path, status, me }: Props) {
+/** Who is in the room, the invite, and the way out. Signed in players are ranked as a team; guests are shown only. */
+export function RoomBar({ code, peers, path, status, me, gameId }: Props) {
   const rows = rankRoom([{ id: 'you', name: 'You', you: true, ...me }, ...peers]);
   const [note, setNote] = useState('');
   const url = `${window.location.origin}${path}?room=${code}`;
@@ -69,7 +70,7 @@ export function RoomBar({ code, peers, path, status, me }: Props) {
             Waiting for a friend. Send the invite.
           </span>
         )}
-        <span className={styles.note}>Room {code}. Most words wins, then time per word, then fewest hints. Not on the leaderboard.</span>
+        <span className={styles.note}>Room {code}. Most words wins, then time per word, then fewest hints. Signed in teams go on the Together board.</span>
       </div>
       <div className={styles.actions}>
         <Button variant="secondary" size="sm" onClick={invite}>
@@ -82,6 +83,7 @@ export function RoomBar({ code, peers, path, status, me }: Props) {
       <span className={styles.status} role="status">
         {note}
       </span>
+      <InviteFollowing gameId={gameId} room={code} />
     </section>
   );
 }

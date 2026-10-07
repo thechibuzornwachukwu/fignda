@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { clearLocalCache, deleteAccount, fetchProfile, mergeGuestDailies, type Profile } from './api';
+import { disableReminder } from './push';
 import { getSupabase, needsAuthNow, onSupabaseReady, supabaseEnabled } from './supabase';
 
 type Auth = {
@@ -80,6 +81,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async () => {
     // Save any dailies played while signed in before the local copy goes.
     if (profile) await mergeGuestDailies().catch(() => {});
+    // This browser's reminder belongs to the player leaving.
+    await disableReminder().catch(() => {});
     await (await getSupabase())?.auth.signOut();
     clearLocalCache();
     setSession(null);

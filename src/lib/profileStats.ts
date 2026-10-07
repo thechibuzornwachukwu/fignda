@@ -15,6 +15,8 @@ export type PlayRow = {
 export type DayCell = { day: number; state: 'perfect' | 'played' | 'none' };
 
 export type ProfileStats = {
+  /** Lifetime tally from verified plays: every daily, and the best score on each other puzzle. */
+  points: number;
   dailies: number;
   streak: number;
   bestStreak: number;
@@ -26,7 +28,7 @@ export type ProfileStats = {
 const isPerfect = (p: PlayRow) => p.total != null && p.total > 0 && p.found === p.total;
 
 /** Longest run of consecutive days. */
-function longestRun(days: Set<number>): number {
+export function longestRun(days: ReadonlySet<number>): number {
   let best = 0;
   for (const d of days) {
     if (days.has(d - 1)) continue;
@@ -35,6 +37,19 @@ function longestRun(days: Set<number>): number {
     best = Math.max(best, n);
   }
   return best;
+}
+
+/** Same rule as the database (player_points): a replayed puzzle counts its best score only. */
+export function pointsOf(plays: readonly PlayRow[]): number {
+  let total = 0;
+  const best = new Map<string, number>();
+  for (const p of plays) {
+    if (p.verified === false) continue;
+    if (p.day_no != null) total += p.score;
+    else best.set(p.game_id, Math.max(best.get(p.game_id) ?? 0, p.score));
+  }
+  for (const v of best.values()) total += v;
+  return total;
 }
 
 export function profileStats(plays: readonly PlayRow[], today: number): ProfileStats {
@@ -49,6 +64,7 @@ export function profileStats(plays: readonly PlayRow[], today: number): ProfileS
   });
   const recent = [...plays].sort((a, b) => b.created_at.localeCompare(a.created_at)).slice(0, 10);
   return {
+    points: pointsOf(plays),
     dailies: played,
     streak,
     bestStreak: longestRun(days),

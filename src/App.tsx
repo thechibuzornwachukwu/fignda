@@ -22,6 +22,9 @@ const GameLeaderboard = lazy(() => import('./routes/Leaderboard').then((m) => ({
 const Players = lazy(() => import('./routes/Players').then((m) => ({ default: m.Players })));
 const Circles = lazy(() => import('./routes/Circles').then((m) => ({ default: m.Circles })));
 const Circle = lazy(() => import('./routes/Circles').then((m) => ({ default: m.Circle })));
+const Answers = lazy(() => import('./routes/Answers').then((m) => ({ default: m.Answers })));
+const Make = lazy(() => import('./routes/Make').then((m) => ({ default: m.Make })));
+const StreakInvite = lazy(() => import('./routes/StreakInvite').then((m) => ({ default: m.StreakInvite })));
 const Privacy = lazy(() => import('./routes/Privacy').then((m) => ({ default: m.Privacy })));
 
 // Test-only card harness. VITE_E2E is set only by the e2e build, so production compiles this away.
@@ -62,6 +65,7 @@ export function App() {
         <Route path="play" element={<Games />} />
         <Route path="play/:id" element={<GameById />} />
         <Route path="d/:n" element={<DailyGame />} />
+        <Route path="d/:n/answers" element={<Answers />} />
         <Route path="p/:code" element={<GameByCode />} />
         <Route path="signin" element={<SignIn />} />
         <Route path="account" element={<Account />} />
@@ -72,6 +76,8 @@ export function App() {
         <Route path="players" element={<Players />} />
         <Route path="circles" element={<Circles />} />
         <Route path="c/:code" element={<Circle />} />
+        <Route path="s/:code" element={<StreakInvite />} />
+        <Route path="make" element={<Make />} />
         <Route path="privacy" element={<Privacy />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

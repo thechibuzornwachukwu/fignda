@@ -87,6 +87,33 @@ export function Profile() {
         {note}
       </span>
 
+      {plays.length === 0 ? (
+        <section className={styles.fresh} aria-label="New player">
+          <h2 className={styles.freshTitle}>{own ? 'Your run starts with one puzzle.' : `${profile.name} is new here.`}</h2>
+          <p className={styles.muted}>
+            {own
+              ? 'Find one word and you are on the board. Points, streaks and your last 14 dailies will show up here as you play.'
+              : 'No plays yet. Their points and streak will show up here after a first game.'}
+          </p>
+          <div className={styles.freshActions}>
+            {own ? (
+              <Button variant="accent" to={`/d/${today}`}>
+                Play today's daily
+              </Button>
+            ) : (
+              <Button variant="secondary" to="/play">
+                Find a puzzle
+              </Button>
+            )}
+          </div>
+        </section>
+      ) : (
+        <>
+      <dl className={styles.points}>
+        <dt className={styles.statLabel}>Points</dt>
+        <dd className={styles.statValue}>{s.points.toLocaleString('en-US')}</dd>
+      </dl>
+
       <dl className={styles.stats}>
         <div className={styles.stat}>
           <dt className={styles.statLabel}>Streak</dt>
@@ -173,6 +200,8 @@ export function Profile() {
           </ul>
         )}
       </section>
+        </>
+      )}
 
       <SocialLists own={own} social={social} />
     </div>

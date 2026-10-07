@@ -102,5 +102,45 @@
   ],
   "teamJoined": [
     "{name} is in. Find them together."
+  ],
+  "remind": [
+    "Today's puzzle is up. One try.",
+    "New words are hiding. Come find them.",
+    "Today's daily is waiting for you."
+  ],
+  "remindStreak": [
+    "{n} days in a row. Keep it going today.",
+    "Your {n} day run is waiting on today's puzzle.",
+    "{n} days so far. Today is next."
+  ],
+  "remindFriend": [
+    "{name} has played today. Your turn.",
+    "{name} found theirs. Go find yours."
+  ],
+  "streakKeep": [
+    "{n} days in a row. Play today to keep it.",
+    "Your {n} day run needs today."
+  ],
+  "streakDay": [
+    "{n} days in a row.",
+    "Day {n} of your run."
+  ],
+  "streakStart": [
+    "Day 1. Come back tomorrow to start a run."
+  ],
+  "streakMilestone": [
+    "{n} days in a row. That is a real habit.",
+    "{n} days. Not many get here."
+  ],
+  "streakBack": [
+    "Day 1 of a new run. Your best is {n}. Go and beat it."
+  ],
+  "rareFind": [
+    "Only {p}% found {w}. You did.",
+    "{w}: found by {p}% of players. And you."
+  ],
+  "inviteGame": [
+    "{name} is in a room and wants you in. Join now.",
+    "{name} wants to play together. Jump in."
   ]
 }

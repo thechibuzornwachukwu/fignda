@@ -1,12 +1,12 @@
 // Writes supabase/seed.sql from data/games.json using the engine.
 // Answer lists and totals come from the engine, never hand typing. Idempotent (upserts).
+// Holidays (data/holidays.json) go through the same rule as the client, so the server's daily always matches.
 // Run: npm run db:seed:gen
 
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { dailyGameId } from '../src/engine/daily';
 import { buildHiddenWords } from '../src/engine/hiddenWords';
-import { dailyPool, games } from '../src/games/catalog';
+import { dailyIdFor, games } from '../src/games/catalog';
 
 /** Days to schedule ahead. 2026-01-01 is day 1. */
 const DAYS = 1100;
@@ -34,13 +34,13 @@ const answers = new Map(games.map((g) => [g.id, buildHiddenWords(g).answers.map(
 const days = Array.from({ length: DAYS }, (_, i) => i + 1);
 out.push(
   'insert into public.daily (day_no, game_id) values',
-  days.map((n) => `  (${n}, ${q(dailyGameId(n, dailyPool))})`).join(',\n'),
+  days.map((n) => `  (${n}, ${q(dailyIdFor(n))})`).join(',\n'),
   'on conflict (day_no) do update set game_id = excluded.game_id;',
   '',
   'insert into public.daily_answers (day_no, answers) values',
   days
     .map((n) => {
-      const keys = answers.get(dailyGameId(n, dailyPool))!;
+      const keys = answers.get(dailyIdFor(n))!;
       return `  (${n}, array[${keys.map(q).join(', ')}]::text[])`;
     })
     .join(',\n'),

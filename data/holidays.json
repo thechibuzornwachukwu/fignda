@@ -1,0 +1,12 @@
+{
+  "since": "2026-10-08",
+  "holidays": [
+    { "id": "new-year", "name": "New Year", "date": "01-01", "game": "general" },
+    { "id": "valentines", "name": "Valentine's", "date": "02-14", "game": "world" },
+    { "id": "easter", "name": "Easter", "dates": ["2027-03-28", "2028-04-16", "2029-04-01", "2030-04-21"], "game": "bible" },
+    { "id": "july-4", "name": "4th of July", "date": "07-04", "game": "history" },
+    { "id": "nigeria-independence", "name": "Independence Day", "date": "10-01", "game": "nigeria" },
+    { "id": "halloween", "name": "Halloween", "date": "10-31", "game": "body" },
+    { "id": "christmas", "name": "Christmas", "date": "12-25", "game": "bible" }
+  ]
+}

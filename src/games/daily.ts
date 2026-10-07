@@ -1,9 +1,15 @@
-import { dailyGameId, dayNo } from '../engine/daily';
+import { dayNo } from '../engine/daily';
 import { storage } from '../lib/storage';
-import { dailyPool, getGameDef, type GameDef } from './catalog';
+import { dailyIdFor, getGameDef, holidayFor, type GameDef } from './catalog';
 import type { SavedSession } from './session';
 
-export type DailyInfo = { n: number; def: GameDef; date: string };
+export type DailyInfo = { n: number; def: GameDef; date: string; /** Holiday name when the day is one: "Christmas". */ holiday?: string };
+
+/** "Christmas daily" on a holiday, else "Daily". */
+export function dailyLabel(n: number): string {
+  const h = holidayFor(n);
+  return h ? `${h.name} daily` : 'Daily';
+}
 
 /** Display date for a day number, in UTC to match `dayNo`. */
 export function dailyDate(n: number): string {
@@ -12,8 +18,8 @@ export function dailyDate(n: number): string {
 }
 
 export function dailyInfo(n: number): DailyInfo | null {
-  const def = getGameDef(dailyGameId(n, dailyPool));
-  return def ? { n, def, date: dailyDate(n) } : null;
+  const def = getGameDef(dailyIdFor(n));
+  return def ? { n, def, date: dailyDate(n), holiday: holidayFor(n)?.name } : null;
 }
 
 export const today = (): DailyInfo => dailyInfo(dayNo())!;

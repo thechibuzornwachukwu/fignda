@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/Button';
 import {
+  askFriendStreak,
   fetchFollowers,
   fetchFollowing,
   follow,
@@ -13,6 +14,7 @@ import {
 import { useAuth } from '../lib/auth';
 import { copyText } from '../lib/share';
 import { Avatar } from '../components/Avatar';
+import { useFriendStreaks } from './FriendStreaks';
 import styles from './Profile.module.css';
 
 export type Social = {
@@ -62,6 +64,26 @@ export function SocialActions({
 }) {
   const auth = useAuth();
   const [busy, setBusy] = useState(false);
+  // A streak the two of you share. Asked from here, kept on /players.
+  const friends = useFriendStreaks(!!auth.profile && !own);
+  const mine = friends.rows?.find((f) => f.handle === handle);
+  const askStreak = async () => {
+    setBusy(true);
+    const r = await askFriendStreak(handle).catch(() => 'failed' as const);
+    setBusy(false);
+    onNote(
+      r === 'asked'
+        ? `Asked. The streak starts when ${name} says yes.`
+        : r === 'started'
+          ? 'Streak started. It grows each day you both play the daily.'
+          : r === 'limit'
+            ? 'You can keep 5 friend streaks at once. End one to start another.'
+            : r === 'exists'
+              ? ''
+              : 'That did not work. Try again.',
+    );
+    friends.reload();
+  };
 
   const share = async () => {
     const url = window.location.href;
@@ -107,6 +129,18 @@ export function SocialActions({
           {social.iFollow ? 'Following' : 'Follow'}
         </Button>
       )}
+      {!own &&
+        auth.profile &&
+        friends.rows &&
+        (mine?.state === 'active' ? (
+          <Button variant="secondary" size="sm" to="/players#friend-streaks">
+            {mine.streak === 1 ? '1 day streak' : `${mine.streak} day streak`}
+          </Button>
+        ) : (
+          <Button variant="secondary" size="sm" onClick={askStreak} disabled={busy || mine?.state === 'outgoing'}>
+            {mine?.state === 'outgoing' ? 'Streak asked' : mine?.state === 'incoming' ? 'Accept streak' : 'Start a streak'}
+          </Button>
+        ))}
       <Button variant="secondary" size="sm" onClick={share}>
         Share
       </Button>

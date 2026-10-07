@@ -1,4 +1,4 @@
-import { dailyStats, handleFromName, safeNext } from './streak';
+import { dailyStats, handleFromName, safeNext, streakPool } from './streak';
 
 describe('dailyStats', () => {
   it('counts a run ending today', () => {
@@ -41,5 +41,23 @@ describe('handleFromName', () => {
     ['', ''],
   ])('%s -> %s', (name, want) => {
     expect(handleFromName(name)).toBe(want);
+  });
+});
+
+describe('streakPool', () => {
+  it.each([
+    [0, 0, null],
+    [1, 1, { pool: 'streakStart', n: 1 }],
+    [1, 2, { pool: 'streakStart', n: 1 }],
+    // Back after a real run: point at the best, not the loss.
+    [1, 42, { pool: 'streakBack', n: 42 }],
+    [2, 2, { pool: 'streakDay', n: 2 }],
+    [6, 40, { pool: 'streakDay', n: 6 }],
+    [7, 7, { pool: 'streakMilestone', n: 7 }],
+    [30, 30, { pool: 'streakMilestone', n: 30 }],
+    [100, 100, { pool: 'streakMilestone', n: 100 }],
+    [365, 365, { pool: 'streakMilestone', n: 365 }],
+  ])('streak %i, best %i', (streak, best, want) => {
+    expect(streakPool(streak, best)).toEqual(want);
   });
 });

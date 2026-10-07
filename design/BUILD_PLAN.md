@@ -1,37 +1,44 @@
 # Build plan
 
-What is left. Everything built so far (M1 to M10, the play test polish, circles, avatars, rooms) is live and
-recorded in git history and `SPEC.md`. A piece of work is done when its checks pass.
+What is left. Everything built so far is recorded in git history and `SPEC.md`. A piece of work is done when its checks pass.
 
 Deploy: `npm run deploy:site`, `npm run deploy:api`. Database: `npx supabase db push`.
+
+## To ship what is built (7 Oct 2026)
+
+Built and passing locally, not yet live: room games on the Together board, holiday dailies, streak lines, reminders, friend streaks with invite links and nudges, room invites, points, the new player profile, "only 8% found", player-made puzzles, answers pages, 4 Naija packs.
+
+- [ ] `npx supabase db push` (6 new migrations, `20261007000100` to `000600`).
+- [ ] Load `supabase/seed.sql` on production: 4 new puzzles and the holiday days. Until this runs, the new packs open but their scores are not saved, and on a holiday the server would still hold the rotation puzzle, so that day's plays would not verify (first one: Halloween, 31 Oct).
+- [ ] `npm run deploy:api`, then `npm run deploy:site`.
+- [ ] Reminders stay off until a key pair exists: `npm run push:keys`, put the public key and `VAPID_SUBJECT` in `worker/wrangler.toml`, `npx wrangler secret put VAPID_PRIVATE_KEY --config worker/wrangler.toml`, deploy the API again. Then check one real push on a phone.
 
 ## Owner
 
 - [ ] Reset the database password (Supabase, Database, Settings). It was shared in chat and is still the live one.
 - [ ] Buy a domain. Unlocks reliable email, ads later, and a keyword in the address.
-- [ ] Custom SMTP (Brevo, free) so sign in emails carry a 6 digit code. The branded code email is ready and applies once this is set.
+- [ ] Custom SMTP (Brevo, free) so sign in emails carry a 6 digit code. The branded code email is ready and applies once this is set. Until then Supabase sends its own plain email with a link.
 - [ ] Free AI key (Google AI Studio or Groq) for any-topic puzzles.
 - [ ] Decide the name: keep Fignda, or rename before the domain is bought (checked free on 7 Oct 2026: peepam.com, sabisee.com, oyalook.com, lookwell.game).
 - [ ] Review the look tags on hairstyles (`src/avatar/parts/hair.ts`): which are usually feminine, masculine, or for anyone. Outfits no longer count toward the look.
+- [ ] Read the 4 Naija packs (`data/games.json`: afrobeats, nollywood, lagos, eagles) for names you would add or drop. The engine has checked that every word is hidden across word boundaries.
+- [ ] Holiday calendar (`data/holidays.json`): Eid is not in it. Its date depends on the moon sighting and no current puzzle fits. Add the dates and a puzzle when ready.
 
 ## To build next
 
-- [ ] Put room games on the leaderboard (owner: "fix this pronto"). Today they are left off because the leaderboard only ranks plays the server has replayed, and in a room a teammate's find would count as yours. Fix: each player sends their own play log from a room; the server replays it and counts only that player's own finds; a Together board per puzzle then ranks teams (words found together, then time) and shows each player's verified share. Checks: a forged or duplicated find never counts; a teammate's find is never credited to you; solo boards are unchanged; guests in a room are shown but not ranked.
-- [ ] Identify the best free model for any-topic puzzles (owner note). Test Google Gemini's free tier, Groq and OpenRouter's free models on the real bar: 10 topics each, every word hidden across word boundaries, checked by the engine. Pick by pass rate, then daily free limit.
-- [ ] Holiday dailies: on a holiday, the daily is a puzzle inspired by it (4 July: America; 1 October: Nigeria; 25 December: Christmas; 14 February: Valentine's; 31 October: Halloween).
-  - Structure: one calendar file, `data/holidays.json`, listing each holiday as a date rule (fixed like `12-25`, or a dated list for moving ones like Easter and Eid), a name, and the puzzle to use. `src/engine/daily.ts` checks the calendar first and falls back to the normal rotation. The seed generator (`npm run db:seed:gen`) reads the same file, so the server's daily and its answers always match the client.
-  - Phase 1, no AI: point each holiday at the closest existing puzzle (Christmas and Easter: Bible; 1 October: Nigerian names; and so on), and label the daily card and results with the holiday ("Independence Day daily").
-  - Phase 2, with the AI key: add a themed puzzle for each holiday ahead of time, checked by the engine and read by a person before it is scheduled. Same file, new puzzle ids.
-  - Checks: a holiday date returns its puzzle on client and server; a normal date is unchanged; yesterday's and tomorrow's dailies are not shifted by a holiday; answers still never leak before the day; leaderboards and streaks treat it as an ordinary daily; link previews and the sitemap name the holiday.
+- [ ] Identify the best free model for any-topic puzzles (owner note). Needs the AI key. Test Google Gemini's free tier, Groq and OpenRouter's free models on the real bar: 10 topics each, every word hidden across word boundaries, checked by the engine. Pick by pass rate, then daily free limit.
 - [ ] Any-topic puzzles: generate one hidden word at a time with a stronger free model, check each with the engine, then switch generation on (it is off in production: the free Workers AI models made puzzles that were too easy to spot).
-- [ ] Streak reminders and friend streaks.
-- [ ] "Only 8% found this word" after each daily.
-- [ ] Player-made puzzles: hide words in your own paragraph, the engine checks it, others play and rate it.
-- [ ] Search traffic: "Fignda: the hidden words game" in titles, an answers page for each past daily, Nigerian packs (Afrobeats, Nollywood, Lagos places, football).
+- [ ] Holiday dailies, phase 2 (needs the AI key): a themed puzzle for each holiday, checked by the engine and read by a person before it is scheduled. Same file, new puzzle ids.
+- [ ] Player-made puzzles, public list: today they open by link only. A browse list needs a report button and a way to hide a puzzle first.
+- [ ] Search traffic, name part: "Fignda: the hidden words game" in titles. Waiting on the name decision.
+- [ ] Streak freeze (see Business). The research case for it: Duolingo reports about 21% less churn for players near a break.
+- [ ] Reminders by email for players whose browser cannot do push. Needs the SMTP above.
 
 ## Ideas parked
 
 - Seasonal avatar touches could switch on by date (a Santa hat row that appears in December), and a few special ones could be earned or sold. Everything that helps someone look like themselves stays free.
+- A home screen widget or app badge showing the run. Duolingo's biggest single lift after the streak itself.
+- Friend streak milestones (7, 30, 100 days together) with a card to share.
 
 ## Business, once people are playing
 
@@ -43,16 +50,20 @@ Rule for all of it: nothing sold or shown may affect scores.
 
 ## Checks still owed
 
-- [ ] One clean run of the full browser suite. Recent full runs stalled with the machine; every affected file passed when run on its own.
 - [ ] Mobile Lighthouse with Google PageSpeed (92 measured on this machine; Google's quota had run out).
-- [ ] Signed in screens on the live site with a real second account: start a circle, save a character, follow someone.
+- [ ] Signed in screens on the live site with a real second account: start a circle, save a character, follow someone, start a friend streak from a link, invite into a room. The Players lists stay empty until a second account exists.
+- [ ] One real push on Android Chrome and on an iPhone with the site on the Home Screen.
 
 ## Switched off on purpose
 
 - Google sign in: hidden until the provider is set up in Supabase, then build with `VITE_GOOGLE_AUTH=1`.
 - Any-topic generation: `AI_PROVIDER` in `worker/wrangler.toml` (see above).
+- Reminders: until the VAPID keys are set (see above). The settings switch says so.
 
 ## Known limits
 
 - "5 wrong codes, then a 15 minute lock" cannot be enforced exactly: Supabase checks sign in codes itself, and its own per address limit applies instead.
-- If two players in a room find the same word at the same moment, both are credited.
+- If two players in a room find the same word at the same moment, both see it as theirs in the room. The Together board credits one of them, the earlier find by the server's clock.
+- A room player who closes the tab before the game ends sends no play, so their finds do not count for the team.
+- Reminder times follow the player's time zone as saved when they turned reminders on. The daily itself still changes at midnight UTC.
+- Room plays made before the Together board shipped are not on it.

@@ -4,6 +4,7 @@ import { Field } from '../components/Field';
 import { follow, isFollowing, newPlayers, searchPlayers, suggestedPlayers, topPlayers, unfollow, type PlayerRef } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { Avatar } from '../components/Avatar';
+import { FriendStreaks } from './FriendStreaks';
 import styles from './Players.module.css';
 
 type Row = PlayerRef & { stat?: string };
@@ -66,6 +67,7 @@ export function Players() {
   const [hits, setHits] = useState<Row[] | null>([]);
   const [streaks, setStreaks] = useState<Row[] | null>(null);
   const [perfect, setPerfect] = useState<Row[] | null>(null);
+  const [points, setPoints] = useState<Row[] | null>(null);
   const [fresh, setFresh] = useState<Row[] | null>(null);
   const [suggested, setSuggested] = useState<Row[] | null>(null);
   const me = auth.profile?.id;
@@ -76,6 +78,9 @@ export function Players() {
     topPlayers('streak')
       .then((r) => alive && setStreaks(r.map((p) => ({ ...p, stat: `${p.value} ${p.value === 1 ? 'day' : 'days'}` }))))
       .catch(() => alive && setStreaks([]));
+    topPlayers('points')
+      .then((r) => alive && setPoints(r.map((p) => ({ ...p, stat: `${p.value.toLocaleString('en-US')} pts` }))))
+      .catch(() => alive && setPoints([]));
     topPlayers('perfect')
       .then((r) => alive && setPerfect(r.map((p) => ({ ...p, stat: `${p.value} perfect` }))))
       .catch(() => alive && setPerfect([]));
@@ -153,6 +158,8 @@ export function Players() {
         {searching && <List rows={hits} empty={`No handle starts with @${q.trim().toLowerCase()}.`} me={me} myHandle={myHandle} check />}
       </section>
 
+      {!searching && me && <FriendStreaks />}
+
       {!searching && (
         <section className={styles.section} aria-labelledby="suggested-title">
           <h2 id="suggested-title" className={styles.h2}>
@@ -172,6 +179,12 @@ export function Players() {
 
       {!searching && (
         <div className={styles.grid}>
+          <section className={styles.section} aria-labelledby="points-title">
+            <h2 id="points-title" className={styles.h2}>
+              Most points
+            </h2>
+            <List rows={points} empty="No points yet. Every word you find adds to yours." />
+          </section>
           <section className={styles.section} aria-labelledby="streaks-title">
             <h2 id="streaks-title" className={styles.h2}>
               Longest streaks

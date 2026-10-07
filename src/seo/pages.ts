@@ -3,12 +3,20 @@
 // bundle). Facts only: nothing here claims numbers we do not have.
 
 import gamesFile from '../../data/games.json';
-import { dailyGameId, dayNo } from '../engine/daily';
+import holidaysFile from '../../data/holidays.json';
+import { dailyGameId, dayNo, holidayOn, type Calendar } from '../engine/daily';
 import { buildHiddenWords } from '../engine/hiddenWords';
 
 type Game = { id: string; category: string; title: string; noun: string; text: string; dict: string[] };
 const data = gamesFile as unknown as { games: Game[]; dailyPool: string[]; filters: string[] };
 const { dailyPool } = data;
+const calendar: Calendar = holidaysFile;
+const dailyId = (n: number) => dailyGameId(n, dailyPool, calendar);
+/** "Christmas daily" on a holiday, else "Daily". */
+function dailyName(n: number): string {
+  const h = holidayOn(n, calendar);
+  return h ? `${h.name} daily` : 'Daily';
+}
 /** Curated order for lists: follows the filter tabs, so no single topic leads. */
 const games = [...data.games].sort((a, b) => data.filters.indexOf(a.category) - data.filters.indexOf(b.category));
 
@@ -126,6 +134,7 @@ const DARE: Record<string, string> = {
   Science: 'Science brain? The words are right in front of you. Seeing them is another matter.',
   AI: 'Work with AI? These words are hiding in a paragraph about something else. Spot them yourself.',
   History: 'Know your history? It is hiding in plain sight. You will read right past some of it.',
+  Naija: 'Naija to the bone? The names are hiding in one ordinary paragraph. You will read straight past some of them.',
   General: 'Sharp eyes? Everything you need is in one short paragraph. You will still miss some.',
 };
 
@@ -162,7 +171,8 @@ function gamePage(origin: string, g: Game): Page {
 }
 
 function dailyPage(origin: string, n: number, g: Game): Page {
-  const q = `Daily #${n}: how many ${g.noun} can you find?`;
+  const label = dailyName(n);
+  const q = `${label} #${n}: how many ${g.noun} can you find?`;
   return {
     title: `${q} · Fignda`,
     description: 'One try. No count. Everyone plays the same puzzle today. Are you sharper than them?',
@@ -173,7 +183,7 @@ function dailyPage(origin: string, n: number, g: Game): Page {
       {
         '@context': 'https://schema.org',
         '@type': 'Game',
-        name: `Fignda Daily #${n}`,
+        name: `Fignda ${label} #${n}`,
         description: `Today's Fignda daily: find the ${g.noun} hidden across spaces and punctuation. One try.`,
         url: `${origin}/d/${n}`,
         isAccessibleForFree: true,
@@ -181,6 +191,35 @@ function dailyPage(origin: string, n: number, g: Game): Page {
       },
     ],
     body: `<h1>${esc(q)}</h1><p>One try. The count stays hidden until midnight UTC. Wrong picks cost 10 points.</p><p><a href="/d/${n}">Play the daily on Fignda</a>.</p>`,
+  };
+}
+
+/** A past daily's answers. Only ever built for days that are over. */
+function answersPage(origin: string, n: number, g: Game): Page {
+  const label = dailyName(n);
+  const date = new Date(Date.UTC(2026, 0, n)).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+  const answers = buildHiddenWords(g).answers.map((a) => a.label);
+  const title = `Fignda ${label} #${n} answers (${date}) · Fignda`;
+  const description = `All ${answers.length} hidden ${g.noun} from the Fignda daily of ${date}, and the paragraph they were hiding in. Today's puzzle is waiting.`;
+  return {
+    title,
+    description,
+    image: `/og/daily-${g.id}.png`,
+    imageAlt: `Fignda daily puzzle: ${g.noun}`,
+    canonical: `/d/${n}/answers`,
+    jsonLd: [
+      { '@context': 'https://schema.org', '@type': 'Article', headline: title.replace(/ · Fignda$/, ''), description, url: `${origin}/d/${n}/answers`, isPartOf: { '@type': 'VideoGame', name: SITE, url: `${origin}/` } },
+      crumbs(origin, [
+        ['Fignda', '/'],
+        [`${label} #${n}`, `/d/${n}`],
+        ['Answers', `/d/${n}/answers`],
+      ]),
+    ],
+    body:
+      `<h1>${esc(`${label} #${n} answers`)}</h1><p>${esc(date)}. ${answers.length} hidden ${esc(g.noun)}. Words hide across spaces and punctuation.</p>` +
+      `<blockquote>${esc(g.text)}</blockquote>` +
+      `<ol>${answers.map((a) => `<li>${esc(a)}</li>`).join('')}</ol>` +
+      `<p><a href="/play">Play today's daily on Fignda</a>.</p>`,
   };
 }
 
@@ -235,8 +274,16 @@ export function pageFor(path: string, origin: string, today = dayNo()): Page {
   if (daily) {
     const n = Number(daily[1]);
     // Future days stay secret: no title or image that would reveal tomorrow's game.
-    const g = n >= 1 && n <= today ? games.find((x) => x.id === dailyGameId(n, dailyPool)) : undefined;
+    const g = n >= 1 && n <= today ? games.find((x) => x.id === dailyId(n)) : undefined;
     return g ? dailyPage(origin, n, g) : { ...home(origin), noindex: true };
+  }
+
+  const past = clean.match(/^\/d\/(\d{1,6})\/answers$/);
+  if (past) {
+    const n = Number(past[1]);
+    // Today and the future stay secret.
+    const g = n >= 1 && n < today ? games.find((x) => x.id === dailyId(n)) : undefined;
+    return g ? answersPage(origin, n, g) : { ...home(origin), canonical: clean, noindex: true };
   }
 
   if (clean === '/play') {
@@ -258,6 +305,8 @@ export function sitemapPaths(today = dayNo()): Array<{ path: string; daily?: boo
     { path: '/play' },
     ...games.map((g) => ({ path: `/play/${g.id}` })),
     ...Array.from({ length: 14 }, (_, i) => ({ path: `/d/${today - i}`, daily: true })).filter((x) => Number(x.path.slice(3)) >= 1),
+    // Past dailies' answers: what people search for the morning after.
+    ...Array.from({ length: 60 }, (_, i) => ({ path: `/d/${today - 1 - i}/answers`, daily: true })).filter((x) => Number(x.path.split('/')[2]) >= 1),
     { path: '/leaderboard' },
     { path: '/players' },
     { path: '/privacy' },
@@ -266,7 +315,7 @@ export function sitemapPaths(today = dayNo()): Array<{ path: string; daily?: boo
 
 /** llms.txt: a short, factual guide for AI assistants (https://llmstxt.org). */
 export function llmsTxt(origin: string, today = dayNo()): string {
-  const g = games.find((x) => x.id === dailyGameId(today, dailyPool));
+  const g = games.find((x) => x.id === dailyId(today));
   return [
     `# ${SITE}`,
     '',
@@ -277,7 +326,7 @@ export function llmsTxt(origin: string, today = dayNo()): string {
     '## Key pages',
     `- [Home](${origin}/): what Fignda is and a playable example`,
     `- [All puzzles](${origin}/play): curated puzzles and the daily`,
-    g ? `- [Today's daily](${origin}/d/${today}): how many ${g.noun} can you find? One try, count hidden until midnight UTC` : '',
+    g ? `- [Today's ${dailyName(today) === 'Daily' ? 'daily' : dailyName(today)}](${origin}/d/${today}): how many ${g.noun} can you find? One try, count hidden until midnight UTC` : '',
     `- [Leaderboard](${origin}/leaderboard): top verified daily scores`,
     `- [Players](${origin}/players): find players to follow`,
     `- [Privacy](${origin}/privacy): what is stored and how to delete it`,

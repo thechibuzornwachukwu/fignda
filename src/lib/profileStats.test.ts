@@ -11,6 +11,30 @@ const play = (over: Partial<PlayRow>): PlayRow => ({
   ...over,
 });
 
+describe('points', () => {
+  it('adds every daily, the best score per other puzzle, and nothing unverified', () => {
+    const s = profileStats(
+      [
+        play({ day_no: 3, score: 400 }),
+        play({ day_no: 4, score: 250 }),
+        // The same puzzle three times: only the best counts.
+        play({ game_id: 'space', score: 300 }),
+        play({ game_id: 'space', score: 900 }),
+        play({ game_id: 'space', score: 100 }),
+        // Ended early, 2 words in: still worth what it earned.
+        play({ game_id: 'bible', found: 2, score: 175 }),
+        play({ day_no: 5, score: 5000, verified: false }),
+      ],
+      10,
+    );
+    expect(s.points).toBe(400 + 250 + 900 + 175);
+  });
+
+  it('is 0 for a new player', () => {
+    expect(profileStats([], 10).points).toBe(0);
+  });
+});
+
 describe('profileStats', () => {
   it('counts dailies, current and best streak', () => {
     const plays = [1, 2, 3, 4, 8, 9, 10].map((d) => play({ day_no: d, created_at: `2026-01-${String(d).padStart(2, '0')}T10:00:00Z` }));

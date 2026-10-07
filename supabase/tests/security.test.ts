@@ -273,7 +273,7 @@ describe('games', () => {
   it('anon lists curated games only', async () => {
     const { data, error } = await anon().from('games').select('id, kind');
     expect(error).toBeNull();
-    expect(data!.length).toBe(21);
+    expect(data!.length).toBe(25);
     expect(data!.every((g) => g.kind === 'curated')).toBe(true);
   });
 

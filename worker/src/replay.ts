@@ -22,7 +22,17 @@ export type Rejection =
   | 'too_fast';
 
 export type ReplayResult =
-  | { ok: true; found: number; total: number; hints: number; misses: number; secs: number; score: number }
+  | {
+      ok: true;
+      found: number;
+      total: number;
+      hints: number;
+      misses: number;
+      secs: number;
+      score: number;
+      /** Each word this log really selected, with its time. Room plays store these. */
+      finds: Array<{ k: string; t: number }>;
+    }
   | { ok: false; reason: Rejection };
 
 const sorted = (xs: number[]) => xs.every((x, i) => i === 0 || x >= xs[i - 1]!);
@@ -36,6 +46,7 @@ export function replay(puzzle: { S: string; answers: readonly Answer[] }, log: P
 
   const n = puzzle.S.length;
   const found = new Set<string>();
+  const finds: Array<{ k: string; t: number }> = [];
   let misses = 0;
   let lastFind = 0; // the clock starts at 0
 
@@ -47,6 +58,7 @@ export function replay(puzzle: { S: string; answers: readonly Answer[] }, log: P
       if (e.t - lastFind < MIN_FIND_GAP_MS) return { ok: false, reason: 'too_fast' };
       lastFind = e.t;
       found.add(r.answer.key);
+      finds.push({ k: r.answer.key, t: e.t });
     } else if (r.kind === 'wrong' && daily) {
       const unfound = puzzle.answers.filter((x) => !found.has(x.key)).map((x) => x.key);
       if (!isClose(r.str, unfound)) misses++;
@@ -56,5 +68,5 @@ export function replay(puzzle: { S: string; answers: readonly Answer[] }, log: P
   const total = puzzle.answers.length;
   const secs = Math.floor(finish / 1000);
   const result = { found: found.size, total, hints: hints.length, misses: daily ? misses : 0, secs };
-  return { ok: true, ...result, score: score(result) };
+  return { ok: true, ...result, score: score(result), finds };
 }

@@ -11,6 +11,7 @@ import { checkProfile } from '../lib/streak';
 import { setSound, soundOn, subscribeSound } from '../lib/sound';
 import { currentTheme, setTheme, type Theme } from '../lib/theme';
 import { AvatarDesigner } from './AvatarDesigner';
+import { Reminders } from './Reminders';
 import styles from './Settings.module.css';
 
 /** /settings. Private account housekeeping. The public side of a player lives on /u/:handle. */
@@ -141,6 +142,13 @@ export function Settings() {
           </div>
         </dl>
         <p className={styles.help}>Only you see your email. It is never shown to other players.</p>
+      </section>
+
+      <section className={styles.section} aria-labelledby="s-remind">
+        <h2 id="s-remind" className={styles.h2}>
+          Reminders
+        </h2>
+        <Reminders />
       </section>
 
       <section className={styles.section} aria-labelledby="s-look">

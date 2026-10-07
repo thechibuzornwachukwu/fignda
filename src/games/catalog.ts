@@ -1,6 +1,8 @@
 // Curated games from data/games.json. Answers and difficulty always come from the engine, never from this file.
 
 import raw from '../../data/games.json';
+import rawHolidays from '../../data/holidays.json';
+import { dailyGameId, holidayOn, type Calendar, type Holiday } from '../engine/daily';
 import { buildHiddenWords, type Difficulty, type HiddenWordsPuzzle } from '../engine/hiddenWords';
 
 export type GameType = 'hidden-words';
@@ -27,6 +29,11 @@ const data = raw as GamesFile;
 export const games: readonly GameDef[] = data.games;
 export const filters: readonly string[] = data.filters;
 export const dailyPool: readonly string[] = data.dailyPool;
+export const calendar: Calendar = rawHolidays;
+
+/** The puzzle for daily `n`: the holiday's on a holiday, else the rotation. Client, seed and link previews all use this rule. */
+export const dailyIdFor = (n: number): string => dailyGameId(n, dailyPool, calendar);
+export const holidayFor = (n: number): Holiday | undefined => holidayOn(n, calendar);
 
 export function getGameDef(id: string): GameDef | undefined {
   return games.find((g) => g.id === id);

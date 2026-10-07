@@ -87,7 +87,7 @@ test.describe('play together', () => {
     const url = host.url();
     const room = host.getByRole('region', { name: 'Playing together' });
     await expect(room).toContainText('Waiting for a friend');
-    await expect(room).toContainText('Not on the leaderboard');
+    await expect(room).toContainText('Signed in teams go on the Together board');
     await expect(room.locator('[data-status="live"]')).toHaveText('Live');
 
     const guest = await context.newPage();

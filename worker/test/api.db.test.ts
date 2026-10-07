@@ -2,10 +2,10 @@
 
 import { randomUUID } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
-import { dayNo, dailyGameId } from '../../src/engine/daily';
+import { dayNo } from '../../src/engine/daily';
 import { buildHiddenWords } from '../../src/engine/hiddenWords';
-import { dailyPool, getGameDef } from '../../src/games/catalog';
-import { forgedJwt, makeUser, type TestUser } from '../../supabase/tests/helpers';
+import { dailyIdFor, getGameDef } from '../../src/games/catalog';
+import { forgedJwt, makeProfile, makeUser, uniqueHandle, type TestUser } from '../../supabase/tests/helpers';
 import { userMessage, type AiGenerate } from '../src/ai';
 import { crossesWords, handle, LIMITS, type Deps } from '../src/app';
 
@@ -230,7 +230,7 @@ describe('POST /api/plays', () => {
 
   it("daily: today only, once, with the server's own answers", async () => {
     const today = dayNo();
-    const daily = buildHiddenWords(getGameDef(dailyGameId(today, dailyPool))!);
+    const daily = buildHiddenWords(getGameDef(dailyIdFor(today))!);
     const body = { game: { type: 'daily', day_no: today }, log: honestLog(daily) };
     const yesterday = await handle(post('/api/plays', { ...body, game: { type: 'daily', day_no: today - 1 } }, { token: u.token }), deps());
     expect(yesterday.status).toBe(400);
@@ -240,5 +240,107 @@ describe('POST /api/plays', () => {
     expect(second.status).toBe(409);
     const rows = await db.from('plays').select('day_no, verified').eq('user_id', u.id);
     expect(rows.data).toEqual([{ day_no: today, verified: true }]);
+  });
+});
+
+describe('POST /api/plays in a room (Together board)', () => {
+  const bnote = buildHiddenWords(getGameDef('bnote')!);
+  const span = (i: number) => ({ a: bnote.answers[i]!.spans[0]![0], b: bnote.answers[i]!.spans[0]![1] });
+  /** A log that finds the given answers, 3s apart, starting at `from` ms. */
+  const logOf = (idx: number[], from = 3000, finish = 60_000) => ({
+    events: idx.map((i, n) => ({ ...span(i), t: from + n * 3000 })),
+    hints: [],
+    finish,
+  });
+  const code = () => Array.from({ length: 6 }, () => 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'[Math.floor(Math.random() * 31)]).join('');
+  const send = (u: TestUser, room: string, log: unknown, game: unknown = { type: 'game', id: 'bnote' }) =>
+    handle(post('/api/plays', { game, log, room }, { token: u.token }), deps());
+  const player = async (tag: string) => {
+    const u = await makeUser(tag);
+    const h = uniqueHandle(tag);
+    await makeProfile(u, tag, h);
+    return { u, h };
+  };
+  type Team = { rank: number; words: number; total: number; secs: number; players: Array<{ handle: string; finds: number }> };
+  const teamOf = async (h: string) => {
+    const { data, error } = await anon.rpc('together_board', { p_game: 'bnote', p_limit: 100 });
+    expect(error).toBeNull();
+    return (data as Team[]).find((t) => t.players.some((p) => p.handle === h));
+  };
+
+  it('ranks a team by its own replayed finds and never touches the solo board', async () => {
+    const [a, b] = [await player('ta'), await player('tb')];
+    const room = code();
+    expect((await send(a.u, room, logOf([0, 1, 2]))).status).toBe(200);
+    // One player alone is not a team.
+    expect(await teamOf(a.h)).toBeUndefined();
+    expect((await send(b.u, room, logOf([3, 4]))).status).toBe(200);
+
+    const team = (await teamOf(a.h))!;
+    expect(team.words).toBe(5);
+    expect(team.total).toBe(bnote.answers.length);
+    expect(team.players).toEqual([
+      { handle: a.h, name: 'ta', finds: 3 },
+      { handle: b.h, name: 'tb', finds: 2 },
+    ]);
+    expect(Object.keys(team).sort()).toEqual(['players', 'rank', 'secs', 'total', 'words']);
+
+    // Solo boards are unchanged: nothing was written to plays.
+    expect((await db.from('plays').select('id').in('user_id', [a.u.id, b.u.id])).data).toEqual([]);
+    const solo = await anon.rpc('game_board', { p_game: 'bnote', p_limit: 100 });
+    expect((solo.data as Array<{ handle: string }>).some((r) => r.handle === a.h || r.handle === b.h)).toBe(false);
+  });
+
+  it('a word two players both claim counts once, for whoever found it first', async () => {
+    const [a, b] = [await player('da'), await player('db')];
+    const room = code();
+    // Both logs end now. Ada picks word 0 three seconds in; Bola picks the same word 40 seconds in.
+    await send(a.u, room, logOf([0, 1], 3000, 60_000));
+    await send(b.u, room, logOf([2, 0], 37_000, 60_000));
+    const team = (await teamOf(a.h))!;
+    expect(team.words).toBe(3);
+    expect(team.players).toEqual([
+      { handle: a.h, name: 'da', finds: 2 },
+      { handle: b.h, name: 'db', finds: 1 },
+    ]);
+  });
+
+  it('a forged, repeated or too fast log stores nothing', async () => {
+    const [a, b] = [await player('fa'), await player('fb')];
+    const room = code();
+    await send(b.u, room, logOf([5]));
+    const twice = logOf([0, 0]);
+    expect(await (await send(a.u, room, twice)).json()).toEqual({ error: 'duplicate_find' });
+    const fast = { events: [0, 1, 2].map((i, n) => ({ ...span(i), t: 1000 + n * 50 })), hints: [], finish: 5000 };
+    expect(await (await send(a.u, room, fast)).json()).toEqual({ error: 'too_fast' });
+    // Letters that are not an answer are not a find.
+    const junk = { events: [{ a: 0, b: 1, t: 2000 }], hints: [], finish: 5000 };
+    expect((await send(a.u, room, junk)).status).toBe(200);
+    const team = (await teamOf(b.h))!;
+    expect(team.words).toBe(1);
+    expect(team.players.find((p) => p.handle === a.h)!.finds).toBe(0);
+  });
+
+  it('one play per player per room, guests are refused, dailies cannot be room plays', async () => {
+    const a = await player('oa');
+    const room = code();
+    expect((await send(a.u, room, logOf([0]))).status).toBe(200);
+    expect((await send(a.u, room, logOf([0, 1, 2, 3]))).status).toBe(409);
+    const guest = await handle(post('/api/plays', { game: { type: 'game', id: 'bnote' }, log: logOf([1]), room }), deps());
+    expect(guest.status).toBe(401);
+    expect((await send(a.u, code(), logOf([0]), { type: 'daily', day_no: dayNo() })).status).toBe(400);
+    expect((await send(a.u, 'room01', logOf([0]))).status).toBe(400);
+  });
+
+  it('clients cannot read or write the room tables', async () => {
+    const a = await player('ra');
+    for (const t of ['room_plays', 'room_finds']) {
+      expect((await a.u.client.from(t).select('*')).data ?? []).toEqual([]);
+      expect((await anon.from(t).select('*')).data ?? []).toEqual([]);
+    }
+    const ins = await a.u.client.from('room_plays').insert({ room_code: code(), game_id: 'bnote', user_id: a.u.id, total: 5, started_at: new Date().toISOString(), ended_at: new Date().toISOString() });
+    expect(ins.error).not.toBeNull();
+    const rpc = await a.u.client.rpc('record_room_play', { p_room: code(), p_game: 'bnote', p_user: a.u.id, p_total: 5, p_hints: 0, p_finish_ms: 1000, p_finds: [], p_log: null });
+    expect(rpc.error).not.toBeNull();
   });
 });

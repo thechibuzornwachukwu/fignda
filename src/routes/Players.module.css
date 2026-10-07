@@ -18,6 +18,13 @@
   min-width: 0;
   max-width: 640px;
 }
+.sectionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -118,6 +125,15 @@
   background: var(--fg);
   border-color: var(--fg);
   color: var(--bg);
+}
+.note {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.note:empty {
+  display: none;
 }
 .signin {
   font-weight: 700;

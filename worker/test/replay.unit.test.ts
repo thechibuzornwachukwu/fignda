@@ -17,7 +17,9 @@ describe('replay: honest logs', () => {
     const r = replay(bnote, { events, hints: [], finish: events.at(-1)!.t + 500 }, false);
     const total = bnote.answers.length;
     const secs = Math.floor((events.at(-1)!.t + 500) / 1000);
-    expect(r).toEqual({ ok: true, found: total, total, hints: 0, misses: 0, secs, score: total * 100 + 600 - secs });
+    expect(r).toMatchObject({ ok: true, found: total, total, hints: 0, misses: 0, secs, score: total * 100 + 600 - secs });
+    // Every word comes back with the time it was picked, for room plays.
+    expect(r.ok && r.finds).toEqual(bnote.answers.map((a, i) => ({ k: a.key, t: events[i]!.t })));
   });
 
   it('accepts reversed selections', () => {
