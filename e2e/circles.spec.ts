@@ -69,41 +69,69 @@ test('design your character: pick parts, save, and it shows as you', async ({ pa
   const handle = await newPlayer(page, 'Dayo');
   await page.goto('/settings');
   await expect(page.getByRole('heading', { name: 'Your character' })).toBeVisible();
-  const save = page.getByRole('button', { name: 'Keep this look' });
-  const tab = (name: string) => page.getByRole('tab', { name, exact: true });
-  // One category shows at a time; the first is Skin.
-  await expect(tab('Skin')).toHaveAttribute('aria-selected', 'true');
-  await expect(page.getByRole('button', { name: /^Skin: / })).toHaveCount(6);
-  await expect(page.getByRole('button', { name: /^Hair and headwear: / })).toHaveCount(0);
-  await tab('Hair and headwear').click();
-  await page.getByRole('button', { name: 'Hair and headwear: Gele' }).click();
-  await tab('Outfit').click();
-  await page.getByRole('button', { name: 'Outfit: Agbada' }).click();
-  await tab('Skin marks').click();
-  await page.getByRole('button', { name: 'Skin marks: Tribal marks', exact: true }).click();
-  // Arrow keys move between tabs.
-  await tab('Skin marks').focus();
-  await page.keyboard.press('ArrowLeft');
-  await expect(tab('Facial hair')).toHaveAttribute('aria-selected', 'true');
-  await tab('Hair and headwear').click();
-  await expect(page.getByRole('button', { name: 'Hair and headwear: Gele' })).toHaveAttribute('aria-pressed', 'true');
-  await save.click();
-  await expect(page.getByText('Saved. This is you on every board.')).toBeVisible();
-  await expect(save).toBeDisabled();
+  await page.getByRole('button', { name: 'Edit character' }).click();
+  const editor = page.getByRole('dialog', { name: 'Edit your character' });
+  const tab = (name: string) => editor.getByRole('tab', { name, exact: true });
+  const pick = (name: string) => editor.getByRole('button', { name, exact: true });
+  const save = editor.getByRole('button', { name: 'Keep this look' });
 
-  // Saved for real: a reload keeps the choices, and the profile shows a drawn character.
+  // Four icon tabs. Face opens first; colours are dots, and only this tab's parts show.
+  await expect(editor.getByRole('tab')).toHaveText(['Face', 'Hair', 'Wear', 'Scene']);
+  await expect(tab('Face')).toHaveAttribute('aria-selected', 'true');
+  await expect(editor.getByRole('button', { name: /^Skin: / })).toHaveCount(6);
+  await expect(editor.getByRole('button', { name: /^Hair and headwear: / })).toHaveCount(0);
+  await pick('Skin marks: Tribal marks').click();
+
+  // Hair comes in families, so nobody wades through all 41 at once.
+  await tab('Hair').click();
+  await editor.getByRole('button', { name: 'Headwear', exact: true }).click();
+  await expect(editor.getByRole('button', { name: /^Hair and headwear: / })).toHaveCount(6);
+  await pick('Hair and headwear: Gele').click();
+  await expect(editor.getByRole('region', { name: 'Hair and headwear' })).toContainText('Gele');
+  await tab('Wear').click();
+  await pick('Outfit: Buba and beads').click();
+  // Arrow keys move between tabs.
+  await tab('Wear').focus();
+  await page.keyboard.press('ArrowLeft');
+  await expect(tab('Hair')).toHaveAttribute('aria-selected', 'true');
+  // Hair opens on the family of the chosen style.
+  await expect(editor.getByRole('button', { name: 'Headwear', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(pick('Hair and headwear: Gele')).toHaveAttribute('aria-pressed', 'true');
+
+  // Surprise me keeps the person: the tribal marks and bare face stay, and Undo brings the exact design back.
+  await expect(editor.getByRole('button', { name: 'Undo' })).toBeDisabled();
+  await editor.getByRole('button', { name: 'Surprise me' }).click();
+  await tab('Face').click();
+  await expect(pick('Skin marks: Tribal marks')).toHaveAttribute('aria-pressed', 'true');
+  await expect(pick('Facial hair: None')).toHaveAttribute('aria-pressed', 'true');
+  await editor.getByRole('button', { name: 'Undo' }).click();
+  await expect(editor.getByRole('button', { name: 'Undo' })).toBeDisabled();
+  await tab('Hair').click();
+  await expect(pick('Hair and headwear: Gele')).toHaveAttribute('aria-pressed', 'true');
+
+  await expect(editor.getByText('Not saved yet.')).toBeVisible();
+  await save.click();
+  await expect(editor.getByText('Saved. This is you on every board.')).toBeVisible();
+  await expect(save).toBeDisabled();
+  const r = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
+  expect(r.violations.map((v) => `${v.id}: ${v.nodes[0]?.html}`)).toEqual([]);
+  await editor.getByRole('button', { name: 'Done' }).click();
+  await expect(editor).toBeHidden();
+
+  // Saved for real: a reload keeps the choices, and the profile draws the saved design.
   await page.reload();
-  await page.getByRole('tab', { name: 'Hair and headwear' }).click();
-  await expect(page.getByRole('button', { name: 'Hair and headwear: Gele' })).toHaveAttribute('aria-pressed', 'true');
-  await page.getByRole('tab', { name: 'Outfit' }).click();
-  await expect(page.getByRole('button', { name: 'Outfit: Agbada' })).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: 'Edit character' }).click();
+  await tab('Hair').click();
+  await expect(pick('Hair and headwear: Gele')).toHaveAttribute('aria-pressed', 'true');
+  await tab('Wear').click();
+  await expect(pick('Outfit: Buba and beads')).toHaveAttribute('aria-pressed', 'true');
+  // Cancel throws away what was not kept.
+  await pick('Outfit: Suit').click();
+  await editor.getByRole('button', { name: 'Cancel' }).click();
   await page.goto(`/u/${handle}`);
   await expect(page.locator('main svg[viewBox="-7 -2 110 110"]').first()).toBeVisible();
   // The gele fabric colour is on the page: the saved design is what is drawn.
   await expect(page.locator('main svg path[fill="#b0336f"]').first()).toBeAttached();
-
-  const r = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21aa', 'wcag22aa']).analyze();
-  expect(r.violations.map((v) => `${v.id}: ${v.nodes[0]?.html}`)).toEqual([]);
 });
 
 test('copy result puts the spoiler free text on the clipboard', async ({ page, context }) => {
@@ -135,23 +163,44 @@ test('copy result puts the spoiler free text on the clipboard', async ({ page, c
 test.describe('designer on a phone', () => {
   test.use({ viewport: { width: 375, height: 740 }, hasTouch: true, isMobile: true });
 
-  test('the preview stays on screen while picking from the longest list, and nothing overflows sideways', async ({ page }) => {
+  test('the editor fills the screen, the character never leaves it, and only the choices scroll', async ({ page }) => {
     await newPlayer(page, 'Efe');
     await page.goto('/settings');
-    await page.getByRole('tab', { name: 'Hair and headwear' }).tap();
-    const panel = page.getByRole('tabpanel');
-    const preview = page.locator('svg[width="120"]');
-    // As a player would have it: the designer at the top of the screen.
-    await preview.evaluate((el) => el.scrollIntoView({ block: "start" }));
-    // Scroll to the last hairstyle inside the panel: the page itself does not move, the preview stays.
-    const before = await page.evaluate(() => window.scrollY);
-    await panel.evaluate((el) => el.scrollTo(0, el.scrollHeight));
-    await page.getByRole('button', { name: 'Hair and headwear: Durag' }).tap();
-    expect(Math.abs((await page.evaluate(() => window.scrollY)) - before)).toBeLessThanOrEqual(60);
-    await expect(preview).toBeInViewport();
-    await expect(page.getByRole('button', { name: 'Hair and headwear: Durag' })).toHaveAttribute('aria-pressed', 'true');
-    expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
-    // Every tab is a full size touch target.
-    for (const h of await page.getByRole('tab').evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height))) expect(h).toBeGreaterThanOrEqual(44);
+    await page.getByRole('button', { name: 'Edit character' }).tap();
+    const editor = page.getByRole('dialog', { name: 'Edit your character' });
+    const hero = editor.locator('svg[width="168"]');
+    const pane = editor.getByRole('tabpanel');
+    await editor.getByRole('tab', { name: 'Hair' }).tap();
+    await editor.getByRole('button', { name: 'Braids and locs', exact: true }).tap();
+
+    const pageAt = await page.evaluate(() => window.scrollY);
+    // Scroll the choices to the very end and pick the last part on the tab.
+    await pane.evaluate((el) => el.scrollTo(0, el.scrollHeight));
+    await editor.getByRole('button', { name: 'Hair ties: Headband' }).tap();
+    await expect(hero).toBeInViewport();
+    await expect(editor.getByRole('button', { name: 'Keep this look' })).toBeInViewport();
+    await expect(editor.getByRole('tab', { name: 'Hair' })).toBeInViewport();
+
+    // One scroll area: the page behind did not move, and nothing scrolls sideways anywhere in the editor.
+    expect(await page.evaluate(() => window.scrollY)).toBe(pageAt);
+    const sideways = await editor.evaluate(
+      (el) =>
+        [el, ...el.querySelectorAll('*')].filter((n) => {
+          const o = getComputedStyle(n).overflowX;
+          return n.scrollWidth > n.clientWidth + 1 && o !== 'visible' && o !== 'hidden';
+        }).length,
+    );
+    expect(sideways).toBe(0);
+    const scrollers = await editor.evaluate(
+      (el) => [...el.querySelectorAll('*')].filter((n) => ['auto', 'scroll'].includes(getComputedStyle(n).overflowY) && n.scrollHeight > n.clientHeight + 1).length,
+    );
+    expect(scrollers).toBe(1);
+
+    // Touch targets: tabs, family chips, swatches and tiles are all at least 36px.
+    await editor.getByRole('tab', { name: 'Face' }).tap();
+    const sizes = await editor.evaluate((el) =>
+      [...el.querySelectorAll('[role="tab"], button[aria-pressed]')].map((n) => Math.min(n.getBoundingClientRect().width, n.getBoundingClientRect().height)),
+    );
+    expect(Math.min(...sizes)).toBeGreaterThanOrEqual(36);
   });
 });

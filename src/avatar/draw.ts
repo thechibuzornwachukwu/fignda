@@ -13,34 +13,40 @@
 // part, then the position of the choice). To add a hairstyle, outfit or mark, append one entry to its list:
 // the designer, the code and the starter avatars all pick it up. Positions are saved, so lists are append only.
 // To add a whole new kind of part, add a line to PARTS with an unused letter and draw it in `drawAvatar`.
+// Give a style `look: 'feminine'` or `'masculine'` if it is usually worn that way: Surprise me and starter
+// avatars use it so they never change how someone presents. It limits nothing a player picks by hand.
 
 import { EXTRA_STYLES, EYE_STYLES, FACE_HAIR_STYLES, HAIR_TIE_NAMES, headband, MARK_STYLES, MOUTH_ITEM_STYLES, MOUTH_STYLES, scrunchie } from './parts/face';
 import { HAIR_STYLES } from './parts/hair';
 import { OUTFIT_STYLES, torso } from './parts/outfits';
-import { BACK_NAMES, BACKS, c, HAIR_COLOUR_NAMES, HAIR_COLOURS, INK, LIME, rect, SEAM_DARK, SEAM_LIGHT, SKINS, WHITE, type Kit, type Shape } from './shapes';
+import { BACK_NAMES, BACKS, c, HAIR_COLOUR_NAMES, HAIR_COLOURS, INK, LIME, rect, SEAM_DARK, SEAM_LIGHT, SKINS, WHITE, type Kit, type Look, type Shape } from './shapes';
 
 export type { Shape } from './shapes';
 
-const names = (list: ReadonlyArray<{ name: string }>) => list.map((x) => x.name);
+type Styled = ReadonlyArray<{ name: string; look?: Look }>;
+const names = (list: Styled) => list.map((x) => x.name);
+/** Which look each choice usually goes with, in the same order as its names. Empty for parts anyone wears. */
+const looks = (list: Styled) => list.map((x) => x.look);
+const anyone: ReadonlyArray<Look | undefined> = [];
 
 /**
- * Every part of an avatar: its key, the letter it is saved under, a title for the designer, and the names
- * of its choices in saved order.
+ * Every part of an avatar: its key, the letter it is saved under, a title for the designer, the names of
+ * its choices in saved order, and the look each choice usually goes with (see `surprise`).
  */
 export const PARTS = [
-  { key: 'back', letter: 'b', title: 'Background', names: BACK_NAMES as readonly string[] },
-  { key: 'skin', letter: 's', title: 'Skin', names: SKINS.map((_, i) => `tone ${i + 1}`) },
-  { key: 'hair', letter: 'h', title: 'Hair and headwear', names: names(HAIR_STYLES) },
-  { key: 'colour', letter: 'c', title: 'Hair colour', names: HAIR_COLOUR_NAMES as readonly string[] },
-  { key: 'eyes', letter: 'e', title: 'Eyes', names: names(EYE_STYLES) },
-  { key: 'mouth', letter: 'm', title: 'Mouth', names: names(MOUTH_STYLES) },
-  { key: 'face', letter: 'f', title: 'Facial hair', names: names(FACE_HAIR_STYLES) },
-  { key: 'extra', letter: 'x', title: 'Glasses and earrings', names: names(EXTRA_STYLES) },
-  { key: 'mark', letter: 'k', title: 'Skin marks', names: names(MARK_STYLES) },
-  { key: 'item', letter: 't', title: 'In the mouth', names: names(MOUTH_ITEM_STYLES) },
-  { key: 'tie', letter: 'a', title: 'Hair ties', names: HAIR_TIE_NAMES as readonly string[] },
-  { key: 'outfit', letter: 'o', title: 'Outfit', names: names(OUTFIT_STYLES) },
-] as const satisfies ReadonlyArray<{ key: string; letter: string; title: string; names: readonly string[] }>;
+  { key: 'back', letter: 'b', title: 'Background', names: BACK_NAMES as readonly string[], looks: anyone },
+  { key: 'skin', letter: 's', title: 'Skin', names: SKINS.map((_, i) => `tone ${i + 1}`), looks: anyone },
+  { key: 'hair', letter: 'h', title: 'Hair and headwear', names: names(HAIR_STYLES), looks: looks(HAIR_STYLES) },
+  { key: 'colour', letter: 'c', title: 'Hair colour', names: HAIR_COLOUR_NAMES as readonly string[], looks: anyone },
+  { key: 'eyes', letter: 'e', title: 'Eyes', names: names(EYE_STYLES), looks: looks(EYE_STYLES) },
+  { key: 'mouth', letter: 'm', title: 'Mouth', names: names(MOUTH_STYLES), looks: looks(MOUTH_STYLES) },
+  { key: 'face', letter: 'f', title: 'Facial hair', names: names(FACE_HAIR_STYLES), looks: looks(FACE_HAIR_STYLES) },
+  { key: 'extra', letter: 'x', title: 'Glasses and earrings', names: names(EXTRA_STYLES), looks: looks(EXTRA_STYLES) },
+  { key: 'mark', letter: 'k', title: 'Skin marks', names: names(MARK_STYLES), looks: looks(MARK_STYLES) },
+  { key: 'item', letter: 't', title: 'In the mouth', names: names(MOUTH_ITEM_STYLES), looks: looks(MOUTH_ITEM_STYLES) },
+  { key: 'tie', letter: 'a', title: 'Hair ties', names: HAIR_TIE_NAMES as readonly string[], looks: anyone },
+  { key: 'outfit', letter: 'o', title: 'Outfit', names: names(OUTFIT_STYLES), looks: looks(OUTFIT_STYLES) },
+] as const satisfies ReadonlyArray<{ key: string; letter: string; title: string; names: readonly string[]; looks: ReadonlyArray<Look | undefined> }>;
 
 export type PartKey = (typeof PARTS)[number]['key'];
 /** The position chosen for each part. */
@@ -64,8 +70,40 @@ export function avatarCode(a: Avatar): string {
   return PARTS.map((part) => `${part.letter}${a[part.key]}`).join('');
 }
 
-/** Hairstyles a starter avatar may get: everything that is not headwear. */
-const STARTER_HAIR = HAIR_STYLES.flatMap((h, i) => (h.headwear ? [] : [i]));
+/**
+ * How an avatar presents, read from what its owner chose: feminine if any choice is usually feminine and
+ * none masculine, masculine the other way round, and null when it is neutral or mixed.
+ * Nothing about gender is asked or saved; this is worked out on the spot from the design itself.
+ */
+export function lookOf(a: Avatar): Look | null {
+  const worn = new Set(PARTS.map((part) => part.looks[a[part.key]]).filter(Boolean));
+  if (worn.size !== 1) return null;
+  return worn.has('feminine') ? 'feminine' : 'masculine';
+}
+
+/** The choices of a part that suit a look: those for anyone, plus those usually worn with that look. */
+function suiting(key: PartKey, look: Look | null): number[] {
+  const part = PARTS.find((x) => x.key === key)!;
+  return part.names.flatMap((_, i) => (part.looks[i] === undefined || part.looks[i] === look ? [i] : []));
+}
+
+/** Picks from a list with a 0 to 1 random source. */
+const pick = (from: readonly number[], random: () => number) => from[Math.min(from.length - 1, Math.floor(random() * from.length))]!;
+
+/** What Surprise me may change. Skin, hair colour, facial hair, skin marks and what is in the mouth are who you are. */
+const PLAYFUL: readonly PartKey[] = ['hair', 'eyes', 'mouth', 'extra', 'tie', 'outfit', 'back'];
+
+/**
+ * A fresh take on the same person. It keeps skin, hair colour, facial hair and marks exactly, and only draws
+ * styles that suit how the avatar already presents, so a surprise never changes someone's gender or complexion.
+ * A neutral or mixed avatar only gets styles that are for anyone.
+ */
+export function surprise(a: Avatar, random: () => number = Math.random): Avatar {
+  const look = lookOf(a);
+  const next = { ...a };
+  for (const key of PLAYFUL) next[key] = pick(suiting(key, look), random);
+  return next;
+}
 
 /** A stable starter avatar from a handle, so nobody is a blank circle before they design theirs. */
 export function avatarFor(seed: string): Avatar {
@@ -76,10 +114,12 @@ export function avatarFor(seed: string): Avatar {
     h = Math.floor(h / n) + 7919;
     return v;
   };
-  const hair = STARTER_HAIR[take(STARTER_HAIR.length)]!;
+  // Neutral on purpose: hair that is for anyone and not headwear, no facial hair, a plain tee.
+  // A hash of a handle must never decide how someone presents.
+  const hairs = suiting('hair', null).filter((i) => !HAIR_STYLES[i]!.headwear);
   return {
     ...DEFAULT_AVATAR,
-    hair,
+    hair: hairs[take(hairs.length)]!,
     back: take(BACKS.length),
     skin: take(SKINS.length),
     colour: take(HAIR_COLOURS.length),

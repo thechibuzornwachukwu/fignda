@@ -5,9 +5,9 @@
 // neckline. `behind(k)` is for anything that sits behind the neck (a hood, a cape).
 // The neck is 14 wide, centred on x 48, and meets the shoulders at about y 78.
 
-import { BACKS, c, CORAL, CREAM, ellipse, EMBROIDERY, INK, LIME, line, NAVY, p, rect, ROSE, STAR, VIOLET, WHITE, type Kit, type Shape } from '../shapes';
+import { BACKS, c, CORAL, CREAM, ellipse, EMBROIDERY, INK, LIME, line, NAVY, p, rect, ROSE, STAR, VIOLET, WHITE, type Kit, type Look, type Shape } from '../shapes';
 
-export type Outfit = { name: string; behind?: (k: Kit) => Shape[]; draw: (k: Kit) => Shape[] };
+export type Outfit = { name: string; look?: Look; behind?: (k: Kit) => Shape[]; draw: (k: Kit) => Shape[] };
 
 /** The shoulders and chest. `rx` widens it for robes. */
 export const torso = (fill: string, rx = 31): Shape => ellipse({ cx: 48, cy: 101, rx, ry: 22, fill });
@@ -23,6 +23,7 @@ export const OUTFIT_STYLES: readonly Outfit[] = [
     // A very wide robe, sleeves folded up onto the shoulders in pleats, a deep V over an inner tunic, and
     // gold embroidery: down the V and in the square panel on the chest.
     name: 'agbada',
+    look: 'masculine',
     draw: (k) => {
       const robe = k.back === CREAM ? WHITE : CREAM;
       const pleats = ['M36 81c-9 3-17 9-23 19', 'M31.5 84c-8 4-14 10-18 19', 'M27.5 88c-6 4-10 9-13 16', 'M60 81c9 3 17 9 23 19', 'M64.5 84c8 4 14 10 18 19', 'M68.5 88c6 4 10 9 13 16'];
@@ -41,6 +42,7 @@ export const OUTFIT_STYLES: readonly Outfit[] = [
   },
   {
     name: 'kaftan',
+    look: 'masculine',
     draw: (k) => [torso(k.body), scoop(k, 3), line('M40.5 80q7.5 4 15 0', k.trim, 1.6), line('M48 82.5v13', k.trim, 1.3), c(48, 86, 0.9, k.trim), c(48, 90, 0.9, k.trim)],
   },
   {
@@ -57,6 +59,7 @@ export const OUTFIT_STYLES: readonly Outfit[] = [
   },
   {
     name: 'buba and beads',
+    look: 'feminine',
     draw: (k) => [
       torso(k.body),
       scoop(k, 6),

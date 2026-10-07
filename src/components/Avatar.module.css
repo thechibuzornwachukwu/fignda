@@ -3,3 +3,8 @@
   flex: none;
   border-radius: 50%;
 }
+.tile {
+  display: block;
+  flex: none;
+  border-radius: var(--radius-lg);
+}

@@ -6,9 +6,9 @@
 // Landmarks: eyes at (40, 48) and (56, 48); mouth around (48, 58); cheeks around (36, 54) and (60, 54);
 // ears at (28, 49) and (68, 49).
 
-import { c, ellipse, INK, line, p, rect, RED, ROSE, WHITE, type Kit, type Shape } from '../shapes';
+import { c, ellipse, INK, line, p, rect, RED, ROSE, WHITE, type Kit, type Look, type Shape } from '../shapes';
 
-export type Part = { name: string; draw: (k: Kit) => Shape[] };
+export type Part = { name: string; look?: Look; draw: (k: Kit) => Shape[] };
 const none: Part = { name: 'none', draw: () => [] };
 
 /** A highlight keeps eyes readable on every skin tone. */
@@ -32,9 +32,9 @@ export const MOUTH_STYLES: readonly Part[] = [
 /** Drawn under the mouth so the mouth stays readable. Takes the hair colour. */
 export const FACE_HAIR_STYLES: readonly Part[] = [
   none,
-  { name: 'beard', draw: (k) => [p('M29 50c1 14 8 21 19 21s18-7 19-21c-2 8-6 12-10 13-3-2-15-2-18 0-4-1-8-5-10-13z', { fill: k.hair })] },
-  { name: 'moustache', draw: (k) => [p('M39 56q4.5-4 9-1q4.5-3 9 1q-4.5 2.5-9 0.5q-4.5 2-9-0.5z', { fill: k.hair })] },
-  { name: 'goatee', draw: (k) => [ellipse({ cx: 48, cy: 66.5, rx: 5.5, ry: 3.6, fill: k.hair })] },
+  { name: 'beard', look: 'masculine', draw: (k) => [p('M29 50c1 14 8 21 19 21s18-7 19-21c-2 8-6 12-10 13-3-2-15-2-18 0-4-1-8-5-10-13z', { fill: k.hair })] },
+  { name: 'moustache', look: 'masculine', draw: (k) => [p('M39 56q4.5-4 9-1q4.5-3 9 1q-4.5 2.5-9 0.5q-4.5 2-9-0.5z', { fill: k.hair })] },
+  { name: 'goatee', look: 'masculine', draw: (k) => [ellipse({ cx: 48, cy: 66.5, rx: 5.5, ry: 3.6, fill: k.hair })] },
 ];
 
 const spot = (x: number, y: number, r: number, fill: string, opacity: number): Shape => c(x, y, r, fill, { opacity });

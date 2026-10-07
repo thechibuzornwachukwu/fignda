@@ -114,6 +114,8 @@ Check: RLS: only you create or delete your own follows, anyone reads counts, no 
 - [x] Circles: a private daily table for a family, class, church or office. Start one, invite by link, today and last 7 days, members still to play shown last, owner can remove, last one out closes it. All through functions, tables default deny (`supabase/tests/circles.test.ts`, 14 DB tests; `e2e/circles.spec.ts`).
 - [x] Avatars: a character the player designs from 12 parts (41 hair and headwear styles, 14 outfits, skin marks including tribal marks, and more). Saved as a short code, drawn as shapes, never an upload. Every look is free. Shown on boards, profiles, players, rooms and circles. Designer in Settings: fixed preview, swipeable tabs, one scrolling grid (`src/avatar`, 20 unit tests).
 - [x] People to follow: everyone registered, all time, minus you and the people you follow; friends of friends first. Follow button on every row of the Players page, including search (`players_suggested`, 3 DB tests, 2 browser tests).
+- [x] Avatar editor redesign: opens over the page; stage in the character's colour; four icon tabs; colour dots; close-up thumbnails; hair in five families; one scroll area. Surprise me keeps the person (skin, hair colour, facial hair, marks) and stays within the look already built; starter avatars are neutral; Undo (`src/avatar/draw.test.ts` 27 tests, `e2e/circles.spec.ts`).
+- [x] Phone header is one row.
 - Next, not built: streak reminders and friend streaks; "only 8% found this word"; player-made puzzles.
 
 ## Owner plan (business)

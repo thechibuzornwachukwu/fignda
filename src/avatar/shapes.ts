@@ -36,6 +36,12 @@ export const SEAM_DARK = '#3f3f46';
 /** Gele fabric: a rich cloth colour so it never reads as hair. */
 export const GELE = { cloth: '#b0336f', light: '#cf5a93', fold: '#7a1d4b' } as const;
 
+/**
+ * Who usually wears a style. Used only to keep Surprise me and starter avatars from changing how someone
+ * presents; it is never saved, shown or used to stop anyone choosing anything.
+ */
+export type Look = 'feminine' | 'masculine';
+
 /** Everything a part needs to know about the avatar it is drawn on. */
 export type Kit = {
   /** Background colour. */

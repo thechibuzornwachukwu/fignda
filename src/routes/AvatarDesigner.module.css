@@ -1,62 +1,111 @@
-.designer {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  min-width: 0;
-}
-.stage {
+/* Settings: the character as it is, and the way in. */
+.summary {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: var(--space-5);
 }
-.stageSide {
+.summaryText {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  min-width: 0;
+  gap: var(--space-3);
 }
-.stageActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-}
-.note {
+.summaryLine {
   margin: 0;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 500;
   color: var(--muted);
 }
-.note:empty {
-  display: none;
+
+/* The editor: stage on the left, tabs, choices and actions on the right.
+   Fixed height, so the pane of choices is the one and only thing that scrolls. */
+.editor {
+  display: grid;
+  grid-template-columns: minmax(240px, 5fr) 8fr;
+  height: min(680px, calc(100dvh - var(--space-12)));
 }
-/* A strip that swipes sideways. Snaps tab by tab, no scrollbar, and never drags the page with it. */
-.tabs {
+.stage {
+  position: relative;
   display: flex;
-  gap: var(--space-2);
-  overflow-x: auto;
-  overscroll-behavior-x: contain;
-  scroll-snap-type: x proximity;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-5);
+  padding: var(--space-8) var(--space-5);
+  transition: background-color var(--dur-slow) var(--ease-std);
+}
+.hero {
+  box-shadow: 0 0 0 4px var(--ring);
+}
+.stage {
+  --ring: var(--stage-ring);
+  --ink: var(--stage-ink);
+  --chip: var(--stage-chip);
+}
+.stage[data-dark] {
+  --ring: var(--stage-ring-dark);
+  --ink: var(--stage-ink-dark);
+  --chip: var(--stage-chip-dark);
+}
+.quick {
+  display: flex;
+  gap: var(--space-3);
+}
+.round,
+.close {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: var(--chip);
+  color: var(--ink);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-std), opacity var(--dur-base) var(--ease-std);
+}
+.round:hover:not(:disabled),
+.close:hover {
+  transform: scale(1.06);
+}
+.round:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.close {
+  position: absolute;
+  top: var(--space-3);
+  left: var(--space-3);
+  width: 36px;
+  height: 36px;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+.tabs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   border-bottom: 1px solid var(--line);
 }
-.tabs::-webkit-scrollbar {
-  display: none;
-}
 .tab {
-  flex: none;
-  scroll-snap-align: center;
-  min-height: 44px;
-  padding: 0 var(--space-3);
+  min-height: 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
   border: 0;
   border-bottom: 2px solid transparent;
   background: none;
   font: inherit;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   color: var(--muted);
-  white-space: nowrap;
   cursor: pointer;
   transition: color var(--dur-base) var(--ease-std), border-color var(--dur-base) var(--ease-std);
 }
@@ -67,45 +116,171 @@
   color: var(--fg);
   border-bottom-color: var(--fg);
 }
-/* The choices scroll inside this box, so the preview above never leaves the screen. */
-.panel {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
-  align-content: start;
-  gap: var(--space-2);
-  max-height: min(46vh, 380px);
+.pane {
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  padding: var(--space-1);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
 }
-.option {
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.groupTitle {
+  margin: 0;
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-2);
+  font-size: 14px;
+  font-weight: 800;
+}
+.chosen {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.chip {
+  min-height: 36px;
+  padding: 0 var(--space-3);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-lg);
+  background: transparent;
+  color: var(--muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color var(--dur-base) var(--ease-std), color var(--dur-base) var(--ease-std);
+}
+.chip:hover {
+  color: var(--fg);
+}
+.chip[aria-pressed='true'] {
+  background: var(--fg);
+  border-color: var(--fg);
+  color: var(--bg);
+}
+.dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.dot {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--line-2);
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-std), box-shadow var(--dur-base) var(--ease-std);
+}
+.dot:hover {
+  transform: scale(1.08);
+}
+.dot[aria-pressed='true'] {
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--fg);
+}
+/* A tick that reads on any swatch, light or dark. */
+.dotCheck {
+  color: var(--swatch-tick);
+  mix-blend-mode: difference;
+}
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: var(--space-2);
+}
+.tile {
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: var(--space-1h);
   min-width: 0;
   padding: var(--space-2) var(--space-1);
-  border-radius: var(--radius-lg);
   border: 2px solid transparent;
+  border-radius: var(--radius-xl);
   background: transparent;
   font: inherit;
   color: var(--muted);
   cursor: pointer;
-  transition: border-color var(--dur-base) var(--ease-std), background-color var(--dur-base) var(--ease-std);
+  transition: border-color var(--dur-base) var(--ease-std), background-color var(--dur-base) var(--ease-std), transform var(--dur-fast) var(--ease-std);
 }
-.option:hover {
+.tile:hover {
   background: var(--surface-2);
 }
-.option[aria-pressed='true'] {
+.tile:active {
+  transform: scale(0.97);
+}
+.tile[aria-pressed='true'] {
   border-color: var(--fg);
   color: var(--fg);
 }
-.optionName {
+.tileName {
   max-width: 100%;
   font-size: 12px;
   font-weight: 600;
   line-height: 1.2;
   text-align: center;
   overflow-wrap: anywhere;
+}
+.foot {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-5);
+  border-top: 1px solid var(--line);
+}
+.note {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* Phone: the whole screen. Stage on top, kept short so the choices get the room. */
+@media (max-width: 720px) {
+  .editor {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+    height: 100%;
+  }
+  .stage {
+    flex-direction: row;
+    justify-content: center;
+    gap: var(--space-5);
+    padding: var(--space-4) var(--space-4) var(--space-4) var(--space-12);
+  }
+  .hero {
+    width: 112px;
+    height: 112px;
+  }
+  .quick {
+    flex-direction: column;
+  }
+  .tab {
+    min-height: 56px;
+  }
+  .pane {
+    padding: var(--space-4);
+  }
+  .foot {
+    padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom));
+  }
 }

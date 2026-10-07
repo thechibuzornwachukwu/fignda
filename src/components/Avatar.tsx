@@ -10,11 +10,15 @@ type Props = {
   parts?: AvatarParts;
   /** Square size in px. */
   size?: number;
+  /** A close-up: an SVG viewBox onto part of the drawing (the editor zooms in on the face or the outfit). */
+  view?: string;
+  /** A rounded square instead of a circle (editor tiles). */
+  tile?: boolean;
   className?: string;
 };
 
 /** A player's character. Drawn from shapes; decorative, the name next to it carries the meaning. */
-export function Avatar({ handle = '', parts, size = 28, className }: Props) {
+export function Avatar({ handle = '', parts, size = 28, view, tile, className }: Props) {
   const code = useSyncExternalStore(
     subscribeAvatars,
     () => (parts || !handle ? null : avatarCodeOf(handle)),
@@ -22,7 +26,7 @@ export function Avatar({ handle = '', parts, size = 28, className }: Props) {
   );
   const shapes = useMemo(() => drawAvatar(parts ?? (code ? parseAvatar(code) : avatarFor(handle))), [parts, code, handle]);
   return (
-    <svg className={[styles.avatar, className].filter(Boolean).join(' ')} width={size} height={size} viewBox={VIEW_BOX} aria-hidden="true" focusable="false">
+    <svg className={[tile ? styles.tile : styles.avatar, className].filter(Boolean).join(' ')} width={size} height={size} viewBox={view ?? VIEW_BOX} preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
       {shapes.map((s, i) => createElement(s.tag, { key: i, ...toProps(s.attrs) }))}
     </svg>
   );
