@@ -109,11 +109,4 @@ describe('Header', () => {
     expect(nav).toHaveTextContent('How it worksAbout');
     expect(screen.getByRole('link', { name: 'Play' })).toHaveAttribute('href', '/play');
   });
-
-  it('on a puzzle the nav is marked to step aside on phones', () => {
-    at('/play/bible');
-    expect(screen.getByRole('navigation', { name: 'Main' }).className).toContain('focus');
-    at('/leaderboard');
-    expect(screen.getAllByRole('navigation', { name: 'Main' })[1]!.className).not.toContain('focus');
-  });
 });

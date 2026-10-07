@@ -71,20 +71,19 @@
   text-overflow: ellipsis;
 }
 
+/* One row on a phone: logo on the left; you, the theme and Play on the right.
+   The landing page's section links are a scroll away, and the app's links live in the tab bar. */
 @media (max-width: 640px) {
-  .nav {
-    order: 3;
-    width: 100%;
-    flex-wrap: wrap;
-    gap: var(--space-2) var(--space-5);
+  .inner {
+    flex-wrap: nowrap;
+    column-gap: var(--space-3);
   }
-  /* In the app on phones, the tab bar carries the links and the account. */
-  .app,
-  .appOnly {
+  .nav,
+  .appOnly,
+  .accountName {
     display: none;
   }
-  /* On a puzzle the board comes first. The screen has its own All games link. */
-  .focus {
-    display: none;
+  .end {
+    gap: var(--space-3);
   }
 }

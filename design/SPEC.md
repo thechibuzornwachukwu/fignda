@@ -32,7 +32,7 @@ Values are tokens from `tokens/tokens.css`. Prototype wins on visuals. This file
 
 ## 3. Layout
 - Max width 1200, gutter 24. Section gap clamp(64px,9vw,120px).
-- Header, by context. Landing: logo, section links (How it works, About), account link, theme toggle, Play button (sm). App: logo, nav (Games, Leaders, Players) 14/600 `--muted`, account link, theme toggle 36 square radius 8. Nav wraps under 640 and hides on puzzle screens under 640 (they carry All games). Sticky with quick return: hides on scroll down past its height, returns on any scroll up (8px tolerance), stays while focus is inside.
+- Header, by context. Landing: logo, section links (How it works, About), account link, theme toggle, Play button (sm). App: logo, nav (Games, Leaders, Players) 14/600 `--muted`, account link, theme toggle 36 square radius 8. Under 640 the header is always one row: logo left; account (avatar only, no name), theme toggle and, on the landing page, Play on the right. Both navs are hidden there: the landing sections are a scroll away and the tab bar carries the app links. Sticky with quick return: hides on scroll down past its height, returns on any scroll up (8px tolerance), stays while focus is inside.
 - Game mobile layout under 760.
 - All text boxes reflow. `min-width: 0` on flex children with text. No fixed heights.
 

@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
-import { isPuzzle } from '../lib/routes';
 import { Button } from './Button';
 import { Logo } from './Logo';
 import { ThemeToggle } from './ThemeToggle';
@@ -15,10 +14,12 @@ function AccountLink() {
   const { profile } = useAuth();
   const { pathname } = useLocation();
   if (profile) {
+    const first = profile.name.split(/\s+/)[0];
     return (
-      <Link to={`/u/${profile.handle}`} className={styles.account}>
+      <Link to={`/u/${profile.handle}`} className={styles.account} aria-label={`${first}, your profile`}>
         <Avatar handle={profile.handle} size={28} />
-        {profile.name.split(/\s+/)[0]}
+        {/* On a phone the face is enough; the name would push the header onto a second row. */}
+        <span className={styles.accountName}>{first}</span>
       </Link>
     );
   }
@@ -102,7 +103,7 @@ export function Header() {
             </Link>
           </nav>
         ) : (
-          <nav className={[styles.nav, styles.app, isPuzzle(pathname) && styles.focus].filter(Boolean).join(' ')} aria-label="Main">
+          <nav className={styles.nav} aria-label="Main">
             <NavLink to="/play" className={navCls}>
               Games
             </NavLink>
