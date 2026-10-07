@@ -16,14 +16,15 @@ describe('avatar parts are append only', () => {
       'loc bun', 'durag',
     ],
     colour: ['black', 'dark brown', 'brown', 'blonde', 'ginger', 'grey'],
-    eyes: ['dots', 'smiling', 'wide', 'wink'],
-    mouth: ['smile', 'grin', 'flat', 'smirk'],
+    eyes: ['dots', 'smiling', 'wide', 'wink', 'heart eyes', 'star eyes', 'sleeping', 'sad', 'crying', 'surprised', 'angry'],
+    mouth: ['smile', 'grin', 'flat', 'smirk', 'frown', 'open', 'big laugh', 'tongue out', 'kiss'],
     face: ['none', 'beard', 'moustache', 'goatee'],
     extra: ['none', 'glasses', 'earrings', 'shades'],
     mark: ['none', 'freckles', 'pimples', 'beauty mark', 'blush', 'tribal marks', 'tribal marks across', 'single mark'],
-    item: ['none', 'toothpick', 'chewing stick'],
+    item: ['none', 'toothpick', 'chewing stick', 'rose'],
     tie: ['none', 'scrunchie', 'headband'],
     outfit: ['tee', 'agbada', 'kaftan', 'dashiki', 'ankara', 'buba and beads', 'suit', 'hoodie', 'jersey', 'turtleneck', 'hero cape', 'wizard robe', 'space suit', 'high collar shirt'],
+    festive: ['none', 'santa hat', 'antlers', 'witch hat', 'pumpkin', 'ghost', 'hearts', 'party hat', 'naija', 'snow', 'crown', 'bunny ears', 'clown'],
   };
 
   it.each(PARTS.map((p) => [p.key, p.letter] as const))('%s keeps its saved order', (key) => {
@@ -49,7 +50,7 @@ describe('avatar drawing', () => {
         for (const s of shapes) {
           for (const v of Object.values(s.attrs)) {
             // Numbers, colours and path data only: nothing that could carry markup or script.
-            if (typeof v === 'string') expect(v, `${p.key} ${p.names[i]}`).toMatch(/^[#A-Za-z0-9 .,-]+$/);
+            if (typeof v === 'string') expect(v, `${p.key} ${p.names[i]}`).toMatch(/^[#A-Za-z0-9 .,()-]+$/);
             else expect(Number.isFinite(v)).toBe(true);
           }
         }
@@ -58,9 +59,9 @@ describe('avatar drawing', () => {
   });
 
   it('a code round trips, and junk falls back to the default', () => {
-    const a: Avatar = { back: 5, skin: 2, hair: 40, colour: 4, eyes: 3, mouth: 1, face: 2, extra: 3, mark: 7, item: 2, tie: 1, outfit: 13 };
+    const a: Avatar = { back: 5, skin: 2, hair: 40, colour: 4, eyes: 3, mouth: 1, face: 2, extra: 3, mark: 7, item: 2, tie: 1, outfit: 13, festive: 11 };
     expect(parseAvatar(avatarCode(a))).toEqual(a);
-    expect(avatarCode(a)).toMatch(/^([a-z][0-9]{1,2}){12}$/);
+    expect(avatarCode(a)).toMatch(/^([a-z][0-9]{1,2}){13}$/);
     for (const junk of [null, undefined, '', '<svg onload=alert(1)>', 'h999', 'b9s9', 'x'.repeat(500)]) {
       expect(parseAvatar(junk)).toEqual(DEFAULT_AVATAR);
     }
@@ -128,6 +129,10 @@ describe('surprise me keeps the person', () => {
     expect(lookOf({ ...DEFAULT_AVATAR, hair: at('hair', 'gele') })).toBe('feminine');
     expect(lookOf({ ...DEFAULT_AVATAR, face: at('face', 'beard') })).toBe('masculine');
     expect(lookOf({ ...DEFAULT_AVATAR, hair: at('hair', 'low fade'), outfit: at('outfit', 'agbada') })).toBe('masculine');
+    // Outfits are costume: an agbada on a woman, or buba and beads on a bearded man, changes nothing.
+    expect(lookOf({ ...DEFAULT_AVATAR, hair: at('hair', 'gele'), outfit: at('outfit', 'agbada') })).toBe('feminine');
+    expect(lookOf({ ...DEFAULT_AVATAR, face: at('face', 'beard'), outfit: at('outfit', 'buba and beads') })).toBe('masculine');
+    expect(lookOf({ ...DEFAULT_AVATAR, outfit: at('outfit', 'agbada') })).toBeNull();
     expect(lookOf(DEFAULT_AVATAR)).toBeNull();
     // Mixed on purpose (braids and a beard): no look is assumed.
     expect(lookOf({ ...DEFAULT_AVATAR, hair: at('hair', 'braids'), face: at('face', 'beard') })).toBeNull();
@@ -187,5 +192,46 @@ describe('surprise me keeps the person', () => {
     expect(count('masculine')).toBeGreaterThanOrEqual(6);
     expect(count(undefined)).toBeGreaterThanOrEqual(10);
     for (const p of PARTS) expect(p.looks.length === 0 || p.looks.length === p.names.length, p.key).toBe(true);
+  });
+});
+
+describe('expressions and festive touches', () => {
+  const at = (key: string, name: string) => namesOf(key).indexOf(name);
+
+  it('a woman in an agbada for a laugh: it saves, draws, and Surprise me still treats her as she presents', () => {
+    const her: Avatar = { ...DEFAULT_AVATAR, hair: at('hair', 'gele'), outfit: at('outfit', 'agbada') };
+    expect(parseAvatar(avatarCode(her))).toEqual(her);
+    expect(drawAvatar(her).length).toBeGreaterThan(10);
+    let seed = 11;
+    const random = () => ((seed = (seed * 1664525 + 1013904223) >>> 0) / 4294967296);
+    const hair = PARTS.find((p) => p.key === 'hair')!;
+    const seen = new Set<string | undefined>();
+    for (let i = 0; i < 300; i++) {
+      const next = surprise(her, random);
+      expect(hair.looks[next.hair]).not.toBe('masculine');
+      expect(next.face).toBe(0);
+      seen.add(hair.looks[next.hair]);
+    }
+    // Feminine styles are still on offer, not only the for-anyone ones.
+    expect(seen.has('feminine')).toBe(true);
+  });
+
+  it('every mood names eyes and a mouth that exist', async () => {
+    const { MOODS } = await import('./parts/face');
+    for (const m of MOODS) {
+      expect(at('eyes', m.eyes), m.name).toBeGreaterThanOrEqual(0);
+      expect(at('mouth', m.mouth), m.name).toBeGreaterThanOrEqual(0);
+    }
+    expect(new Set(MOODS.map((m) => m.name)).size).toBe(MOODS.length);
+  });
+
+  it('festive touches are kept by Surprise me and never given to starters', () => {
+    const me: Avatar = { ...DEFAULT_AVATAR, festive: at('festive', 'santa hat') };
+    for (let i = 0; i < 50; i++) expect(surprise(me).festive).toBe(me.festive);
+    for (const h of ['ada', 'chidi', 'emma', 'x_y']) expect(avatarFor(h).festive).toBe(0);
+  });
+
+  it('old codes saved before festive existed still open', () => {
+    expect(parseAvatar('b0s3h6c0e0m0f0x0k0t0a0o1')).toEqual({ ...DEFAULT_AVATAR, hair: 6, outfit: 1 });
   });
 });

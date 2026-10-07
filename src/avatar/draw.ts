@@ -5,7 +5,8 @@
 //   shapes.ts          the SVG shapes, the palette, and the `Kit` every part is drawn with
 //   parts/hair.ts      hair and headwear, one entry per style
 //   parts/outfits.ts   outfits, one entry per outfit
-//   parts/face.ts      eyes, mouths, facial hair, skin marks, extras, mouth items, hair ties
+//   parts/face.ts      eyes, mouths, facial hair, skin marks, extras, mouth items, hair ties, mood presets
+//   parts/festive.ts   seasonal and themed touches (Santa hat, hearts, Naija colours), drawn on top
 //   draw.ts (here)     the choices an avatar is made of, its saved code, and the layer order
 //   store.ts           fetching other players' codes in batches
 //
@@ -17,6 +18,7 @@
 // avatars use it so they never change how someone presents. It limits nothing a player picks by hand.
 
 import { EXTRA_STYLES, EYE_STYLES, FACE_HAIR_STYLES, HAIR_TIE_NAMES, headband, MARK_STYLES, MOUTH_ITEM_STYLES, MOUTH_STYLES, scrunchie } from './parts/face';
+import { FESTIVE_STYLES } from './parts/festive';
 import { HAIR_STYLES } from './parts/hair';
 import { OUTFIT_STYLES, torso } from './parts/outfits';
 import { BACK_NAMES, BACKS, c, HAIR_COLOUR_NAMES, HAIR_COLOURS, INK, LIME, rect, SEAM_DARK, SEAM_LIGHT, SKINS, WHITE, type Kit, type Look, type Shape } from './shapes';
@@ -46,18 +48,19 @@ export const PARTS = [
   { key: 'item', letter: 't', title: 'In the mouth', names: names(MOUTH_ITEM_STYLES), looks: looks(MOUTH_ITEM_STYLES) },
   { key: 'tie', letter: 'a', title: 'Hair ties', names: HAIR_TIE_NAMES as readonly string[], looks: anyone },
   { key: 'outfit', letter: 'o', title: 'Outfit', names: names(OUTFIT_STYLES), looks: looks(OUTFIT_STYLES) },
+  { key: 'festive', letter: 'z', title: 'Festive', names: names(FESTIVE_STYLES), looks: anyone },
 ] as const satisfies ReadonlyArray<{ key: string; letter: string; title: string; names: readonly string[]; looks: ReadonlyArray<Look | undefined> }>;
 
 export type PartKey = (typeof PARTS)[number]['key'];
 /** The position chosen for each part. */
 export type Avatar = Record<PartKey, number>;
 
-export const DEFAULT_AVATAR: Avatar = { back: 0, skin: 3, hair: 0, colour: 0, eyes: 0, mouth: 0, face: 0, extra: 0, mark: 0, item: 0, tie: 0, outfit: 0 };
+export const DEFAULT_AVATAR: Avatar = { back: 0, skin: 3, hair: 0, colour: 0, eyes: 0, mouth: 0, face: 0, extra: 0, mark: 0, item: 0, tie: 0, outfit: 0, festive: 0 };
 
 /** Parse a saved code. Anything missing or out of range falls back to the default choice. */
 export function parseAvatar(code: string | null | undefined): Avatar {
   const out: Avatar = { ...DEFAULT_AVATAR };
-  if (typeof code !== 'string' || code.length > 56) return out;
+  if (typeof code !== 'string' || code.length > 64) return out;
   for (const part of PARTS) {
     const m = code.match(new RegExp(`${part.letter}(\\d{1,2})(?!\\d)`));
     const n = m ? Number(m[1]) : NaN;
@@ -71,12 +74,14 @@ export function avatarCode(a: Avatar): string {
 }
 
 /**
- * How an avatar presents, read from what its owner chose: feminine if any choice is usually feminine and
- * none masculine, masculine the other way round, and null when it is neutral or mixed.
+ * How an avatar presents, read from the hair and facial hair its owner chose: feminine if those are usually
+ * feminine, masculine if usually masculine, and null when they are neutral or mixed (braids and a beard).
+ * Outfits are costume and do not count: a woman in an agbada for a laugh still presents as she did.
  * Nothing about gender is asked or saved; this is worked out on the spot from the design itself.
  */
+const IDENTITY: readonly PartKey[] = ['hair', 'face'];
 export function lookOf(a: Avatar): Look | null {
-  const worn = new Set(PARTS.map((part) => part.looks[a[part.key]]).filter(Boolean));
+  const worn = new Set(PARTS.filter((part) => IDENTITY.includes(part.key)).map((part) => part.looks[a[part.key]]).filter(Boolean));
   if (worn.size !== 1) return null;
   return worn.has('feminine') ? 'feminine' : 'masculine';
 }
@@ -174,6 +179,8 @@ export function drawAvatar(a: Avatar): Shape[] {
     MOUTH_ITEM_STYLES[a.item]!.draw(k),
     tie === 'scrunchie' ? (hair.scrunchie ?? []).map((at) => scrunchie(k, at)) : [],
     tie === 'headband' && !hair.headwear && !hair.noHeadband ? [headband(k)] : [],
+    // Festive touches go on last, so a hat sits over whatever hair is underneath.
+    FESTIVE_STYLES[a.festive]!.draw(k),
   ];
   return layers.flat();
 }

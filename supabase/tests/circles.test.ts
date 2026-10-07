@@ -119,10 +119,12 @@ describe('circles', () => {
 describe('avatars', () => {
   it('you set your own, in the part code alphabet only', async () => {
     expect((await as('ann').from('profiles').update({ avatar: 'b0s3h1c0e0m0f0x0k0t0a0o1' }).eq('id', id('ann'))).error).toBeNull();
-    for (const bad of ['<svg onload=alert(1)>', 'javascript:alert(1)', 'b0 s3', 'z9', 'b0'.repeat(13), 'b123']) {
+    for (const bad of ['<svg onload=alert(1)>', 'javascript:alert(1)', 'b0 s3', 'Z9', 'b0'.repeat(25), 'b123', 'b', '9b', 'b0;drop']) {
       expect((await as('ann').from('profiles').update({ avatar: bad }).eq('id', id('ann'))).error, bad).not.toBeNull();
     }
     expect((await svc.from('profiles').select('avatar').eq('id', id('ann')).single()).data!.avatar).toBe('b0s3h1c0e0m0f0x0k0t0a0o1');
+    // A part added later (festive is z) saves without a migration, and so does a longer code.
+    expect((await as('ben').from('profiles').update({ avatar: 'b0s3h1c0e4m0f0x0k0t0a0o1z11' }).eq('id', id('ben'))).error).toBeNull();
   });
 
   it('nobody sets someone else’s, and anon sets none', async () => {

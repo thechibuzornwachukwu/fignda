@@ -1,6 +1,7 @@
 import { useState, type KeyboardEvent } from 'react';
 import { Check, Dices, Palette, Pencil, Scissors, Shirt, Smile, Undo2, X, type LucideIcon } from 'lucide-react';
 import { avatarCode, avatarFor, parseAvatar, PARTS, surprise, type Avatar as Parts, type PartKey } from '../avatar/draw';
+import { MOODS } from '../avatar/parts/face';
 import { HAIR_FAMILIES, HAIR_STYLES, type HairFamily } from '../avatar/parts/hair';
 import { BACKS, HAIR_COLOURS, SKINS } from '../avatar/shapes';
 import { setAvatarCode } from '../avatar/store';
@@ -19,7 +20,7 @@ const TABS: Array<{ key: string; title: string; icon: LucideIcon; parts: PartKey
   { key: 'face', title: 'Face', icon: Smile, parts: ['skin', 'eyes', 'mouth', 'mark', 'face'] },
   { key: 'hair', title: 'Hair', icon: Scissors, parts: ['hair', 'colour', 'tie'] },
   { key: 'wear', title: 'Wear', icon: Shirt, parts: ['outfit', 'extra', 'item'] },
-  { key: 'scene', title: 'Scene', icon: Palette, parts: ['back'] },
+  { key: 'scene', title: 'Scene', icon: Palette, parts: ['back', 'festive'] },
 ];
 const listed = new Set(TABS.flatMap((t) => t.parts));
 TABS[2]!.parts.push(...PARTS.map((p) => p.key).filter((k) => !listed.has(k)));
@@ -30,10 +31,13 @@ const SWATCHES: Partial<Record<PartKey, readonly string[]>> = { skin: SKINS, col
 const FACE = '25 31 46 46';
 const HEAD = '6 -2 84 84';
 const CHEST = '12 50 72 72';
-const VIEW: Partial<Record<PartKey, string>> = { eyes: FACE, mouth: FACE, mark: FACE, face: FACE, extra: FACE, item: FACE, hair: HEAD, tie: HEAD, outfit: CHEST };
+const WHOLE = '-7 -2 110 110';
+const VIEW: Partial<Record<PartKey, string>> = { eyes: FACE, mouth: FACE, mark: FACE, face: FACE, extra: FACE, item: FACE, hair: HEAD, tie: HEAD, outfit: CHEST, festive: WHOLE };
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const partOf = (key: PartKey) => PARTS.find((p) => p.key === key)!;
+/** Each mood as the eye and mouth positions it sets. */
+const MOOD_SETS = MOODS.map((m) => ({ name: m.name as string, eyes: partOf('eyes').names.indexOf(m.eyes), mouth: partOf('mouth').names.indexOf(m.mouth) }));
 
 type Props = { id: string; handle: string; code: string | null | undefined; onSaved: () => void };
 
@@ -159,6 +163,33 @@ function Editor({ id, handle, code, onSaved, onClose }: Props & { onClose: () =>
 
         {/* Keyed by tab, so each one opens at its top. This pane is the editor's only scroll. */}
         <div key={tab} className={styles.pane} role="tabpanel" id="avatar-panel" aria-labelledby={`avatar-tab-${tab}`} tabIndex={0}>
+          {tab === 'face' && (
+            <section className={styles.group} aria-label="Mood">
+              <h3 className={styles.groupTitle}>
+                Mood
+                <span className={styles.chosen}>Sets the eyes and mouth together</span>
+              </h3>
+              <div className={styles.tiles}>
+                {MOOD_SETS.map((m) => (
+                  <button
+                    key={m.name}
+                    type="button"
+                    className={styles.tile}
+                    aria-pressed={parts.eyes === m.eyes && parts.mouth === m.mouth}
+                    aria-label={`Mood: ${cap(m.name)}`}
+                    onClick={() => {
+                      setNote('');
+                      setBefore(null);
+                      setParts({ ...parts, eyes: m.eyes, mouth: m.mouth });
+                    }}
+                  >
+                    <Avatar parts={{ ...parts, eyes: m.eyes, mouth: m.mouth }} size={72} view={FACE} tile />
+                    <span className={styles.tileName}>{cap(m.name)}</span>
+                  </button>
+                ))}
+              </div>
+            </section>
+          )}
           {current.parts.map((key) => {
             const part = partOf(key);
             const swatches = SWATCHES[key];

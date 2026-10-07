@@ -81,6 +81,11 @@ test('design your character: pick parts, save, and it shows as you', async ({ pa
   await expect(editor.getByRole('button', { name: /^Skin: / })).toHaveCount(6);
   await expect(editor.getByRole('button', { name: /^Hair and headwear: / })).toHaveCount(0);
   await pick('Skin marks: Tribal marks').click();
+  // A mood sets the eyes and the mouth together.
+  await pick('Mood: Lovestruck').click();
+  await expect(pick('Eyes: Heart eyes')).toHaveAttribute('aria-pressed', 'true');
+  await expect(pick('Mouth: Smile')).toHaveAttribute('aria-pressed', 'true');
+  await expect(pick('Mood: Lovestruck')).toHaveAttribute('aria-pressed', 'true');
 
   // Hair comes in families, so nobody wades through all 41 at once.
   await tab('Hair').click();
@@ -90,6 +95,9 @@ test('design your character: pick parts, save, and it shows as you', async ({ pa
   await expect(editor.getByRole('region', { name: 'Hair and headwear' })).toContainText('Gele');
   await tab('Wear').click();
   await pick('Outfit: Buba and beads').click();
+  await tab('Scene').click();
+  await pick('Festive: Santa hat').click();
+  await tab('Wear').click();
   // Arrow keys move between tabs.
   await tab('Wear').focus();
   await page.keyboard.press('ArrowLeft');
@@ -125,6 +133,11 @@ test('design your character: pick parts, save, and it shows as you', async ({ pa
   await expect(pick('Hair and headwear: Gele')).toHaveAttribute('aria-pressed', 'true');
   await tab('Wear').click();
   await expect(pick('Outfit: Buba and beads')).toHaveAttribute('aria-pressed', 'true');
+  await tab('Scene').click();
+  await expect(pick('Festive: Santa hat')).toHaveAttribute('aria-pressed', 'true');
+  await tab('Face').click();
+  await expect(pick('Mood: Lovestruck')).toHaveAttribute('aria-pressed', 'true');
+  await tab('Wear').click();
   // Cancel throws away what was not kept.
   await pick('Outfit: Suit').click();
   await editor.getByRole('button', { name: 'Cancel' }).click();
