@@ -1,5 +1,5 @@
 /* Fignda tokens. Single source. Components read var(--*) only; never hard-code hex.
-   Manrope is self-hosted via @fontsource/manrope (imported in src/main.tsx), no third-party font request. */
+   Manrope and Bungee are self-hosted via @fontsource (imported in src/main.tsx), no third-party font request. */
 
 :root, [data-theme="dark"] {
   color-scheme: dark;
@@ -14,6 +14,8 @@
   --header-line: #1f1f22;
   --fg: #ededee;
   --fg-strong: #ffffff;
+  --ink-display: #c0c0c1; /* Bungee is heavy: display type sits at 80% of --fg, headings at 88% */
+  --ink-heading: #d2d2d3;
   --text-puzzle: #cfcfd4;
   --muted: #a1a1a8;
   --subtle: #7d7d85;
@@ -43,6 +45,8 @@
   --header-line: #e3e3e7;
   --fg: #111113;
   --fg-strong: #000000;
+  --ink-display: #3f3f41;
+  --ink-heading: #2c2c2e;
   --text-puzzle: #2a2a2e;
   --muted: #55555c;
   --subtle: #6a6a72;
@@ -60,6 +64,7 @@
 }
 :root {
   --font: 'Manrope', system-ui, sans-serif;
+  --font-display: 'Bungee', 'Manrope', system-ui, sans-serif; /* Headings only. One weight (400), capitals only, digits are not tabular */
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
   --radius-xs: 3px; --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px; --radius-xl: 12px; --radius-sheet: 14px;
   --radius-seg: 10px; --radius-seg-option: 7px; --radius-toggle: 13px; --radius-pill: 999px; /* M7: Segmented and Toggle, SPEC section 4 */

@@ -19,7 +19,7 @@
 .display {
   composes: display from '../styles/type.module.css';
   margin: 0;
-  font-size: clamp(52px, 11vw, 150px);
+  font-size: clamp(38px, 7.6vw, 104px);
 }
 
 .how {

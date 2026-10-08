@@ -13,11 +13,9 @@
   gap: var(--space-3);
 }
 .title {
+  composes: gameTitle from '../styles/type.module.css';
   margin: 0;
-  font-size: clamp(40px, 8vw, 56px);
-  line-height: 0.95;
-  font-weight: 800;
-  letter-spacing: -0.05em;
+  font-size: clamp(28px, 6vw, 40px);
 }
 .sub {
   color: var(--subtle);

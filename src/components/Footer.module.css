@@ -12,13 +12,10 @@
   flex-wrap: wrap;
 }
 .cta {
+  composes: h2 from '../styles/type.module.css';
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  font-size: clamp(28px, 4vw, 44px);
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  line-height: 1;
   transition: color var(--dur-base) var(--ease-std);
 }
 .cta:hover {

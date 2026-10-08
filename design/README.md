@@ -24,7 +24,7 @@ prototype/*.dc.html    Running design. Open in a browser. Visual truth.
 High. Colours, type, spacing, motion and copy are final. The prototype is HTML reference, not code to ship. Rebuild in the stack below. `prototype/support.js` is a prototype runtime only.
 
 ## Stack
-Vite, React, TypeScript, React Router, CSS Modules on `tokens.css`, `lucide-react`, `@fontsource/manrope`, Supabase (auth, Postgres, RLS), Cloudflare Worker (AI, score verification, OG images), Cloudflare Pages. All free tier.
+Vite, React, TypeScript, React Router, CSS Modules on `tokens.css`, `lucide-react`, `@fontsource/manrope`, `@fontsource/bungee`, Supabase (auth, Postgres, RLS), Cloudflare Worker (AI, score verification, OG images), Cloudflare Pages. All free tier.
 
 ## Start
 Empty repo. `CLAUDE.md` at root, this folder at `/design`. Prompt Claude Code:

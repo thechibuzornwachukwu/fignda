@@ -39,10 +39,8 @@
   border-top: 1px solid var(--line-3);
 }
 .h2 {
+  composes: h3 from '../styles/type.module.css';
   margin: 0;
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
 }
 .help {
   margin: 0;
@@ -109,8 +107,6 @@
   gap: var(--space-4);
 }
 .confirmTitle {
+  composes: h3 from '../styles/type.module.css';
   margin: 0;
-  font-size: 28px;
-  font-weight: 800;
-  letter-spacing: -0.03em;
 }

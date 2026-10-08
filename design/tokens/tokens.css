@@ -1,5 +1,5 @@
 /* Fignda tokens. Single source. Components read var(--*) only; never hard-code hex. */
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bungee&family=Manrope:wght@400;500;600;700;800&display=swap');
 
 :root, [data-theme="dark"] {
   color-scheme: dark;
@@ -14,6 +14,8 @@
   --header-line: #1f1f22;
   --fg: #ededee;
   --fg-strong: #ffffff;
+  --ink-display: #c0c0c1;
+  --ink-heading: #d2d2d3;
   --text-puzzle: #cfcfd4;
   --muted: #a1a1a8;
   --subtle: #7d7d85;
@@ -42,6 +44,8 @@
   --header-line: #e3e3e7;
   --fg: #111113;
   --fg-strong: #000000;
+  --ink-display: #3f3f41;
+  --ink-heading: #2c2c2e;
   --text-puzzle: #2a2a2e;
   --muted: #55555c;
   --subtle: #6a6a72;
@@ -58,6 +62,7 @@
 }
 :root {
   --font: 'Manrope', system-ui, sans-serif;
+  --font-display: 'Bungee', 'Manrope', system-ui, sans-serif;
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
   --radius-xs: 3px; --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px; --radius-xl: 12px; --radius-sheet: 14px;
   --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px; --space-12: 48px; --space-14: 56px; --space-18: 72px; --space-20: 80px; --space-24: 96px; --space-30: 120px;

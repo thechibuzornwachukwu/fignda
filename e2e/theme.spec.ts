@@ -59,6 +59,22 @@ test('Manrope is the loaded font', async ({ page }) => {
   expect(family).toContain('Manrope');
 });
 
+test('headings are Bungee, in the softer ink', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'dark' });
+  await page.goto('/play');
+  // Bungee is only requested once a heading is on the page.
+  await expect(page.locator('h1')).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
+  expect(await page.evaluate(() => document.fonts.check('400 36px Bungee'))).toBe(true);
+  const h1 = await page.evaluate(() => {
+    const s = getComputedStyle(document.querySelector('h1')!);
+    return { family: s.fontFamily, weight: s.fontWeight, color: s.color };
+  });
+  expect(h1.family).toContain('Bungee');
+  expect(h1.weight).toBe('400');
+  expect(h1.color).toBe('rgb(192, 192, 193)');
+});
+
 test('header fits at 375 with no horizontal scroll', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 800 });
   await page.goto('/');

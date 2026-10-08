@@ -34,10 +34,8 @@
   max-width: none;
 }
 .h2 {
+  composes: h3 from '../styles/type.module.css';
   margin: 0;
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
 }
 .list {
   margin: 0;

@@ -6,6 +6,7 @@ import '@fontsource/manrope/500.css';
 import '@fontsource/manrope/600.css';
 import '@fontsource/manrope/700.css';
 import '@fontsource/manrope/800.css';
+import '@fontsource/bungee/400.css';
 import './styles/tokens.css';
 import './styles/global.css';
 import { App } from './App';

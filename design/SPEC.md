@@ -17,14 +17,20 @@ Values are tokens from `tokens/tokens.css`. Prototype wins on visuals. This file
 
 ## 2. Type
 
+Two faces. Bungee (`--font-display`, 400 only, capitals only) for headings. Manrope (`--font`) for everything else. Bungee is wider and heavier than Manrope, so heading steps run smaller and take a softer ink: `--ink-display` (80% of `--fg`) on the two largest steps, `--ink-heading` (88%) on the rest. Its digits are not tabular, so clock and stat stay Manrope. Names, game rows, buttons, inputs and puzzle text stay Manrope.
+
+| Token | Face | Size | Weight | Tracking | LH | Ink |
+|---|---|---|---|---|---|---|
+| display | Bungee | clamp(36px,7vw,96px) | 400 | -0.02em | 0.98 | `--ink-display` |
+| gameTitle | Bungee | clamp(28px,5vw,68px) | 400 | -0.02em | 1 | `--ink-display` |
+| resultTitle | Bungee | clamp(24px,3.6vw,46px) | 400 | -0.015em | 1.05 | `--ink-heading` |
+| h2 | Bungee | clamp(22px,2.9vw,34px) | 400 | -0.015em | 1.05 | `--ink-heading` |
+| h3 | Bungee | 17 | 400 | 0 | 1.2 | `--ink-heading` |
+
 | Token | Size | Weight | Tracking | LH |
 |---|---|---|---|---|
-| display | clamp(52px,10vw,136px) | 800 | -0.055em | 0.92 |
-| gameTitle | clamp(40px,7vw,96px) | 800 | -0.05em | 0.95 |
 | clock | clamp(48px,7vw,96px) tabular | 800 | -0.05em | 0.85 |
-| resultTitle | clamp(32px,5vw,64px) | 800 | -0.045em | 1 |
 | stat | clamp(36px,5vw,56px) tabular | 800 | -0.04em | 1 |
-| h2 | clamp(32px,4vw,48px) | 800 | -0.04em | 1 |
 | row | clamp(24px,3.2vw,40px) | 700 | -0.035em | 1.1 |
 | puzzle | clamp(20px,2.3vw,27px) | 600 | -0.015em | 1.7 |
 | body | 16 | 500 | 0 | 1.55 |

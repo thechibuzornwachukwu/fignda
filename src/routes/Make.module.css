@@ -103,10 +103,8 @@
   gap: var(--space-4);
 }
 .h2 {
+  composes: h3 from '../styles/type.module.css';
   margin: 0;
-  font-size: 22px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
 }
 .list {
   margin: 0;
