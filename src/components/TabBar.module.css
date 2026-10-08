@@ -1,35 +1,105 @@
 .bar {
   display: none;
 }
+/* A dock that floats off the bottom edge. The hard lower edge (the ledge) is what makes it read as a
+   thing you can press, the way game buttons do. */
 @media (max-width: 640px) {
   .bar {
     position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    left: var(--space-3);
+    right: var(--space-3);
+    bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
     z-index: 10;
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    padding: var(--space-1) var(--space-2) env(safe-area-inset-bottom);
-    background: var(--bg);
-    border-top: 1px solid var(--line-2);
+    grid-template-columns: repeat(5, 1fr);
+    align-items: end;
+    height: var(--tabbar-h);
+    padding: 0 var(--space-1);
+    background: var(--surface);
+    border: 1px solid var(--line-3);
+    border-radius: var(--radius-dock);
+    box-shadow: 0 var(--ledge) 0 var(--line-3);
   }
 }
-.tab {
-  min-height: var(--tabbar-h);
+.tab,
+.play {
+  height: var(--tabbar-h);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: var(--space-1);
+  gap: var(--space-0h);
   color: var(--muted);
-  font-size: 12px;
-  font-weight: 700;
-  transition: color var(--dur-base) var(--ease-std);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  -webkit-tap-highlight-color: transparent;
+}
+.label {
+  line-height: 1;
+}
+/* The active place: a filled pill behind the icon and full-strength ink. Shape and weight, not colour alone. */
+.pill {
+  display: grid;
+  place-items: center;
+  width: var(--space-12);
+  height: var(--space-6h);
+  border-radius: var(--radius-pill);
+  transition:
+    background var(--dur-base) var(--ease-std),
+    transform var(--dur-fast) var(--ease-out);
 }
 .on {
   color: var(--fg);
 }
-.label {
-  line-height: 1;
+.on .pill {
+  background: var(--surface-2);
+  animation: pop var(--dur-slow) var(--ease-out);
+}
+.tab:active .pill {
+  transform: scale(0.9);
+}
+@keyframes pop {
+  from {
+    transform: scale(0.8);
+  }
+}
+
+/* Today's daily: a raised disc that pushes down when pressed. Ink, not lime: lime means found. */
+.play {
+  justify-content: flex-end;
+  padding-bottom: var(--space-2h);
+  color: var(--fg);
+}
+.disc {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--tabbar-disc);
+  height: var(--tabbar-disc);
+  margin-bottom: var(--space-1);
+  border-radius: 50%;
+  background: var(--fg);
+  color: var(--bg);
+  font-size: var(--tabbar-disc-icon);
+  border: var(--space-1) solid var(--bg);
+  box-shadow: 0 var(--ledge) 0 var(--line-4);
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out);
+}
+.disc svg {
+  fill: currentColor;
+}
+.play:active .disc {
+  transform: translateY(var(--ledge));
+  box-shadow: 0 0 0 var(--line-4);
+}
+/* Played today: the disc turns lime with a tick. Lime is success. */
+.play[data-done] .disc {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.play[data-done] .disc svg {
+  fill: none;
 }

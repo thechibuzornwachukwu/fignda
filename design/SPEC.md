@@ -123,7 +123,7 @@ Streak resets on wrong pick and on hint. `onFound` picks: first find, last one l
 
 **Avatars:** drawn from parts in `src/avatar` (see the header of `draw.ts`). Saved as a code of positions, so part lists are append only. Starter avatar from the handle until designed. Sizes: 24 room, 28 header and boards, 32 follow lists, 40 players, 88 profile, 120 designer preview. Settings, Your character: the avatar at 88 and Edit character, which opens the editor (Dialog variant `editor`: 940 wide, full screen under 720). Editor: a stage in the chosen background colour with the avatar at 168 and round icon buttons (dice = Surprise me, undo); four icon tabs (Face, Hair, Wear, Scene: smile, scissors, shirt, palette); one pane of choices that is the only scroll; footer with a status line, Cancel or Done, Keep this look. Colours (skin, hair colour, background) are 44px dots. Other parts are 72px close-up tiles with names: face parts zoom on the face, hair on the head, outfits on the chest. Hair shows one family at a time (Cuts and fades, Afros and curls, Braids and locs, Long and tied, Headwear). Surprise me keeps skin, hair colour, facial hair, marks and mouth item, and only draws styles that suit the look already built (styles carry an optional `look`; nothing about gender is asked or saved). Starter avatars use only for-anyone hair, no facial hair, a tee. The look is read from hair and facial hair only; outfits are costume. Face tab starts with a Mood row (Happy, Lovestruck, Star gazing, Laughing, Cheeky, Sleeping, Sad, Crying, Shocked, Angry, Blowing a kiss) that sets eyes and mouth together. Scene tab holds Background and Festive (Santa hat, antlers, witch hat, pumpkin, ghost, hearts, party hat, Naija, snow, crown, bunny ears, clown), drawn on top of everything and kept by Surprise me.
 
-**Tab bar (phones, app pages):** Games, Leaders, Players, You (or Sign in); icons 20 over 12/700 labels; fixed bottom with safe area. Hidden on landing and puzzles.
+**Tab bar (phones, app pages):** a floating dock, 12 from the sides and the bottom plus the safe area, `--tabbar-h` 64 high, `--surface` with a 1px `--line-3` border, radius `--radius-dock` 22 and a hard lower edge of `--ledge` 4 in `--line-3`. 5 slots: Games, Leaders, Daily, Players, You (or Sign in). Tabs: icon 20 inside a 48 by 28 pill over an 11/800 label, `--muted`; the active tab is `--fg` with the pill filled `--surface-2` (shape and weight, never colour alone). Daily, in the middle: a 60 disc raised above the dock, `--fg` fill with a `--bg` Play icon (24, filled) and its own ledge, opening today's daily; once today's daily is finished on this device the disc is `--accent` with a Check. Pressing the disc sinks it by the ledge. Hidden on landing and puzzles.
 
 ## 6. Screens (prototype file in brackets)
 
@@ -171,6 +171,7 @@ Durations and easings are tokens. Reduced motion sets them to 0 and disables FLI
 | Element | Transition |
 |---|---|
 | Letter | bg, color 180ms ease |
+| Tab bar | active pill pops from 0.8 scale, `--dur-slow` `--ease-out`; a pressed tab's pill scales to 0.9; the Daily disc sinks by `--ledge`, `--dur-fast` |
 | Word chip | bg, color 250ms ease |
 | GameRow hover | padding-left 0→12, color 250ms ease |
 | FilterTab, Button, Toggle | 200ms ease |

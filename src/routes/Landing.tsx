@@ -1,6 +1,11 @@
+import { Button } from '../components/Button';
 import { GameRow } from '../components/GameRow';
+import { TextLink } from '../components/TextLink';
 import { getPuzzle } from '../games/catalog';
+import { today } from '../games/daily';
 import { LandingDemo } from './LandingDemo';
+import { HowTo } from './LandingHowTo';
+import { CastStack, Features, HeroArt } from './LandingPreviews';
 import styles from './Landing.module.css';
 
 /** Landing list: a friendly name per curated game. Counts and levels come from the engine. */
@@ -22,18 +27,48 @@ export function Landing() {
   return (
     <>
       <section className={styles.hero}>
-        <div className={styles.wrap}>
-          <h1 className={styles.display}>
-            Find it.
-            <br />
-            <span className={styles.sub}>Figure it out.</span>
-          </h1>
+        <div className={`${styles.wrap} ${styles.heroGrid}`}>
+          <div className={styles.pitch}>
+            <h1 className={styles.display}>
+              Find it.
+              <br />
+              <span className={styles.sub}>Figure it out.</span>
+            </h1>
+            <p className={styles.lede}>
+              Words are hiding inside ordinary sentences, across the spaces and the commas. Drag over the letters to
+              pull them out.
+            </p>
+            <div className={styles.actions}>
+              <Button to={`/d/${today().n}`}>Play today's daily</Button>
+              <Button to="/#how" variant="secondary">
+                Try it here
+              </Button>
+            </div>
+            <p className={styles.proof}>
+              <CastStack />
+              Free in your browser. Play as a guest, sign in when you want your name on the board.
+            </p>
+          </div>
+          <HeroArt />
         </div>
       </section>
 
-      <section id="how" className={styles.how} aria-label="Try it">
-        <div className={styles.wrap}>
+      <section id="how" className={styles.how} aria-labelledby="how-title">
+        <div className={`${styles.wrap} ${styles.stack}`}>
+          <h2 id="how-title" className={styles.h2}>
+            Two ways to find a word
+          </h2>
+          <HowTo />
           <LandingDemo />
+        </div>
+      </section>
+
+      <section className={styles.more} aria-labelledby="more-title">
+        <div className={`${styles.wrap} ${styles.stack}`}>
+          <h2 id="more-title" className={styles.h2}>
+            More than one way to play
+          </h2>
+          <Features />
         </div>
       </section>
 
@@ -51,6 +86,7 @@ export function Landing() {
                 </li>
               ))}
             </ol>
+            <TextLink to="/play">Or type any topic</TextLink>
           </div>
           <ul className={styles.games}>
             {PICKS.map(([id, name]) => {

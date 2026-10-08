@@ -49,7 +49,7 @@ Decided direction, 8 Oct 2026. The research and the reasoning are in `design/INS
 
 ## To build next
 
-Order matters. 1 and 2 make the game better and cost nothing. 3 to 5 serve Make a puzzle.
+Order matters. 1 to 3 make the game better and cost nothing. 4 to 6 serve Make a puzzle.
 
 ### 1. Say the promise
 
@@ -87,7 +87,7 @@ Six parts, from the six principles in `INSIGHTS.html`. Each is small enough to s
 
 - [ ] The leaderboard opens on your crowd: circle if you have one, else people you follow, else everyone. Segmented control keeps all three.
 - [ ] Crowns: for each hidden word in today's daily, the first player in your circle to find it. Shown in the circle's Today table and under your result ("First in your circle to find KENYA"). Server side only, from verified play logs.
-- [ ] Weekly tables: about 20 players of similar level, grouped each Monday from last week's dailies. Top 3 named on Sunday. No promotion or relegation ladder yet.
+- [ ] Weekly tables of about 20 players, with tiers to move up and down: see Leagues in 3c.
 - [ ] On the global board, "ahead of 62% today" beside the rank, from 5 verified players up.
 - [ ] A player with no circle is offered one after their third daily, not before.
 
@@ -132,7 +132,61 @@ Nothing is removed. Things appear when they mean something.
 - [ ] Each part has an e2e path for a guest, a new signed in player and a player with history.
 - [ ] `SECURITY.md` read before crowns, weekly tables and rest days: all three are decided on the server from verified plays.
 
-### 3. Waiting screen with the player's avatar
+### 3. Screens that feel like a game
+
+The reasoning is in `INSIGHTS.html` sections 7 to 9. Done on 9 Oct 2026: the phone tab bar is now a floating dock with a raised Daily button (SPEC section 5, Tab bar).
+
+**3a. Pages that stand alone** (learned from Duolingo's core tabs redesign)
+
+- [ ] One `<PageHeader>` for the 4 tabs: title in the same place at the same size, one action on the right. Replace the per-page headings on Games, Leaders, Players and You.
+- [ ] Each tab leads with the thing to do now. Games: today's daily. Leaders: your crowd (2b). Players: one section, not 3 (2c). You: your records (2f).
+- [ ] Each tab does one job. List what is on each of the 4 pages today and move or drop what does not serve that job. Write the result into `SPEC.md` section 6 before changing a page.
+- [ ] Sections are separated by space, not by a box around each one. Count the bordered cards on each tab and remove the ones that only group.
+- [ ] One-off type sizes: every text style on the 4 tabs comes from `type.module.css`. Add a test beside the tokens test.
+- [ ] Desktop: the same headers and order. The header links stay; no dock.
+- [ ] The dock, still to check: on a real iPhone with the Home Screen app (safe area), on a 320px phone, with the keyboard open on Players search, and that the lime tick appears the moment the daily is finished without a reload.
+
+**3b. The first minute** (owner, 9 Oct 2026: onboarding is not great)
+
+Play first, account later, and every question asked for a reason the player can see. Write the flow into `SPEC.md` first.
+
+- [ ] First visit on a phone opens on a playable sentence, not a marketing page. The landing demo is the base. The rest of the landing page sits below it.
+- [ ] One guided find: a hand shows the first hidden word, then the player is alone. No slides. Skippable.
+- [ ] After the first finished puzzle, at the result: "Keep this score." That is the first time sign in is offered.
+- [ ] Character before form. The new player builds a look first (below), then signs in to keep it. A guest's character and score are kept in the browser and move to the account on sign in.
+- [ ] One question per screen, each with Skip, and a ring that closes across the steps (2e's `<Ring>`).
+- [ ] The outfit question (owner, wording agreed 9 Oct 2026). Heading: "We believe you should look good." Subheading, the question itself: "Who are we dressing?" 3 choices: A woman, A man, I'd rather not say. Under them: "So we pick hair and outfits that suit you. Change it any time."
+  - "I'd rather not say" is a full answer, not a skip: the player gets the mixed set, which is what everyone sees today.
+  - It sets which hair and outfit choices come first and what Surprise me draws. It locks nothing: every style stays open to everyone.
+  - Saved with the avatar as its `look` (the tags already exist in `src/avatar`), shown to nobody, never used for ranking, matching or ads.
+  - `SPEC.md` says today that nothing about gender is asked or saved. Change that line and the privacy page in the same commit.
+  - Existing players are not asked. They can set it in the editor.
+  - Read `SECURITY.md` first: it is a new personal field on `profiles`.
+- [ ] Name and @handle come last, prefilled, one tap to accept.
+- [ ] The flow ends on today's daily, not on a menu.
+- [ ] Edge cases: a player who skips everything, one who leaves half way and returns, one who signs in on a second device, a returning player with an old account (never sees the flow), reduced motion, a 320px phone, a screen reader.
+- [ ] Measure: new visitors who finish one puzzle, and finished players who then sign in (INSIGHTS section 10).
+
+**3c. The journey** (owner, 9 Oct 2026: the Games page feels boring)
+
+The Games tab becomes a path the player travels, the way Duolingo's home is a path and not a list. It replaces the list as the first thing on the tab. It does not sit on top of it.
+
+- [ ] The path: chapters, each a theme (Bible, Science, Football, Naija and so on), each a run of puzzles as round stops on a winding line. The 25 puzzles in `data/games.json` make about 5 chapters of 5. Order inside a chapter runs easy to hard, from the engine's difficulty (2a).
+- [ ] Stops have 3 states: done (lime tick, since lime means found), next (the player's avatar stands on it and it is the one accent on the screen), and locked (muted, with a lock). Finishing a stop opens the next one.
+- [ ] Stars on each stop, 1 to 3, earned by skill: 1 for finishing, 2 for finding 80%, 3 for a clean read with no hints. A stop can be replayed for more stars.
+- [ ] Each chapter ends on a harder puzzle (longer words, more joins). Clearing it opens the next chapter and gives a chapter badge.
+- [ ] The daily stays apart: it is on the dock and at the top of the path, and it is never locked.
+- [ ] Nothing is lost: "All games" under the path opens today's list with its filters, every puzzle playable in any order. Finished ones show their stars.
+- [ ] Levels: one number that grows with points. Thresholds rise (level 2 at 500 points, then each level needs about 20% more). Shown on the profile, beside the avatar in rooms and boards, and on a level-up moment after a game. Names for bands of levels come from the promise (for example Skimmer, Reader, Spotter, Sharp eye, Hawk eye). Points already exist and already cannot be farmed by replays.
+- [ ] Leagues: the weekly tables of 2b, with tiers. 5 tiers to start. About 20 players in a table, grouped each Monday within a tier. The week's score is the points earned that week from dailies and first clears on the path. Top 5 move up a tier, bottom 5 move down, the top tier keeps its top 3 on a wall. Decided on the server by the hourly job that already exists.
+- [ ] Keep leagues on the right side of principle 4: no message about dropping, a player can leave leagues in Settings, a week with no play moves nobody down more than 1 tier, and rest days (2d) apply.
+- [ ] More stops need more puzzles. New chapters come from puzzles that passed the daily candidate rule (2a), so the path grows without anyone writing to order.
+- [ ] Guests travel the path too, saved in the browser, and it moves to the account on sign in. Levels and leagues need sign in.
+- [ ] Motion: the avatar hops to the next stop, stars pop in one at a time, a level-up fills the ring (2e). All from tokens, all off under reduced motion. Write them into `SPEC.md` section 8 first.
+- [ ] Edge cases: a player with history before the path exists (their finished puzzles show as done, with stars worked out from their best verified play), every stop done, a chapter with a puzzle later removed, 2 devices with different guest progress on sign in, a table with fewer than 5 players (nobody moves down), a tie on the cut line, the week turning over mid game.
+- [ ] Database: `journey_progress`, `levels` as a view over points, `leagues` and `league_weeks`. Migrations with RLS, written by the Worker only. Read `SECURITY.md` first.
+
+### 4. Waiting screen with the player's avatar
 
 Asked for by the owner on 8 Oct 2026. Write it into `SPEC.md` first (section 8, Motion, and the any-topic line), then build.
 
@@ -173,7 +227,7 @@ Edge cases to test (unit tests for the component, e2e for the flows):
 - [ ] Reduced motion on: nothing moves.
 - [ ] Long name or long topic in the line: wraps, never pushes the avatar off screen.
 
-### 4. Make the puzzle in the background
+### 5. Make the puzzle in the background
 
 Needed because a 1 to 5 minute request that dies with the page is fragile on phones. The waiting screen sits on top of this.
 
@@ -185,7 +239,7 @@ Needed because a 1 to 5 minute request that dies with the page is fragile on pho
 - [ ] Check first that `waitUntil` lasts long enough on the free Workers plan for a 2.5 minute model call. If it does not, use a Queue or keep the request open as today.
 - [ ] Read `SECURITY.md` before the table and the endpoint.
 
-### 5. Make a puzzle takes over any-topic
+### 6. Make a puzzle takes over any-topic
 
 Owner, 8 Oct 2026. There is one feature, Make a puzzle. "Any topic" is not a second feature: it is Make with the system making the choices the player did not make. Everything any-topic has today moves inside Make and the name goes away.
 
@@ -207,7 +261,7 @@ Folding the rest in:
 - [ ] The 24 hour topic cache stays as a speed-up, but each player gets their own copy of the puzzle so that plays, votes and the maker's name are theirs.
 - [ ] Remove "Or any topic" from the games screen, `CustomTopic.tsx`, its SPEC line and its tests. Remove the `Custom` category name where it shows; these are player puzzles.
 - [ ] Old any-topic puzzles made by guests keep working by link. They have no maker, so they never become daily candidates.
-- [ ] The waiting screen (3) and background making (4) belong to Make now. Their text says "Making your puzzle", never anything about topics or AI.
+- [ ] The waiting screen (4) and background making (5) belong to Make now. Their text says "Making your puzzle", never anything about topics or AI.
 - [ ] Topic icons (owner, 8 Oct 2026: icons, not emoji). Every puzzle and every pack carries one small icon for what it is about.
   - First choice: `lucide-react` through `<Icon>`, already the rule. Stroke 1.75, size 20 on cards and 16 inline.
   - `data/topicIcons.json`: topic words to icon names (football, music, food, animals, space, cars, money, school, faith, places, people, and so on). The system picks from this table by matching the topic. The AI never chooses or draws an icon.
@@ -238,7 +292,7 @@ Quality and speed of the system's writing:
 - [ ] Log which provider made each puzzle and how long it took (a column on `games`), so the order can be decided on numbers.
 - [ ] Generate one hidden word at a time and check each with the engine, if whole-paragraph quality stays poor.
 
-### 6. Other
+### 7. Other
 
 - [ ] Holiday dailies, phase 2: a themed puzzle for each holiday, made with the AI, checked by the engine and by the same safety check and standard as any other puzzle (2a). Same file, new puzzle ids.
 - [ ] Player-made puzzles, public list: today they open by link only. A browse list needs a report button and a way to hide a puzzle first. Any-topic puzzles need the same before they are listed anywhere.

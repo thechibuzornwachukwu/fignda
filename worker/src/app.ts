@@ -9,6 +9,7 @@ import pools from '../../data/copy.json';
 import type { AiGenerate } from './ai';
 import { PUSH_ENDPOINT, type PushSend } from './push';
 import { MAX_LOG_EVENTS, MAX_PLAY_MS, replay } from './replay';
+import { MAX_UNKNOWN, onRealWords, tokensOf, unknownIn } from './realWords';
 import { TOPIC_MAX, cleanTopic, isProfane, shareCode, topicKey } from './text';
 
 export { crossesWords };
@@ -129,17 +130,26 @@ export const AiPuzzle = z
 
 const AI_ATTEMPTS = 2;
 
-/** One AI round: validated, filtered, at least 4 hidden words that cross word boundaries. */
+/** One AI round: validated, filtered, at least 4 hidden words that cross word boundaries and sit on real words. */
 export async function draft(ai: AiGenerate, topic: string) {
   const raw = await ai(topic).catch(() => null);
   const parsed = raw == null ? null : AiPuzzle.safeParse(extractJson(raw));
   if (!parsed?.success) return null;
   const { title, paragraph, words } = parsed.data;
   if (isProfane(title, paragraph, words.join(' '))) return null;
-  const puzzle = buildHiddenWords({ text: paragraph, dict: words });
-  const hidden = puzzle.answers.filter((a) => crossesWords(puzzle.chars, a.spans));
-  if (hidden.length < 4) return null;
-  return { title, paragraph, dict: hidden.map((a) => a.label) };
+  // A model that cannot hide a word cuts it in two with a space ("cr oss"). Those are not puzzles.
+  const hidden = honestWords(paragraph, words);
+  if (!hidden) return null;
+  return { title, paragraph, dict: hidden };
+}
+
+/** The hidden words that cross word boundaries and sit on real words. Null when there are under 4, or the text is full of fragments. */
+export function honestWords(text: string, dict: readonly string[]): string[] | null {
+  const puzzle = buildHiddenWords({ text, dict });
+  const tokens = tokensOf(puzzle.chars);
+  if (unknownIn(tokens).length > MAX_UNKNOWN) return null;
+  const hidden = puzzle.answers.filter((a) => crossesWords(puzzle.chars, a.spans) && onRealWords(tokens, a.spans));
+  return hidden.length < 4 ? null : hidden.map((a) => a.label);
 }
 
 function extractJson(text: string): unknown {
@@ -180,7 +190,9 @@ async function generate(req: Request, deps: Deps) {
     .order('created_at', { ascending: false })
     .limit(1)
     .maybeSingle();
-  if (cached.data) return json({ ...gameOut(cached.data), cached: true });
+  // A puzzle saved before the real-word check may be made of fragments. Do not hand it out again.
+  const stillGood = cached.data && honestWords(cached.data.text, (cached.data.dict as string[] | null) ?? []);
+  if (cached.data && stillGood) return json({ ...gameOut(cached.data), cached: true });
 
   // The engine decides what really hides. Keep real hits that cross word boundaries only.
   let made: Awaited<ReturnType<typeof draft>> = null;
