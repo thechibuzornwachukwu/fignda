@@ -10,14 +10,19 @@ binding = "AI"
 # Public settings. Secrets are NOT here: set them with `npx wrangler secret put NAME`.
 #   SUPABASE_SERVICE_ROLE_KEY  (required)
 #   ANTHROPIC_API_KEY          (only if AI_PROVIDER = "anthropic"; pay per use)
+#   GEMINI_API_KEY             (only if AI_PROVIDER = "gemini"; free tier, 20 requests a day on gemini-3.5-flash)
+#   OPENROUTER_API_KEY         (only if AI_PROVIDER lists "openrouter"; free models)
+#   GROQ_API_KEY               (only if AI_PROVIDER lists "groq"; free tier)
 [vars]
 SUPABASE_URL = "https://oeoytlqfkynaidxeskbn.supabase.co"
 # Comma separated. Only these origins are served.
 APP_ORIGINS = "https://fignda.pages.dev,http://localhost:5173,http://localhost:4173"
-# "workers-ai" (free) | "anthropic" (paid) | "off"
-# Off for now: the free Workers AI models tested could not hide words across word boundaries.
-# Set "workers-ai" to retry free models (optionally with AI_MODEL), or "anthropic" with a key and a spending cap.
-AI_PROVIDER = "off"
+# Providers in order, comma separated. The first is the main one; the next is asked when it fails.
+# A provider without its key is skipped. "off" switches generation off. Details: worker/src/ai.ts.
+# OpenRouter is the main one (8 Oct 2026): 50 requests a day free, 1,000 once the account has bought $10 of
+# credit. Gemini is 20 a day. Groq joins when its key is stored. Workers AI is left out: its free models
+# could not hide words across word boundaries.
+AI_PROVIDER = "openrouter,gemini,groq"
 # Daily reminders (web push). Off until a key pair exists: run `npm run push:keys`, paste the public key and
 # subject here, and store the private one with `npx wrangler secret put VAPID_PRIVATE_KEY --config worker/wrangler.toml`.
 # VAPID_PUBLIC_KEY = ""

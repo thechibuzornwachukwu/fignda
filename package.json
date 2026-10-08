@@ -26,7 +26,8 @@
     "og:render": "node scripts/render-og.mjs",
     "brand:render": "node scripts/render-brand.mjs",
     "avatars:render": "tsx scripts/render-avatars.mjs",
-    "push:keys": "node scripts/push-keys.mjs"
+    "push:keys": "node scripts/push-keys.mjs",
+    "ai:bench": "tsx scripts/ai-bench.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.128.0",

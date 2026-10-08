@@ -130,7 +130,7 @@ export const AiPuzzle = z
 const AI_ATTEMPTS = 2;
 
 /** One AI round: validated, filtered, at least 4 hidden words that cross word boundaries. */
-async function draft(ai: AiGenerate, topic: string) {
+export async function draft(ai: AiGenerate, topic: string) {
   const raw = await ai(topic).catch(() => null);
   const parsed = raw == null ? null : AiPuzzle.safeParse(extractJson(raw));
   if (!parsed?.success) return null;

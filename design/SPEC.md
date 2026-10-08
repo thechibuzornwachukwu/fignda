@@ -87,7 +87,7 @@ Streak resets on wrong pick and on hint. `onFound` picks: first find, last one l
 **Finish:** "I'm done" or last find. Missed answers shade. Result title picked once from `titlePerfect|titleGood|titleLow|titleZero`, then fixed.
 **Sound:** Web Audio, synthesized, no files (`src/lib/sound.ts`). A soft triangle tick per new letter in a selection, pitch up a semitone per letter from 660 Hz (cap 2 octaves), ticks under 25ms apart merge. A find plays C6 then G6. Misses are silent. On by default, `fignda-sound`=`off` mutes. Audio wakes on the first gesture only. Mute: speaker button on the puzzle screen (aria-pressed) and a Sounds switch in Settings. Safari ambient session: the iPhone silent switch mutes it.
 
-**Together:** `?vs=handle` shows that player's best verified score (plays_public) above the board, then won / lost / level at the end; dailies show the score only until you finish. `?room=CODE` (6 chars, no 0 O 1 I L) joins a live room: Play together button on non-daily puzzles, room bar (who is in, Invite, Leave, Not ranked). Spans broadcast and re-checked with the engine; `teamFound` / `teamJoined` copy pools. When the game ends each signed in player sends their own play log with the room code; the server replays it for the Together board and never for the solo boards. Under the room bar, "Invite someone you follow" opens a list of the people you follow with an Invite button each.
+**Together:** `?vs=handle` shows that player's best verified score (plays_public) above the board, then won / lost / level at the end; dailies show the score only until you finish. `?room=CODE` (6 chars, no 0 O 1 I L) joins a live room: Play together button on non-daily puzzles, room bar (who is in, Invite, Leave, Not ranked). Every player in the room has an avatar at 24, your own row included; a guest gets a starter drawn from their room id. Spans broadcast and re-checked with the engine; `teamFound` / `teamJoined` copy pools. When the game ends each signed in player sends their own play log with the room code; the server replays it for the Together board and never for the solo boards. Under the room bar, "Invite someone you follow" opens a list of the people you follow with an Invite button each.
 
 **Text result:** Copy result button on results (secondary). Lines: title (dailies: `Fignda Daily #n`), `found · time · score` (dailies never print the total), marks in play order 🟩 find ⬜ miss 💡 hint in rows of 10 (max 40), `Beat it: <link>` (adds `?vs=handle` when signed in). Coarse pointers use the share sheet, others copy.
 
@@ -134,7 +134,7 @@ Hero "Find it." / "Figure it out." (`--subtle`). Inline demo sentence with 5 wor
 - Heading "Pick a game." / "Start finding."
 - Daily card: kicker `Daily #N · date` `--accent-ink`, title, sub. Unplayed "One try. Count hidden. Wrong picks cost 10." + accent "Play today". Played "Done for today. You found N. New puzzle at midnight." + secondary "See result".
 - FilterTabs, GameRow list from `data/games.json` sorted by filter order.
-- "Or any topic" input + "Create puzzle" ("Creating..."). Empty: "Give us something to hide words in first." Failure: `genFail` line.
+- "Or any topic" input + "Create puzzle" ("Creating..."). While it works, the line under the input reads "This can take a few minutes. Keep this page open." Empty: "Give us something to hide words in first." Failure: `genFail` line.
 
 **Game `/play/:id`, `/d/:n`**
 - Back "All games", `Category · Level`.

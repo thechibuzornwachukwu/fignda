@@ -92,6 +92,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
   const roomRef = useRef<Room | null>(null);
   const [peers, setPeers] = useState<Peer[]>([]);
   const [roomStatus, setRoomStatus] = useState<RoomStatus>('connecting');
+  const [roomId] = useState(() => crypto.randomUUID());
   const g = useGameSession({
     mod,
     puzzle,
@@ -131,7 +132,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
       const spans = gRef.current.s.found.map((f) => f.span);
       if (spans.length) roomRef.current?.sendSync(spans);
     };
-    const me: Peer = { id: crypto.randomUUID(), name: myName ?? 'A friend', handle: myHandle };
+    const me: Peer = { id: roomId, name: myName ?? 'A friend', handle: myHandle };
     void joinRoom(roomCode, me, {
       onFind: (a, b, from) => gRef.current.teamPick(a, b, from.name),
       onPeers: (p) => alive && setPeers(p),
@@ -165,7 +166,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
       roomRef.current = null;
       setPeers([]);
     };
-  }, [inRoom, roomCode, myName, myHandle]);
+  }, [inRoom, roomCode, roomId, myName, myHandle]);
 
   // Signed in: send the play log once per finished game. The Worker replays it and stores a verified score.
   // Today's daily only; if that fails for a reason other than "already played", keep it as an unverified merge.
@@ -309,7 +310,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
         </div>
       </div>
 
-      {inRoom && <RoomBar gameId={def.id} code={roomCode} peers={peers} status={roomStatus} me={myStats} path={sharePath({ id: def.id, code: def.id.startsWith('c-') ? def.id.slice(2).toUpperCase() : undefined })} />}
+      {inRoom && <RoomBar gameId={def.id} code={roomCode} peers={peers} status={roomStatus} me={myStats} you={{ id: roomId, handle: myHandle }} path={sharePath({ id: def.id, code: def.id.startsWith('c-') ? def.id.slice(2).toUpperCase() : undefined })} />}
 
       {challenge && !inRoom && (
         <Challenge

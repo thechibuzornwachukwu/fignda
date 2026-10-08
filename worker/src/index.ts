@@ -7,14 +7,20 @@ export type Env = {
   SUPABASE_URL: string;
   SUPABASE_SERVICE_ROLE_KEY: string;
   APP_ORIGINS: string;
-  /** "workers-ai" (free, default) | "anthropic" (paid) | "off". */
+  /** Providers in order, comma separated: "openrouter,gemini,groq". See worker/src/ai.ts. "off" switches generation off. */
   AI_PROVIDER?: string;
-  /** Optional model override for the chosen provider. */
+  /** Optional model for the first provider. */
   AI_MODEL?: string;
   /** Workers AI binding from wrangler.toml [ai]. */
   AI?: WorkersAi;
   /** Only for AI_PROVIDER = "anthropic". */
   ANTHROPIC_API_KEY?: string;
+  /** Only for AI_PROVIDER = "gemini". */
+  GEMINI_API_KEY?: string;
+  /** Only for AI_PROVIDER = "openrouter". */
+  OPENROUTER_API_KEY?: string;
+  /** Only for "groq". */
+  GROQ_API_KEY?: string;
   /** Daily reminders. Unset: reminders are off. */
   VAPID_PUBLIC_KEY?: string;
   VAPID_PRIVATE_KEY?: string;
@@ -33,6 +39,9 @@ function depsOf(env: Env): Deps {
       model: env.AI_MODEL,
       workersAi: env.AI,
       anthropicKey: env.ANTHROPIC_API_KEY,
+      geminiKey: env.GEMINI_API_KEY,
+      openrouterKey: env.OPENROUTER_API_KEY,
+      groqKey: env.GROQ_API_KEY,
     }),
     origins: env.APP_ORIGINS.split(',').map((s) => s.trim()).filter(Boolean),
     push: makePush({ publicKey: env.VAPID_PUBLIC_KEY, privateKey: env.VAPID_PRIVATE_KEY, subject: env.VAPID_SUBJECT }),

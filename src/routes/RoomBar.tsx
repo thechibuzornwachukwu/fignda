@@ -9,7 +9,7 @@ import { copyText } from '../lib/share';
 import { InviteFollowing } from './GameInvites';
 import styles from './RoomBar.module.css';
 
-type Props = { code: string; peers: Peer[]; path: string; status: RoomStatus; me: RoomStats; gameId: string };
+type Props = { code: string; peers: Peer[]; path: string; status: RoomStatus; me: RoomStats; /** Your id in the room, and your handle when signed in. */ you: Pick<Peer, 'id' | 'handle'>; gameId: string };
 
 const line = (r: Row) =>
   [`${r.finds ?? 0} ${r.finds === 1 ? 'word' : 'words'}`, r.finds ? `${r.pace ?? 0}s a word` : '', `${r.hints ?? 0} ${r.hints === 1 ? 'hint' : 'hints'}`]
@@ -19,8 +19,8 @@ const line = (r: Row) =>
 const STATUS: Record<RoomStatus, string> = { connecting: 'Connecting', live: 'Live', offline: 'Reconnecting' };
 
 /** Who is in the room, the invite, and the way out. Signed in players are ranked as a team; guests are shown only. */
-export function RoomBar({ code, peers, path, status, me, gameId }: Props) {
-  const rows = rankRoom([{ id: 'you', name: 'You', you: true, ...me }, ...peers]);
+export function RoomBar({ code, peers, path, status, me, you, gameId }: Props) {
+  const rows = rankRoom([{ ...you, name: 'You', you: true, ...me }, ...peers]);
   const [note, setNote] = useState('');
   const url = `${window.location.origin}${path}?room=${code}`;
   const invite = async () => {
@@ -50,8 +50,9 @@ export function RoomBar({ code, peers, path, status, me, gameId }: Props) {
               <li key={p.id} className={styles.player} data-away={p.away || undefined} data-you={p.you || undefined}>
                 <span className={styles.rank}>{i + 1}</span>
                 <span className={styles.dot} aria-hidden="true" />
-                {p.handle && <Avatar handle={p.handle} size={24} />}
-                {p.handle ? (
+                {/* Guests have no handle: their room id draws a starter, the same one on every screen. */}
+                <Avatar handle={p.handle ?? p.id} size={24} />
+                {p.handle && !p.you ? (
                   <Link to={`/u/${p.handle}`} className={styles.name}>
                     {p.name}
                   </Link>

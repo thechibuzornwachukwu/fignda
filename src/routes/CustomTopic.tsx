@@ -55,7 +55,7 @@ export function CustomTopic() {
         </button>
       </div>
       <p className={styles.err} role="alert">
-        {err}
+        {err || (busy ? 'This can take a few minutes. Keep this page open.' : '')}
       </p>
     </form>
   );

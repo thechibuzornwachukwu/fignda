@@ -180,6 +180,8 @@ test.describe('play together', () => {
     expect(new Set(found).size).toBe(1);
     // Scoreboards agree on who is on it, and nobody has more than they found.
     for (const p of all) await expect(p.getByRole('list', { name: 'Room scoreboard' }).locator('li')).toHaveCount(4);
+    // Every player has an avatar on every screen, guests and your own row included.
+    for (const p of all) await expect(p.getByRole('list', { name: 'Room scoreboard' }).locator('li > svg')).toHaveCount(4);
   });
 
   test('a signed up player shows by name, linked to their profile', async ({ context }) => {
