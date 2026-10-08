@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // Behaviour parity with the handoff reference (design/reference/*.js).
 // Skipped when the design folder is not present.
 

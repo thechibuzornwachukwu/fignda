@@ -13,7 +13,9 @@ export default defineConfig({
     modules: { localsConvention: 'camelCaseOnly' },
   },
   test: {
-    environment: 'jsdom',
+    // Plain Node by default: starting a browser-like page for every file took most of the run and made
+    // workers time out on a busy machine. A test that needs a page starts with `// @vitest-environment jsdom`.
+    environment: 'node',
     globals: true,
     setupFiles: ['src/test/setup.ts'],
     // Two workers: fits next to Docker on low-memory machines without start-up timeouts.
