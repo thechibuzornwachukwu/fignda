@@ -5,7 +5,8 @@
 //
 // who      cat (the main one), dino, dog, robot
 // mood     calm, happy, thinking, found, stumped, sleepy: the eyes, brows and mouth
-// dress    hat, coat, glass, monocle: any mix
+// dress    hat, coat, glass, monocle: any mix. Each character has its own: on the robot `glass` is a
+//          scanner and `monocle` is a zoom on its screen (see `tools` in CAST).
 // wave     one arm up, hand open. With no mood given, a waving character is happy.
 // view     full (the whole figure), bust (head and shoulders), eyes (the app icon, eyes up close)
 // flip     mirrored, so a character can face the other way across a screen
@@ -49,7 +50,8 @@ export type Options = {
 };
 type Dress = Required<Pick<Options, 'hat' | 'coat' | 'glass' | 'monocle' | 'wave' | 'dark'>> & { mood: Mood; line: string };
 /** A character: its name, how it is drawn, the square around its eyes, and the colour that fills its icon. */
-type Member = { name: string; draw: (d: Dress) => string; eyes: readonly [number, number, number]; fur: string; eye: readonly [number, number, number] };
+/** `called` is the character's name. `tools` says what `glass` and `monocle` are on this character. */
+type Member = { name: string; called: string; tools: { glass: string; monocle: string }; draw: (d: Dress) => string; eyes: readonly [number, number, number]; fur: string; eye: readonly [number, number, number] };
 
 // ------------------------------------------------------------------ Shared parts
 
@@ -298,17 +300,19 @@ function robotFace(mood: Mood): string {
   const eyes: Record<Mood, string> = {
     calm: light(92, 22, 28) + light(148, 22, 28),
     happy: arcUp(92, 108, 14, LIME, 9) + arcUp(148, 108, 14, LIME, 9),
-    thinking: light(92, 22, 28) + light(148, 24, 9) + `<circle cx="166" cy="84" r="3" fill="${LIME}"/><circle cx="174" cy="76" r="2.2" fill="${LIME}"/>`,
+    // Working: three dots, as a screen shows it.
+    thinking: `<circle cx="96" cy="108" r="8" fill="${LIME}"/><circle cx="120" cy="108" r="8" fill="${LIME}" fill-opacity=".6"/><circle cx="144" cy="108" r="8" fill="${LIME}" fill-opacity=".3"/>`,
     found: `<circle cx="92" cy="108" r="17" fill="${LIME}"/><circle cx="148" cy="108" r="17" fill="${LIME}"/><circle cx="92" cy="108" r="6" fill="${VISOR}"/><circle cx="148" cy="108" r="6" fill="${VISOR}"/>`,
-    stumped: stroke('M80 100l24 12M160 100l-24 12', LIME, 9),
+    // Stumped, for a machine, is an error code.
+    stumped: `<text x="120" y="122" text-anchor="middle" font-family="Bungee, 'Courier New', monospace" font-size="36" fill="${LIME}">404</text>`,
     sleepy: stroke('M80 110h24M136 110h24', LIME, 8),
   };
   const mouths: Record<Mood, string> = {
     calm: stroke('M108 134q12 8 24 0', LIME, 4.5),
     happy: stroke('M102 132q18 16 36 0', LIME, 5),
-    thinking: stroke('M112 136h18', LIME, 4.5),
+    thinking: '',
     found: `<rect x="112" y="128" width="16" height="13" rx="6" fill="${LIME}"/>`,
-    stumped: stroke('M102 137l9-6 9 6 9-6 9 6', LIME, 4.5),
+    stumped: stroke('M96 138h48', LIME, 3),
     sleepy: stroke('M114 136h12', LIME, 4.5),
   };
   return eyes[mood] + mouths[mood];
@@ -335,19 +339,32 @@ function robot(d: Dress): string {
   s += `<rect x="44" y="42" width="152" height="132" rx="36" fill="${STEEL}"/><rect x="60" y="68" width="120" height="86" rx="28" fill="${VISOR}"/>`;
   s += `<path d="M72 86a22 22 0 0 1 16-12" fill="none" stroke="${WHITE}" stroke-opacity=".35" stroke-width="4" stroke-linecap="round"/>`;
   s += robotFace(d.mood);
-  if (d.monocle) s += monocle(148, 108, 24);
+  // Zoom: a reticle on the screen around one eye. Nothing is held up to the face.
+  if (d.monocle) {
+    s += `<circle cx="148" cy="108" r="22" fill="none" stroke="${LIME}" stroke-width="3" stroke-dasharray="7 5"/>`;
+    s += stroke('M148 80v9M148 127v9M120 108h9M167 108h9', LIME, 3);
+    s += `<path d="M66 82v-8h8M174 74h8v8M66 140v8h8M174 148h8v-8" fill="none" stroke="${LIME}" stroke-opacity=".6" stroke-width="2.5" stroke-linecap="round"/>`;
+  }
   if (d.hat) s += fedora(-6, 0, -18);
-  if (d.glass) s += heldGlass(d.line, STEEL);
+  // Scanner: a handset with a lime beam, where the others hold a glass.
+  if (d.glass) {
+    s += `<path d="M184 208L232 150l8 52z" fill="${LIME}" fill-opacity=".3"/>` + stroke('M184 208L232 150M184 208l56-6', LIME, 1.6);
+    s += `<rect x="160" y="204" width="30" height="20" rx="6" fill="${STEEL_DARK}" transform="rotate(-24 175 214)"/><circle cx="183" cy="208" r="4" fill="${LIME}"/>`;
+    s += `<circle cx="172" cy="220" r="11" fill="${STEEL}"/>`;
+  }
   return s;
 }
 
 // ------------------------------------------------------------------ The cast, and the one function that draws it
 
+const HAND_LENS = { glass: 'magnifying glass', monocle: 'monocle' } as const;
+
 export const CAST: Record<Who, Member> = {
-  cat: { name: 'Cat', draw: cat, eyes: [50, 50, 140], fur: CAT, eye: [155, 116, 29] },
-  dino: { name: 'Dino', draw: dino, eyes: [46, 38, 148], fur: REX, eye: [152, 96, 29] },
-  dog: { name: 'Dog', draw: dog, eyes: [50, 44, 140], fur: DOG, eye: [146, 118, 21] },
-  robot: { name: 'Robot', draw: robot, eyes: [52, 42, 136], fur: STEEL, eye: [148, 108, 24] },
+  cat: { name: 'Cat', called: 'Detective X', tools: HAND_LENS, draw: cat, eyes: [50, 50, 140], fur: CAT, eye: [155, 116, 29] },
+  dino: { name: 'Dino', called: 'Detective Tobs', tools: HAND_LENS, draw: dino, eyes: [46, 38, 148], fur: REX, eye: [152, 96, 29] },
+  dog: { name: 'Dog', called: 'Detective Puff', tools: HAND_LENS, draw: dog, eyes: [50, 44, 140], fur: DOG, eye: [146, 118, 21] },
+  // A robot does not hold a glass to its screen. It scans, and it zooms.
+  robot: { name: 'Robot', called: 'Robo-cop', tools: { glass: 'scanner', monocle: 'zoom' }, draw: robot, eyes: [52, 42, 136], fur: STEEL, eye: [148, 108, 24] },
 };
 
 let uid = 0;
@@ -370,6 +387,6 @@ export function character(o: Options): string {
   const rx = view === 'full' ? 0 : w * 0.23;
   const id = `ch${uid++}`;
   const fill = back ? `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="${back}"/>` : '';
-  const label = `${m.name}, ${mood}${o.wave ? ', waving' : ''}`;
+  const label = `${m.called}, ${mood}${o.wave ? ', waving' : ''}`;
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${Math.round((size * h) / w)}" viewBox="${x} ${y} ${w} ${h}" role="img" aria-label="${label}"><clipPath id="${id}"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${rx}"/></clipPath><g clip-path="url(#${id})">${fill}${art}</g></svg>`;
 }

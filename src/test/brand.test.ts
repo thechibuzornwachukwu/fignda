@@ -33,8 +33,8 @@ describe('characters', () => {
 
   it('a wave is happy unless told otherwise, and an unknown mood is the default', () => {
     const face = (o: Parameters<typeof character>[0]) => character(o).replace(/ch\d+/g, '');
-    expect(character({ who: 'cat', wave: true })).toContain('aria-label="Cat, happy, waving"');
-    expect(character({ who: 'cat', wave: true, mood: 'stumped' })).toContain('aria-label="Cat, stumped, waving"');
+    expect(character({ who: 'cat', wave: true })).toContain('aria-label="Detective X, happy, waving"');
+    expect(character({ who: 'cat', wave: true, mood: 'stumped' })).toContain('aria-label="Detective X, stumped, waving"');
     expect(face({ who: 'dog', mood: 'furious' as Mood })).toBe(face({ who: 'dog' }));
   });
 
@@ -59,6 +59,20 @@ describe('characters', () => {
   it('two drawings on one page never share a clip id', () => {
     const ids = Array.from({ length: 50 }, () => /clipPath id="(ch\d+)"/.exec(character({ who: 'cat' }))![1]);
     expect(new Set(ids).size).toBe(50);
+  });
+
+  it('the robot has tools of its own: it scans and zooms, and shows 404 when stumped', () => {
+    const gold = 'stroke="#e0a526"';
+    // No gold monocle rim and no hand lens on a machine with a screen for a face.
+    expect(character({ who: 'robot', monocle: true })).not.toContain(gold);
+    expect(character({ who: 'cat', monocle: true })).toContain(gold);
+    expect(character({ who: 'robot', glass: true })).not.toContain('fill-opacity=".25" stroke="#141416" stroke-width="8"');
+    expect(character({ who: 'dog', glass: true })).toContain('fill-opacity=".25" stroke="#141416" stroke-width="8"');
+    expect(character({ who: 'robot', monocle: true })).toContain('stroke-dasharray="7 5"');
+    expect(character({ who: 'robot', mood: 'stumped' })).toContain('>404</text>');
+    for (const who of ['cat', 'dino', 'dog'] as const) expect(character({ who, mood: 'stumped' })).not.toContain('404');
+    expect(CAST.robot.tools).toEqual({ glass: 'scanner', monocle: 'zoom' });
+    expect(CAST.cat.tools.glass).toBe('magnifying glass');
   });
 
   it('says who is in the cast when asked for someone who is not', () => {

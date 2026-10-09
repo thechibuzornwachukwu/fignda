@@ -32,11 +32,9 @@ for (const who of WHO) {
 const fig = (svg: string, caption: string) => `<figure>${svg}<figcaption>${caption}</figcaption></figure>`;
 /** `tile`: each drawing sits on a light tile, so ink lines show when the page itself is dark. */
 const row = (items: string[], tile = false) => `<div class="row${tile ? ' tile' : ''}">${items.join('')}</div>`;
-const NOTE: Record<Who, string> = { cat: 'The main one.', dino: "A player's other choice.", dog: "A player's other choice.", robot: 'New.' };
 
 const section = (who: Who) => `<section>
-  <h2>${CAST[who].name}</h2>
-  <p class="sub">${NOTE[who]}</p>
+  <h2>${CAST[who].called}</h2>
   <h3>Mood</h3>
   ${row(MOODS.map((mood) => fig(character({ who, mood, ...KIT, size: 150 }), mood)), true)}
   <h3>Dress and pose</h3>
@@ -44,8 +42,8 @@ const section = (who: Who) => `<section>
     fig(character({ who, size: 150 }), 'none'),
     fig(character({ who, hat: true, size: 150 }), 'hat'),
     fig(character({ who, ...KIT, size: 150 }), 'hat, coat'),
-    fig(character({ who, ...KIT, glass: true, size: 150 }), 'glass'),
-    fig(character({ who, ...KIT, monocle: true, size: 150 }), 'monocle'),
+    fig(character({ who, ...KIT, glass: true, size: 150 }), CAST[who].tools.glass),
+    fig(character({ who, ...KIT, monocle: true, size: 150 }), CAST[who].tools.monocle),
     fig(character({ who, ...KIT, wave: true, size: 150 }), 'waving'),
     fig(character({ who, wave: true, size: 150 }), 'waving, no kit'),
     fig(character({ who, ...KIT, glass: true, flip: true, size: 150 }), 'flipped'),
@@ -91,8 +89,8 @@ const html = `<!doctype html>
 <body>
 <main>
 <h1>Characters</h1>
-<p class="sub">Built from parts. Any character, mood, dress and view combine: <code>character({ who, mood, hat, coat, glass, monocle, view, flip, dark })</code> in <code>characters.ts</code>.</p>
-${row(WHO.map((who) => fig(character({ who, ...KIT, glass: true, size: 190 }), CAST[who].name)), true)}
+<p class="sub">The parts. Who each one is, and when to use which, is in the brand guide (<code>design/brand/index.html</code>). Built from parts. Any character, mood, dress and view combine: <code>character({ who, mood, hat, coat, glass, monocle, view, flip, dark })</code> in <code>characters.ts</code>.</p>
+${row(WHO.map((who) => fig(character({ who, ...KIT, glass: true, size: 190 }), CAST[who].called)), true)}
 ${WHO.map(section).join('\n')}
 </main>
 </body>

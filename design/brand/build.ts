@@ -22,11 +22,64 @@ const keep = (name: string, svg: string): string => {
 
 // ------------------------------------------------------------------ What the guide says
 
-const VOICE: Record<Who, { role: string; nature: string; line: string; use: string }> = {
-  cat: { role: 'The lead, and the logo', nature: 'Dry and sure of itself. Says little. Already knows.', line: 'It was there the whole time.', use: 'The default partner. The icon, emails, anything that speaks for Gazecraft.' },
-  dino: { role: "A player's choice", nature: 'All heart, short arms. Tries hard, means well.', line: 'I nearly had it.', use: 'Younger players. Cases set in the past.' },
-  dog: { role: "A player's choice", nature: 'Glad you came. Pleased with every find.', line: 'You found one. I knew you would.', use: 'First days, streaks, anything that welcomes.' },
-  robot: { role: "A player's choice", nature: 'Exact. Counts everything, misses nothing.', line: '4 found. 3 left.', use: 'Number games, scores, the facts of a result.' },
+/**
+ * Who each partner is. Working names, not yet checked for trademarks. Every story follows the tone rule:
+ * mischief, pride or a surprise, never harm, and no promise of a result.
+ */
+type Bio = { name: string; meaning: string; role: string; nature: string; story: string; wants: string; quirk: string; weak: string; line: string; never: string; use: string };
+const VOICE: Record<Who, Bio> = {
+  cat: {
+    name: 'Detective X',
+    meaning: 'Nobody knows what the X stands for.',
+    role: 'The lead, and the logo',
+    nature: 'Dry and sure of itself. Says little. Already knows.',
+    story: 'X grew up above a newspaper office in Lagos, asleep on the proofreader\'s desk. Every night the same page was read 3 times, and every night a mistake got through. The proofreader marked each one with an X. The cat took the mark for a name, and learned where mistakes hide: in the line everyone has already read.',
+    wants: 'For you to see it yourself. X could point. X would rather wait.',
+    quirk: 'Never chases anything. Sits, watches, and lowers one eyelid when it knows. Signs every closed case with an X.',
+    weak: 'Hates to be wrong, so when it is not sure it says nothing at all.',
+    line: 'It was there the whole time.',
+    never: 'I told you so. The eyelid says it.',
+    use: 'The default partner. The icon, emails, anything that speaks for Gazecraft.',
+  },
+  dino: {
+    name: 'Detective Tobs',
+    meaning: 'From tobi, Yoruba for big. Tobs is not.',
+    role: "A player's choice",
+    nature: 'All heart, short arms. Tries hard, means well.',
+    story: 'Tobs hatched late, in a museum crate marked "replica". It is the youngest thing in a building full of very old things, and it has decided to be as fearsome as the skeleton in the main hall. So far it is as fearsome as a house plant.',
+    wants: 'To be taken seriously, and to find the longest word before anyone else.',
+    quirk: 'Roars quietly, so as not to wake the guards. Holds the glass close, because its arms end early.',
+    weak: 'Rushes. Finds the 9 letter word and walks past the 3 letter one.',
+    line: 'I nearly had it.',
+    never: 'Anything about the size of its arms.',
+    use: 'Younger players. Cases set in the past.',
+  },
+  dog: {
+    name: 'Detective Puff',
+    meaning: 'After puff-puff, the round fried dough from home.',
+    role: "A player's choice",
+    nature: 'Glad you came. Pleased with every find.',
+    story: 'Puff was found asleep beside a tray of puff-puff outside a bakery in Surulere, the same colour and nearly the same shape. The baker kept both. Puff has followed its nose ever since, and has never met a day it did not like.',
+    wants: 'For everybody to find one. It keeps count of your good days and loses count of the rest.',
+    quirk: 'The tail starts before you have found it. That is a hint, and Puff cannot help it.',
+    weak: 'Celebrates too early.',
+    line: 'You found one. I knew you would.',
+    never: 'That was easy.',
+    use: 'First days, streaks, anything that welcomes.',
+  },
+  robot: {
+    name: 'Robo-cop',
+    meaning: 'Nobody gave it a badge. It printed one.',
+    role: "A player's choice",
+    nature: 'Exact. Counts everything, misses nothing.',
+    story: 'Robo-cop was put together in Computer Village from a trader\'s calculator and a radio that only got one station. It can count the letters in a paragraph faster than you can blink. It cannot see the word hiding in them until somebody shows it, and it thinks that is the cleverest thing people do.',
+    wants: 'To understand how you noticed. It writes down your answer every time.',
+    quirk: 'Says the number first. Scans where the others look. Shows 404 when it is lost, and three dots while it works.',
+    weak: 'Cannot round up. 7 of 8 is 7 of 8.',
+    line: '4 found. 3 left.',
+    never: 'Roughly.',
+    use: 'Number games, scores, the facts of a result.',
+  },
 };
 
 /** Which face goes with which moment. One mood per moment, so a player learns to read them. */
@@ -50,7 +103,7 @@ const COLOURS: Array<[string, string, string]> = [
   ['Gold', '#e0a526', 'Buckles, monocles, ranks'],
 ];
 
-const DO = ['Let the cat speak for Gazecraft.', 'Give each moment its one mood.', 'Keep the watermark between 6% and 14%.', 'Keep lime for what is found, and for the eyes.', 'Use a light tile behind a character on a dark screen.'];
+const DO = ['Let Detective X speak for Gazecraft.', 'Give each character tools that suit it. A robot scans. It does not hold a glass to a screen.', 'Give each moment its one mood.', 'Keep the watermark between 6% and 14%.', 'Keep lime for what is found, and for the eyes.', 'Use a light tile behind a character on a dark screen.'];
 const DONT = ['Redraw, recolour or stretch the cat.', 'Put the watermark under puzzle text a player must read closely.', 'Use a character as decoration with nothing to say.', 'Show two characters reacting at once.', 'Let a character promise a result: no memory, focus or brain claims.'];
 
 // ------------------------------------------------------------------ Pieces
@@ -78,17 +131,27 @@ const STATES: Array<[string, Mood, string, string]> = [
   ['done', 'found', 'Case closed', 'Every word found.'],
 ];
 
-const castCard = (who: Who) => `<div class="cast">
+const castCard = (who: Who) => {
+  const v = VOICE[who];
+  return `<div class="cast">
   <div class="on cream">${character({ who, hat: true, coat: true, glass: true, size: 150 })}</div>
   <div>
-    <h3>${CAST[who].name}</h3>
-    <p class="role">${VOICE[who].role}</p>
-    <p>${VOICE[who].nature}</p>
-    <p class="say">"${VOICE[who].line}"</p>
-    <p class="use">${VOICE[who].use}</p>
+    <h3>${v.name} <span class="kind">the ${CAST[who].name.toLowerCase()}</span></h3>
+    <p class="role">${v.role} · ${v.meaning}</p>
+    <p>${v.story}</p>
+    <dl>
+      <dt>Nature</dt><dd>${v.nature}</dd>
+      <dt>Wants</dt><dd>${v.wants}</dd>
+      <dt>Quirk</dt><dd>${v.quirk}</dd>
+      <dt>Weak spot</dt><dd>${v.weak}</dd>
+      <dt>Says</dt><dd class="say">"${v.line}"</dd>
+      <dt>Never says</dt><dd>${v.never}</dd>
+      <dt>Use for</dt><dd>${v.use}</dd>
+    </dl>
     ${row(MOODS.map((mood) => fig(character({ who, mood, hat: true, coat: true, view: 'bust', back: CREAM, size: 58 }), mood)), 'tight')}
   </div>
 </div>`;
+};
 
 const html = `<!doctype html>
 <html lang="en">
@@ -138,7 +201,12 @@ const html = `<!doctype html>
   .cast { display: grid; grid-template-columns: minmax(150px, 200px) 1fr; gap: 20px; align-items: start; margin-top: 18px; padding: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; }
   @media (max-width: 620px) { .cast { grid-template-columns: 1fr; } }
   .role { color: var(--subtle); font-weight: 800; font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
-  .say { font-weight: 800; margin: 8px 0; }
+  .say { font-weight: 800; }
+  .kind { color: var(--subtle); font-weight: 600; font-size: 14px; }
+  dl { display: grid; grid-template-columns: max-content 1fr; gap: 6px 14px; margin: 12px 0 0; font-size: 15px; }
+  dt { color: var(--subtle); font-weight: 800; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; padding-top: 3px; }
+  dd { margin: 0; color: var(--muted); }
+  dd.say { color: var(--fg); }
   .use { color: var(--muted); font-size: 15px; }
   table { border-collapse: collapse; width: 100%; font-size: 15px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
   td { padding: 8px 14px; border-bottom: 1px solid var(--line); vertical-align: middle; color: var(--muted); }
@@ -166,7 +234,7 @@ ${wordmark('currentColor', 44)}
   ${row([240, 96, 48, 28, 16].map((n) => fig(mark(n), String(n))).concat([180, 64, 32, 16].map((n) => fig(appIcon('cat', n), `icon ${n}`))))}
   <h4>Sizes and space</h4>
   <div class="grid">
-    <div class="card"><h3>Sizes</h3><ul><li>Header wordmark 22. On a phone under 400 wide, the mark alone at 28.</li><li>Share card 52. Link preview 46. Email 24.</li><li>Smallest wordmark 16. Smallest mark 16.</li></ul></div>
+    <div class="card"><h3>Sizes</h3><ul><li>Smallest wordmark 16. Smallest mark 16.</li><li>The size for each place it appears is set once, in <code>SPEC.md</code> section 1.</li></ul></div>
     <div class="card"><h3>Space</h3><ul><li>Keep about 12% of the height clear on every side.</li><li>The letters are ink or white. They never take a colour.</li><li>The app icon is the eyes up close, fur to every edge, corners at 25%.</li></ul></div>
   </div>
 </section>
@@ -193,7 +261,7 @@ ${wordmark('currentColor', 44)}
 <section>
   <p class="num">4</p>
   <h2>The cast</h2>
-  <p class="sub">Five characters. The cat leads. A player picks one partner from the four, and the fifth is the player.</p>
+  <p class="sub">Four partners and the player. The four work a case beside you: a new player picks 1, free, and can switch to another once it is unlocked with points. Detective X leads, and is the logo. Each has tools of its own: the animals hold a magnifying glass and wear a monocle, and Robo-cop scans and zooms.</p>
   ${WHO.map(castCard).join('\n')}
   <div class="cast">
     <div class="on cream">${row([you({ back: 3, skin: 4, hair: 33, eyes: 1 }), you({ back: 2, skin: 5, hair: 26, face: 1 }), you({ back: 5, skin: 1, hair: 8, eyes: 1 })].map((s) => fig(s)), 'tight')}</div>
@@ -201,8 +269,11 @@ ${wordmark('currentColor', 44)}
       <h3>You</h3>
       <p class="role">The detective</p>
       <p>The player's own avatar, built from parts. It is their face, so the case is theirs.</p>
-      <p class="say">The partner stands beside the player. It never replaces them.</p>
-      <p class="use">Boards, rooms, profiles. Detective pieces (badge, hat, coat, glass) are earned by rank.</p>
+      <p>The only one with no story written for them. Theirs is the run of cases they close.</p>
+      <dl>
+        <dt>Rule</dt><dd class="say">The partner stands beside the player. It never replaces them.</dd>
+        <dt>Use for</dt><dd>Boards, rooms, profiles. Detective pieces (badge, hat, coat, glass) are earned by rank.</dd>
+      </dl>
     </div>
   </div>
 </section>
@@ -223,7 +294,9 @@ ${wordmark('currentColor', 44)}
     fig(character({ who: 'cat', hat: true, coat: true, wave: true, size: 120, back: CREAM }), 'hello'),
   ])}
   <h4>Every partner says hello</h4>
-  ${row(WHO.map((who) => fig(character({ who, hat: true, coat: true, wave: true, size: 120, back: CREAM }), CAST[who].name)))}
+  ${row(WHO.map((who) => fig(character({ who, hat: true, coat: true, wave: true, size: 120, back: CREAM }), VOICE[who].name)))}
+  <h4>Each with its own tools</h4>
+  ${row(WHO.flatMap((who) => [fig(character({ who, hat: true, coat: true, glass: true, size: 120, back: CREAM }), `${VOICE[who].name}: ${CAST[who].tools.glass}`), fig(character({ who, hat: true, coat: true, monocle: true, size: 120, back: CREAM }), CAST[who].tools.monocle)]))}
 </section>
 
 <section>
@@ -236,7 +309,7 @@ ${wordmark('currentColor', 44)}
   </div>
   <h4>Screen states</h4>
   <p class="sub">Each state in each character. The screen shows the player's own partner.</p>
-  ${WHO.map((who) => row(STATES.map(([name, mood, title, line]) => fig(keep(`state-${name}-${who}`, stateCard(who, mood, title, line)), `${name}, ${CAST[who].name.toLowerCase()}`)), 'four')).join('')}
+  ${WHO.map((who) => row(STATES.map(([name, mood, title, line]) => fig(keep(`state-${name}-${who}`, stateCard(who, mood, title, line)), `${name}, ${VOICE[who].name}`)), 'four')).join('')}
   <h4>Case files</h4>
   ${row([
     fig(keep('case-open-cat', caseCard('The missing trophy', 'Case 3 · Football', 2, 5, 'cat')), 'open, cat'),
@@ -249,7 +322,7 @@ ${wordmark('currentColor', 44)}
   <h4>Grounds and rules</h4>
   ${row([fig(eyesPattern(300, 150, NIGHT, 0.5), 'eyes, night'), fig(eyesPattern(300, 150, CAT_FUR, 0.6), 'eyes, fur'), fig(`<div class="on light" style="padding:14px">${pawDivider(300, INK)}</div>`, 'paw rule')])}
   <h4>A player's choice of home screen icon</h4>
-  ${row(WHO.map((who) => fig(appIcon(who, 96), CAST[who].name)))}
+  ${row(WHO.map((who) => fig(appIcon(who, 96), VOICE[who].name)))}
 </section>
 
 <section>

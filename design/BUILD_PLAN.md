@@ -11,6 +11,7 @@ Seed (after `npm run db:seed:gen`): `npx supabase db query --linked -f supabase/
 - One skill in every game: looking closely. Words today, numbers and shapes next.
 - A case is a run of clues. A clue is one short sitting. The last clue puts the pieces together and unmasks who hid the secret.
 - A new culprit each case, an ordinary character under a disguise. One unseen figure links the cases: every culprit leaves the same calling card.
+- 4 partners work the case beside the player: Detective X (the cat, and the logo), Detective Tobs, Detective Puff and Robo-cop. A player picks 1, free, and unlocks the others with points. Who they are: `design/brand/index.html`.
 - Tone: the motive is mischief, pride or a surprise, never harm. No violence, gangs, weapons, romance or fear.
 - For all ages, not a children's product. Accounts from 13. Younger players join on a parent's device or room.
 - We promise the practice, never a result. No word about memory, attention span, focus, IQ, brain training or "proven". Lumosity paid $2 million for claims like those.
@@ -35,6 +36,7 @@ This is a business. Running costs are near zero, so the first sale is profit. No
 | Supporter | One payment: no ads ever, a badge | Players | Needs Paystack |
 | Plus, by the month | More puzzles in Make, private rooms, extra outfits | Players | Needs Paystack, set 6e |
 | Special outfits | Cosmetic only | Players | Needs Paystack, set 3d |
+| Partner unlock | The points to unlock another partner. Bought points unlock partners only and never count for rank, boards or leagues | Players | Needs Paystack, set 3g |
 | Licence | The game under a school's or a publisher's own name | Schools, publishers, media houses | After private boards are proven |
 | Footer ad | One a page, still image, never near a puzzle | Advertisers | Needs the domain, and consent in the EU and UK |
 
@@ -43,7 +45,8 @@ Never for sale: hints, extra tries, time, or anything that touches a score; stre
 ## Owner
 
 - [ ] Decide: the name (suggested: keep Gazecraft, detective theme inside it. Free as .com and .game on 9 Oct 2026, registry check only: gazecraft, keensleuth, sleuthtrail, cluestop, plainsleuth, loupequest).
-- [ ] Prices for the models above. None is set.
+- [ ] Prices for the models above, and the points a partner costs. None is set.
+- [ ] "Robo-cop" is close to RoboCop, a registered film trademark. Check it, or rename, before the robot is in the game.
 - [ ] A list of 20 people to ask first: brands, schools, churches, event planners.
 - [ ] What a sponsor may and may not write.
 - [ ] Reset the database password (Supabase, Database, Settings). It was shared in chat and is still the live one.
@@ -87,6 +90,7 @@ A long puzzle is played in short passages. Short must not mean thin: every sitti
 - [ ] **Set 3d. Outfits.** Detective pieces (coat, hat, magnifying glass, badge) earned by closing cases and rising in rank. Everything that helps someone look like themselves stays free.
 - [ ] **Set 3e. Server.** Clue progress and case badges saved from verified plays, a guest's progress moved to the account on sign in, ranks as a view over points. 2 devices with different progress, and a player with history before cases exist.
 - [ ] **Set 3f. Rooms as a squad.** Every player's finds count toward the same secret.
+- [ ] **Set 3g. Partners** (SPEC section 5, Partners). The art exists: `design/characters` draws them, `design/brand/elements` holds the states, bubbles and case files. To build: the pick in the first minute, the partner on screen states, the waiting screen and the result, the choice saved with the profile, switching in Settings, unlocking with points. Buying points for an unlock waits for Paystack.
 
 ### 4. More games
 
