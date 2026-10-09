@@ -41,6 +41,19 @@ export async function saveAvatar(id: string, code: string): Promise<boolean> {
   return !error;
 }
 
+/** The look kept with the avatar (BUILD_PLAN 3b). Its owner only: `profile_private` has no other reader. Null: never answered. */
+export async function fetchLook(id: string): Promise<string | null> {
+  const { data, error } = await (await client()).from('profile_private').select('look').eq('user_id', id).maybeSingle();
+  if (error) throw error;
+  return typeof data?.look === 'string' ? data.look : null;
+}
+
+/** Save the look. The database only accepts the 3 answers or null. */
+export async function saveLook(id: string, look: string | null): Promise<boolean> {
+  const { error } = await (await client()).from('profile_private').upsert({ user_id: id, look }, { onConflict: 'user_id' });
+  return !error;
+}
+
 export type PublicProfile = Profile & { created_at: string };
 
 /** Anyone can open a profile by handle. Name and handle only; never the email. */
@@ -55,7 +68,7 @@ export async function fetchProfileByHandle(handle: string): Promise<PublicProfil
   return data;
 }
 
-const PLAY_COLS = 'game_id, day_no, found, total, score, secs, created_at';
+const PLAY_COLS = 'game_id, day_no, found, total, score, secs, created_at, clean';
 
 /** Verified plays anyone can see. Today's daily total is masked by the database. */
 export async function fetchPublicPlays(handle: string, limit = 400): Promise<PlayRow[]> {
@@ -391,7 +404,7 @@ export function localDailies(limit = 60): Array<{ day_no: number; s: SavedSessio
   try {
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);
-      const m = k?.match(/^fignda-daily-(\d+)$/);
+      const m = k?.match(/^gazecraft-daily-(\d+)$/);
       if (!m) continue;
       const s = storage.getJSON<SavedSession>(k!);
       if (s && s.endAt != null && Array.isArray(s.found)) out.push({ day_no: Number(m[1]), s });
@@ -443,20 +456,79 @@ export async function generateAvailable(): Promise<boolean> {
   }
 }
 
-export type GenerateResult = { ok: true; code: string } | { ok: false; error: string };
+/** `retryAfter`: seconds from the `Retry-After` header on a 429, when the server sent one. */
+export type GenerateResult = { ok: true; code: string } | { ok: false; error: string; retryAfter?: number };
 
-export async function generatePuzzle(topic: string): Promise<GenerateResult> {
+/** `signal` stops the request (Cancel, the 5 minute cap, leaving the page). A stopped request answers `aborted`. */
+export async function generatePuzzle(topic: string, signal?: AbortSignal): Promise<GenerateResult> {
   try {
     const r = await fetch(`${API}/generate`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', ...(await authHeader()) },
       body: JSON.stringify({ topic }),
+      signal,
     });
     const body = (await r.json().catch(() => ({}))) as { code?: string; error?: string };
-    return r.ok && body.code ? { ok: true, code: body.code } : { ok: false, error: body.error ?? `http_${r.status}` };
+    if (r.ok && body.code) return { ok: true, code: body.code };
+    const secs = Number(r.headers.get('Retry-After'));
+    return { ok: false, error: r.status === 429 ? 'rate_limited' : (body.error ?? `http_${r.status}`), ...(r.status === 429 && secs > 0 ? { retryAfter: secs } : {}) };
+  } catch {
+    return { ok: false, error: signal?.aborted ? 'aborted' : 'network' };
+  }
+}
+
+// Background making. The server answers at once with a job; the slow work happens inside `runGenerateJob`,
+// an ordinary long request. Ask `getGenerateJob` every 5 seconds. If it says `run`, nobody is working on the
+// job (the page that started it has gone): call `runGenerateJob` again.
+/** `code` is null until the job is done, `error` is null unless it failed, `run` is true only while it waits unattended. */
+export type GenerateJob = { id: string; state: 'waiting' | 'done' | 'failed'; code: string | null; error: string | null; run: boolean };
+export type GenerateJobResult = { ok: true; job: GenerateJob } | { ok: false; error: string; /** Seconds, on a 429. */ retryAfter?: number };
+
+const GUEST_KEY = 'gazecraft-guest';
+
+/** A random key this browser keeps, so two guests behind one address do not share a job. Not an identity. */
+function guestKey(): string {
+  let k = storage.get(GUEST_KEY);
+  if (!k || !/^[A-Za-z0-9_-]{8,64}$/.test(k)) {
+    k = Array.from(crypto.getRandomValues(new Uint8Array(16)), (b) => b.toString(16).padStart(2, '0')).join('');
+    storage.set(GUEST_KEY, k);
+  }
+  return k;
+}
+
+async function jobCall(path: string, init: RequestInit, auth: Record<string, string>): Promise<GenerateJobResult> {
+  try {
+    const r = await fetch(`${API}${path}`, { ...init, headers: { ...(init.body ? { 'Content-Type': 'application/json' } : {}), ...auth } });
+    const body = (await r.json().catch(() => ({}))) as Partial<GenerateJob> & { error?: string };
+    if (r.ok && body.id && body.state) {
+      return { ok: true, job: { id: body.id, state: body.state, code: body.code ?? null, error: body.error ?? null, run: body.run === true } };
+    }
+    const after = Number(r.headers.get('Retry-After'));
+    return { ok: false, error: body.error ?? `http_${r.status}`, ...(after > 0 ? { retryAfter: after } : {}) };
   } catch {
     return { ok: false, error: 'network' };
   }
+}
+
+/** Ask for a puzzle. Answers at once. One job at a time: a second ask returns the first job, whatever its topic. */
+export async function startGenerate(topic: string): Promise<GenerateJobResult> {
+  const auth = await authHeader();
+  const body = { topic, background: true, ...(auth.Authorization ? {} : { guest: guestKey() }) };
+  return jobCall('/generate', { method: 'POST', body: JSON.stringify(body) }, auth);
+}
+
+/** Where a job stands. Cheap; ask every 5 seconds. */
+export async function getGenerateJob(id: string): Promise<GenerateJobResult> {
+  return jobCall(`/generate/${encodeURIComponent(id)}`, { method: 'GET' }, await authHeader());
+}
+
+/**
+ * Do the work for a job and answer when it is over (1 to 5 minutes). Safe to call more than once: only one
+ * caller does the work, the others get the state back at once. Pass a signal to stop waiting; the job itself
+ * is picked up again by the next call.
+ */
+export async function runGenerateJob(id: string, signal?: AbortSignal): Promise<GenerateJobResult> {
+  return jobCall(`/generate/${encodeURIComponent(id)}/run`, { method: 'GET', signal }, await authHeader());
 }
 
 export type PlaySubmission = {
@@ -530,6 +602,60 @@ export async function ratePuzzle(code: string, up: boolean): Promise<boolean> {
   return !error && !!data;
 }
 
+/** Report a puzzle that is not yours. One per player per puzzle; `again` when you had reported it before. */
+export async function reportPuzzle(code: string): Promise<{ ok: boolean; status: number; error: string | null; again: boolean }> {
+  const auth = await authHeader();
+  if (!auth.Authorization) return { ok: false, status: 401, error: 'sign_in_required', again: false };
+  try {
+    const r = await fetch(`${API}/puzzles/${encodeURIComponent(code)}/report`, { method: 'POST', headers: auth });
+    const out = (await r.json().catch(() => ({}))) as { error?: string; again?: boolean };
+    return { ok: r.ok, status: r.status, error: out.error ?? null, again: out.again === true };
+  } catch {
+    return { ok: false, status: 0, error: 'network', again: false };
+  }
+}
+
+/** Clean reads on a public profile: every daily, and each other puzzle once. Today's daily joins when the day ends. */
+export async function fetchCleanReads(handle: string): Promise<number> {
+  const { data, error } = await (await client()).rpc('clean_reads_of', { p_handle: handle });
+  if (error) throw error;
+  return typeof data === 'number' ? data : 0;
+}
+
+// The owner page. The server answers 404 to everyone who is not an owner, so `null` means "not for you".
+export type HiddenPuzzle = {
+  code: string;
+  title: string;
+  noun: string;
+  text: string;
+  dict: string[];
+  maker: string | null;
+  safety: 'passed' | 'failed' | 'unchecked';
+  reports: number;
+  created_at: string;
+  hidden_at: string;
+};
+
+/** Hidden puzzles, newest first; an empty list when there are none. Null when you are not an owner. */
+export async function fetchHiddenPuzzles(): Promise<HiddenPuzzle[] | null> {
+  const auth = await authHeader();
+  if (!auth.Authorization) return null;
+  try {
+    const r = await fetch(`${API}/owner/puzzles`, { headers: auth });
+    if (!r.ok) return null;
+    const list = ((await r.json().catch(() => ({}))) as { puzzles?: HiddenPuzzle[] | null }).puzzles;
+    return Array.isArray(list) ? list : [];
+  } catch {
+    return null;
+  }
+}
+
+/** Open a hidden puzzle again. Its old reports stop counting toward hiding it. */
+export const restorePuzzle = (code: string) => postApi(`/owner/puzzles/${encodeURIComponent(code)}/restore`, {});
+
+/** Delete a hidden puzzle for good, with its plays and thumbs. */
+export const removePuzzle = (code: string) => postApi(`/owner/puzzles/${encodeURIComponent(code)}/remove`, {});
+
 /** Ask a player you follow into your room. */
 export const inviteToRoom = (handle: string, game: string, room: string) => postApi('/invite', { handle, game, room });
 
@@ -538,8 +664,25 @@ export const nudgeFriend = (handle: string) => postApi('/nudge', { handle });
 
 export type CustomGame = { id: string; title: string; noun: string; text: string; dict: string[]; code: string };
 
-/** Anyone with the share code can open a custom game. */
-export async function fetchCustomGame(code: string): Promise<CustomGame | null> {
+const customGames = new Map<string, Promise<CustomGame | null>>();
+
+/**
+ * Anyone with the share code can open a custom game. One request per code: the route gate (which shows the
+ * waiting screen) and the game screen share the answer. A miss is forgotten, so a retry asks again.
+ */
+export function fetchCustomGame(code: string): Promise<CustomGame | null> {
+  let p = customGames.get(code);
+  if (!p) {
+    p = loadCustomGame(code).catch(() => null);
+    customGames.set(code, p);
+    void p.then((g) => {
+      if (!g) setTimeout(() => customGames.delete(code), 2000);
+    });
+  }
+  return p;
+}
+
+async function loadCustomGame(code: string): Promise<CustomGame | null> {
   const sb = await getSupabase();
   if (!sb || !/^[A-Za-z2-7]{8}$/.test(code)) return null;
   const { data, error } = await sb.rpc('get_game_by_code', { p_code: code });
@@ -552,13 +695,13 @@ export async function deleteAccount(): Promise<void> {
   if (error) throw error;
 }
 
-/** Sign out clears the session and this browser's Fignda data, except the theme. */
+/** Sign out clears the session and this browser's Gazecraft data, except the theme. */
 export function clearLocalCache(): void {
   try {
     const keys: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const k = localStorage.key(i);
-      if (k && k.startsWith('fignda-') && k !== 'fignda-theme') keys.push(k);
+      if (k && k.startsWith('gazecraft-') && k !== 'gazecraft-theme') keys.push(k);
     }
     keys.forEach((k) => storage.remove(k));
   } catch {

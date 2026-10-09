@@ -4,6 +4,8 @@ import { Check, X } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Field } from '../components/Field';
 import { Icon } from '../components/Icon';
+import { useDelayedWaiting } from '../components/useDelayedWaiting';
+import { Waiting } from '../components/Waiting';
 import { checkDraft, MAKE, splitWords, type WordState } from '../engine/make';
 import { myPuzzles, publishPuzzle, type MyPuzzle } from '../lib/api';
 import { useAuth } from '../lib/auth';
@@ -35,6 +37,10 @@ export function Make() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const [mine, setMine] = useState<MyPuzzle[] | null>(null);
+  /** Published: the code to open, held until the waiting line has had its minimum time. */
+  const [made, setMade] = useState('');
+  // Publishing usually answers in under a second. Past that, the waiting line shows beside the button.
+  const waiting = useDelayedWaiting(busy);
   const me = auth.profile?.id;
 
   useEffect(() => {
@@ -47,6 +53,10 @@ export function Make() {
       alive = false;
     };
   }, [me]);
+
+  useEffect(() => {
+    if (made && !waiting) nav(`/p/${made}`);
+  }, [made, waiting, nav]);
 
   const words = useMemo(() => splitWords(raw), [raw]);
   const draft = useMemo(() => checkDraft(text, words), [text, words]);
@@ -72,12 +82,13 @@ export function Make() {
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
+    if (busy || made) return;
     if (!ready) return setErr(need);
     setBusy(true);
     setErr('');
     const r = await publishPuzzle({ title: title.trim(), noun: noun.trim(), text: text.trim(), words });
     setBusy(false);
-    if (r.ok) return nav(`/p/${r.code}`);
+    if (r.ok) return setMade(r.code);
     setErr(FAIL[r.error] ?? 'We could not save that. Try again.');
   };
 
@@ -122,12 +133,16 @@ export function Make() {
         )}
 
         <div className={styles.row}>
-          <Button type="submit" variant="accent" disabled={busy}>
-            {busy ? 'Publishing...' : 'Publish puzzle'}
+          <Button type="submit" variant="accent" disabled={busy || !!made}>
+            Publish puzzle
           </Button>
-          <span className={styles.note} role="status">
-            {err || need}
-          </span>
+          {waiting ? (
+            <Waiting size="inline" />
+          ) : (
+            <span className={styles.note} role="status">
+              {err || need}
+            </span>
+          )}
         </div>
       </form>
 

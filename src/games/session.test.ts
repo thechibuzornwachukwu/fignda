@@ -1,6 +1,6 @@
 import { getPuzzle } from './catalog';
 import { registry } from './registry';
-import { applyFinish, applyHint, applyPick, isLogged, newSession, type Copy, type Session } from './session';
+import { applyFinish, applyHint, applyPick, applyTeamFind, isCleanRead, isLogged, newSession, type Copy, type Session } from './session';
 
 const mod = registry['hidden-words'];
 const bible = getPuzzle('bible')!;
@@ -97,6 +97,51 @@ describe('session transitions', () => {
   it("I'm done finishes with the current count", () => {
     const s = applyFinish(pick(newSession(0), ...spanOf('amos')), 9000, total, copy);
     expect(s).toMatchObject({ endAt: 9000, resultTitle: `title:1/${total}`, hintLi: -1 });
+  });
+
+  it('wrong picks are counted in every game, and scored only on the daily', () => {
+    const wrong = [0, 4] as const;
+    expect(pick(newSession(0), ...wrong)).toMatchObject({ wrongs: 1, misses: 0 });
+    expect(pick(newSession(0), ...wrong, { daily: true })).toMatchObject({ wrongs: 1, misses: 1 });
+    const [a, b] = spanOf('amos');
+    expect(pick(newSession(0), a, b + 1)).toMatchObject({ wrongs: 0 });
+  });
+
+  describe('clean read', () => {
+    const all = (from: Session) => bible.answers.reduce((s, a) => pick(s, ...a.spans[0]!, { now: 5000 }), from);
+
+    it('is every word with no hint and no wrong pick', () => {
+      expect(isCleanRead(all(newSession(0)), total)).toBe(true);
+    });
+
+    it('a near miss does not spoil it', () => {
+      const [a, b] = spanOf('amos');
+      expect(isCleanRead(all(pick(newSession(0), a, b + 1)), total)).toBe(true);
+    });
+
+    it('a wrong pick, a hint, a missed word or an unfinished game is not one', () => {
+      expect(isCleanRead(all(pick(newSession(0), 0, 4)), total)).toBe(false);
+      expect(isCleanRead(all(applyHint(newSession(0), mod.hint(bible, new Set()), copy)), total)).toBe(false);
+      expect(isCleanRead(applyFinish(pick(newSession(0), ...spanOf('amos')), 9000, total, copy), total)).toBe(false);
+      expect(isCleanRead(pick(newSession(0), ...spanOf('amos')), total)).toBe(false);
+      expect(isCleanRead(applyFinish(newSession(0), 9000, 0, copy), 0)).toBe(false);
+    });
+
+    it("a teammate's find is not yours", () => {
+      const [first, ...rest] = bible.answers;
+      let s = applyTeamFind(newSession(0), mod.check(bible, ...first!.spans[0]!, new Set()), { now: 1, total, copy, name: 'Ada' });
+      for (const a of rest) s = pick(s, ...a.spans[0]!);
+      expect(s.endAt).not.toBeNull();
+      expect(isCleanRead(s, total)).toBe(false);
+    });
+  });
+
+  it('reveal lists every unfound answer in reading order with its letters marked', () => {
+    const items = mod.reveal(bible, new Set(['amos']));
+    expect(items).toHaveLength(total - 1);
+    expect(items.map((r) => r.span[0])).toEqual([...items.map((r) => r.span[0])].sort((x, y) => x - y));
+    expect(items.some((r) => r.key === 'amos')).toBe(false);
+    expect(mod.reveal(bible, new Set(bible.answers.map((a) => a.key)))).toEqual([]);
   });
 
   it('missed spans cover every unfound answer after finish', () => {

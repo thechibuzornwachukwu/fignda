@@ -51,6 +51,8 @@ test.describe('desktop', () => {
     await expect(firstRow(page)).toContainText('Amos');
     await expect(page.getByRole('status')).toContainText('Amos');
     await expect(page.getByText('1 / 30').first()).toBeVisible();
+    // The ring beside the count fills by found over total: 1 of 30.
+    await expect(page.getByRole('progressbar', { name: 'Found' })).toHaveAttribute('aria-valuenow', '3');
 
     // The space inside "a most" shares the found bar.
     const bridged = await letter(page, a).evaluate((el) => (el.nextElementSibling as HTMLElement).dataset.state);
@@ -86,11 +88,61 @@ test.describe('desktop', () => {
     await expect(page.getByText('Playing as a guest.', { exact: false })).toBeVisible();
   });
 
+  test('what you missed steps through each word where it hides', async ({ page }) => {
+    await page.goto('/play/bible');
+    const [a, b] = await spanOf(page, 'amos');
+    await drag(page, a, b);
+    await page.getByRole('button', { name: "I'm done" }).click();
+    const reveal = page.getByRole('region', { name: 'What you missed' });
+    await expect(reveal).toContainText('1 of 29');
+    const first = await reveal.locator('mark').innerText();
+    await reveal.getByRole('button', { name: 'Next missed word' }).click();
+    await expect(reveal).toContainText('2 of 29');
+    await expect(reveal.locator('mark')).not.toHaveText(first);
+    // It wraps around, and the buttons work from the keyboard.
+    await reveal.getByRole('button', { name: 'Previous missed word' }).focus();
+    await page.keyboard.press('Enter');
+    await page.keyboard.press('Enter');
+    await expect(reveal).toContainText('29 of 29');
+    await expect(reveal.getByRole('button', { name: 'Previous missed word' })).toBeFocused();
+  });
+
+  test('every word with no hint and no wrong pick is a clean read, with nothing left to reveal', async ({ page }) => {
+    await page.goto('/play/bnote');
+    for (const w of ['mark', 'luke', 'amos', 'joel', 'acts', 'ruth', 'job']) {
+      const [a, b] = await spanOf(page, w);
+      await drag(page, a, b);
+    }
+    await expect(page.getByText('Every answer found.')).toBeVisible();
+    await expect(page.getByText(/clean read/i)).toBeVisible();
+    // A catalogue puzzle played alone earns stars. A first finish raises them, so the line is said.
+    await expect(page.getByRole('img', { name: '3 of 3 stars' })).toBeVisible();
+    await expect(page.getByText(/3 of 3 stars/)).toBeVisible();
+    await expect(page.getByRole('region', { name: 'What you missed' })).toHaveCount(0);
+  });
+
+  test('a wrong pick on the way is not a clean read', async ({ page }) => {
+    await page.goto('/play/bnote');
+    const [x] = await spanOf(page, 'remark');
+    await drag(page, x, x + 5);
+    for (const w of ['mark', 'luke', 'amos', 'joel', 'acts', 'ruth', 'job']) {
+      const [a, b] = await spanOf(page, w);
+      await drag(page, a, b);
+    }
+    await expect(page.getByText('Every answer found.')).toBeVisible();
+    await expect(page.getByText(/clean read/i)).toHaveCount(0);
+    // Every word with no hint is still said, and it is 2 stars, not 3.
+    await expect(page.getByText(/no hints\.$/)).toBeVisible();
+    await expect(page.getByRole('img', { name: '2 of 3 stars' })).toBeVisible();
+  });
+
   test('games list filters and opens a game', async ({ page }) => {
     await page.goto('/play');
     await page.getByRole('button', { name: 'Football', exact: true }).click();
     const rows = page.locator('ul li a');
     await expect(rows).toHaveCount(2);
+    // The shelf line counts the category from the catalogue. A new guest has finished none.
+    await expect(page.getByText('0 of 2 finished')).toBeVisible();
     await rows.first().click();
     await expect(page).toHaveURL(/\/play\/(football|legends)$/);
   });

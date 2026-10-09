@@ -3,7 +3,14 @@
 (() => {
   let t = null;
   try {
-    t = localStorage.getItem('fignda-theme');
+    // The game was called Fignda. Carry what this browser saved under the old name across, once.
+    for (const k of Object.keys(localStorage)) {
+      const m = k.match(/^fignda([-:].*)$/);
+      if (!m) continue;
+      if (localStorage.getItem('gazecraft' + m[1]) === null) localStorage.setItem('gazecraft' + m[1], localStorage.getItem(k));
+      localStorage.removeItem(k);
+    }
+    t = localStorage.getItem('gazecraft-theme');
   } catch {
     // Storage blocked: fall back to the system setting.
   }

@@ -1,37 +1,39 @@
 import styles from './Logo.module.css';
+import { LOGO_G, LOGO_REST, LOGO_SHADE, MARK_BOX, WORDMARK_BOX } from './logoPaths';
 
-type MarkProps = { size?: number; className?: string };
+type Props = { height?: number; className?: string };
 
-/** The Fignda mark from SPEC section 1. Never redraw. */
-export function LogoMark({ size = 30, className }: MarkProps) {
+/** The Gazecraft mark from SPEC section 1: the G on its lime shade. Never redraw. */
+export function LogoMark({ height = 30, className }: Props) {
   return (
     <svg
-      width={size}
-      height={size}
-      viewBox="0 0 64 64"
-      fill="none"
+      width={(height * MARK_BOX[2]) / MARK_BOX[3]}
+      height={height}
+      viewBox={MARK_BOX.join(' ')}
       aria-hidden="true"
       focusable="false"
-      className={[styles.mark, className].filter(Boolean).join(' ')}
+      className={[styles.logo, className].filter(Boolean).join(' ')}
     >
-      <g transform="translate(1 2)">
-        <circle cx="27" cy="30" r="13" fill="var(--accent)" stroke="currentColor" strokeWidth="7" />
-        <path
-          d="M40 30V14a10 10 0 0 1 10-10h3M40 20h12M40 30v15a11 11 0 0 1-11 11h-5"
-          stroke="currentColor"
-          strokeWidth="7"
-        />
-      </g>
+      <path d={LOGO_SHADE} fill="var(--accent)" />
+      <path d={LOGO_G} fill="currentColor" />
     </svg>
   );
 }
 
-/** Lockup: mark 30 + "fignda" 18/800, gap 10. */
-export function Logo({ className }: { className?: string }) {
+/** The wordmark: GAZECRAFT with the mark as its first letter. Height includes the shade; capitals are 88% of it. */
+export function Logo({ height = 22, className }: Props) {
   return (
-    <span className={[styles.lockup, className].filter(Boolean).join(' ')}>
-      <LogoMark size={30} />
-      <span className={styles.word}>fignda</span>
-    </span>
+    <svg
+      width={(height * WORDMARK_BOX[2]) / WORDMARK_BOX[3]}
+      height={height}
+      viewBox={WORDMARK_BOX.join(' ')}
+      role="img"
+      aria-label="Gazecraft"
+      focusable="false"
+      className={[styles.logo, className].filter(Boolean).join(' ')}
+    >
+      <path d={LOGO_SHADE} fill="var(--accent)" />
+      <path d={LOGO_G + LOGO_REST} fill="currentColor" />
+    </svg>
   );
 }

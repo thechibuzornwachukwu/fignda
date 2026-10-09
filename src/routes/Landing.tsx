@@ -1,8 +1,11 @@
+import { useState } from 'react';
 import { Button } from '../components/Button';
 import { GameRow } from '../components/GameRow';
 import { TextLink } from '../components/TextLink';
 import { getPuzzle } from '../games/catalog';
 import { today } from '../games/daily';
+import { hasPlayed } from '../lib/firstMinute';
+import { useMediaQuery } from '../lib/media';
 import { LandingDemo } from './LandingDemo';
 import { HowTo } from './LandingHowTo';
 import { CastStack, Features, HeroArt } from './LandingPreviews';
@@ -23,26 +26,52 @@ const PICKS = [
 
 const STEPS = ['Choose your topic', 'Pick a game', 'Start finding'];
 
+const WHY = [
+  ['It ends', 'One daily puzzle and no feed under it. When you finish, you are done for today.'],
+  ['It is worth reading', 'Every puzzle is a small scene in plain words, not filler around the answers.'],
+  ['It respects you', 'Free to play, as a guest if you like. Nothing nags you to stay.'],
+] as const;
+
 export function Landing() {
+  // Play first (BUILD_PLAN 3b): a first time visitor on a phone opens on the demo sentence, with the pitch under it.
+  // Decided once, when the page opens, so finishing the demo does not move the page under the player.
+  const [fresh] = useState(() => !hasPlayed());
+  const phone = useMediaQuery('(max-width: 759px)');
+  const playFirst = fresh && phone;
+  // One h1 on the page: the demo's when it leads, the pitch's otherwise.
+  const Pitch = playFirst ? 'h2' : 'h1';
   return (
     <>
+      {playFirst && (
+        <section className={styles.first} aria-labelledby="first-title">
+          <div className={`${styles.wrap} ${styles.stack}`}>
+            <h1 id="first-title" className={styles.firstTitle}>
+              Words are hiding in this sentence.
+            </h1>
+            <LandingDemo guide />
+          </div>
+        </section>
+      )}
+
       <section className={styles.hero}>
         <div className={`${styles.wrap} ${styles.heroGrid}`}>
           <div className={styles.pitch}>
-            <h1 className={styles.display}>
-              Find it.
+            <Pitch className={styles.display}>
+              Do you have
               <br />
-              <span className={styles.sub}>Figure it out.</span>
-            </h1>
+              <span className={styles.sub}>what it takes?</span>
+            </Pitch>
             <p className={styles.lede}>
               Words are hiding inside ordinary sentences, across the spaces and the commas. Drag over the letters to
               pull them out.
             </p>
             <div className={styles.actions}>
               <Button to={`/d/${today().n}`}>Play today's daily</Button>
-              <Button to="/#how" variant="secondary">
-                Try it here
-              </Button>
+              {!playFirst && (
+                <Button to="/#how" variant="secondary">
+                  Try it here
+                </Button>
+              )}
             </div>
             <p className={styles.proof}>
               <CastStack />
@@ -53,13 +82,34 @@ export function Landing() {
         </div>
       </section>
 
+      <section className={styles.promise} aria-labelledby="promise-title">
+        <div className={`${styles.wrap} ${styles.stack}`}>
+          <div className={styles.promiseHead}>
+            <h2 id="promise-title" className={styles.h2}>
+              Slow down. Look closer.
+            </h2>
+            <p className={styles.lede}>
+              One paragraph a day, with words hidden in plain sight. About 5 minutes, then it is over.
+            </p>
+          </div>
+          <ul className={styles.why}>
+            {WHY.map(([title, line]) => (
+              <li key={title} className={styles.whyItem}>
+                <h3 className={styles.h3}>{title}</h3>
+                <p className={styles.whyLine}>{line}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
       <section id="how" className={styles.how} aria-labelledby="how-title">
         <div className={`${styles.wrap} ${styles.stack}`}>
           <h2 id="how-title" className={styles.h2}>
             Two ways to find a word
           </h2>
           <HowTo />
-          <LandingDemo />
+          {!playFirst && <LandingDemo />}
         </div>
       </section>
 
@@ -86,7 +136,7 @@ export function Landing() {
                 </li>
               ))}
             </ol>
-            <TextLink to="/play">Or type any topic</TextLink>
+            <TextLink to="/play#any-topic">Or type any topic</TextLink>
           </div>
           <ul className={styles.games}>
             {PICKS.map(([id, name]) => {
@@ -112,7 +162,10 @@ export function Landing() {
           </h2>
           <p className={styles.aboutText}>
             It began with an old puzzle that hid thirty books of the Bible in one paragraph. People passed it around
-            for years. <span className={styles.sub}>Fignda makes that kind of puzzle for any subject.</span>
+            for years.{' '}
+            <span className={styles.sub}>
+              Gazecraft makes that kind of puzzle for any subject. The only trick is to slow down and look closer.
+            </span>
           </p>
         </div>
       </section>

@@ -111,7 +111,7 @@ test.describe('play together', () => {
     // A forged message for a span that is not an answer changes nothing.
     const code = new URL(url).searchParams.get('room');
     await guest.evaluate((code) => {
-      const bc = new BroadcastChannel(`fignda-room-${code}`);
+      const bc = new BroadcastChannel(`gazecraft-room-${code}`);
       bc.postMessage({ event: 'find', payload: { a: 0, b: 6, from: { id: 'x', name: 'Mallory' } } });
       bc.postMessage({ event: 'sync', payload: { spans: [[1, 9], ['a', 'b']], from: { id: 'x', name: 'Mallory' } } });
     }, code);

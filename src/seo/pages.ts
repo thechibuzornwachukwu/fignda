@@ -20,7 +20,7 @@ function dailyName(n: number): string {
 /** Curated order for lists: follows the filter tabs, so no single topic leads. */
 const games = [...data.games].sort((a, b) => data.filters.indexOf(a.category) - data.filters.indexOf(b.category));
 
-export const SITE = 'Fignda';
+export const SITE = 'Gazecraft';
 export const TAGLINE = 'Find it. Figure it out.';
 export const PITCH =
   'A free word puzzle where words hide across spaces and punctuation, so "Pat omitted" hides ATOM. Drag across the letters to find them. A new daily puzzle every midnight.';
@@ -56,12 +56,12 @@ const level = (g: Game) => buildHiddenWords(g).difficulty;
 const question = (g: Game) => `Can you find ${count(g)} ${g.noun}?`;
 
 export const FAQ: Array<[string, string]> = [
-  ['What is Fignda?', PITCH],
+  ['What is Gazecraft?', PITCH],
   [
     'How do you play?',
     'Read the paragraph and drag across the letters of a hidden word. On a phone, swipe across the letters, or tap the first letter and then the last. Answers can run across spaces and punctuation.',
   ],
-  ['Is Fignda free?', 'Yes. Every puzzle is free to play in your browser. There is nothing to download.'],
+  ['Is Gazecraft free?', 'Yes. Every puzzle is free to play in your browser. There is nothing to download.'],
   [
     'What is the daily puzzle?',
     'One puzzle a day for everyone. You get one try, the number of hidden words stays secret until midnight UTC, and wrong picks cost 10 points.',
@@ -102,10 +102,10 @@ const faqHtml = () =>
 function home(origin: string): Page {
   const list = games.map((g) => `<li><a href="/play/${g.id}">${esc(question(g))}</a> ${esc(g.category)}, ${esc(level(g))}.</li>`).join('');
   return {
-    title: "Think you read carefully? You don't. · Fignda",
-    description: '"Pat omitted" hides ATOM. You just read past it. Every answer on Fignda is in plain sight. Prove you can see them.',
+    title: "Think you read carefully? You don't. · Gazecraft",
+    description: '"Pat omitted" hides ATOM. You just read past it. One paragraph a day, every answer in plain sight. Slow down. Look closer.',
     image: '/og/default.png',
-    imageAlt: 'Fignda. Find it. Figure it out.',
+    imageAlt: 'Gazecraft. Find it. Figure it out.',
     canonical: '/',
     jsonLd: [
       { ...GAME_LD, url: `${origin}/` },
@@ -141,24 +141,24 @@ const DARE: Record<string, string> = {
 function gamePage(origin: string, g: Game): Page {
   const q = question(g);
   return {
-    title: `${q} You won't find them all. · Fignda`,
+    title: `${q} You won't find them all. · Gazecraft`,
     description: `${DARE[g.category] ?? DARE.General} ${level(g)}, free, no sign up.`,
     image: `/og/${g.id}.png`,
-    imageAlt: `Fignda puzzle: ${q}`,
+    imageAlt: `Gazecraft puzzle: ${q}`,
     canonical: `/play/${g.id}`,
     jsonLd: [
       {
         '@context': 'https://schema.org',
         '@type': 'Game',
         name: `${g.title}: ${q}`,
-        description: `A Fignda word puzzle. ${count(g)} ${g.noun} are hidden across spaces and punctuation in one paragraph.`,
+        description: `A Gazecraft word puzzle. ${count(g)} ${g.noun} are hidden across spaces and punctuation in one paragraph.`,
         url: `${origin}/play/${g.id}`,
         genre: 'Word puzzle',
         isAccessibleForFree: true,
         isPartOf: { '@type': 'VideoGame', name: SITE, url: `${origin}/` },
       },
       crumbs(origin, [
-        ['Fignda', '/'],
+        ['Gazecraft', '/'],
         ['Games', '/play'],
         [g.title, `/play/${g.id}`],
       ]),
@@ -166,7 +166,7 @@ function gamePage(origin: string, g: Game): Page {
     body:
       `<h1>${esc(q)}</h1><p>${esc(g.category)} puzzle, ${esc(level(g))}. Words hide across spaces and punctuation.</p>` +
       `<blockquote>${esc(g.text)}</blockquote>` +
-      `<p><a href="/play/${g.id}">Play this puzzle on Fignda</a>. <a href="/play">More puzzles</a>.</p>`,
+      `<p><a href="/play/${g.id}">Play this puzzle on Gazecraft</a>. <a href="/play">More puzzles</a>.</p>`,
   };
 }
 
@@ -174,23 +174,23 @@ function dailyPage(origin: string, n: number, g: Game): Page {
   const label = dailyName(n);
   const q = `${label} #${n}: how many ${g.noun} can you find?`;
   return {
-    title: `${q} · Fignda`,
+    title: `${q} · Gazecraft`,
     description: 'One try. No count. Everyone plays the same puzzle today. Are you sharper than them?',
     image: `/og/daily-${g.id}.png`,
-    imageAlt: `Fignda daily puzzle: how many ${g.noun} can you find?`,
+    imageAlt: `Gazecraft daily puzzle: how many ${g.noun} can you find?`,
     canonical: `/d/${n}`,
     jsonLd: [
       {
         '@context': 'https://schema.org',
         '@type': 'Game',
-        name: `Fignda ${label} #${n}`,
-        description: `Today's Fignda daily: find the ${g.noun} hidden across spaces and punctuation. One try.`,
+        name: `Gazecraft ${label} #${n}`,
+        description: `Today's Gazecraft daily: find the ${g.noun} hidden across spaces and punctuation. One try.`,
         url: `${origin}/d/${n}`,
         isAccessibleForFree: true,
         isPartOf: { '@type': 'VideoGame', name: SITE, url: `${origin}/` },
       },
     ],
-    body: `<h1>${esc(q)}</h1><p>One try. The count stays hidden until midnight UTC. Wrong picks cost 10 points.</p><p><a href="/d/${n}">Play the daily on Fignda</a>.</p>`,
+    body: `<h1>${esc(q)}</h1><p>One try. The count stays hidden until midnight UTC. Wrong picks cost 10 points.</p><p><a href="/d/${n}">Play the daily on Gazecraft</a>.</p>`,
   };
 }
 
@@ -199,18 +199,18 @@ function answersPage(origin: string, n: number, g: Game): Page {
   const label = dailyName(n);
   const date = new Date(Date.UTC(2026, 0, n)).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
   const answers = buildHiddenWords(g).answers.map((a) => a.label);
-  const title = `Fignda ${label} #${n} answers (${date}) · Fignda`;
-  const description = `All ${answers.length} hidden ${g.noun} from the Fignda daily of ${date}, and the paragraph they were hiding in. Today's puzzle is waiting.`;
+  const title = `Gazecraft ${label} #${n} answers (${date}) · Gazecraft`;
+  const description = `All ${answers.length} hidden ${g.noun} from the Gazecraft daily of ${date}, and the paragraph they were hiding in. Today's puzzle is waiting.`;
   return {
     title,
     description,
     image: `/og/daily-${g.id}.png`,
-    imageAlt: `Fignda daily puzzle: ${g.noun}`,
+    imageAlt: `Gazecraft daily puzzle: ${g.noun}`,
     canonical: `/d/${n}/answers`,
     jsonLd: [
-      { '@context': 'https://schema.org', '@type': 'Article', headline: title.replace(/ · Fignda$/, ''), description, url: `${origin}/d/${n}/answers`, isPartOf: { '@type': 'VideoGame', name: SITE, url: `${origin}/` } },
+      { '@context': 'https://schema.org', '@type': 'Article', headline: title.replace(/ · Gazecraft$/, ''), description, url: `${origin}/d/${n}/answers`, isPartOf: { '@type': 'VideoGame', name: SITE, url: `${origin}/` } },
       crumbs(origin, [
-        ['Fignda', '/'],
+        ['Gazecraft', '/'],
         [`${label} #${n}`, `/d/${n}`],
         ['Answers', `/d/${n}/answers`],
       ]),
@@ -219,17 +219,17 @@ function answersPage(origin: string, n: number, g: Game): Page {
       `<h1>${esc(`${label} #${n} answers`)}</h1><p>${esc(date)}. ${answers.length} hidden ${esc(g.noun)}. Words hide across spaces and punctuation.</p>` +
       `<blockquote>${esc(g.text)}</blockquote>` +
       `<ol>${answers.map((a) => `<li>${esc(a)}</li>`).join('')}</ol>` +
-      `<p><a href="/play">Play today's daily on Fignda</a>.</p>`,
+      `<p><a href="/play">Play today's daily on Gazecraft</a>.</p>`,
   };
 }
 
 export function profilePage(origin: string, p: ProfileSummary): Page {
   const stats = `${p.current_streak} day streak · ${p.dailies} ${p.dailies === 1 ? 'daily' : 'dailies'} · ${p.perfect} perfect`;
   return {
-    title: `${p.name} (@${p.handle}) on Fignda`,
+    title: `${p.name} (@${p.handle}) on Gazecraft`,
     description: `@${p.handle} set the bar: ${stats}. Think you can beat it?`,
     image: '/og/default.png',
-    imageAlt: `${p.name} on Fignda`,
+    imageAlt: `${p.name} on Gazecraft`,
     canonical: `/u/${p.handle}`,
     jsonLd: [
       {
@@ -245,7 +245,7 @@ export function profilePage(origin: string, p: ProfileSummary): Page {
         },
       },
     ],
-    body: `<h1>${esc(p.name)} (@${esc(p.handle)})</h1><p>${esc(stats)}. ${p.followers} followers on Fignda.</p>`,
+    body: `<h1>${esc(p.name)} (@${esc(p.handle)})</h1><p>${esc(stats)}. ${p.followers} followers on Gazecraft.</p>`,
   };
 }
 
@@ -253,10 +253,10 @@ const simple = (path: string, title: string, description: string, body: string):
   title,
   description,
   image: '/og/default.png',
-  imageAlt: 'Fignda. Find it. Figure it out.',
+  imageAlt: 'Gazecraft. Find it. Figure it out.',
   canonical: path,
   jsonLd: [{ '@context': 'https://schema.org', '@type': 'CollectionPage', name: title, description }],
-  body: `<h1>${esc(title.replace(/ · Fignda$/, ''))}</h1><p>${esc(description)}</p>${body}`,
+  body: `<h1>${esc(title.replace(/ · Gazecraft$/, ''))}</h1><p>${esc(description)}</p>${body}`,
 });
 
 /** Everything a crawler or link previewer needs for one path. Profiles need their summary passed in. */
@@ -288,11 +288,11 @@ export function pageFor(path: string, origin: string, today = dayNo()): Page {
 
   if (clean === '/play') {
     const list = games.map((g) => `<li><a href="/play/${g.id}">${esc(question(g))}</a></li>`).join('');
-    return simple('/play', 'Word puzzles · Fignda', `${games.length} puzzles and a new daily every midnight. Every answer is in plain sight. You will still miss some.`, `<ul>${list}</ul>`);
+    return simple('/play', 'Word puzzles · Gazecraft', `${games.length} puzzles and a new daily every midnight. Every answer is in plain sight. You will still miss some.`, `<ul>${list}</ul>`);
   }
-  if (clean === '/leaderboard') return simple('/leaderboard', "Today's leaderboard · Fignda", 'Top verified scores on the Fignda daily puzzle, and the best score on every puzzle.', '');
-  if (clean === '/players') return simple('/players', 'Players · Fignda', 'Find players to follow on Fignda: longest streaks, most perfect dailies and new players.', '');
-  if (clean === '/privacy') return simple('/privacy', 'Privacy · Fignda', 'What Fignda keeps, why, and how to delete it.', '');
+  if (clean === '/leaderboard') return simple('/leaderboard', "Today's leaderboard · Gazecraft", 'Top verified scores on the Gazecraft daily puzzle, and the best score on every puzzle.', '');
+  if (clean === '/players') return simple('/players', 'Players · Gazecraft', 'Find players to follow on Gazecraft: longest streaks, most perfect dailies and new players.', '');
+  if (clean === '/privacy') return simple('/privacy', 'Privacy · Gazecraft', 'What Gazecraft keeps, why, and how to delete it.', '');
 
   // Custom puzzles, sign in, settings and anything else: generic preview, not indexed.
   return { ...home(origin), canonical: clean, noindex: !clean.startsWith('/u/') };
@@ -321,10 +321,10 @@ export function llmsTxt(origin: string, today = dayNo()): string {
     '',
     `> ${PITCH}`,
     '',
-    'Fignda runs in the browser at no cost. Guests can play every puzzle; signing in keeps a streak, ranks verified scores on the leaderboard and lets players follow each other.',
+    'Gazecraft runs in the browser at no cost. Guests can play every puzzle; signing in keeps a streak, ranks verified scores on the leaderboard and lets players follow each other.',
     '',
     '## Key pages',
-    `- [Home](${origin}/): what Fignda is and a playable example`,
+    `- [Home](${origin}/): what Gazecraft is and a playable example`,
     `- [All puzzles](${origin}/play): curated puzzles and the daily`,
     g ? `- [Today's ${dailyName(today) === 'Daily' ? 'daily' : dailyName(today)}](${origin}/d/${today}): how many ${g.noun} can you find? One try, count hidden until midnight UTC` : '',
     `- [Leaderboard](${origin}/leaderboard): top verified daily scores`,

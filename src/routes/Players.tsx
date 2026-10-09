@@ -1,7 +1,11 @@
-import { useEffect, useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { useEffect, useState, type ReactNode } from 'react';
+import { Link, Navigate, useLocation } from 'react-router-dom';
 import { Field } from '../components/Field';
-import { follow, isFollowing, newPlayers, searchPlayers, suggestedPlayers, topPlayers, unfollow, type PlayerRef } from '../lib/api';
+import { PageHeader } from '../components/PageHeader';
+import { Segmented } from '../components/Segmented';
+import { follow, isFollowing, newPlayers, searchPlayers, suggestedPlayers, topPlayers, unfollow, type PlayerRef, type Suggested } from '../lib/api';
+import { useStreak } from '../lib/useStreak';
+import { keepUnlocked, useUnlocks } from '../lib/useUnlocks';
 import { useAuth } from '../lib/auth';
 import { Avatar } from '../components/Avatar';
 import { FriendStreaks } from './FriendStreaks';
@@ -37,9 +41,18 @@ function FollowButton({ me, handle, name, check }: { me: string; handle: string;
   );
 }
 
+/** A list that is loading (null), that did not load, or that is here. */
+type Rows = Row[] | null | 'failed';
+
+/** Only rows with a handle and a name are shown, so a broken reply never prints "undefined". */
+const clean = <T extends PlayerRef>(r: unknown): T[] => (Array.isArray(r) ? (r as T[]).filter((p) => p && typeof p.handle === 'string' && p.handle !== '') : []);
+const count = (n: unknown): number => (typeof n === 'number' && Number.isFinite(n) && n > 0 ? Math.floor(n) : 0);
+
 /** `me` (your user id) adds a Follow button to every row but your own. */
-function List({ rows, empty, me, myHandle, check = false }: { rows: Row[] | null; empty: string; me?: string; myHandle?: string; check?: boolean }) {
+function List({ rows, empty, me, myHandle, check = false }: { rows: Rows; empty: ReactNode; me?: string; myHandle?: string; check?: boolean }) {
   if (rows == null) return <div className={styles.loading} aria-busy="true" />;
+  // A list that failed says so. It never claims to be empty.
+  if (rows === 'failed') return <p className={styles.muted}>This list did not load. Try again in a moment.</p>;
   if (rows.length === 0) return <p className={styles.muted}>{empty}</p>;
   return (
     <ul className={styles.list}>
@@ -48,49 +61,83 @@ function List({ rows, empty, me, myHandle, check = false }: { rows: Row[] | null
           <Link to={`/u/${p.handle}`} className={styles.row}>
             <Avatar handle={p.handle} size={40} />
             <span className={styles.who}>
-              <span className={styles.name}>{p.name}</span>
+              <span className={styles.name}>{p.name || `@${p.handle}`}</span>
               <span className={styles.handle}>@{p.handle}</span>
             </span>
             {p.stat && <span className={styles.stat}>{p.stat}</span>}
           </Link>
-          {me && p.handle !== myHandle && <FollowButton me={me} handle={p.handle} name={p.name} check={check} />}
+          {me && p.handle !== myHandle && <FollowButton me={me} handle={p.handle} name={p.name || p.handle} check={check} />}
         </li>
       ))}
     </ul>
   );
 }
 
-/** /players. Find people to follow: search by handle, plus players worth following. */
-export function Players() {
-  const auth = useAuth();
-  const [q, setQ] = useState('');
-  const [hits, setHits] = useState<Row[] | null>([]);
-  const [streaks, setStreaks] = useState<Row[] | null>(null);
-  const [perfect, setPerfect] = useState<Row[] | null>(null);
-  const [points, setPoints] = useState<Row[] | null>(null);
-  const [fresh, setFresh] = useState<Row[] | null>(null);
-  const [suggested, setSuggested] = useState<Row[] | null>(null);
-  const me = auth.profile?.id;
-  const myHandle = auth.profile?.handle;
+const TOPS = ['streak', 'perfect', 'new', 'points'] as const;
+type Top = (typeof TOPS)[number];
+const TOP_LABEL: Record<Top, string> = { streak: 'Streaks', perfect: 'Perfect', new: 'New', points: 'Points' };
+const TOP_EMPTY: Record<Top, string> = {
+  streak: "No streaks yet. Play today's daily to start one.",
+  perfect: 'Nobody has found every word yet.',
+  new: 'No new players this week.',
+  points: 'No points yet. Every word you find adds to yours.',
+};
 
+async function loadTop(kind: Top): Promise<Row[]> {
+  if (kind === 'new') return clean<Row>(await newPlayers());
+  const rows = clean<PlayerRef & { value: number }>(await topPlayers(kind));
+  return rows.map((p) => {
+    const v = count(p.value);
+    const stat = kind === 'streak' ? `${v} ${v === 1 ? 'day' : 'days'}` : kind === 'points' ? `${v.toLocaleString('en-US')} pts` : `${v} perfect`;
+    return { handle: p.handle, name: p.name, stat };
+  });
+}
+
+/** One section where there were 4: the best players, one list at a time. Points joins once the viewer has some to compare. */
+function TopPlayers({ points }: { points: boolean }) {
+  const [kind, setKind] = useState<Top>('streak');
+  const [lists, setLists] = useState<Partial<Record<Top, Rows>>>({});
+  const loaded = lists[kind] !== undefined;
   useEffect(() => {
+    if (loaded) return;
     let alive = true;
-    topPlayers('streak')
-      .then((r) => alive && setStreaks(r.map((p) => ({ ...p, stat: `${p.value} ${p.value === 1 ? 'day' : 'days'}` }))))
-      .catch(() => alive && setStreaks([]));
-    topPlayers('points')
-      .then((r) => alive && setPoints(r.map((p) => ({ ...p, stat: `${p.value.toLocaleString('en-US')} pts` }))))
-      .catch(() => alive && setPoints([]));
-    topPlayers('perfect')
-      .then((r) => alive && setPerfect(r.map((p) => ({ ...p, stat: `${p.value} perfect` }))))
-      .catch(() => alive && setPerfect([]));
-    newPlayers()
-      .then((r) => alive && setFresh(r))
-      .catch(() => alive && setFresh([]));
+    loadTop(kind)
+      .then((r) => alive && setLists((l) => ({ ...l, [kind]: r })))
+      .catch(() => alive && setLists((l) => ({ ...l, [kind]: 'failed' })));
     return () => {
       alive = false;
     };
-  }, []);
+  }, [kind, loaded]);
+  const options = TOPS.filter((t) => t !== 'points' || points).map((t) => [t, TOP_LABEL[t]] as const);
+  return (
+    <section className={styles.section} aria-labelledby="top-title">
+      <h2 id="top-title" className={styles.h2}>
+        Top players
+      </h2>
+      <div className={styles.switch}>
+        <Segmented label="List" hideLabel options={options} value={kind} onChange={setKind} />
+      </div>
+      <List rows={lists[kind] ?? null} empty={TOP_EMPTY[kind]} />
+    </section>
+  );
+}
+
+/** /players. Find people: search and people to follow lead, then friend streaks, then the top players. */
+export function Players() {
+  const auth = useAuth();
+  const run = useStreak();
+  const open = useUnlocks(run.played);
+  const { hash } = useLocation();
+  const [q, setQ] = useState('');
+  const [hits, setHits] = useState<Rows>([]);
+  const [suggested, setSuggested] = useState<Rows>(null);
+  const me = auth.profile?.id;
+  const myHandle = auth.profile?.handle;
+  // A direct link always works: /players#friend-streaks shows the section, and it stays from then on.
+  const asked = hash === '#friend-streaks';
+  useEffect(() => {
+    if (asked) keepUnlocked(['friendStreaks']);
+  }, [asked]);
 
   // Suggestions depend on who is asking: they leave out you and the people you already follow.
   useEffect(() => {
@@ -100,14 +147,18 @@ export function Players() {
         (r) =>
           alive &&
           setSuggested(
-            r.map((s) => ({
-              handle: s.handle,
-              name: s.name,
-              stat: s.mutuals > 0 ? `Followed by ${s.mutuals} you follow` : s.plays > 0 ? `${s.plays} ${s.plays === 1 ? 'play' : 'plays'}` : 'New here',
-            })),
+            clean<Suggested>(r).map((s) => {
+              const mutuals = count(s.mutuals);
+              const plays = count(s.plays);
+              return {
+                handle: s.handle,
+                name: s.name,
+                stat: mutuals > 0 ? `Followed by ${mutuals} you follow` : plays > 0 ? `${plays} ${plays === 1 ? 'play' : 'plays'}` : 'New here',
+              };
+            }),
           ),
       )
-      .catch(() => alive && setSuggested([]));
+      .catch(() => alive && setSuggested('failed'));
     return () => {
       alive = false;
     };
@@ -120,8 +171,8 @@ export function Players() {
     let alive = true;
     const id = window.setTimeout(() => {
       searchPlayers(term)
-        .then((r) => alive && setHits(r))
-        .catch(() => alive && setHits([]));
+        .then((r) => alive && setHits(clean<Row>(r)))
+        .catch(() => alive && setHits('failed'));
     }, 250);
     return () => {
       alive = false;
@@ -131,14 +182,15 @@ export function Players() {
 
   if (!auth.enabled) return <Navigate to="/play" replace />;
   const searching = q.trim().length > 0;
+  const signIn = (
+    <Link to="/signin?next=%2Fplayers" className={styles.signin}>
+      Sign in
+    </Link>
+  );
 
   return (
     <div className={styles.page}>
-      <h1 className={styles.title}>
-        Players.
-        <br />
-        <span className={styles.sub}>Find your rivals.</span>
-      </h1>
+      <PageHeader title="Players" />
 
       <section className={styles.section} aria-label="Search players">
         <Field
@@ -158,53 +210,25 @@ export function Players() {
         {searching && <List rows={hits} empty={`No handle starts with @${q.trim().toLowerCase()}.`} me={me} myHandle={myHandle} check />}
       </section>
 
-      {!searching && me && <FriendStreaks />}
-
       {!searching && (
         <section className={styles.section} aria-labelledby="suggested-title">
           <h2 id="suggested-title" className={styles.h2}>
             People to follow
           </h2>
-          <List rows={suggested} empty="Nobody else has joined yet. Invite a friend and they will show up here." me={me} myHandle={myHandle} />
-          {!me && !auth.loading && !!suggested?.length && (
-            <p className={styles.muted}>
-              <Link to="/signin?next=%2Fplayers" className={styles.signin}>
-                Sign in
-              </Link>{' '}
-              to follow players and see them on your own leaderboard.
-            </p>
-          )}
+          <List
+            rows={suggested}
+            empty={me ? 'You follow everyone here. Invite a friend and they will show up.' : 'Nobody else has joined yet. Invite a friend and they will show up here.'}
+            me={me}
+            myHandle={myHandle}
+          />
+          {!me && !auth.loading && Array.isArray(suggested) && <p className={styles.note}>{signIn} to follow players and see them on your own leaderboard.</p>}
         </section>
       )}
 
-      {!searching && (
-        <div className={styles.grid}>
-          <section className={styles.section} aria-labelledby="points-title">
-            <h2 id="points-title" className={styles.h2}>
-              Most points
-            </h2>
-            <List rows={points} empty="No points yet. Every word you find adds to yours." />
-          </section>
-          <section className={styles.section} aria-labelledby="streaks-title">
-            <h2 id="streaks-title" className={styles.h2}>
-              Longest streaks
-            </h2>
-            <List rows={streaks} empty="No streaks yet. Play today's daily to start one." />
-          </section>
-          <section className={styles.section} aria-labelledby="perfect-title">
-            <h2 id="perfect-title" className={styles.h2}>
-              Most perfect dailies
-            </h2>
-            <List rows={perfect} empty="Nobody has found every word yet." />
-          </section>
-          <section className={styles.section} aria-labelledby="new-title">
-            <h2 id="new-title" className={styles.h2}>
-              New this week
-            </h2>
-            <List rows={fresh} empty="No new players this week." />
-          </section>
-        </div>
-      )}
+      {/* Friend streaks appear after the third daily. A player already in one, or asked into one, sees it at once. */}
+      {!searching && me && <FriendStreaks quiet={!open.friendStreaks && !asked} />}
+
+      {!searching && <TopPlayers points={open.points} />}
     </div>
   );
 }

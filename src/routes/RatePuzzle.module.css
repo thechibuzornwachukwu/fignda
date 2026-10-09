@@ -1,0 +1,23 @@
+.confirm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.title {
+  composes: h3 from '../styles/type.module.css';
+  margin: 0;
+}
+.help {
+  composes: small from '../styles/type.module.css';
+  margin: 0;
+  color: var(--muted);
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2h);
+}
+.said {
+  composes: small from '../styles/type.module.css';
+  color: var(--muted);
+}

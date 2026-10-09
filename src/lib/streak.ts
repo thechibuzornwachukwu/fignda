@@ -37,7 +37,7 @@ export function handleFromName(name: string): string {
 }
 
 export const HANDLE_RE = /^[a-z0-9._]{2,20}$/;
-export const RESERVED_HANDLES = ['admin', 'fignda', 'support', 'root', 'help'];
+export const RESERVED_HANDLES = ['admin', 'gazecraft', 'fignda', 'support', 'root', 'help'];
 
 /** Name and handle rules shared by sign up and settings. Returns cleaned values or the message to show. */
 export function checkProfile(rawName: string, rawHandle: string): { name: string; handle: string } | { error: string } {

@@ -33,7 +33,7 @@ const row = (title, cells) => `<h2 style="font-size:14px;color:#a1a1aa;font-weig
 const total = PARTS.reduce((n, p) => n * p.names.length, 1);
 
 const html = `<body style="margin:0;padding:40px;background:#0e0e10;color:#f4f4f5;font-family:Manrope,system-ui,sans-serif">
-<h1 style="font-size:28px;margin:0 0 6px">Fignda avatars</h1>
+<h1 style="font-size:28px;margin:0 0 6px">Gazecraft avatars</h1>
 <p style="margin:0;color:#a1a1aa;font-size:15px">${PARTS.length} things to choose, ${total.toLocaleString('en-US')} combinations. Every look is free.</p>
 ${PARTS.map((p) => row(`${p.title} (${p.names.length})`, p.names.map((name, i) => cell(avatarSvg(sample(p.key, i), 96), name)))).join('')}
 ${row('A few players', players.map((p) => cell(avatarSvg(p.a, 96), p.handle)))}

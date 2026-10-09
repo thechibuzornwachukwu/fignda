@@ -8,7 +8,7 @@ const todayNo = () => {
 
 test('guest sees the daily board, a sign in prompt and puzzle boards', async ({ page }) => {
   await page.goto('/leaderboard');
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Leaderboard.');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Leaders');
   await expect(page.getByText(`Today · Daily #${todayNo()}`)).toBeVisible();
   await expect(page.getByText("Today's totals stay hidden until midnight.")).toBeVisible();
   await expect(page.getByText('Guest scores stay on this device and are never ranked.')).toBeVisible();

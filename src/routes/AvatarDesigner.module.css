@@ -173,6 +173,14 @@
   border-color: var(--fg);
   color: var(--bg);
 }
+/* The line under the outfit question. */
+.help {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--subtle);
+}
 .dots {
   display: flex;
   flex-wrap: wrap;

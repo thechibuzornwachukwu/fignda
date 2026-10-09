@@ -1,5 +1,5 @@
 {
-  "name": "fignda",
+  "name": "gazecraft",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -24,7 +24,7 @@
     "deploy:site": "node scripts/deploy-site.mjs",
     "deploy:api": "wrangler deploy --config worker/wrangler.toml",
     "og:render": "node scripts/render-og.mjs",
-    "brand:render": "node scripts/render-brand.mjs",
+    "brand:render": "tsx scripts/render-brand.mjs",
     "avatars:render": "tsx scripts/render-avatars.mjs",
     "push:keys": "node scripts/push-keys.mjs",
     "ai:bench": "tsx scripts/ai-bench.ts"

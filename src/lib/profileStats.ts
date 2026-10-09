@@ -10,6 +10,8 @@ export type PlayRow = {
   secs: number;
   created_at: string;
   verified?: boolean;
+  /** Clean read, recorded by the server from the play log. Null on a public row while it is today's daily. */
+  clean?: boolean | null;
 };
 
 export type DayCell = { day: number; state: 'perfect' | 'played' | 'none' };
@@ -21,6 +23,8 @@ export type ProfileStats = {
   streak: number;
   bestStreak: number;
   perfect: number;
+  /** Clean reads: every daily, and each other puzzle once. */
+  cleanReads: number;
   last14: DayCell[];
   recent: PlayRow[];
 };
@@ -52,6 +56,16 @@ export function pointsOf(plays: readonly PlayRow[]): number {
   return total;
 }
 
+/** Same rule as the database (clean_reads_of): a puzzle read cleanly more than once counts once. */
+export function cleanReadsOf(plays: readonly PlayRow[]): number {
+  const seen = new Set<string>();
+  for (const p of plays) {
+    if (p.clean !== true || p.verified === false) continue;
+    seen.add(p.day_no != null ? `d:${p.day_no}` : `g:${p.game_id}`);
+  }
+  return seen.size;
+}
+
 export function profileStats(plays: readonly PlayRow[], today: number): ProfileStats {
   const dailyPlays = plays.filter((p) => p.day_no != null && p.day_no >= 1 && p.day_no <= today);
   const days = new Set(dailyPlays.map((p) => p.day_no!));
@@ -69,6 +83,7 @@ export function profileStats(plays: readonly PlayRow[], today: number): ProfileS
     streak,
     bestStreak: longestRun(days),
     perfect: plays.filter(isPerfect).length,
+    cleanReads: cleanReadsOf(plays),
     last14,
     recent,
   };

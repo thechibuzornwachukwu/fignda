@@ -35,7 +35,7 @@ const list = (page: Page) => page.getByRole('complementary', { name: 'Hidden abo
 
 test('demo completes by drag and links to the hard puzzle', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Find it\.\s*Figure it out\./);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Do you have\s*what it takes\?/);
   const S = await letters(page);
   await expect(cta(page)).toHaveCount(0);
 
@@ -87,6 +87,8 @@ test.describe('touch', () => {
 
   test('demo by two taps, no horizontal scroll', async ({ page }) => {
     await page.goto('/');
+    // A first visit on a phone opens on one guided find. Skipped, the player is alone with the demo.
+    await page.getByRole('button', { name: 'Skip the guide' }).tap();
     await expect(page.getByText('Swipe across the letters, or tap the first and then the last.', { exact: false })).toBeVisible();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow).toBeLessThanOrEqual(0);

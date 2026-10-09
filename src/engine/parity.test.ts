@@ -27,11 +27,11 @@ type Ref = {
 async function loadRef(): Promise<Ref> {
   const url = pathToFileURL(join(REF, 'engine.js')).href;
   const engine = (await import(/* @vite-ignore */ url)) as RefEngine & Ref['engine'];
-  const w = window as unknown as { FigndaCards: Ref['cards']; FigndaCopy: Ref['copy'] };
+  const w = window as unknown as { GazecraftCards: Ref['cards']; GazecraftCopy: Ref['copy'] };
   // The reference cards/copy are browser IIFEs that attach to window.
   new Function(readFileSync(join(REF, 'cards.js'), 'utf8'))();
   new Function(readFileSync(join(REF, 'copy.js'), 'utf8'))();
-  return { engine, cards: w.FigndaCards, copy: w.FigndaCopy };
+  return { engine, cards: w.GazecraftCards, copy: w.GazecraftCopy };
 }
 
 const ratios: Ratio[] = ['1:1', '4:5', '9:16'];
@@ -112,7 +112,7 @@ describe.skipIf(!has)('parity with design/reference', () => {
       const keys = buildHiddenWords(g).answers.map((a) => a.key);
       const answers = answersFrom(g.text, keys).map((a, i) => ({ ...a, found: i % 2 === 0, hinted: i % 5 === 0 }));
       for (const v of variants) {
-        const o = { ...v, text: g.text, answers, secs: 125, noun: g.noun, name: 'Ada Obi', kicker: 'Fignda', date: 'Sep 25' };
+        const o = { ...v, text: g.text, answers, secs: 125, noun: g.noun, name: 'Ada Obi', kicker: 'Gazecraft', date: 'Sep 25' };
         const mine = puzzleCards(o);
         const theirs = ref.cards.puzzleCards!(o) as Array<Record<string, unknown> & { segs: Array<{ t: string; bg: string; ring: string }> }>;
         expect(mine.length).toBe(theirs.length);

@@ -5,10 +5,11 @@ import { storage } from './storage';
  *   tick(n)  one soft click per letter a selection passes. Pitch climbs a semitone per letter, so the ear
  *            hears how long the selection is. Resets on the next swipe.
  *   chime()  two quick notes when a word is found. A miss makes no sound.
- * On by default and quiet. Stored as `fignda-sound` = "off" when muted.
+ *   record() three rising notes when a personal record falls, after the last chime has rung.
+ * On by default and quiet. Stored as `gazecraft-sound` = "off" when muted.
  * Safari plays Web Audio in the ambient session, so the iPhone silent switch mutes it, as it should.
  */
-const KEY = 'fignda-sound';
+const KEY = 'gazecraft-sound';
 /** Base pitch for the first letter, in Hz. */
 const BASE = 660;
 /** Ticks closer than this merge into one, so a fast flick is a ripple, not a buzz. */
@@ -107,4 +108,14 @@ export function chime(): void {
   const at = c.currentTime + 0.01;
   note(c, 1046.5, at, 0.06, 0.16, 'sine'); // C6
   note(c, 1568, at + 0.07, 0.06, 0.24, 'sine'); // G6
+}
+
+/** A new personal record: E6, G6, C7. It starts late enough to follow the chime of the find that ended the game. */
+export function record(): void {
+  const c = ready();
+  if (!c) return;
+  const at = c.currentTime + 0.45;
+  note(c, 1318.5, at, 0.06, 0.16, 'sine'); // E6
+  note(c, 1568, at + 0.09, 0.06, 0.16, 'sine'); // G6
+  note(c, 2093, at + 0.18, 0.06, 0.32, 'sine'); // C7
 }

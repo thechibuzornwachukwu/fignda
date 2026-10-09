@@ -5,7 +5,7 @@ import { useAuth } from '../lib/auth';
 import { useUnread } from '../lib/useUnread';
 import { Button } from './Button';
 import { Icon } from './Icon';
-import { Logo } from './Logo';
+import { Logo, LogoMark } from './Logo';
 import { ThemeToggle } from './ThemeToggle';
 import { Avatar } from './Avatar';
 import styles from './Header.module.css';
@@ -116,8 +116,9 @@ export function Header() {
   return (
     <header ref={ref} className={[styles.header, tucked && styles.tucked].filter(Boolean).join(' ')} data-tucked={tucked || undefined}>
       <div className={styles.inner}>
-        <Link to="/" className={styles.home} aria-label="Fignda home">
-          <Logo />
+        <Link to="/" className={styles.home} aria-label="Gazecraft home">
+          <Logo className={styles.wordmark} />
+          <LogoMark height={28} className={styles.mark} />
         </Link>
         {landing ? (
           <nav className={styles.nav} aria-label="On this page">

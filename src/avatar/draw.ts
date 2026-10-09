@@ -77,7 +77,8 @@ export function avatarCode(a: Avatar): string {
  * How an avatar presents, read from the hair and facial hair its owner chose: feminine if those are usually
  * feminine, masculine if usually masculine, and null when they are neutral or mixed (braids and a beard).
  * Outfits are costume and do not count: a woman in an agbada for a laugh still presents as she did.
- * Nothing about gender is asked or saved; this is worked out on the spot from the design itself.
+ * This is worked out on the spot from the design itself. The one thing a player may tell us is the answer to
+ * "Who are we dressing?" (`Prefer` below), which only orders choices and steers Surprise me.
  */
 const IDENTITY: readonly PartKey[] = ['hair', 'face'];
 export function lookOf(a: Avatar): Look | null {
@@ -92,6 +93,26 @@ function suiting(key: PartKey, look: Look | null): number[] {
   return part.names.flatMap((_, i) => (part.looks[i] === undefined || part.looks[i] === look ? [i] : []));
 }
 
+/**
+ * The player's own answer to "Who are we dressing?", kept with the avatar as its look. `mixed` ("I'd rather not
+ * say"), null and anything unknown all mean the same here: no steer, which is what everyone had before the question.
+ */
+export type Prefer = Look | 'mixed' | null | undefined;
+const lookFrom = (prefer: unknown): Look | null => (prefer === 'feminine' || prefer === 'masculine' ? prefer : null);
+
+/**
+ * The choices of a part in the order the editor shows them: those that suit the answer first, the rest after,
+ * each group in its saved order. Nothing is left out, so nothing is locked. No answer: the saved order.
+ */
+export function orderFor(key: PartKey, prefer?: Prefer): number[] {
+  const part = PARTS.find((x) => x.key === key)!;
+  const all = part.names.map((_, i) => i);
+  const look = lookFrom(prefer);
+  if (!look) return all;
+  const suits = new Set(suiting(key, look));
+  return [...all.filter((i) => suits.has(i)), ...all.filter((i) => !suits.has(i))];
+}
+
 /** Picks from a list with a 0 to 1 random source. */
 const pick = (from: readonly number[], random: () => number) => from[Math.min(from.length - 1, Math.floor(random() * from.length))]!;
 
@@ -102,9 +123,10 @@ const PLAYFUL: readonly PartKey[] = ['hair', 'eyes', 'mouth', 'extra', 'tie', 'o
  * A fresh take on the same person. It keeps skin, hair colour, facial hair and marks exactly, and only draws
  * styles that suit how the avatar already presents, so a surprise never changes someone's gender or complexion.
  * A neutral or mixed avatar only gets styles that are for anyone.
+ * With an answer to the outfit question (`prefer`), that answer steers the draw instead of the design.
  */
-export function surprise(a: Avatar, random: () => number = Math.random): Avatar {
-  const look = lookOf(a);
+export function surprise(a: Avatar, random: () => number = Math.random, prefer?: Prefer): Avatar {
+  const look = lookFrom(prefer) ?? lookOf(a);
   const next = { ...a };
   for (const key of PLAYFUL) next[key] = pick(suiting(key, look), random);
   return next;

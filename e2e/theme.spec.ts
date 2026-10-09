@@ -19,7 +19,7 @@ test('toggle persists across reloads', async ({ page }) => {
 
   await page.getByRole('button', { name: 'Switch to light theme' }).click();
   expect(await theme(page)).toBe('light');
-  expect(await page.evaluate(() => localStorage.getItem('fignda-theme'))).toBe('light');
+  expect(await page.evaluate(() => localStorage.getItem('gazecraft-theme'))).toBe('light');
 
   await page.reload();
   expect(await theme(page)).toBe('light');
@@ -29,7 +29,7 @@ test('toggle persists across reloads', async ({ page }) => {
 test('no flash: stored theme is set before first paint', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'dark' });
   await page.addInitScript(() => {
-    localStorage.setItem('fignda-theme', 'light');
+    localStorage.setItem('gazecraft-theme', 'light');
     // Record the theme and body background at the first DOM moment and first frame.
     const w = window as unknown as { __seen: string[] };
     w.__seen = [];
@@ -72,7 +72,8 @@ test('headings are Bungee, in the softer ink', async ({ page }) => {
   });
   expect(h1.family).toContain('Bungee');
   expect(h1.weight).toBe('400');
-  expect(h1.color).toBe('rgb(192, 192, 193)');
+  // The page title is the resultTitle step, in --ink-heading.
+  expect(h1.color).toBe('rgb(210, 210, 211)');
 });
 
 test('header fits at 375 with no horizontal scroll', async ({ page }) => {

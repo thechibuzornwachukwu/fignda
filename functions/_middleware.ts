@@ -35,7 +35,7 @@ export function headTags(p: Page, origin: string): string {
     `<link rel="canonical" href="${esc(url)}" />`,
     p.noindex ? name('robots', 'noindex, follow') : '',
     prop('og:type', 'website'),
-    prop('og:site_name', 'Fignda'),
+    prop('og:site_name', 'Gazecraft'),
     prop('og:locale', 'en_GB'),
     prop('og:title', p.title),
     prop('og:description', p.description),

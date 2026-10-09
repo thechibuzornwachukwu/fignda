@@ -1,15 +1,22 @@
 .screen {
-  padding: var(--screen-top) 0 var(--space-30);
+  padding: var(--screen-top-game) 0 var(--space-30);
   display: flex;
   flex-direction: column;
-  gap: var(--screen-gap);
+  gap: var(--screen-gap-game);
 }
-.heading {
-  composes: display from '../styles/type.module.css';
+/* The daily, the week and the way to the board read as one block. */
+.today {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+.more,
+.empty {
   margin: 0;
 }
-.sub {
-  color: var(--subtle);
+.empty {
+  composes: body from '../styles/type.module.css';
+  color: var(--muted);
 }
 
 .daily {
@@ -36,7 +43,7 @@
   min-width: 0;
 }
 .kicker {
-  font-size: 13px;
+  composes: label from '../styles/type.module.css';
   font-weight: 700;
   color: var(--accent-ink);
 }
@@ -44,18 +51,46 @@
   composes: h2 from '../styles/type.module.css';
 }
 .dailySub {
-  font-size: 14px;
-  font-weight: 500;
+  composes: caption from '../styles/type.module.css';
   color: var(--muted);
 }
 
-.make {
+.week {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.weekText {
   margin: 0;
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-2) var(--space-4);
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
 }
+.weekLine {
+  composes: itemTitle from '../styles/type.module.css';
+  color: var(--fg);
+}
+
+.shelf {
+  composes: label from '../styles/type.module.css';
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-4);
+  padding: var(--space-6) 0 var(--space-2);
+  border-bottom: 1px solid var(--line-2);
+  color: var(--subtle);
+  font-variant-numeric: tabular-nums;
+}
+.shelfName {
+  font-weight: 700;
+  color: var(--fg);
+}
+
 
 .list {
   display: flex;

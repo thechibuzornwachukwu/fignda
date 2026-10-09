@@ -1,0 +1,70 @@
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2h);
+  min-width: 0;
+}
+.sm {
+  gap: var(--space-2);
+}
+/* The number sits inside the ring. */
+.dial {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.dial > * {
+  grid-area: 1 / 1;
+}
+/* Manrope: a count is never Bungee. */
+.number {
+  font-family: var(--font);
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg);
+}
+.sm .number {
+  font-size: 12px;
+}
+.text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+}
+.band {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--fg);
+  overflow-wrap: anywhere;
+}
+.sm .band {
+  font-size: 13px;
+}
+.points {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--subtle);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Level up: the ring fills by its own transition, the number pops. Never from scale 0. */
+.badge[data-level-up] .number {
+  animation: pop var(--dur-slow) var(--ease-out) backwards;
+}
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .badge[data-level-up] .number {
+    animation: none;
+  }
+}

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Stars } from './Stars';
 import styles from './GameRow.module.css';
 
 type Props = {
@@ -9,15 +10,18 @@ type Props = {
   /** "N words · Level" */
   meta: string;
   size?: 'lg' | 'md';
+  /** Best stars on a finished puzzle. 0 or absent shows nothing. */
+  stars?: number;
 };
 
-export function GameRow({ to, category, title, meta, size = 'lg' }: Props) {
+export function GameRow({ to, category, title, meta, size = 'lg', stars = 0 }: Props) {
   return (
     <li className={styles.item}>
       <Link to={to} className={size === 'md' ? styles.rowMd : styles.row}>
         {category != null && <span className={styles.cat}>{category}</span>}
         <span className={size === 'md' ? styles.titleMd : styles.title}>{title}</span>
         <span className={styles.meta}>{meta}</span>
+        {stars > 0 && <Stars value={stars} />}
       </Link>
     </li>
   );

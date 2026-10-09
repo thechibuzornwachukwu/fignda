@@ -7,13 +7,32 @@ import { dayNo } from '../engine/daily';
 import { formatTime } from '../engine/time';
 import { dailyIdFor, games, getGameDef } from '../games/catalog';
 import { dailyDate, dailyLabel } from '../games/daily';
-import { fetchDailyBoard, fetchDailyRank, fetchFollowingBoard, fetchGameBoard, fetchTogetherBoard, type BoardRow, type MyRank, type TeamRow } from '../lib/api';
+import {
+  fetchCircleBoard,
+  fetchDailyBoard,
+  fetchDailyRank,
+  fetchFollowing,
+  fetchFollowingBoard,
+  fetchGameBoard,
+  fetchTogetherBoard,
+  myCircles,
+  type BoardRow,
+  type MyRank,
+  type TeamRow,
+} from '../lib/api';
+import { CROWDS, askedCrowd, circleRows, defaultCrowd, type Crowd } from '../lib/crowd';
+import { sizeOf } from '../lib/unlocks';
+import { useStreak } from '../lib/useStreak';
+import { useUnlocks } from '../lib/useUnlocks';
+import { PageHeader } from '../components/PageHeader';
+import { TextLink } from '../components/TextLink';
 import { Segmented } from '../components/Segmented';
 import { useAuth } from '../lib/auth';
 import { Avatar } from '../components/Avatar';
 import styles from './Leaderboard.module.css';
 
-type Load = { status: 'loading' } | { status: 'error' } | { status: 'ready'; rows: BoardRow[]; me: MyRank | null };
+type Loaded = { rows: BoardRow[]; me: MyRank | null; /** Circle members still to play. */ waiting?: number };
+type Load = { status: 'loading' } | { status: 'error' } | ({ status: 'ready' } & Loaded);
 
 function Board({ rows, me, myHandle, empty }: { rows: BoardRow[]; me: MyRank | null; myHandle?: string; empty: ReactNode }) {
   if (rows.length === 0) return <p className={styles.empty}>{empty}</p>;
@@ -41,7 +60,7 @@ function Board({ rows, me, myHandle, empty }: { rows: BoardRow[]; me: MyRank | n
           {row(me, true)}
         </ol>
       )}
-      {me && (
+      {me && Number.isFinite(me.rank) && Number.isFinite(me.players) && (
         <p className={styles.meta}>
           You are #{me.rank} of {me.players}.
         </p>
@@ -50,20 +69,24 @@ function Board({ rows, me, myHandle, empty }: { rows: BoardRow[]; me: MyRank | n
   );
 }
 
-function useBoard(key: string, load: () => Promise<{ rows: BoardRow[]; me: MyRank | null }>): Load {
+/** `load` is null while there is nothing to ask for yet: the board reads as loading. */
+function useBoard(key: string, load: (() => Promise<Loaded>) | null): Load {
   // Results are tagged with the key they answer, so a new key reads as loading without a reset.
   const [state, setState] = useState<{ key: string; load: Load } | null>(null);
+  const idle = !load;
   useEffect(() => {
+    if (!load) return;
     let alive = true;
     load()
-      .then((r) => alive && setState({ key, load: { status: 'ready', ...r } }))
+      // A reply that is not a list is an empty board, never a crash.
+      .then((r) => alive && setState({ key, load: { status: 'ready', ...r, rows: Array.isArray(r.rows) ? r.rows : [] } }))
       .catch(() => alive && setState({ key, load: { status: 'error' } }));
     return () => {
       alive = false;
     };
-    // `key` captures every input of `load`.
+    // `key` captures every input of `load`, and `idle` whether there is one.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
+  }, [key, idle]);
   return state?.key === key ? state.load : { status: 'loading' };
 }
 
@@ -81,47 +104,81 @@ function GuestNote({ next }: { next: string }) {
   );
 }
 
-/** /leaderboard?day=N. Daily boards, newest first, plus a board for every curated puzzle. */
+type Mine = { circles: Array<{ code: string; name: string }>; following: number };
+
+/** Your circles and how many people you follow: what decides which board opens. A lookup that fails counts as none. */
+function useMine(handle: string | undefined): Mine | null {
+  const [state, setState] = useState<{ handle: string; mine: Mine } | null>(null);
+  useEffect(() => {
+    if (!handle) return;
+    let alive = true;
+    Promise.all([myCircles().catch(() => []), fetchFollowing(handle).catch(() => [])]).then(([c, f]) => {
+      if (!alive) return;
+      const circles = (Array.isArray(c) ? c : []).filter((x) => x && typeof x.code === 'string').map((x) => ({ code: x.code, name: x.name || 'Your circle' }));
+      setState({ handle, mine: { circles, following: sizeOf(f) } });
+    });
+    return () => {
+      alive = false;
+    };
+  }, [handle]);
+  return handle && state?.handle === handle ? state.mine : null;
+}
+
+const CROWD_LABEL: Record<Crowd, string> = { circle: 'Circle', following: 'Following', everyone: 'Everyone' };
+
+/** /leaderboard?day=N&board=circle|following|everyone. Opens on your crowd. Daily boards, newest first, plus a board for every curated puzzle. */
 export function Leaderboard() {
   const auth = useAuth();
+  const run = useStreak();
+  const open = useUnlocks(run.played);
   const [params, setParams] = useSearchParams();
   const today = dayNo();
-  const asked = Number(params.get('day'));
-  const day = Number.isInteger(asked) && asked >= 1 && asked <= today ? asked : today;
+  const wanted = Number(params.get('day'));
+  const day = Number.isInteger(wanted) && wanted >= 1 && wanted <= today ? wanted : today;
   const game = getGameDef(dailyIdFor(day));
   const me = auth.profile?.handle;
-  const circle = params.get('board') === 'following' && !!me;
+  const mine = useMine(me);
+  const asked = askedCrowd(params.get('board'));
+  // Guests have no crowd. Signed in, the address wins; otherwise wait to know who your crowd is.
+  const crowd: Crowd | null = !me ? 'everyone' : (asked ?? (mine ? defaultCrowd(mine.circles.length, mine.following) : null));
+  const circle = mine?.circles[0];
+  // The circle board needs to know which circle. Until then it is still loading; with none, there is nothing to load.
+  const waitingForCircle = crowd === 'circle' && !mine;
+  const noCircle = crowd === 'circle' && !!mine && !circle;
 
-  const state = useBoard(`${day}|${me ?? ''}|${circle}`, async () => {
-    if (circle) return { rows: await fetchFollowingBoard(day), me: null };
-    const [rows, mine] = await Promise.all([fetchDailyBoard(day), me ? fetchDailyRank(day, me) : Promise.resolve(null)]);
-    return { rows, me: mine };
-  });
+  const state = useBoard(
+    `${day}|${me ?? ''}|${crowd ?? ''}|${circle?.code ?? ''}`,
+    !crowd || waitingForCircle || noCircle
+      ? null
+      : async () => {
+          if (crowd === 'circle' && circle) return { ...circleRows(await fetchCircleBoard(circle.code, day)), me: null };
+          if (crowd === 'following') return { rows: await fetchFollowingBoard(day), me: null };
+          const [rows, rank] = await Promise.all([fetchDailyBoard(day), me ? fetchDailyRank(day, me).catch(() => null) : Promise.resolve(null)]);
+          return { rows, me: rank };
+        },
+  );
 
   if (!auth.enabled) return <Navigate to="/play" replace />;
-  const setQuery = (d: number, following: boolean) => {
+  const setQuery = (d: number, board: Crowd | null) => {
     const q: Record<string, string> = {};
     if (d !== today) q.day = String(d);
-    if (following) q.board = 'following';
+    if (board) q.board = board;
     setParams(q, { replace: true });
   };
-  const go = (d: number) => setQuery(d, circle);
+  const go = (d: number) => setQuery(d, asked);
+  const hasCircle = !!circle;
+  // Circles are offered after the third daily. A player already in one always sees it, and so does a direct link.
+  const showCircle = hasCircle || open.circles || crowd === 'circle';
+  const options = CROWDS.filter((c) => c !== 'circle' || showCircle).map((c) => [c, CROWD_LABEL[c]] as const);
+  const playToday = (
+    <Link to={`/d/${today}`} className={styles.inline}>
+      Play today's daily
+    </Link>
+  );
 
   return (
     <div className={styles.page}>
-      <div className={styles.topLinks}>
-        <Link to="/circles" className={styles.findPlayers}>
-          Your circles
-        </Link>
-        <Link to="/players" className={styles.findPlayers}>
-          Find players
-        </Link>
-      </div>
-      <h1 className={styles.title}>
-        Leaderboard.
-        <br />
-        <span className={styles.sub}>Verified only.</span>
-      </h1>
+      <PageHeader title="Leaders" action={me && (hasCircle || open.circles) ? <TextLink to="/circles">Your circles</TextLink> : undefined} />
 
       <section className={styles.section} aria-labelledby="daily-title">
         <div className={styles.head}>
@@ -143,49 +200,64 @@ export function Leaderboard() {
           </div>
         </div>
 
-        {me && (
+        {me && crowd && (
           <div className={styles.switch}>
-            <Segmented
-              label="Board"
-              hideLabel
-              options={[
-                ['everyone', 'Everyone'],
-                ['following', 'Following'],
-              ]}
-              value={circle ? 'following' : 'everyone'}
-              onChange={(v) => setQuery(day, v === 'following')}
-            />
+            <Segmented label="Board" hideLabel options={options} value={crowd} onChange={(v) => setQuery(day, v)} />
           </div>
         )}
-        {state.status === 'loading' && <div className={styles.loading} aria-busy="true" />}
-        {state.status === 'error' && <p className={styles.empty}>The board did not load. Try again in a moment.</p>}
-        {state.status === 'ready' && (
-          <Board
-            rows={state.rows}
-            me={state.me}
-            myHandle={me}
-            empty={
-              circle ? (
-                <>
-                  Nobody you follow has a verified score here yet.{' '}
-                  <Link to="/players" className={styles.inline}>
-                    Find players
-                  </Link>
-                  .
-                </>
-              ) : day === today ? (
-                <>
-                  No verified scores yet today.{' '}
-                  <Link to={`/d/${today}`} className={styles.inline}>
-                    Be the first
-                  </Link>
-                  .
-                </>
-              ) : (
-                'Nobody was ranked on this day.'
-              )
-            }
-          />
+        {noCircle ? (
+          <p className={styles.empty}>
+            You are not in a circle yet. A circle is a private table for your people.{' '}
+            <Link to="/circles" className={styles.inline}>
+              Start one
+            </Link>
+            .
+          </p>
+        ) : (
+          <>
+            {state.status === 'loading' && <div className={styles.loading} aria-busy="true" />}
+            {state.status === 'error' && <p className={styles.empty}>The board did not load. Try again in a moment.</p>}
+            {state.status === 'ready' && (
+              <Board
+                rows={state.rows}
+                me={state.me}
+                myHandle={me}
+                empty={
+                  crowd === 'circle' ? (
+                    <>
+                      Nobody in {circle?.name ?? 'your circle'} has a verified score here yet.{day === today && <> {playToday}.</>}
+                    </>
+                  ) : crowd === 'following' ? (
+                    <>
+                      Nobody you follow has a verified score here yet.{' '}
+                      <Link to="/players" className={styles.inline}>
+                        Find players
+                      </Link>
+                      .
+                    </>
+                  ) : day === today ? (
+                    <>
+                      No verified scores yet today.{' '}
+                      <Link to={`/d/${today}`} className={styles.inline}>
+                        Be the first
+                      </Link>
+                      .
+                    </>
+                  ) : (
+                    'Nobody was ranked on this day.'
+                  )
+                }
+              />
+            )}
+            {crowd === 'circle' && circle && state.status === 'ready' && (
+              <p className={styles.meta}>
+                {state.waiting ? `${state.waiting} still to play. ` : ''}
+                <Link to={`/c/${circle.code}`} className={styles.inline}>
+                  Open {circle.name}
+                </Link>
+              </p>
+            )}
+          </>
         )}
         {day === today ? (
           <p className={styles.meta}>Today's totals stay hidden until midnight.</p>
@@ -199,21 +271,23 @@ export function Leaderboard() {
         <GuestNote next="/leaderboard" />
       </section>
 
-      <section className={styles.section} aria-labelledby="puzzles-title">
-        <h2 id="puzzles-title" className={styles.h2}>
-          Puzzle boards
-        </h2>
-        <ul className={styles.puzzles}>
-          {games.map((g) => (
-            <li key={g.id}>
-              <Link to={`/leaderboard/${g.id}`} className={styles.puzzleLink}>
-                <span className={styles.puzzleCat}>{g.category}</span>
-                {g.title}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
+      {games.length > 0 && (
+        <section className={styles.section} aria-labelledby="puzzles-title">
+          <h2 id="puzzles-title" className={styles.h2}>
+            Puzzle boards
+          </h2>
+          <ul className={styles.puzzles}>
+            {games.map((g) => (
+              <li key={g.id}>
+                <Link to={`/leaderboard/${g.id}`} className={styles.puzzleLink}>
+                  <span className={styles.puzzleCat}>{g.category}</span>
+                  {g.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }

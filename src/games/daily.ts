@@ -24,7 +24,7 @@ export function dailyInfo(n: number): DailyInfo | null {
 
 export const today = (): DailyInfo => dailyInfo(dayNo())!;
 
-const key = (n: number) => `fignda-daily-${n}`;
+const key = (n: number) => `gazecraft-daily-${n}`;
 
 export function loadDaily(n: number): SavedSession | null {
   return storage.getJSON<SavedSession>(key(n));

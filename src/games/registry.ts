@@ -5,6 +5,7 @@ import type { ComponentType } from 'react';
 import { Puzzle, type PuzzleProps, type Span } from '../components/Puzzle';
 import { check, isClose } from '../engine/check';
 import { buildHiddenWords, norm, type HiddenWordsPuzzle } from '../engine/hiddenWords';
+import { revealParts, type RevealPart } from '../engine/reveal';
 import type { GameDef, GameType } from './catalog';
 
 export type Evaluation =
@@ -15,6 +16,8 @@ export type Evaluation =
   | { kind: 'ignore' };
 
 export type AnswerInfo = { key: string; label: string; length: number };
+
+export type RevealItem = { key: string; label: string; span: Span; parts: RevealPart[] };
 
 export type GameModule<P> = {
   build(def: GameDef): P;
@@ -27,6 +30,8 @@ export type GameModule<P> = {
   hint(p: P, found: ReadonlySet<string>): { key: string; at: number } | null;
   /** Spans to shade for unfound answers after finish. */
   missed(p: P, found: ReadonlySet<string>): Span[];
+  /** After finish: each unfound answer and the words it hides in, in reading order. */
+  reveal(p: P, found: ReadonlySet<string>): RevealItem[];
   /** Sort key for unfound rows in the word list. */
   listOrder(p: P): (key: string) => number;
   Board: ComponentType<PuzzleProps>;
@@ -53,6 +58,10 @@ const hiddenWords: GameModule<HiddenWordsPuzzle<GameDef>> = {
     return next ? { key: next.key, at: next.spans[0]![0] } : null;
   },
   missed: (p, found) => p.answers.filter((a) => !found.has(a.key)).map((a) => a.spans[0]!),
+  reveal: (p, found) =>
+    p.answers
+      .filter((a) => !found.has(a.key))
+      .map((a) => ({ key: a.key, label: a.label, span: a.spans[0]!, parts: revealParts(p.chars, a.spans[0]!) })),
   listOrder(p) {
     const order = p.dict.map(norm);
     return (key) => order.indexOf(key);

@@ -71,15 +71,31 @@
   text-wrap: balance;
 }
 
+.holds {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
 .progress {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
 }
+.tally {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.left {
+  font-weight: 700;
+  color: var(--muted);
+}
 .stats {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   gap: var(--space-6);
   font-size: 14px;
   font-weight: 600;

@@ -1,0 +1,79 @@
+/* The first minute (SPEC section 6). One question per screen, in the same narrow column as sign in. */
+.screen {
+  composes: screen from './SignIn.module.css';
+}
+.head {
+  composes: head from './SignIn.module.css';
+}
+.title {
+  composes: title from './SignIn.module.css';
+  overflow-wrap: anywhere;
+}
+/* Moved to by script when a step changes, so a screen reader says the new heading. No ring for that. */
+.title:focus {
+  outline: none;
+}
+.lead {
+  composes: lead from './SignIn.module.css';
+}
+.full {
+  composes: full from './SignIn.module.css';
+}
+/* The ring and "Step 2 of 4". */
+.progress {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.character {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-5);
+}
+.choices {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+/* The question itself. Manrope: it is read, and it names the group for a screen reader. */
+.question {
+  padding: 0;
+  margin-bottom: var(--space-4);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  color: var(--fg);
+}
+.choice {
+  width: 100%;
+  height: 52px;
+}
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-3) var(--space-6);
+  font-size: 14px;
+}
+/* Skip is small text. Give it a full tap target on a phone. */
+.links > * {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+}
+.aside {
+  font-weight: 500;
+  color: var(--subtle);
+  overflow-wrap: anywhere;
+}

@@ -2,7 +2,7 @@ import { excerptRange } from '../engine/excerpt';
 import { answersFrom } from '../engine/cards';
 import { buildHiddenWords } from '../engine/hiddenWords';
 import { rangeText, sentences, toChars } from '../engine/text';
-import { LogoMark } from './Logo';
+import { Logo } from './Logo';
 import styles from './OgCard.module.css';
 
 export type OgInput =
@@ -56,8 +56,7 @@ function Brand({ kicker }: { kicker?: string }) {
   return (
     <div className={styles.top}>
       <div className={styles.brand}>
-        <LogoMark size={56} />
-        <span className={styles.word}>fignda</span>
+        <Logo height={46} />
       </div>
       {kicker && <span className={styles.kicker}>{kicker}</span>}
     </div>

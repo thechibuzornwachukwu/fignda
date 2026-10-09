@@ -1,0 +1,19 @@
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-5);
+  min-width: 0;
+}
+.title {
+  composes: resultTitle from '../styles/type.module.css';
+  margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.action {
+  flex: none;
+  display: flex;
+  align-items: center;
+}

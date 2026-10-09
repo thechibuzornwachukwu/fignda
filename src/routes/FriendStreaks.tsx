@@ -37,9 +37,9 @@ export function useFriendStreaks(enabled: boolean) {
 
 /**
  * /players, signed in: streaks you share with one other player. Up to 5.
- * Start one with a link (works for friends who are not on Fignda yet) or from a player's profile.
+ * Start one with a link (works for friends who are not on Gazecraft yet) or from a player's profile.
  */
-export function FriendStreaks() {
+export function FriendStreaks({ quiet = false }: { /** Not unlocked yet: show nothing unless the player is already in one or has been asked. */ quiet?: boolean }) {
   const { rows, reload } = useFriendStreaks(true);
   const [busy, setBusy] = useState('');
   const [note, setNote] = useState('');
@@ -78,10 +78,10 @@ export function FriendStreaks() {
     const code = await myStreakLink().catch(() => null);
     if (!code) return setNote('We could not make your link. Try again.');
     const url = `${window.location.origin}/s/${code}`;
-    const text = 'Keep a daily streak with me on Fignda. We both play, it grows.';
+    const text = 'Keep a daily streak with me on Gazecraft. We both play, it grows.';
     if (navigator.share && window.matchMedia('(pointer: coarse)').matches) {
       try {
-        await navigator.share({ title: 'Fignda', text, url });
+        await navigator.share({ title: 'Gazecraft', text, url });
         return;
       } catch {
         /* closed the sheet: fall back to copying */
@@ -90,6 +90,7 @@ export function FriendStreaks() {
     setNote((await copyText(`${text} ${url}`)) ? 'Link copied. Send it to a friend. Their yes starts the streak.' : url);
   };
 
+  if (quiet && !rows?.length) return null;
   return (
     <section id="friend-streaks" className={styles.section} aria-labelledby="friend-streaks-title">
       <div className={styles.sectionHead}>

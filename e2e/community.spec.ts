@@ -8,8 +8,13 @@ test('players page: search by handle, wildcards find nothing, lists render', asy
   await other.close();
 
   await page.goto('/players');
-  await expect(page.getByRole('heading', { level: 1 })).toContainText('Players.');
-  await expect(page.getByRole('heading', { name: 'Longest streaks' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Players');
+  // One section leads. The 4 top lists are one section with a switch.
+  await expect(page.getByRole('region', { name: 'People to follow' })).toBeVisible();
+  const top = page.getByRole('region', { name: 'Top players' });
+  await expect(top.getByRole('radio', { name: 'Streaks' })).toHaveAttribute('aria-checked', 'true');
+  await top.getByRole('radio', { name: 'New' }).click();
+  await expect(top.getByRole('listitem').first()).toBeVisible();
   await page.getByLabel('Search by handle').fill(handle.slice(0, 7));
   await expect(page.getByRole('link', { name: new RegExp(`@${handle}`) })).toBeVisible();
   await page.getByLabel('Search by handle').fill('%');
@@ -28,8 +33,12 @@ test('follow, counts, lists, remove a follower, following board', async ({ page,
   await expect(page.getByRole('link', { name: /1 follower$/ })).toBeVisible();
   await expect(page.locator('#followers').getByRole('link', { name: new RegExp(`@${a}`) })).toBeVisible();
 
-  // The Following board is there for signed-in players.
+  // The board opens on your crowd: A follows someone and has no circle, so it opens on Following.
   await page.goto('/leaderboard');
+  await expect(page.getByRole('radio', { name: 'Following' })).toHaveAttribute('aria-checked', 'true');
+  // Everyone is one tap away, and the choice is kept in the address.
+  await page.getByRole('radio', { name: 'Everyone' }).click();
+  await expect(page).toHaveURL(/board=everyone/);
   await page.getByRole('radio', { name: 'Following' }).click();
   await expect(page).toHaveURL(/board=following/);
 
@@ -108,4 +117,33 @@ test('guests see people to follow and are asked to sign in', async ({ page }) =>
   await expect(suggested.getByRole('listitem').first()).toBeVisible();
   await expect(suggested.getByRole('button')).toHaveCount(0);
   await expect(suggested.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/signin?next=%2Fplayers');
+});
+
+test('your records show on your own page only, and a new player sees a calm line', async ({ page, browser }) => {
+  const handle = await newPlayer(page, 'Recorda');
+  await page.goto(`/u/${handle}`);
+  // No plays yet: no records block, no level.
+  await expect(page.getByRole('heading', { name: 'Your run starts with one puzzle.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your records' })).toHaveCount(0);
+
+  // Records live in this browser. Unreadable ones are dropped, never shown.
+  await page.evaluate(() => localStorage.setItem('gazecraft-records', '{not json'));
+  await page.goto(`/u/${handle}`);
+  await expect(page.getByText('undefined')).toHaveCount(0);
+
+  const other = await browser.newPage();
+  await other.addInitScript(() => localStorage.setItem('gazecraft-records', JSON.stringify({ clean: { Bible: 75 }, daily: 7, long: null })));
+  await other.goto(`/u/${handle}`);
+  await expect(other.getByRole('heading', { name: 'Your records' })).toHaveCount(0);
+  await other.close();
+});
+
+test('the owner page is not found for anyone who is not an owner', async ({ page }) => {
+  await page.goto('/owner/puzzles');
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole('heading', { name: 'Hidden puzzles' })).toHaveCount(0);
+
+  await newPlayer(page, 'Notowner');
+  await page.goto('/owner/puzzles');
+  await expect(page).toHaveURL(/\/$/);
 });

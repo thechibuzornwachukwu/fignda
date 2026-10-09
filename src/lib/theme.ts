@@ -2,7 +2,7 @@ import { storage } from './storage';
 
 export type Theme = 'dark' | 'light';
 
-export const THEME_KEY = 'fignda-theme';
+export const THEME_KEY = 'gazecraft-theme';
 
 const isTheme = (v: unknown): v is Theme => v === 'dark' || v === 'light';
 

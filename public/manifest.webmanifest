@@ -1,6 +1,6 @@
 {
-  "name": "Fignda",
-  "short_name": "Fignda",
+  "name": "Gazecraft",
+  "short_name": "Gazecraft",
   "description": "Find words hidden across letters, spaces and punctuation. A new puzzle every day.",
   "start_url": "/play",
   "scope": "/",

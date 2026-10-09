@@ -1,6 +1,6 @@
 import { useState, type KeyboardEvent } from 'react';
 import { Check, Dices, Palette, Pencil, Scissors, Shirt, Smile, Undo2, X, type LucideIcon } from 'lucide-react';
-import { avatarCode, avatarFor, parseAvatar, PARTS, surprise, type Avatar as Parts, type PartKey } from '../avatar/draw';
+import { avatarCode, avatarFor, orderFor, parseAvatar, PARTS, surprise, type Avatar as Parts, type PartKey } from '../avatar/draw';
 import { MOODS } from '../avatar/parts/face';
 import { HAIR_FAMILIES, HAIR_STYLES, type HairFamily } from '../avatar/parts/hair';
 import { BACKS, HAIR_COLOURS, SKINS } from '../avatar/shapes';
@@ -9,7 +9,9 @@ import { Avatar } from '../components/Avatar';
 import { Button } from '../components/Button';
 import { Dialog } from '../components/Dialog';
 import { Icon } from '../components/Icon';
-import { saveAvatar } from '../lib/api';
+import { saveAvatar, saveLook } from '../lib/api';
+import { keepLook, loadLook } from '../lib/firstMinute';
+import { LOOK_CHOICES, type LookChoice } from '../lib/onboarding';
 import styles from './AvatarDesigner.module.css';
 
 /**
@@ -41,9 +43,51 @@ const MOOD_SETS = MOODS.map((m) => ({ name: m.name as string, eyes: partOf('eyes
 
 type Props = { id: string; handle: string; code: string | null | undefined; onSaved: () => void };
 
+/** The parts whose choices are put in order by the answer to "Who are we dressing?". Nothing is ever left out. */
+const ORDERED: readonly PartKey[] = ['hair', 'outfit'];
+
+type EditorProps = {
+  /** What a starter is drawn from when there is no design yet: a handle, or a guest's seed. */
+  seed: string;
+  code: string | null | undefined;
+  /** The answer to the outfit question, or null when there is none. */
+  look: LookChoice | null;
+  /** Keep the design. Resolves false when it could not be saved. */
+  onSave: (code: string) => Promise<boolean>;
+  /** Keep the answer. Resolves false when it could not be saved. */
+  onLook: (look: LookChoice) => Promise<boolean>;
+  onClose: () => void;
+};
+
+/**
+ * The one character editor, in its dialog. Settings opens it for a signed in player; the first minute opens it
+ * for a guest, whose design is kept in the browser. Where the design goes is the caller's business.
+ */
+export function CharacterEditor({ open, ...editor }: EditorProps & { open: boolean }) {
+  return (
+    <Dialog open={open} onClose={editor.onClose} label="Edit your character" variant="editor">
+      {open && <Editor {...editor} />}
+    </Dialog>
+  );
+}
+
 /** Settings: your character as it is now, and the way into the editor. */
 export function AvatarDesigner({ id, handle, code, onSaved }: Props) {
   const [open, setOpen] = useState(false);
+  // This browser's copy, filled from the account when the profile loads. Null: never answered.
+  const [look, setLook] = useState<LookChoice | null>(loadLook);
+  const save = async (next: string) => {
+    const ok = await saveAvatar(id, next).catch(() => false);
+    if (!ok) return false;
+    setAvatarCode(handle, next);
+    onSaved();
+    return true;
+  };
+  const chooseLook = async (next: LookChoice) => {
+    setLook(next);
+    keepLook(next);
+    return saveLook(id, next).catch(() => false);
+  };
   return (
     <div className={styles.summary}>
       <Avatar handle={handle} size={88} />
@@ -56,9 +100,7 @@ export function AvatarDesigner({ id, handle, code, onSaved }: Props) {
           </Button>
         </div>
       </div>
-      <Dialog open={open} onClose={() => setOpen(false)} label="Edit your character" variant="editor">
-        {open && <Editor id={id} handle={handle} code={code} onSaved={onSaved} onClose={() => setOpen(false)} />}
-      </Dialog>
+      <CharacterEditor open={open} seed={handle} code={code} look={look} onSave={save} onLook={chooseLook} onClose={() => setOpen(false)} />
     </div>
   );
 }
@@ -68,8 +110,8 @@ export function AvatarDesigner({ id, handle, code, onSaved }: Props) {
  * thing that scrolls: the page behind is locked and nothing moves sideways.
  * Saved as a short code, never an image.
  */
-function Editor({ id, handle, code, onSaved, onClose }: Props & { onClose: () => void }) {
-  const [parts, setParts] = useState<Parts>(() => (code ? parseAvatar(code) : avatarFor(handle)));
+function Editor({ seed, code, look, onSave, onLook, onClose }: EditorProps) {
+  const [parts, setParts] = useState<Parts>(() => (code ? parseAvatar(code) : avatarFor(seed)));
   const [saved, setSaved] = useState(code ? avatarCode(parseAvatar(code)) : '');
   const [before, setBefore] = useState<Parts | null>(null);
   const [note, setNote] = useState('');
@@ -87,7 +129,7 @@ function Editor({ id, handle, code, onSaved, onClose }: Props & { onClose: () =>
   };
   // A fresh take on the same person (see `surprise`), with one step back in case the old one was better.
   const shuffle = () => {
-    const next = surprise(parts);
+    const next = surprise(parts, Math.random, look);
     setNote('');
     setBefore(parts);
     setParts(next);
@@ -102,14 +144,17 @@ function Editor({ id, handle, code, onSaved, onClose }: Props & { onClose: () =>
   const save = async () => {
     setBusy(true);
     const next = avatarCode(parts);
-    const ok = await saveAvatar(id, next).catch(() => false);
+    const ok = await onSave(next).catch(() => false);
     setBusy(false);
     if (!ok) return setNote('Could not save. Try again.');
     setSaved(next);
     setBefore(null);
-    setAvatarCode(handle, next);
     setNote('Saved. This is you on every board.');
-    onSaved();
+  };
+  const dress = async (next: LookChoice) => {
+    setNote('');
+    const ok = await onLook(next).catch(() => false);
+    setNote(ok ? 'Saved. Your choices are in a new order.' : 'Could not save. Try again.');
   };
 
   // Left and right arrows move between tabs, as in any tab list.
@@ -190,10 +235,28 @@ function Editor({ id, handle, code, onSaved, onClose }: Props & { onClose: () =>
               </div>
             </section>
           )}
+          {tab === 'wear' && (
+            <section className={styles.group} aria-label="Who are we dressing?">
+              <h3 className={styles.groupTitle}>
+                Who are we dressing?
+                <span className={styles.chosen}>Only you see this</span>
+              </h3>
+              <div className={styles.chips}>
+                {LOOK_CHOICES.map((c) => (
+                  <button key={c.value} type="button" className={styles.chip} aria-pressed={c.value === look} onClick={() => void dress(c.value)}>
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+              <p className={styles.help}>So we pick hair and outfits that suit you. Change it any time.</p>
+            </section>
+          )}
           {current.parts.map((key) => {
             const part = partOf(key);
             const swatches = SWATCHES[key];
-            const shown = part.names.map((name, i) => ({ name, i })).filter(({ i }) => key !== 'hair' || HAIR_STYLES[i]!.family === family);
+            // The answer to the outfit question puts the choices that suit it first. Every choice is still here.
+            const order = ORDERED.includes(key) ? orderFor(key, look) : part.names.map((_, i) => i);
+            const shown = order.map((i) => ({ name: part.names[i]!, i })).filter(({ i }) => key !== 'hair' || HAIR_STYLES[i]!.family === family);
             return (
               <section key={key} className={styles.group} aria-label={part.title}>
                 <h3 className={styles.groupTitle}>

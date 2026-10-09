@@ -25,12 +25,12 @@ describe('text result', () => {
 
   it('a puzzle prints the total, rows of 10, and the link last', () => {
     const t = shareText({ title: 'Books of the Bible', found: 12, total: 30, secs: 161, score: 1420, marks: Array(12).fill(F), url: 'https://x.test/play/bible?vs=ada' });
-    expect(t.split('\n')).toEqual(['Fignda · Books of the Bible', '12/30 · 2:41 · 1,420', F.repeat(10), F.repeat(2), 'Beat it: https://x.test/play/bible?vs=ada']);
+    expect(t.split('\n')).toEqual(['Gazecraft · Books of the Bible', '12/30 · 2:41 · 1,420', F.repeat(10), F.repeat(2), 'Beat it: https://x.test/play/bible?vs=ada']);
   });
 
   it('a daily never prints the total or anything about the words', () => {
     const t = shareText({ title: 'Nigerian names', daily: 281, found: 18, total: 26, secs: 95, score: 900, marks: [F, M], url: 'https://x.test/d/281' });
-    expect(t).toContain('Fignda Daily #281\n18 found · 1:35 · 900');
+    expect(t).toContain('Gazecraft Daily #281\n18 found · 1:35 · 900');
     expect(t).not.toMatch(/26|Nigerian|names/);
     expect(t).not.toMatch(/[!—]/);
   });

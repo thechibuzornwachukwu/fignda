@@ -7,7 +7,7 @@ self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim(
 
 async function showReminder() {
   // Used only if the API cannot be reached.
-  let line = { title: 'Fignda', body: "Today's puzzle is up.", url: '/play' };
+  let line = { title: 'Gazecraft', body: "Today's puzzle is up.", url: '/play' };
   try {
     const sub = await self.registration.pushManager.getSubscription();
     const res = await fetch('/api/push/line', {

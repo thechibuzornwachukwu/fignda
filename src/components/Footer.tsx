@@ -15,7 +15,7 @@ export function Footer() {
           <Link to="/privacy" className={styles.metaLink}>
             Privacy
           </Link>
-          <span>© 2026 Fignda</span>
+          <span>© 2026 Gazecraft</span>
         </div>
       </div>
     </footer>

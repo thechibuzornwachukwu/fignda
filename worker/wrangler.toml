@@ -23,6 +23,12 @@ APP_ORIGINS = "https://fignda.pages.dev,http://localhost:5173,http://localhost:4
 # credit. Gemini is 20 a day. Groq joins when its key is stored. Workers AI is left out: its free models
 # could not hide words across word boundaries.
 AI_PROVIDER = "openrouter,gemini,groq"
+# The safety check on player-made and machine-made puzzles (worker/src/safety.ts). Llama Guard runs on the
+# [ai] binding above, inside the same free daily allowance. When it cannot answer, the AI_PROVIDER list is asked.
+SAFETY_MODEL = "@cf/meta/llama-guard-3-8b"
+# Owner power: who may list, restore and remove hidden puzzles (/api/owner/*). Supabase user ids (the uuid in
+# Authentication, Users), comma separated. Empty: nobody. Ids are not secrets; the session token is the proof.
+OWNER_USER_IDS = ""
 # Daily reminders (web push). Off until a key pair exists: run `npm run push:keys`, paste the public key and
 # subject here, and store the private one with `npx wrangler secret put VAPID_PRIVATE_KEY --config worker/wrangler.toml`.
 # VAPID_PUBLIC_KEY = ""

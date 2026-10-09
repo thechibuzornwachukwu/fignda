@@ -51,7 +51,7 @@ export function HeroArt() {
     <div
       className={styles.art}
       role="img"
-      aria-label={`A Fignda puzzle in play. ${PEEK_TEAM.length} players have found ${peekFound.length} of ${peekAnswers.length} hidden ${PEEK.noun}.`}
+      aria-label={`A Gazecraft puzzle in play. ${PEEK_TEAM.length} players have found ${peekFound.length} of ${peekAnswers.length} hidden ${PEEK.noun}.`}
     >
       <div className={styles.cast}>
         {PEEK_TEAM.map((p, i) => (

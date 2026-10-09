@@ -4,8 +4,19 @@ import { fetchDailyDays, localDailies } from './api';
 import { useAuth } from './auth';
 import { longestRun } from './profileStats';
 import { dailyStats } from './streak';
+import { daysThisMonth, weekParts, type DayState } from './week';
 
-export type Streak = { streak: number; best: number; playedToday: boolean };
+export type Streak = {
+  streak: number;
+  best: number;
+  playedToday: boolean;
+  /** Dailies ever played. 0 means there is nothing to show yet. */
+  played: number;
+  /** The last 7 UTC days, oldest first. */
+  week: DayState[];
+  /** Dailies played in this UTC month. */
+  month: number;
+};
 
 /**
  * The player's own run of dailies: what is finished in this browser, plus their stored plays when signed in.
@@ -30,8 +41,16 @@ export function useStreak(tick: unknown = 0): Streak {
   return useMemo(() => {
     const today = dayNo();
     const days = new Set([...localDailies(400).map((d) => d.day_no), ...(signedIn ? server : [])]);
-    const { streak } = dailyStats(days, today);
-    return { streak, best: longestRun(days), playedToday: days.has(today) };
+    const { streak, played } = dailyStats(days, today);
+    return {
+      streak,
+      best: longestRun(days),
+      playedToday: days.has(today),
+      played,
+      // Rest days are the server's to grant. Until it does, none are passed.
+      week: weekParts(days, today),
+      month: daysThisMonth(days, today),
+    };
     // `tick` is the reason to recount.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [server, signedIn, tick]);

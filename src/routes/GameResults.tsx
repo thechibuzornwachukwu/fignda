@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
+import { clampStars, Stars } from '../components/Stars';
 import { formatTime } from '../engine/time';
 import styles from './GameResults.module.css';
 
@@ -25,13 +26,29 @@ type Props = {
   streak?: string;
   /** "Only 8% found Habakkuk." */
   rare?: string;
+  /** Stars for a catalogue puzzle played alone. 0 or missing: no stars shown. */
+  stars?: number;
+  /** Said beside the stars when this play raised them. */
+  starsUp?: string;
+  /** Skill lines, rarest first: clean read, no-hint perfect, deep find, long word. The caller sends 2 at most. */
+  skills?: readonly string[];
+  /** One line per personal record this play beat. */
+  records?: readonly string[];
+  /** After today's daily: "Today hid 11. Most days hide 8." */
+  day?: string;
+  /** After today's daily: one calm line that the day is done. */
+  done?: string;
   /** Extra actions under the result (the reminder ask). */
   children?: ReactNode;
 };
 
-export function GameResults({ title, line, score, found, total, secs, canReplay, onReplay, onShare, onText, boardPath, guest, streak, rare, children }: Props) {
+/** Lines worth a paragraph: no blanks, none twice. */
+const lines = (l?: readonly string[]) => [...new Set((l ?? []).filter((x) => typeof x === 'string' && x.trim() !== ''))];
+
+export function GameResults({ title, line, score, found, total, secs, canReplay, onReplay, onShare, onText, boardPath, guest, streak, rare, stars, starsUp, skills, records, day, done, children }: Props) {
   const { pathname } = useLocation();
   const [note, setNote] = useState('');
+  const earned = clampStars(stars);
   return (
     <section className={styles.results} aria-labelledby="results-title">
       <div className={styles.head}>
@@ -49,8 +66,26 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
             </>
           )}
         </p>
+        {earned > 0 && (
+          <p className={styles.stars}>
+            <Stars value={earned} size={20} pop={!!starsUp} />
+            {starsUp && <span>{starsUp}</span>}
+          </p>
+        )}
+        {lines(skills).map((l) => (
+          <p key={l} className={styles.streak}>
+            {l}
+          </p>
+        ))}
+        {lines(records).map((l) => (
+          <p key={l} className={styles.streak}>
+            {l}
+          </p>
+        ))}
         {rare && <p className={styles.streak}>{rare}</p>}
+        {day && <p className={styles.streak}>{day}</p>}
         {streak && <p className={styles.streak}>{streak}</p>}
+        {done && <p className={styles.streak}>{done}</p>}
       </div>
       <div className={styles.row}>
         <dl className={styles.stats}>
@@ -94,10 +129,11 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
       {guest && (
         <div className={styles.guest}>
           <span className={styles.guestText}>
-            Playing as a guest. Sign in to keep this score, your streak and your name on shared cards.
+            You are playing as a guest. Sign in and this score goes with you, with your streak and your name on shared cards.
           </span>
-          <Link className={styles.signin} to={`/signin?next=${encodeURIComponent(pathname)}`}>
-            Sign in
+          {/* The first time sign in is offered (SPEC section 6, The first minute). /welcome sends an existing player straight on. */}
+          <Link className={styles.signin} to={`/welcome?from=${encodeURIComponent(pathname)}`}>
+            Keep this score
           </Link>
         </div>
       )}

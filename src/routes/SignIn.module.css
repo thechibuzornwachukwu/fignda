@@ -7,6 +7,11 @@
   flex-direction: column;
   gap: var(--space-8);
 }
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
 .head {
   display: flex;
   flex-direction: column;

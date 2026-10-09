@@ -4,6 +4,7 @@
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import * as copyDefault from '../copy';
 import { score } from '../engine/score';
+import { cleanReadOf } from '../engine/skill';
 import { durationMs, scrollToTop } from '../lib/media';
 import { chime } from '../lib/sound';
 import { loadDaily, saveDaily } from './daily';
@@ -19,6 +20,8 @@ export type SavedSession = {
   hints: number;
   /** Wrong picks. Only the daily counts them. */
   misses: number;
+  /** Wrong picks in any game. Never scored: a clean read has none. */
+  wrongs: number;
   hintLi: number;
   streak: number;
   lastFindAt: number | null;
@@ -41,6 +44,7 @@ export const newSession = (now: number): Session => ({
   hinted: [],
   hints: 0,
   misses: 0,
+  wrongs: 0,
   hintLi: -1,
   streak: 0,
   lastFindAt: null,
@@ -89,8 +93,8 @@ export function applyPick(s: Session, ev: Evaluation, { now, total, daily, copy 
       return { ...s, msg: copy.pick('close') };
     case 'wrong':
       return daily
-        ? { ...s, streak: 0, misses: s.misses + 1, msg: copy.pick('wrongDaily') }
-        : { ...s, streak: 0, msg: copy.pick('wrong') };
+        ? { ...s, streak: 0, misses: s.misses + 1, wrongs: s.wrongs + 1, msg: copy.pick('wrongDaily') }
+        : { ...s, streak: 0, wrongs: s.wrongs + 1, msg: copy.pick('wrong') };
     case 'ignore':
       return { ...s, msg: '' };
   }
@@ -137,11 +141,17 @@ export function scoreOf(s: SavedSession, total: number, daily: boolean, secs: nu
   return score({ found: s.found.length, total, hints: s.hints, misses: daily ? s.misses : 0, secs });
 }
 
+/** Every word found by you, with no wrong pick and no hint. The rule itself lives in the engine. */
+export function isCleanRead(s: SavedSession, total: number): boolean {
+  return isFinished(s) && cleanReadOf({ found: s.found, wrongs: s.wrongs, hints: s.hints }, total);
+}
+
 /** Keep only entries that still match this puzzle's answers. */
 function sanitize(saved: SavedSession, keys: ReadonlySet<string>): Session {
   const seen = new Set<string>();
   const found = (saved.found ?? []).filter((f) => keys.has(f.key) && !seen.has(f.key) && seen.add(f.key));
-  return { ...newSession(Date.now()), ...saved, found, msg: '' };
+  // A daily saved before wrong picks were counted everywhere: its misses are its wrong picks.
+  return { ...newSession(Date.now()), ...saved, wrongs: saved.wrongs ?? saved.misses ?? 0, found, msg: '' };
 }
 
 /** Whether a pick goes in the play log. A word picked twice is not a second find, and the server refuses a
@@ -158,19 +168,23 @@ function withLog(next: Session, cur: Session, add: (l: PlayLog) => PlayLog): Ses
 type Options<P> = {
   mod: GameModule<P>;
   puzzle: P;
-  /** Daily number. Persists every change under `fignda-daily-N`. */
+  /** Daily number. Persists every change under `gazecraft-daily-N`. */
   dailyN?: number;
   /** Called just before a find is committed (WordList FLIP capture). */
   beforeHit?: (key: string) => void;
   /** Called after your own find, with its span (rooms send it to teammates). */
   onHit?: (a: number, b: number) => void;
+  /** Called once, from the pick or the button that ended the game. Never for a finished daily loaded again. */
+  onFinish?: (s: Session) => void;
   copy?: Copy;
 };
 
-export function useGameSession<P>({ mod, puzzle, dailyN, beforeHit, onHit, copy = copyDefault }: Options<P>) {
+export function useGameSession<P>({ mod, puzzle, dailyN, beforeHit, onHit, onFinish, copy = copyDefault }: Options<P>) {
   const onHitRef = useRef(onHit);
+  const onFinishRef = useRef(onFinish);
   useLayoutEffect(() => {
     onHitRef.current = onHit;
+    onFinishRef.current = onFinish;
   });
   const daily = dailyN != null;
   const answers = mod.answers(puzzle);
@@ -217,7 +231,10 @@ export function useGameSession<P>({ mod, puzzle, dailyN, beforeHit, onHit, copy 
       : picked;
     commit(next);
     if (ev.kind === 'hit') onHitRef.current?.(a, b);
-    if (isFinished(next)) window.setTimeout(scrollToTop, durationMs('--dur-slower'));
+    if (isFinished(next)) {
+      onFinishRef.current?.(next);
+      window.setTimeout(scrollToTop, durationMs('--dur-slower'));
+    }
   };
 
   /** A teammate's span. Only a real, new hit lands. */
@@ -231,7 +248,10 @@ export function useGameSession<P>({ mod, puzzle, dailyN, beforeHit, onHit, copy 
     chime();
     const next = applyTeamFind(cur, ev, { now: Date.now(), total, copy, name });
     commit(next);
-    if (isFinished(next)) window.setTimeout(scrollToTop, durationMs('--dur-slower'));
+    if (isFinished(next)) {
+      onFinishRef.current?.(next);
+      window.setTimeout(scrollToTop, durationMs('--dur-slower'));
+    }
   };
 
   const say = (msg: string) => commit({ ...ref.current, msg });
@@ -244,7 +264,10 @@ export function useGameSession<P>({ mod, puzzle, dailyN, beforeHit, onHit, copy 
   };
 
   const finish = () => {
-    commit(applyFinish(ref.current, Date.now(), total, copy));
+    const cur = ref.current;
+    const next = applyFinish(cur, Date.now(), total, copy);
+    commit(next);
+    if (next !== cur) onFinishRef.current?.(next);
     scrollToTop();
   };
 

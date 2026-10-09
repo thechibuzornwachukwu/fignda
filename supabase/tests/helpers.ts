@@ -14,7 +14,7 @@ export const admin = (): SupabaseClient => createClient(URL, SERVICE, opts);
 export type TestUser = { id: string; email: string; client: SupabaseClient; token: string };
 
 export async function makeUser(tag = 'u'): Promise<TestUser> {
-  const email = `${tag}-${randomUUID().slice(0, 8)}@test.fignda.local`;
+  const email = `${tag}-${randomUUID().slice(0, 8)}@test.gazecraft.local`;
   const password = `pw-${randomUUID()}`;
   const { data, error } = await admin().auth.admin.createUser({ email, password, email_confirm: true });
   if (error) throw error;

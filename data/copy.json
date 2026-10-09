@@ -92,6 +92,37 @@
     "Nothing hiding there yet. Try a different angle.",
     "Our monocle fogged up. Give it another try."
   ],
+  "genLimit": [
+    "That is enough puzzles for now. Try again in {t}.",
+    "You have made plenty for now. Try again in {t}."
+  ],
+  "genOffline": [
+    "You are offline. Check your connection, then try again.",
+    "No connection. Your words are still here. Try again when you are back."
+  ],
+  "waiting": [
+    "Getting it ready.",
+    "One moment.",
+    "Still working on it.",
+    "Nearly there.",
+    "This one takes a little longer.",
+    "Hang on. It is coming.",
+    "Putting the last pieces in place.",
+    "Thanks for waiting.",
+    "Not stuck. Just careful."
+  ],
+  "waitingMake": [
+    "Making your puzzle.",
+    "Making your puzzle. This can take a few minutes.",
+    "Hiding the words. Keep this page open.",
+    "Writing the paragraph. Take a breath.",
+    "Tucking words between other words.",
+    "Checking every word is really hidden.",
+    "Still making your puzzle. Keep this page open.",
+    "Good hiding places take a moment.",
+    "Not stuck. Just hiding things carefully.",
+    "Your puzzle is on its way."
+  ],
   "reveal": [
     "{w} was hiding there."
   ],
@@ -109,8 +140,8 @@
     "Today's daily is waiting for you."
   ],
   "remindStreak": [
-    "{n} days in a row. Keep it going today.",
-    "Your {n} day run is waiting on today's puzzle.",
+    "{n} days so far. Today's puzzle is up.",
+    "Today's puzzle is ready. You are on {n} days.",
     "{n} days so far. Today is next."
   ],
   "remindFriend": [
@@ -118,8 +149,8 @@
     "{name} found theirs. Go find yours."
   ],
   "streakKeep": [
-    "{n} days in a row. Play today to keep it.",
-    "Your {n} day run needs today."
+    "{n} days so far. Today's puzzle is ready.",
+    "You are on {n} days. Today's is up."
   ],
   "streakDay": [
     "{n} days in a row.",
@@ -135,12 +166,118 @@
   "streakBack": [
     "Day 1 of a new run. Your best is {n}. Go and beat it."
   ],
+  "cleanRead": [
+    "A clean read. No hints, no wrong picks.",
+    "Clean read. Nothing hinted, nothing wrong."
+  ],
+  "readPast": [
+    "Your picks ran across {n} of these.",
+    "You went over {n} of these and kept going."
+  ],
+  "doneToday": [
+    "That is today done. See you tomorrow.",
+    "Done for today. The next one lands at midnight.",
+    "Today's puzzle is finished. Go and enjoy your day."
+  ],
+  "leftCount": [
+    "{n} left"
+  ],
+  "weekDays": [
+    "Played {n} of the last 7 days."
+  ],
+  "runMonth": [
+    "Current run: {n}. Days this month: {m}."
+  ],
+  "shelfDone": [
+    "{n} of {t} finished"
+  ],
+  "journeyCount": [
+    "{n} of {t} stops"
+  ],
+  "journeyLocked": [
+    "Finish {title} to open this."
+  ],
+  "journeyDone": [
+    "Every stop on the path is done. Play any one again for more stars.",
+    "The whole path, walked. Any stop can be played again."
+  ],
+  "journeyEmpty": [
+    "No stops on the path yet. Every puzzle is in All games."
+  ],
+  "chapterDone": [
+    "{c} is cleared.",
+    "Every stop in {c}, done.",
+    "{c}: cleared, start to end."
+  ],
+  "starsOf": [
+    "{n} of 3 stars"
+  ],
+  "levelUp": [
+    "Level {n}.",
+    "You reached level {n}."
+  ],
   "rareFind": [
     "Only {p}% found {w}. You did.",
     "{w}: found by {p}% of players. And you."
   ],
+  "rarestFind": [
+    "Your rarest find: {w}. {p}% of players found it.",
+    "{w} was your rarest find. {p}% found it."
+  ],
+  "starsUp": [
+    "New best here: {n} of 3 stars.",
+    "{n} of 3 stars. Your best on this one."
+  ],
+  "skillNoHint": [
+    "Every word, and no hints.",
+    "All found with no hints."
+  ],
+  "skillDeep": [
+    "{w} ran across {n} words. You followed it.",
+    "A deep one. {w}, across {n} words."
+  ],
+  "skillLong": [
+    "{w}. {n} letters, and you saw it.",
+    "A long one. {w}, {n} letters."
+  ],
+  "dayHid": [
+    "Today hid {n}. Most days hide {m}."
+  ],
+  "dayHidSame": [
+    "Today hid {n}. That is a usual day."
+  ],
+  "todayLong": [
+    "Today hides a long one."
+  ],
+  "todayDeep": [
+    "Today hides a deep one."
+  ],
+  "recordClean": [
+    "Your fastest clean read in {w}: {t}.",
+    "{t}. Your fastest clean read in {w}."
+  ],
+  "recordDaily": [
+    "{n} found. Your most in a daily.",
+    "Your most in a daily: {n} found."
+  ],
+  "recordLong": [
+    "{w}. Your longest find yet, {n} letters.",
+    "Your longest find yet: {w}, {n} letters."
+  ],
   "inviteGame": [
     "{name} is in a room and wants you in. Join now.",
     "{name} wants to play together. Jump in."
+  ],
+  "reportDone": [
+    "Thanks. We will take a look.",
+    "Noted. We will take a look."
+  ],
+  "reportAgain": [
+    "You have reported this one already. It is noted.",
+    "Already noted. Thanks for telling us."
+  ],
+  "reportFailed": [
+    "That did not send. Try again in a moment.",
+    "Could not send that. Try again in a moment."
   ]
 }

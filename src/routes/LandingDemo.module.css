@@ -32,3 +32,31 @@
   margin-top: var(--space-5);
   justify-content: space-between;
 }
+
+/* The sentence, and the hand that points at the first hidden word (first visit on a phone). */
+.stage {
+  position: relative;
+}
+/* Its fingertip is placed on a letter from LandingDemo.tsx. Taps go through it to the letters. */
+.hand {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  display: flex;
+  font-size: 32px;
+  color: var(--fg);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform var(--dur-slower) var(--ease-out);
+}
+.hand[data-placed] {
+  opacity: 1;
+}
+.hand svg {
+  fill: var(--bg);
+  transition: scale var(--dur-fast) var(--ease-std);
+}
+.hand[data-down] svg {
+  scale: 0.84;
+}

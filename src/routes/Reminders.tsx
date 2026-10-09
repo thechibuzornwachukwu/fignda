@@ -5,7 +5,7 @@ import { DEFAULT_HOUR, disableReminder, enableReminder, reminderState, setRemind
 import styles from './Settings.module.css';
 
 const WHY: Partial<Record<ReminderState['status'], string>> = {
-  unsupported: 'This browser cannot send reminders. On iPhone, add Fignda to your Home Screen and open it from there.',
+  unsupported: 'This browser cannot send reminders. On iPhone, add Gazecraft to your Home Screen and open it from there.',
   unavailable: 'Reminders are not switched on yet. Check back soon.',
   blocked: 'Notifications are blocked for this site. Allow them in your browser settings, then turn this on.',
 };

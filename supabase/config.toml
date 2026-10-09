@@ -242,13 +242,13 @@ otp_expiry = 600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
-# Fignda signs in with a 6 digit code, never a link. Same templates go to production.
+# Gazecraft signs in with a 6 digit code, never a link. Same templates go to production.
 [auth.email.template.magic_link]
-subject = "Your Fignda code"
+subject = "Your Gazecraft code"
 content_path = "./supabase/templates/code.html"
 
 [auth.email.template.confirmation]
-subject = "Your Fignda code"
+subject = "Your Gazecraft code"
 content_path = "./supabase/templates/code.html"
 
 # Uncomment to customize email template

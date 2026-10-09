@@ -30,6 +30,10 @@ export type ReplayResult =
       misses: number;
       secs: number;
       score: number;
+      /** Wrong picks in any game, near misses left out. Scored on the daily only (`misses`). */
+      wrongs: number;
+      /** Clean read: every word found, no wrong picks, no hints. Never changes the score. */
+      clean: boolean;
       /** Each word this log really selected, with its time. Room plays store these. */
       finds: Array<{ k: string; t: number }>;
     }
@@ -47,7 +51,7 @@ export function replay(puzzle: { S: string; answers: readonly Answer[] }, log: P
   const n = puzzle.S.length;
   const found = new Set<string>();
   const finds: Array<{ k: string; t: number }> = [];
-  let misses = 0;
+  let wrongs = 0;
   let lastFind = 0; // the clock starts at 0
 
   for (const e of events) {
@@ -59,14 +63,20 @@ export function replay(puzzle: { S: string; answers: readonly Answer[] }, log: P
       lastFind = e.t;
       found.add(r.answer.key);
       finds.push({ k: r.answer.key, t: e.t });
-    } else if (r.kind === 'wrong' && daily) {
+    } else if (r.kind === 'wrong') {
       const unfound = puzzle.answers.filter((x) => !found.has(x.key)).map((x) => x.key);
-      if (!isClose(r.str, unfound)) misses++;
+      if (!isClose(r.str, unfound)) wrongs++;
     }
   }
 
   const total = puzzle.answers.length;
   const secs = Math.floor(finish / 1000);
-  const result = { found: found.size, total, hints: hints.length, misses: daily ? misses : 0, secs };
-  return { ok: true, ...result, score: score(result), finds };
+  const result = { found: found.size, total, hints: hints.length, misses: daily ? wrongs : 0, secs };
+  return { ok: true, ...result, score: score(result), wrongs, clean: isCleanRead({ ...result, wrongs }), finds };
+}
+
+/** The same rule as the result screen (src/games/session.ts isCleanRead), from replayed numbers only. */
+export function isCleanRead(r: { found: number; total: number; hints: number; wrongs: number }, room = false): boolean {
+  // A room play is never one: a teammate may have found some of the words.
+  return !room && r.total > 0 && r.found === r.total && r.hints === 0 && r.wrongs === 0;
 }

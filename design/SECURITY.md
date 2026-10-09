@@ -1,4 +1,4 @@
-# Fignda security
+# Gazecraft security
 
 Risks: leaked keys, faked scores, AI endpoint abuse, injected text in shared content. All items required.
 
@@ -17,6 +17,7 @@ Risks: leaked keys, faked scores, AI endpoint abuse, injected text in shared con
 | Table | Read | Write |
 |---|---|---|
 | profiles (name, handle) | all | own row |
+| profile_private (look) | own row | own row; `feminine`, `masculine`, `mixed` or null |
 | plays | own rows; public view exposes handle, score, time | Worker only |
 | daily | all | none |
 | daily_answers | service role only until day ends | none |
@@ -28,9 +29,12 @@ Risks: leaked keys, faked scores, AI endpoint abuse, injected text in shared con
 | friend_streaks, streak_links, game_invites, puzzle_ratings | through functions only | through functions only |
 | notifications | own, through `my_notifications()` | database triggers only; a client can only mark its own read |
 | badges | all, through `badges_of()` | database trigger on verified plays only |
+| puzzle_reports | none | Worker only, through `report_puzzle()` |
+| generate_jobs | none; the Worker hands out a job's state by its id | Worker only |
+| daily_candidates (view) | service role only | none |
 
 - Email lives only in `auth.users`.
-- Handle: unique, 2 to 20, `[a-z0-9._]`, reserved list (admin, fignda, support, root, help).
+- Handle: unique, 2 to 20, `[a-z0-9._]`, reserved list (admin, gazecraft, fignda, support, root, help).
 - Unique index `(user_id, day_no)` on daily plays.
 
 ## Score integrity
@@ -41,6 +45,7 @@ Risks: leaked keys, faked scores, AI endpoint abuse, injected text in shared con
 - The client logs real picks only. A word picked twice is not sent, so an honest play is never refused for it.
 - Room plays: each player's own log is replayed and only the words in it are stored, with the time of each. The start is worked out from the server clock. A word two players both found is credited once, to the earlier find, when the board is read. Room plays never write to `plays`.
 - Word stats for today's daily are returned only to players who have a play for today.
+- Clean read (every word, no wrong picks, no hints) is worked out by the same replay and stored on the play. It adds nothing to the score. A room play is never one. On today's daily it is masked in public, like the total, since it would give the count away.
 
 ## AI generation `/api/generate`
 - Rate limit: 5 per hour per IP (guest), 20 per hour per user. Return 429.
@@ -49,7 +54,28 @@ Risks: leaked keys, faked scores, AI endpoint abuse, injected text in shared con
 - Validate JSON with zod: paragraph ≤ 900 chars, ≤ 20 words, each `[A-Za-z]{3,12}`.
 - Run engine server side. Keep real hits only. Under 4 hits: friendly failure.
 - Profanity filter on title, text, words.
-- Cache by normalised topic 24h.
+- Cache by normalised topic 24h. A hidden puzzle is never handed out from the cache.
+- Background making (`"background": true`): the POST writes a `generate_jobs` row and answers at once. `GET /api/generate/:id/run` does the slow work as an ordinary long request; `GET /api/generate/:id` reads the state. A Worker only gets about 30 seconds after its answer (`waitUntil`), far less than a puzzle takes, so the work never hangs off the POST.
+- One runner per job: the claim is one SQL statement. The runner renews it every 20 seconds; a claim not renewed for 60 seconds is stale and the next run may take the job. 3 runners at most, 15 minutes at most, then the job fails.
+- One waiting job per player (user id, or address plus a random key the browser keeps). A second ask returns the first job and is not counted.
+- A signed in player's job answers only to them. A guest's job answers to its id, an unguessable uuid. The answer holds the state, the puzzle code or a plain error code, and nothing else.
+- A failed attempt gives a guest the request back, once. So that failures cannot be farmed for free model calls, every guest ask is also counted on a second limit of 15 per hour per IP that is never handed back. A puzzle the safety check refuses stays counted.
+- `/run`: 60 per hour per IP.
+
+## Safety check (`worker/src/safety.ts`)
+- Runs on every player-made and machine-made puzzle before it gets a link: the word filter over title, noun, paragraph and every hidden word, then Llama Guard (`SAFETY_MODEL`) on the Workers AI binding, then the `AI_PROVIDER` list with a fixed prompt. The puzzle reaches a model as quoted data, never as instructions.
+- The result is stored on the puzzle: `passed`, or `unchecked` when no model could be reached. A fail returns `not_allowed` and saves nothing.
+- A link fails open: an `unchecked` puzzle still opens, since the word filter ran and reports are the net. A daily candidate fails closed: `passed` only.
+- Clients cannot write the state. RLS gives them no write on `games`.
+
+## Reports and owner power
+- `POST /api/puzzles/:code/report`: signed in, 20 per hour, one per player per puzzle, never your own, player-made and machine-made puzzles only.
+- The third report from different players hides the puzzle in the same transaction as the count. The reporter is never told whether theirs was the third.
+- A hidden puzzle does not open by link for anyone but its maker, and is out of the daily queue. Any report, ever, keeps a puzzle out of the daily queue.
+- Owner power is a list of Supabase user ids in the Worker var `OWNER_USER_IDS` (`worker/wrangler.toml`), empty by default. The proof is the verified session token; the ids are not secrets. There is no owner flag in the database and nothing a client can set.
+- `/api/owner/*` (list hidden, restore, remove) answers 404 to everyone else, the same as a path that does not exist.
+- Restore keeps the old reports but they stop counting toward hiding it again. Remove deletes the puzzle with its plays, thumbs and reports.
+- Daily candidates (`daily_candidates` view, service role only): has a maker, safety passed, not hidden, never reported, 20 different verified players other than the maker, at least 80% "Good one".
 
 ## Push and invites
 - VAPID private key is a Worker secret. Pushes carry no payload; the service worker asks `/api/push/line` for the line.
@@ -75,16 +101,17 @@ Risks: leaked keys, faked scores, AI endpoint abuse, injected text in shared con
 ```
 /*
   Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://*.supabase.co https://api.fignda.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self'; connect-src 'self' https://*.supabase.co https://api.gazecraft.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: camera=(), microphone=(), geolocation=()
 ```
 - Theme boot script as an external file (CSP).
-- Worker CORS: app origins only.
+- Worker CORS: app origins only. `Retry-After` is the one exposed header.
 
 ## Privacy
 - Collect email, name, handle. Cookieless analytics (Cloudflare Web Analytics).
+- The look ("Who are we dressing?") is optional and personal. It is kept off `profiles`, which everyone can read, in `profile_private`. No view or function reads it. It orders choices in the avatar editor and nothing else: never ranking, matching or ads. A guest's answer stays in the browser.
 - Delete account cascades profile, plays, shares.
 - Privacy page before launch.
 
@@ -93,8 +120,12 @@ Dependabot. `npm audit --audit-level=high`. Lockfile committed.
 
 ## Must pass
 - Anon client cannot read `daily_answers` or any email.
+- Nobody but its owner can read or change a player's look, and no public view carries it.
 - Tampered play log rejected.
 - A room play never credits a teammate's find, and never reaches the solo boards.
 - A push endpoint outside the allowlist is refused by the database and never called.
 - 6th guest generate in an hour returns 429.
+- Two runs of one job make one model call and one puzzle.
+- A third report hides a puzzle at once; a non-owner gets 404 from every owner endpoint.
+- A puzzle the safety check fails is never saved; an unchecked one never becomes a daily candidate.
 - Zero CSP violations on every route.

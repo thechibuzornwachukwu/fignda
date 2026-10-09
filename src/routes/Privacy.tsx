@@ -1,18 +1,18 @@
 import { Link } from 'react-router-dom';
 import styles from './Privacy.module.css';
 
-/** Plain account of what Fignda keeps. Matches design/SECURITY.md and the database schema. */
+/** Plain account of what Gazecraft keeps. Matches design/SECURITY.md and the database schema. */
 export function Privacy() {
   return (
     <article className={styles.page}>
       <h1 className={styles.title}>Privacy.</h1>
-      <p className={styles.lead}>Fignda keeps as little as it can. This page says what, why and where.</p>
+      <p className={styles.lead}>Gazecraft keeps as little as it can. This page says what, why and where.</p>
 
       <section className={styles.section}>
         <h2 className={styles.h2}>Playing as a guest</h2>
         <p>
-          You can play every puzzle without an account. Your theme and your daily results stay in this browser. We do
-          not send them anywhere unless you sign in.
+          You can play every puzzle without an account. Your theme, your daily results, a character you build and
+          your answer about who we are dressing stay in this browser. We do not send them anywhere unless you sign in.
         </p>
       </section>
 
@@ -25,6 +25,11 @@ export function Privacy() {
           <li>Your plays: which puzzle, what you found, hints, time and score. We use them for your streak.</li>
           <li>Custom puzzles you create and cards you share.</li>
           <li>The character you design. It is saved as a short code of your choices, never a photo, and shows next to your name.</li>
+          <li>
+            Who we are dressing, only if you answer: a woman, a man, or you would rather not say. It is saved with your character and
+            decides which hair and outfits you are shown first. Every style stays open to you. Nobody else sees it, and we never use it
+            for ranking, matching or ads. Change it in the character editor.
+          </li>
           <li>Who you follow, and the circles you join. Members of a circle see each other’s names and verified daily scores.</li>
           <li>
             Rooms: while you play together, the others in the room see your name and what you find. When the game ends, signed in players’ own
@@ -45,6 +50,15 @@ export function Privacy() {
       </section>
 
       <section className={styles.section}>
+        <h2 className={styles.h2}>Puzzles on any topic</h2>
+        <p>
+          When you ask for a puzzle on a topic of your own, the topic you type is sent to an AI service that writes the
+          paragraph. We use 3: OpenRouter, Google and Groq. Only the topic goes. Your name, email and account do not.
+          The puzzle that comes back is kept so its link works.
+        </p>
+      </section>
+
+      <section className={styles.section}>
         <h2 className={styles.h2}>What we do not do</h2>
         <ul className={styles.list}>
           <li>No ads and no selling data.</li>
@@ -57,7 +71,7 @@ export function Privacy() {
         <h2 className={styles.h2}>Where it lives</h2>
         <p>
           Accounts and scores are stored with Supabase in Frankfurt, Germany. The site and its API run on Cloudflare.
-          Both process data only to run Fignda.
+          Both process data only to run Gazecraft.
         </p>
       </section>
 
@@ -65,12 +79,12 @@ export function Privacy() {
         <h2 className={styles.h2}>Deleting everything</h2>
         <p>
           Delete your account from <Link to="/settings">Settings</Link>. It removes your profile, plays,
-          shared cards and custom puzzles at once. It cannot be undone. Signing out also clears Fignda data from this
+          shared cards and custom puzzles at once. It cannot be undone. Signing out also clears Gazecraft data from this
           browser.
         </p>
       </section>
 
-      <p className={styles.updated}>Updated 7 Oct 2026.</p>
+      <p className={styles.updated}>Updated 9 Oct 2026.</p>
     </article>
   );
 }

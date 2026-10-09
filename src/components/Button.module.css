@@ -13,7 +13,14 @@
   white-space: nowrap;
   cursor: pointer;
   text-decoration: none;
-  transition: background-color var(--dur-base) var(--ease-std), color var(--dur-base) var(--ease-std);
+  transition:
+    background-color var(--dur-base) var(--ease-std),
+    color var(--dur-base) var(--ease-std),
+    transform var(--dur-fast) var(--ease-out);
+}
+/* The press: the button answers the finger before anything else happens. */
+.button:active:not(:disabled, [aria-disabled='true']) {
+  transform: scale(0.97);
 }
 .button:disabled,
 .button[aria-disabled='true'] {
@@ -36,8 +43,10 @@
   background: var(--fg);
   color: var(--bg);
 }
-.primary:hover:not(:disabled) {
-  background: var(--fg-strong);
+@media (hover: hover) and (pointer: fine) {
+  .primary:hover:not(:disabled) {
+    background: var(--fg-strong);
+  }
 }
 
 .accent,
@@ -45,8 +54,10 @@
   background: var(--accent);
   color: var(--on-accent);
 }
-.accent:hover:not(:disabled) {
-  background: var(--accent-hover);
+@media (hover: hover) and (pointer: fine) {
+  .accent:hover:not(:disabled) {
+    background: var(--accent-hover);
+  }
 }
 
 .secondary,
@@ -55,6 +66,8 @@
   color: var(--fg);
   box-shadow: inset 0 0 0 1px var(--line-3);
 }
-.secondary:hover:not(:disabled) {
-  background: var(--surface-2);
+@media (hover: hover) and (pointer: fine) {
+  .secondary:hover:not(:disabled) {
+    background: var(--surface-2);
+  }
 }

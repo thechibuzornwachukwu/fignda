@@ -11,6 +11,8 @@ import { Segmented } from './Segmented';
 import { ShareCard, ShareCardFrame, type CardData } from './ShareCard';
 import { Toggle } from './Toggle';
 import { useCardBudget } from './useCardBudget';
+import { useDelayedWaiting } from './useDelayedWaiting';
+import { Waiting } from './Waiting';
 import styles from './ShareSheet.module.css';
 
 export type ShareGame = {
@@ -58,6 +60,8 @@ export function ShareSheet({ open, onClose, game, result, player }: Props) {
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const exportRefs = useRef<Array<HTMLDivElement | null>>([]);
+  // Images usually take under a second. Past that, the waiting line shows where the note goes.
+  const waiting = useDelayedWaiting(busy);
 
   const daily = !!game.daily;
   const showOn = show && !daily;
@@ -99,8 +103,8 @@ export function ShareSheet({ open, onClose, game, result, player }: Props) {
   const link = shareUrl(game.vs ? `${game.path}?vs=${encodeURIComponent(game.vs)}` : game.path);
   const text =
     kind === 'result'
-      ? `Fignda · ${game.title}\n${daily ? `${found} found` : `${found}/${total}`} · ${formatTime(result.secs)} · ${result.score.toLocaleString('en-US')}\nCan you beat it?`
-      : `${daily ? `How many ${game.noun} can you find?` : `Can you find ${total} ${game.noun}?`} Fignda`;
+      ? `Gazecraft · ${game.title}\n${daily ? `${found} found` : `${found}/${total}`} · ${formatTime(result.secs)} · ${result.score.toLocaleString('en-US')}\nCan you beat it?`
+      : `${daily ? `How many ${game.noun} can you find?` : `Can you find ${total} ${game.noun}?`} Gazecraft`;
 
   const send = async () => {
     setBusy(true);
@@ -109,7 +113,7 @@ export function ShareSheet({ open, onClose, game, result, player }: Props) {
       const slug = game.id.replace(/[^a-z0-9-]/gi, '');
       const files = await Promise.all(
         cards.map((c, i) =>
-          cardToFile(exportRefs.current[i]!, c.w, c.h, `fignda-${slug}-${kind}-${ratio.replace(':', 'x')}${cards.length > 1 ? `-${i + 1}` : ''}.png`),
+          cardToFile(exportRefs.current[i]!, c.w, c.h, `gazecraft-${slug}-${kind}-${ratio.replace(':', 'x')}${cards.length > 1 ? `-${i + 1}` : ''}.png`),
         ),
       );
       const r = await deliver(files, text, link);
@@ -218,15 +222,19 @@ export function ShareSheet({ open, onClose, game, result, player }: Props) {
           )}
           <div className={styles.actions}>
             <Button variant="primary" onClick={send} disabled={busy} className={styles.send}>
-              {busy ? 'Making images...' : cards.length > 1 ? `Share ${cards.length} images` : 'Share image'}
+              {cards.length > 1 ? `Share ${cards.length} images` : 'Share image'}
             </Button>
             <Button variant="secondary" onClick={copy}>
               Copy link
             </Button>
           </div>
-          <span className={styles.status} role="status">
-            {note}
-          </span>
+          {waiting ? (
+            <Waiting size="inline" />
+          ) : (
+            <span className={styles.status} role="status">
+              {note}
+            </span>
+          )}
         </div>
       </div>
 

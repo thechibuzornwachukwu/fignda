@@ -91,7 +91,7 @@ function base(o: CardInput, r: Layout) {
     pad: r.pad,
     date: o.date ?? '',
     kicker: o.kicker ?? '',
-    url: o.url ?? 'fignda.com',
+    url: o.url ?? 'gazecraft.com',
     guest,
     initial: guest ? 'f' : name.charAt(0).toUpperCase(),
     first: guest ? 'A guest' : name.split(/\s+/)[0]!,

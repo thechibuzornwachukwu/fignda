@@ -22,17 +22,36 @@ export async function latestCode(email: string): Promise<string> {
   throw new Error(`No code arrived for ${email}`);
 }
 
+/** A new player's first minute: skip the character and outfit steps until the name step shows. */
+export async function skipToName(page: Page): Promise<void> {
+  const nameField = page.getByLabel('Name');
+  for (let i = 0; i < 4; i++) {
+    await expect(nameField.or(page.getByRole('button', { name: 'Skip' })).first()).toBeVisible();
+    if (await nameField.isVisible()) return;
+    await page.getByRole('button', { name: 'Skip' }).click();
+  }
+}
+
+/** The first minute after the code: skip to the name step, give a name, and land on /play. */
+export async function finishWelcome(page: Page, name: string, handle: string): Promise<void> {
+  const nameField = page.getByLabel('Name');
+  await skipToName(page);
+  await nameField.fill(name);
+  await page.getByLabel('Handle').fill(handle);
+  await page.getByRole('button', { name: 'Start finding' }).click();
+  // The flow ends on today's daily. The specs start from the games screen.
+  await expect(page).toHaveURL(/\/(d\/\d+|play)$/);
+  await page.goto('/play');
+}
+
 /** Sign up a fresh player and land on /play. Returns their handle. */
 export async function newPlayer(page: Page, name: string): Promise<string> {
-  const email = `e2e-${uid()}@test.fignda.local`;
+  const email = `e2e-${uid()}@test.gazecraft.local`;
   const handle = `${name.toLowerCase().replace(/[^a-z]/g, '').slice(0, 8)}_${uid()}`;
   await page.goto('/signin');
   await page.getByLabel('Email').fill(email);
   await page.getByRole('button', { name: 'Email me a code' }).click();
   await page.getByLabel('Code').fill(await latestCode(email));
-  await page.getByLabel('Name').fill(name);
-  await page.getByLabel('Handle').fill(handle);
-  await page.getByRole('button', { name: 'Start finding' }).click();
-  await expect(page).toHaveURL(/\/play$/);
+  await finishWelcome(page, name, handle);
   return handle;
 }

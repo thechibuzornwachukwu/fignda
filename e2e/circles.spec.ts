@@ -166,7 +166,7 @@ test('copy result puts the spoiler free text on the clipboard', async ({ page, c
   const text = await page.evaluate(() => navigator.clipboard.readText());
   // Windows clipboards hand text back with CRLF line ends.
   const lines = text.split(/\r?\n/);
-  expect(lines[0]).toBe('Fignda · The classic');
+  expect(lines[0]).toBe('Gazecraft · The classic');
   expect(lines[1]).toMatch(/^1\/30 · \d+:\d\d · [\d,]+$/);
   expect(lines[2]).toBe('🟩⬜');
   expect(lines[3]).toMatch(/^Beat it: http.*\/play\/bible$/);

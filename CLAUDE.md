@@ -1,4 +1,4 @@
-# Fignda rules
+# Gazecraft rules
 
 Design: `/design`. Read `SPEC.md` before UI work, `SECURITY.md` before data, auth or Worker work.
 
@@ -8,15 +8,15 @@ Design: `/design`. Read `SPEC.md` before UI work, `SECURITY.md` before data, aut
 ## Tokens
 - Colour, radius, spacing, duration, easing: `var(--*)` from `src/styles/tokens.css` only. No hex, px radius or ms in components.
 - Missing value: add a token, then use it.
-- Theme: `data-theme="dark|light"` on `<html>`, key `fignda-theme` in localStorage, default from `prefers-color-scheme`, set before paint.
+- Theme: `data-theme="dark|light"` on `<html>`, key `gazecraft-theme` in localStorage, default from `prefers-color-scheme`, set before paint.
 
 ## Brand
 - Manrope (400 to 800) for everything read, typed or counted. Bungee (400 only) for headings: `display`, `gameTitle`, `resultTitle`, `h2`, `h3` from `type.module.css`. Never set `--font-display` by hand in a component.
 - Bungee is capitals only and its digits are not tabular. Not for clocks, scores, stats, game rows, buttons, inputs, names or puzzle text.
 - Bungee is heavy. Headings use `--ink-display` or `--ink-heading`, never `--fg-strong`.
 - Icons: `lucide-react` through one `<Icon>` wrapper. Stroke 1.75. Sizes 16 inline, 18 controls, 20 cards.
-- Logo: `<Logo>` from SPEC section 1. Never redraw.
-- Lime `--accent` = found or success. Never body text, never large fills. One accent button per screen.
+- Logo: `<Logo>` (wordmark) and `<LogoMark>` (the G) from SPEC section 1. Outlines live in `logoPaths.ts`. Never redraw, never type the name in Bungee as a logo.
+- Lime `--accent` = found or success, and the shade of the logo's G. Never body text, never large fills. One accent button per screen.
 
 ## Copy
 - No em dashes. No exclamation marks. Short sentences. Digits for numbers.

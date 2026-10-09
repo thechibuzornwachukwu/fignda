@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Field } from '../components/Field';
 import { TextLink } from '../components/TextLink';
-import { saveProfile } from '../lib/api';
+import { fetchProfileByHandle, saveProfile } from '../lib/api';
 import { useAuth } from '../lib/auth';
+import { withTail } from '../lib/onboarding';
 import { checkProfile, handleFromName, safeNext } from '../lib/streak';
 import { getSupabase } from '../lib/supabase';
 import styles from './SignIn.module.css';
@@ -14,43 +15,34 @@ const RESEND_AFTER = 30;
 /** Google sign in shows only when the provider is configured. */
 const GOOGLE = import.meta.env.VITE_GOOGLE_AUTH === '1';
 
-type Step = 'start' | 'code' | 'profile';
-
 function authError(e: { status?: number; message?: string } | null): string {
   if (!e) return '';
   if (e.status === 429) return 'Too many tries. Wait a few minutes and try again.';
   return '';
 }
 
-export function SignIn() {
-  const auth = useAuth();
-  const nav = useNavigate();
-  const [params] = useSearchParams();
-  const next = safeNext(params.get('next'));
-  const editing = params.get('edit') === '1';
+type EmailProps = {
+  /** Where a link in the email lands, and where the player goes once signed in. */
+  next: string;
+  /** The heading and lead of the first screen. */
+  head: ReactNode;
+  /** Under the form of the first screen: the way to carry on without signing in. */
+  foot?: ReactNode;
+};
 
-  const [step, setStep] = useState<Step>('start');
+/**
+ * Email, then the 6 digit code. Used by /signin and by the first minute (/welcome), so there is one sign in.
+ * When the code is right the auth listener takes over: this component only gets the player signed in.
+ */
+export function EmailSignIn({ next, head, foot }: EmailProps) {
+  const [step, setStep] = useState<'start' | 'code'>('start');
   const [email, setEmail] = useState('');
   const [code, setCode] = useState('');
-  const [name, setName] = useState('');
-  const [handle, setHandle] = useState('');
-  const [handleEdited, setHandleEdited] = useState(false);
   const [err, setErr] = useState('');
   const [busy, setBusy] = useState(false);
   const [wait, setWait] = useState(0);
   const codeRef = useRef<HTMLInputElement>(null);
-
-  const signedIn = !!auth.session;
-  const needsProfile = signedIn && (!auth.profile || editing);
-
-  // Prefill when editing an existing profile.
-  const [prefilled, setPrefilled] = useState(false);
-  if (editing && auth.profile && !prefilled) {
-    setPrefilled(true);
-    setName(auth.profile.name);
-    setHandle(auth.profile.handle);
-    setHandleEdited(true);
-  }
+  const back = `${window.location.origin}/signin?next=${encodeURIComponent(next)}`;
 
   useEffect(() => {
     if (wait <= 0) return;
@@ -62,20 +54,6 @@ export function SignIn() {
     if (step === 'code') codeRef.current?.focus();
   }, [step]);
 
-  if (!auth.enabled) {
-    return (
-      <div className={styles.screen}>
-        <h1 className={styles.title}>Sign in is not set up yet.</h1>
-        <p className={styles.lead}>You can play every game as a guest.</p>
-        <TextLink to={next}>Keep playing as a guest</TextLink>
-      </div>
-    );
-  }
-  if (auth.loading) return <div className={styles.screen} aria-busy="true" />;
-  if (signedIn && auth.profile && !editing) return <Navigate to={next} replace />;
-
-  const current: Step = needsProfile ? 'profile' : step;
-
   const sendCode = async (e?: FormEvent) => {
     e?.preventDefault();
     const addr = email.trim();
@@ -83,10 +61,10 @@ export function SignIn() {
     setBusy(true);
     setErr('');
     // The email carries a code; until custom SMTP is set up it may carry a link instead, which lands back here.
-    const { error } = await (await getSupabase())!.auth.signInWithOtp({
-      email: addr,
-      options: { shouldCreateUser: true, emailRedirectTo: `${window.location.origin}/signin?next=${encodeURIComponent(next)}` },
-    });
+    const error = await getSupabase()
+      .then((sb) => sb!.auth.signInWithOtp({ email: addr, options: { shouldCreateUser: true, emailRedirectTo: back } }))
+      .then((r) => r.error)
+      .catch(() => ({ status: 0 }));
     setBusy(false);
     if (error) return setErr(authError(error) || 'We could not send a code. Try again in a moment.');
     setCode('');
@@ -97,14 +75,17 @@ export function SignIn() {
   const verify = async (value: string) => {
     setBusy(true);
     setErr('');
-    const { error } = await (await getSupabase())!.auth.verifyOtp({ email: email.trim(), token: value, type: 'email' });
+    const error = await getSupabase()
+      .then((sb) => sb!.auth.verifyOtp({ email: email.trim(), token: value, type: 'email' }))
+      .then((r) => r.error)
+      .catch(() => ({ status: 0 }));
     setBusy(false);
     if (error) {
       setCode('');
       codeRef.current?.focus();
       return setErr(authError(error) || 'That code did not work. Check it or send a new one.');
     }
-    // The auth listener loads the profile; with none, this screen moves to the profile step.
+    // The auth listener loads the profile; with none, the player is sent on to the first minute.
   };
 
   const onCode = (v: string) => {
@@ -116,82 +97,16 @@ export function SignIn() {
 
   const google = async () => {
     setErr('');
-    const { error } = await (await getSupabase())!.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: `${window.location.origin}/signin?next=${encodeURIComponent(next)}` },
-    });
+    const error = await getSupabase()
+      .then((sb) => sb!.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: back } }))
+      .then((r) => r.error)
+      .catch(() => ({ status: 0 }));
     if (error) setErr(authError(error) || 'Google sign in is not available right now.');
   };
 
-  const onName = (v: string) => {
-    setName(v);
-    if (!handleEdited) setHandle(handleFromName(v));
-    setErr('');
-  };
-
-  const save = async (e: FormEvent) => {
-    e.preventDefault();
-    const c = checkProfile(name, handle);
-    if ('error' in c) return setErr(c.error);
-    const { name: n, handle: h } = c;
-    setBusy(true);
-    const res = await saveProfile({ id: auth.session!.user.id, name: n, handle: h }, !!auth.profile);
-    setBusy(false);
-    if (res === 'taken') return setErr('That handle is taken. Try another.');
-    if (res) return setErr('We could not save that. Try again.');
-    await auth.refreshProfile();
-    nav(editing ? '/settings' : next, { replace: true });
-  };
-
-  if (current === 'profile') {
+  if (step === 'code') {
     return (
-      <form className={styles.screen} onSubmit={save} noValidate>
-        <div className={styles.head}>
-          <h1 className={styles.title}>
-            What should
-            <br />
-            we call you?
-          </h1>
-          <p className={styles.lead}>This shows on cards you share. Change it any time.</p>
-        </div>
-        <div className={styles.fields}>
-          <Field
-            label="Name"
-            autoComplete="name"
-            placeholder="Ada Obi"
-            value={name}
-            maxLength={40}
-            onChange={(e) => onName(e.target.value)}
-          />
-          <Field
-            label="Handle"
-            prefix="@"
-            placeholder="ada"
-            autoCapitalize="none"
-            autoCorrect="off"
-            spellCheck={false}
-            maxLength={20}
-            value={handle}
-            onChange={(e) => {
-              setHandle(e.target.value.replace(/^@/, ''));
-              setHandleEdited(true);
-              setErr('');
-            }}
-          />
-          <p className={styles.err} role="alert">
-            {err}
-          </p>
-        </div>
-        <Button type="submit" variant="accent" disabled={busy} className={styles.full}>
-          {editing ? 'Save' : 'Start finding'}
-        </Button>
-      </form>
-    );
-  }
-
-  if (current === 'code') {
-    return (
-      <div className={styles.screen}>
+      <>
         <div className={styles.head}>
           <h1 className={styles.title}>Check your inbox.</h1>
           <p className={styles.lead}>
@@ -230,26 +145,13 @@ export function SignIn() {
             Use a different email
           </TextLink>
         </div>
-      </div>
+      </>
     );
   }
 
   return (
-    <div className={styles.screen}>
-      <div className={styles.head}>
-        <h1 className={styles.title}>
-          Sign in.
-          <br />
-          <span className={styles.sub}>Keep your streak.</span>
-        </h1>
-        <p className={styles.lead}>
-          Save scores, keep daily streaks and put your name on shared cards. See what we keep in{' '}
-          <Link to="/privacy" className={styles.inline}>
-            Privacy
-          </Link>
-          .
-        </p>
-      </div>
+    <>
+      {head}
       <form className={styles.fields} onSubmit={sendCode} noValidate>
         {GOOGLE && (
           <>
@@ -281,9 +183,187 @@ export function SignIn() {
           {err}
         </p>
       </form>
-      <Link to={next} className={styles.guest}>
-        Keep playing as a guest
-      </Link>
+      {foot}
+    </>
+  );
+}
+
+type ProfileProps = {
+  userId: string;
+  /** The row is already there (editing). Otherwise this creates it. */
+  exists: boolean;
+  /** What the fields open with. Empty is fine. */
+  name?: string | null;
+  handle?: string | null;
+  /** The handle is the player's own, not a guess from the name: typing a name leaves it alone. */
+  handleEdited?: boolean;
+  /** A prefilled handle that turns out to be taken gets a short tail before the player meets an error. */
+  suggest?: boolean;
+  submit: string;
+  head: ReactNode;
+  foot?: ReactNode;
+  onSaved: () => void | Promise<void>;
+};
+
+/** Name and @handle. One form for the first minute and for editing. */
+export function ProfileForm({ userId, exists, name: name0, handle: handle0, handleEdited: edited0 = false, suggest = false, submit, head, foot, onSaved }: ProfileProps) {
+  const [name, setName] = useState(name0 ?? '');
+  const [handle, setHandle] = useState(handle0 ?? '');
+  const [handleEdited, setHandleEdited] = useState(edited0);
+  const [err, setErr] = useState('');
+  const [busy, setBusy] = useState(false);
+  const touched = useRef(false);
+
+  // One look, when the screen opens: is the suggested handle free? Only ever changes a field nobody has typed in.
+  useEffect(() => {
+    const guess = handle0 ?? '';
+    if (!suggest || !guess) return;
+    let alive = true;
+    fetchProfileByHandle(guess)
+      .then((p) => {
+        if (alive && p && !touched.current) setHandle(withTail(guess));
+      })
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [suggest, handle0]);
+
+  const onName = (v: string) => {
+    touched.current = true;
+    setName(v);
+    if (!handleEdited) setHandle(handleFromName(v));
+    setErr('');
+  };
+
+  const save = async (e: FormEvent) => {
+    e.preventDefault();
+    const c = checkProfile(name, handle);
+    if ('error' in c) return setErr(c.error);
+    setBusy(true);
+    const res = await saveProfile({ id: userId, name: c.name, handle: c.handle }, exists).catch(() => 'failed' as const);
+    if (res) setBusy(false);
+    if (res === 'taken') return setErr('That handle is taken. Try another.');
+    if (res) return setErr('We could not save that. Try again.');
+    await onSaved();
+  };
+
+  return (
+    <form className={styles.form} onSubmit={save} noValidate>
+      {head}
+      <div className={styles.fields}>
+        <Field label="Name" autoComplete="name" placeholder="Ada Obi" value={name} maxLength={40} onChange={(e) => onName(e.target.value)} />
+        <Field
+          label="Handle"
+          prefix="@"
+          placeholder="ada"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+          maxLength={20}
+          value={handle}
+          onChange={(e) => {
+            touched.current = true;
+            setHandle(e.target.value.replace(/^@/, ''));
+            setHandleEdited(true);
+            setErr('');
+          }}
+        />
+        <p className={styles.err} role="alert">
+          {err}
+        </p>
+      </div>
+      <Button type="submit" variant="accent" disabled={busy} className={styles.full}>
+        {submit}
+      </Button>
+      {foot}
+    </form>
+  );
+}
+
+export function SignIn() {
+  const auth = useAuth();
+  const nav = useNavigate();
+  const [params] = useSearchParams();
+  const asked = params.get('next');
+  const next = safeNext(asked);
+  const editing = params.get('edit') === '1';
+
+  if (!auth.enabled) {
+    return (
+      <div className={styles.screen}>
+        <h1 className={styles.title}>Sign in is not set up yet.</h1>
+        <p className={styles.lead}>You can play every game as a guest.</p>
+        <TextLink to={next}>Keep playing as a guest</TextLink>
+      </div>
+    );
+  }
+  // A stored session, or a profile on its way: wait, so an existing player is never sent to the first minute.
+  if (auth.loading || (auth.session && !auth.profile && auth.checking)) return <div className={styles.screen} aria-busy="true" />;
+
+  if (auth.session && auth.profile) {
+    if (!editing) return <Navigate to={next} replace />;
+    return (
+      <div className={styles.screen}>
+        <ProfileForm
+          userId={auth.session.user.id}
+          exists
+          name={auth.profile.name}
+          handle={auth.profile.handle}
+          handleEdited
+          submit="Save"
+          head={
+            <div className={styles.head}>
+              <h1 className={styles.title}>
+                What should
+                <br />
+                we call you?
+              </h1>
+              <p className={styles.lead}>This shows on cards you share. Change it any time.</p>
+            </div>
+          }
+          onSaved={async () => {
+            await auth.refreshProfile();
+            nav('/settings', { replace: true });
+          }}
+        />
+      </div>
+    );
+  }
+
+  // Signed in with no profile: a new player. The first minute asks the rest, one question per screen, and ends
+  // on the page they asked for, or on today's daily.
+  if (auth.session) {
+    const to = next.startsWith('/welcome') ? next : asked ? `/welcome?next=${encodeURIComponent(next)}` : '/welcome';
+    return <Navigate to={to} replace />;
+  }
+
+  return (
+    <div className={styles.screen}>
+      <EmailSignIn
+        next={next}
+        head={
+          <div className={styles.head}>
+            <h1 className={styles.title}>
+              Sign in.
+              <br />
+              <span className={styles.sub}>Keep your streak.</span>
+            </h1>
+            <p className={styles.lead}>
+              Save scores, keep daily streaks and put your name on shared cards. See what we keep in{' '}
+              <Link to="/privacy" className={styles.inline}>
+                Privacy
+              </Link>
+              .
+            </p>
+          </div>
+        }
+        foot={
+          <Link to={next} className={styles.guest}>
+            Keep playing as a guest
+          </Link>
+        }
+      />
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { useLayoutEffect, useRef, type ReactNode, type Ref } from 'react';
 import type { puzzleCards, resultCard } from '../engine/cards';
 import tokens from '../styles/tokens.json';
-import { LogoMark } from './Logo';
+import { Logo } from './Logo';
 import styles from './ShareCard.module.css';
 
 export type ResultCardData = ReturnType<typeof resultCard>;
@@ -47,8 +47,7 @@ function Brand({ date, children }: { date: string; children?: ReactNode }) {
   return (
     <div className={styles.top}>
       <div className={styles.brand}>
-        <LogoMark size={64} />
-        <span className={styles.word}>fignda</span>
+        <Logo height={52} />
       </div>
       <div className={styles.topEnd}>
         {children}

@@ -4,14 +4,17 @@ import { ArrowLeft, UsersRound } from 'lucide-react';
 import { BigClock, Elapsed } from '../components/BigClock';
 import { Icon } from '../components/Icon';
 import { MobileBar } from '../components/MobileBar';
-import { ProgressLine } from '../components/ProgressLine';
+import { Ring } from '../components/Ring';
 import { TextLink } from '../components/TextLink';
 import { WordList, type WordListHandle, type WordRow } from '../components/WordList';
 import { dayNo } from '../engine/daily';
-import { getGameDef, type GameDef } from '../games/catalog';
+import { dailyPool, getGameDef, getPuzzle, type GameDef } from '../games/catalog';
 import { dailyInfo, dailyLabel } from '../games/daily';
 import { registry } from '../games/registry';
-import { scoreOf, secondsOf, useGameSession } from '../games/session';
+import { dayHidLine, playFacts, rareLine, recordLines, skillLines, starsUpLine, todayHoldsLine } from '../games/resultLines';
+import { isCleanRead, scoreOf, secondsOf, useGameSession, type Session } from '../games/session';
+import { starsFor } from '../engine/stars';
+import { dayProfile } from '../engine/variableDay';
 import { fetchCustomGame, fetchWordStats, mergeGuestDailies, submitPlay } from '../lib/api';
 import { rarestFound } from '../lib/wordStats';
 import { useAuth } from '../lib/auth';
@@ -20,6 +23,7 @@ import { ShareSheet, type ShareGame } from '../components/ShareSheet';
 import { SoundToggle } from '../components/SoundToggle';
 import { dailyDate } from '../games/daily';
 import { copyText, sharePath, shareUrl } from '../lib/share';
+import { readPast } from '../engine/reveal';
 import { shareText, storyMarks } from '../engine/shareText';
 import * as copy from '../copy';
 import { joinRoom, newRoomCode, ROOM_RE, type Peer, type Room, type RoomStats, type RoomStatus } from '../lib/room';
@@ -27,9 +31,14 @@ import { Challenge } from './Challenge';
 import { RoomBar } from './RoomBar';
 import { ReminderAsk } from './ReminderAsk';
 import { RatePuzzle } from './RatePuzzle';
+import { recordPlay } from '../lib/records';
+import { markFinished } from '../lib/shelves';
+import { record as recordSound } from '../lib/sound';
+import { recordStars } from '../lib/starStore';
 import { streakPool } from '../lib/streak';
 import { useStreak } from '../lib/useStreak';
 import { GameResults } from './GameResults';
+import { GameReveal } from './GameReveal';
 import styles from './Game.module.css';
 
 export function GameById() {
@@ -80,6 +89,9 @@ export function GameByCode() {
   return <GameScreen key={def.id} def={def} />;
 }
 
+/** A daily says how many are left only from here down. */
+const NEAR = 3;
+
 function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
   const mod = registry[def.type];
   const puzzle = useMemo(() => mod.build(def), [mod, def]);
@@ -99,6 +111,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
     dailyN,
     beforeHit: (k) => listRef.current?.capture(k),
     onHit: (a, b) => roomRef.current?.sendFind(a, b),
+    onFinish: (fs) => onFinish(fs),
   });
   const { s, foundSet, total, answers, daily, finished } = g;
   const coarse = useCoarsePointer();
@@ -197,7 +210,37 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
   const foundCount = s.found.length;
   const count = daily && !finished ? `${foundCount} found` : `${foundCount} / ${total}`;
   const progress = total ? foundCount / total : 0;
-  const hideProgress = daily && !finished;
+  // A daily hides its count. With 3 or fewer left, and at least 1 found, it says how many and the ring shows the gap.
+  const left = total - foundCount;
+  const near = daily && !finished && foundCount > 0 && left > 0 && left <= NEAR;
+  const leftLine = useMemo(() => (near ? copy.pick('leftCount', { n: left }) : ''), [near, left]);
+  const hideProgress = daily && !finished && !near;
+
+  // Pack shelves: a catalogue puzzle played to the end with at least 1 find is finished in this browser.
+  const inCatalogue = !daily && !!getGameDef(def.id);
+  useEffect(() => {
+    if (finished && inCatalogue && foundCount > 0) markFinished(def.id);
+  }, [finished, inCatalogue, foundCount, def.id]);
+
+  // The moment a game ends, once: stars for a catalogue puzzle played alone, then personal records.
+  // Both live in this browser. A finished daily opened again does not come through here.
+  const starred = inCatalogue && !inRoom;
+  const [end, setEnd] = useState<{ at: number; starsUp: boolean; records: string[] } | null>(null);
+  function onFinish(fs: Session) {
+    const mine = fs.found.filter((f) => !f.by);
+    const cleanRead = isCleanRead(fs, total);
+    const stars = starsFor({ finished: true, found: fs.found.length, total, hints: fs.hints, wrongs: fs.wrongs, byOthers: mine.length !== fs.found.length });
+    const starsUp = starred && recordStars(def.id, stars);
+    const broke = recordPlay({
+      pack: daily || inCatalogue ? def.category : null,
+      cleanSecs: cleanRead ? secondsOf(fs, fs.endAt ?? Date.now()) : null,
+      dailyFound: daily ? mine.length : null,
+      longest: playFacts(puzzle, fs.found, fs.wrongs, fs.hints).longest,
+    });
+    if (broke.length) recordSound();
+    setEnd({ at: fs.startAt, starsUp, records: recordLines(broke, copy.pick) });
+  }
+  const ended = end && end.at === s.startAt ? end : null;
 
   const foundSpans = useMemo(() => s.found.map((f) => f.span), [s.found]);
   const missed = useMemo(() => (finished ? mod.missed(puzzle, foundSet) : []), [finished, mod, puzzle, foundSet]);
@@ -251,8 +294,37 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
     const p = isToday && finished ? streakPool(run.streak, run.best) : null;
     return p ? copy.pick(p.pool, { n: p.n }) : '';
   }, [isToday, finished, run.streak, run.best]);
+  // Skill lines, 2 at most, rarest first. Picked once per finish.
+  const lines = useMemo(
+    () => (finished ? skillLines(playFacts(puzzle, s.found, s.wrongs, s.hints), copy.pick) : []),
+    // A finished game does not change: its start time names it.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [finished, puzzle, s.startAt],
+  );
+  // Stars: a catalogue puzzle played alone. One line beside them when this play raised them.
+  const stars = finished && starred
+    ? starsFor({ finished, found: foundCount, total, hints: s.hints, wrongs: s.wrongs, byOthers: s.found.some((f) => f.by) })
+    : 0;
+  const starsUp = !!ended?.starsUp;
+  const starLine = useMemo(() => starsUpLine(stars, starsUp, copy.pick), [stars, starsUp]);
+  // Variable days. Before today's daily: what it holds, never how much. After it: today against a usual day.
+  const holdsLine = useMemo(
+    () => (isToday && !finished ? todayHoldsLine(dayProfile(puzzle), copy.pick) : ''),
+    [isToday, finished, puzzle],
+  );
+  const dayLine = useMemo(() => {
+    if (!isToday || !finished) return '';
+    const pool = dailyPool.map((id) => (id === def.id ? puzzle : getPuzzle(id))).filter((p) => p != null);
+    return dayHidLine(puzzle, pool, copy.pick);
+  }, [isToday, finished, puzzle, def.id]);
 
-  // "Only 8% found Habakkuk": the rarest word you found on this daily. Picked once.
+  // What you missed, shown where it hides, and how many of them your own picks ran across. Picked once.
+  const reveal = useMemo(() => (finished ? mod.reveal(puzzle, foundSet) : []), [finished, mod, puzzle, foundSet]);
+  const past = finished ? readPast(s.log?.events ?? [], reveal.map((r) => r.span)) : 0;
+  const pastLine = useMemo(() => (past ? copy.pick('readPast', { n: past }) : ''), [past]);
+  const doneLine = useMemo(() => (isToday && finished ? copy.pick('doneToday') : ''), [isToday, finished]);
+
+  // "Only 8% found Habakkuk": the rarest word you found on this daily, from 5 verified players up. Picked once.
   // Guests and past days send nothing, so there is nothing to wait for.
   const settled = finished && (!signedIn || !isToday || answered);
   const [rare, setRare] = useState('');
@@ -263,7 +335,8 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
       .then((stats) => {
         const r = rarestFound(stats, gRef.current.s.found.map((f) => f.key));
         const label = r && gRef.current.s.found.find((f) => f.key === r.key)?.label;
-        if (alive && r && label) setRare(copy.pick('rareFind', { p: r.pct, w: label }));
+        const line = rareLine(r, label, copy.pick);
+        if (alive && line) setRare(line);
       })
       .catch(() => {});
     return () => {
@@ -308,6 +381,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
           <h1 className={styles.title}>{daily ? `Find the hidden ${def.noun}` : `Find ${total} ${def.noun}`}</h1>
           <BigClock startAt={s.startAt} endAt={s.endAt} />
         </div>
+        {holdsLine && <p className={styles.holds}>{holdsLine}</p>}
       </div>
 
       {inRoom && <RoomBar gameId={def.id} code={roomCode} peers={peers} status={roomStatus} me={myStats} you={{ id: roomId, handle: myHandle }} path={sharePath({ id: def.id, code: def.id.startsWith('c-') ? def.id.slice(2).toUpperCase() : undefined })} />}
@@ -322,10 +396,13 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
 
       <div className={styles.progress}>
         <div className={styles.stats}>
-          <span className={styles.count}>{count}</span>
+          <span className={styles.tally}>
+            {!hideProgress && <Ring value={progress} label="Found" />}
+            <span className={styles.count}>{count}</span>
+          </span>
+          {leftLine && <span className={styles.left}>{leftLine}</span>}
           <span>{s.hints === 1 ? '1 hint' : `${s.hints} hints`}</span>
         </div>
-        {!hideProgress && <ProgressLine value={progress} label="Found" />}
       </div>
 
       {finished && (
@@ -344,7 +421,14 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
           guest={!signedIn}
           streak={streakLine}
           rare={rare}
+          stars={stars}
+          starsUp={starLine}
+          skills={lines}
+          records={ended?.records}
+          day={dayLine}
+          done={doneLine}
         >
+          <GameReveal items={reveal} past={pastLine} />
           {isToday && signedIn && <ReminderAsk />}
           {auth.enabled && def.id.startsWith('c-') && <RatePuzzle code={def.id.slice(2).toUpperCase()} />}
         </GameResults>
@@ -412,7 +496,8 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
       {!finished && (
         <MobileBar
           count={count}
-          progress={hideProgress ? 0 : progress}
+          progress={hideProgress ? null : progress}
+          left={leftLine}
           time={<Elapsed startAt={s.startAt} endAt={s.endAt} />}
           message={s.msg || (coarse ? 'Swipe across letters, or tap first then last' : 'Drag across the letters')}
           onHint={g.hint}

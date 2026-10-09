@@ -93,7 +93,7 @@ describe('emails stay in auth.users', () => {
     const { data, error } = await anon().from('profiles').select('*').eq('id', a.id).single();
     expect(error).toBeNull();
     expect(Object.keys(data!).sort()).toEqual(['avatar', 'created_at', 'handle', 'id', 'name', 'updated_at']);
-    expect(JSON.stringify(data)).not.toContain('@test.fignda.local');
+    expect(JSON.stringify(data)).not.toContain('@test.gazecraft.local');
   });
 
   it('no public function or view returns an email', async () => {
@@ -110,7 +110,7 @@ describe('emails stay in auth.users', () => {
       body: JSON.stringify({ query: '{ profilesCollection { edges { node { email } } } }' }),
     });
     const body = await res.json();
-    expect(JSON.stringify(body)).not.toContain('@test.fignda.local');
+    expect(JSON.stringify(body)).not.toContain('@test.gazecraft.local');
     expect(body.errors ?? body.data == null).toBeTruthy();
   });
 });
@@ -221,6 +221,7 @@ describe('profiles', () => {
       ['emoji', 'ada😀'],
       ['sql', "a'); drop table profiles;--"],
       ['reserved admin', 'admin'],
+      ['reserved gazecraft', 'gazecraft'],
       ['reserved fignda', 'fignda'],
       ['reserved support', 'support'],
       ['reserved root', 'root'],
@@ -361,6 +362,7 @@ describe('plays', () => {
     const { data, error } = await anon().from('plays_public').select('*');
     expect(error).toBeNull();
     expect(Object.keys(data![0]!).sort()).toEqual([
+      'clean',
       'created_at',
       'day_no',
       'found',

@@ -70,3 +70,28 @@ describe('profileStats', () => {
     expect(profileStats([play({ day_no: 11 }), play({ day_no: 0 })], 10).dailies).toBe(0);
   });
 });
+
+describe('clean reads', () => {
+  it('counts every clean daily, and each other puzzle once however often it was read cleanly', () => {
+    const s = profileStats(
+      [
+        play({ day_no: 3, clean: true }),
+        play({ day_no: 4, clean: true }),
+        play({ game_id: 'space', clean: true }),
+        play({ game_id: 'space', clean: true }),
+        play({ game_id: 'bible', clean: false }),
+        // Today's daily on a public profile: masked until the day ends.
+        play({ day_no: 10, clean: null }),
+        // Rows from before clean reads were recorded.
+        play({ game_id: 'ocean' }),
+        play({ day_no: 5, clean: true, verified: false }),
+      ],
+      10,
+    );
+    expect(s.cleanReads).toBe(3);
+  });
+
+  it('is 0 for a new player', () => {
+    expect(profileStats([], 10).cleanReads).toBe(0);
+  });
+});

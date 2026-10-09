@@ -187,7 +187,7 @@ export function Settings() {
           >
             Sign out
           </Button>
-          <span className={styles.help}>Also clears Fignda data from this browser.</span>
+          <span className={styles.help}>Also clears Gazecraft data from this browser.</span>
         </div>
       </section>
 

@@ -81,6 +81,24 @@ describe('board sounds', () => {
     expect(notes[1]!.freq).toBeGreaterThan(notes[0]!.freq);
   });
 
+  it('a new record plays three rising notes, and nothing when muted', async () => {
+    const s = await load();
+    s.unlock();
+    s.record();
+    expect(notes).toHaveLength(3);
+    expect(notes[1]!.freq).toBeGreaterThan(notes[0]!.freq);
+    expect(notes[2]!.freq).toBeGreaterThan(notes[1]!.freq);
+    s.setSound(false);
+    s.record();
+    expect(notes).toHaveLength(3);
+  });
+
+  it('a record makes no sound before a gesture has woken audio', async () => {
+    const s = await load();
+    s.record();
+    expect(notes).toHaveLength(0);
+  });
+
   it('mute is remembered and silences everything', async () => {
     const s = await load();
     s.unlock();
@@ -88,13 +106,13 @@ describe('board sounds', () => {
     s.subscribeSound(heard);
     s.setSound(false);
     expect(heard).toHaveBeenCalled();
-    expect(localStorage.getItem('fignda-sound')).toBe('off');
+    expect(localStorage.getItem('gazecraft-sound')).toBe('off');
     s.tick(1);
     s.chime();
     expect(notes).toHaveLength(0);
     const again = await load();
     expect(again.soundOn()).toBe(false);
     again.setSound(true);
-    expect(localStorage.getItem('fignda-sound')).toBeNull();
+    expect(localStorage.getItem('gazecraft-sound')).toBeNull();
   });
 });

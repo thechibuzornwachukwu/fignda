@@ -90,7 +90,7 @@ export function SocialActions({
     const nav = navigator as Navigator & { share?: (d: ShareData) => Promise<void> };
     if (nav.share && window.matchMedia('(pointer: coarse)').matches) {
       try {
-        await nav.share({ title: `${name} on Fignda`, text: `Find hidden words with @${handle} on Fignda.`, url });
+        await nav.share({ title: `${name} on Gazecraft`, text: `Find hidden words with @${handle} on Gazecraft.`, url });
         return;
       } catch {
         /* cancelled: fall back to copy */
@@ -110,11 +110,8 @@ export function SocialActions({
 
   return (
     <div className={styles.ownActions}>
-      {own ? (
-        <Button variant="secondary" size="sm" to="/settings">
-          Settings
-        </Button>
-      ) : !auth.profile ? (
+      {/* Your own page: Settings is the one action in the page header. */}
+      {own ? null : !auth.profile ? (
         <Button variant="primary" size="sm" to={`/signin?next=${encodeURIComponent(`/u/${handle}`)}`}>
           Follow
         </Button>

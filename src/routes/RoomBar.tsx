@@ -26,7 +26,7 @@ export function RoomBar({ code, peers, path, status, me, you, gameId }: Props) {
   const invite = async () => {
     try {
       if (navigator.share) {
-        await navigator.share({ title: 'Fignda', text: 'Find them with me on Fignda.', url });
+        await navigator.share({ title: 'Gazecraft', text: 'Find them with me on Gazecraft.', url });
         return;
       }
     } catch {

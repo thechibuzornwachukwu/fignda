@@ -1,6 +1,6 @@
-# Fignda handoff
+# Gazecraft handoff
 
-Fignda is a web game. Pick a topic, read a paragraph, find words buried across letters, spaces and punctuation ("a most" hides AMOS).
+Gazecraft is a web game. Pick a topic, read a paragraph, find words buried across letters, spaces and punctuation ("a most" hides AMOS).
 
 ## Read in this order
 1. `CLAUDE.md` rules. Copy to repo root.

@@ -18,10 +18,15 @@
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
-.progress {
-  flex: 1;
+.left {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 .time {
+  margin-left: auto;
   font-size: 13px;
   font-weight: 600;
   color: var(--subtle);

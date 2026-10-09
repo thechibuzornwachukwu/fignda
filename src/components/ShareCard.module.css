@@ -1,4 +1,4 @@
-/* Share cards are drawn at 1080 wide. Sizes here are card pixels, from the prototype (Fignda Card). */
+/* Share cards are drawn at 1080 wide. Sizes here are card pixels, from the prototype (Gazecraft Card). */
 
 .frame {
   position: relative;
@@ -30,11 +30,6 @@
   align-items: center;
   gap: 18px;
   color: var(--fg);
-}
-.word {
-  font-size: 42px;
-  font-weight: 800;
-  letter-spacing: -0.035em;
 }
 .topEnd {
   display: flex;

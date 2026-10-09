@@ -1,4 +1,4 @@
-// Fignda live copy. One source for every in-game line. Picks by context, never repeats back to back.
+// Gazecraft live copy. One source for every in-game line. Picks by context, never repeats back to back.
 (function () {
   const P = {
     found: ['{w}. Nice.', '{w}. Got it.', 'There it is. {w}.', '{w}. Sharp.', 'Yes. {w}.', '{w}, spotted.', 'Clean find. {w}.'],
@@ -18,7 +18,11 @@
     titleGood: ['Good run.', 'Solid finding.', 'Most of them. Nice.'],
     titleLow: ['Nice try.', 'They hid well today.', 'Tough one.'],
     titleZero: ['They all got away.', 'Next time.'],
-    genFail: ['That topic hid too well. Even from us. Try again?', 'We looked everywhere. The words got away. One more go?', 'Nothing hiding there yet. Try a different angle.', 'Our monocle fogged up. Give it another try.']
+    genFail: ['That topic hid too well. Even from us. Try again?', 'We looked everywhere. The words got away. One more go?', 'Nothing hiding there yet. Try a different angle.', 'Our monocle fogged up. Give it another try.'],
+    genLimit: ['That is enough puzzles for now. Try again in {t}.', 'You have made plenty for now. Try again in {t}.'],
+    genOffline: ['You are offline. Check your connection, then try again.', 'No connection. Your words are still here. Try again when you are back.'],
+    waiting: ['Getting it ready.', 'One moment.', 'Still working on it.', 'Nearly there.', 'This one takes a little longer.', 'Hang on. It is coming.', 'Putting the last pieces in place.', 'Thanks for waiting.', 'Not stuck. Just careful.'],
+    waitingMake: ['Making your puzzle.', 'Making your puzzle. This can take a few minutes.', 'Hiding the words. Keep this page open.', 'Writing the paragraph. Take a breath.', 'Tucking words between other words.', 'Checking every word is really hidden.', 'Still making your puzzle. Keep this page open.', 'Good hiding places take a moment.', 'Not stuck. Just hiding things carefully.', 'Your puzzle is on its way.']
   };
   const last = {};
   function pick(key, vars) {
@@ -52,5 +56,5 @@
     if (found === 0) return pick('titleZero');
     return pick(found >= total / 2 ? 'titleGood' : 'titleLow');
   }
-  window.FigndaCopy = { POOLS: P, pick, onFound, isClose, resultTitle };
+  window.GazecraftCopy = { POOLS: P, pick, onFound, isClose, resultTitle };
 })();

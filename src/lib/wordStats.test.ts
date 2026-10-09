@@ -8,10 +8,27 @@ describe('rarestFound', () => {
     expect(rarestFound(stats, ['amos', 'habakkuk', 'mark'])).toEqual({ key: 'habakkuk', pct: 8 });
   });
 
-  it('says nothing about words the player missed, or common ones', () => {
-    expect(rarestFound([stat('obadiah', 2), stat('amos', 90)], ['amos'])).toBeNull();
-    expect(rarestFound([stat('amos', 51)], ['amos'])).toBeNull();
-    expect(rarestFound([stat('amos', 50)], ['amos'])).toEqual({ key: 'amos', pct: 50 });
+  it('says nothing about words the player missed', () => {
+    expect(rarestFound([stat('obadiah', 2), stat('amos', 90)], ['amos'])).toEqual({ key: 'amos', pct: 90 });
+    expect(rarestFound([stat('obadiah', 2)], ['amos'])).toBeNull();
+  });
+
+  it('a common word is still the rarest you found', () => {
+    expect(rarestFound([stat('amos', 51)], ['amos'])).toEqual({ key: 'amos', pct: 51 });
+    expect(rarestFound([stat('amos', 100), stat('mark', 100)], ['amos', 'mark'])).toEqual({ key: 'amos', pct: 100 });
+  });
+
+  it('is empty with nothing found', () => {
+    expect(rarestFound([stat('amos', 30)], [])).toBeNull();
+  });
+
+  it('never says a share that is not a number, and never over 100%', () => {
+    expect(rarestFound([stat('amos', NaN)], ['amos'])).toBeNull();
+    expect(rarestFound([stat('amos', 3, NaN)], ['amos'])).toBeNull();
+    expect(rarestFound([stat('amos', 0, 0)], ['amos'])).toBeNull();
+    expect(rarestFound([stat('amos', -2)], ['amos'])).toBeNull();
+    expect(rarestFound([stat('amos', 9, 6)], ['amos'])).toEqual({ key: 'amos', pct: 100 });
+    expect(rarestFound([{ key: 'amos' } as never], ['amos'])).toBeNull();
   });
 
   it('needs enough players for a percentage to mean something', () => {

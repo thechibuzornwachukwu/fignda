@@ -1,4 +1,7 @@
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { createCopy, POOLS, type PoolKey } from '.';
+import { BANNED_CLAIMS } from './claims';
 
 const keys = Object.keys(POOLS) as PoolKey[];
 
@@ -40,6 +43,27 @@ describe('pick', () => {
         expect(line).not.toMatch(/—/); // em dash
         expect(line).not.toMatch(/!/);
       }
+  });
+});
+
+describe('the promise', () => {
+  it('no pool line claims a result', () => {
+    for (const k of keys) for (const line of POOLS[k]) expect(line, k).not.toMatch(BANNED_CLAIMS);
+  });
+
+  it('no screen or component claims a result', () => {
+    for (const dir of ['src/routes', 'src/components']) {
+      for (const f of readdirSync(dir).filter((n) => n.endsWith('.tsx') && !n.includes('.test.'))) {
+        // Comments are not read by players.
+        const src = readFileSync(join(dir, f), 'utf8').replace(/\/\*[\s\S]*?\*\/|\/\/.*$/gm, '');
+        expect(src, f).not.toMatch(BANNED_CLAIMS);
+      }
+    }
+  });
+
+  it('run and reminder lines talk about today, not about what would be lost', () => {
+    const lines = (['remind', 'remindStreak', 'remindFriend', 'streakKeep', 'streakDay', 'streakStart', 'doneToday'] as const).flatMap((k) => POOLS[k]);
+    for (const line of lines) expect(line).not.toMatch(/\b(lose|lost|losing|keep it|needs? today|do not break|don't break|miss out|last chance)\b/i);
   });
 });
 

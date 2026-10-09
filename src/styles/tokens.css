@@ -1,4 +1,4 @@
-/* Fignda tokens. Single source. Components read var(--*) only; never hard-code hex.
+/* Gazecraft tokens. Single source. Components read var(--*) only; never hard-code hex.
    Manrope and Bungee are self-hosted via @fontsource (imported in src/main.tsx), no third-party font request. */
 
 :root, [data-theme="dark"] {
@@ -71,7 +71,7 @@
   --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px; --space-12: 48px; --space-14: 56px; --space-18: 72px; --space-20: 80px; --space-24: 96px; --space-30: 120px;
   --page-max: 1200px; --gutter: 24px;
   --dur-fast: 150ms; --dur-base: 200ms; --dur-slow: 250ms; --dur-slower: 400ms;
-  --ease-std: ease; --ease-out: cubic-bezier(.2,.8,.2,1);
+  --ease-std: ease; --ease-out: cubic-bezier(.23,1,.32,1);
   --icon-stroke: 1.75;
   --tabbar-h: 64px; /* Phone dock height, above the safe area */
   --tabbar-disc: 60px; --tabbar-disc-icon: 24px; /* The raised daily button and its icon */
@@ -106,11 +106,27 @@
   --dur-flip: 420ms;        /* WordList reorder, other rows */
   --dur-connect: 220ms;    /* Tap first, tap last: the whole range shows before it is checked. Not motion, so it stays under reduced motion */
   --dur-flip-lead: 520ms;   /* WordList reorder, found row */
+  /* Waiting screen, SPEC section 8. The only loop outside the landing. */
+  --dur-bob: 1600ms;        /* Avatar, one way */
+  --dur-bounce: 1200ms;     /* Dots, one full cycle */
+  --dur-bounce-step: 160ms; /* Each dot starts this long after the last */
+  --ease-loop: cubic-bezier(.45,0,.55,1);
+  --z-cover: 12;            /* Full waiting screen: above the tab bar, below the header */
+  /* The journey, SPEC sections 6 and 8. */
+  --journey-stop: 64px; --journey-stop-big: 80px; /* A stop, and the last stop of a chapter */
+  --journey-sway: clamp(24px, 8vw, 44px);          /* One step left or right on the winding line */
+  --journey-pitch: 148px;   /* Least height of one stop row: the hop's drop */
+  --journey-label: 120px;   /* Widest a title under a stop may run */
+  --dur-hop: 520ms;         /* Avatar to the next stop. Once per finished stop */
+  --dur-star: 220ms;        /* One star popping in */
+  --dur-star-step: 140ms;   /* Each star starts this long after the last */
 }
 @media (prefers-reduced-motion: reduce) {
   :root {
     --dur-fast: 0ms; --dur-base: 0ms; --dur-slow: 0ms; --dur-slower: 0ms;
     --dur-letter: 0ms; --dur-clock: 0ms; --dur-flip: 0ms; --dur-flip-lead: 0ms;
+    --dur-bob: 0ms; --dur-bounce: 0ms; --dur-bounce-step: 0ms;
+    --dur-hop: 0ms; --dur-star: 0ms; --dur-star-step: 0ms;
   }
 }
 html, body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); -webkit-font-smoothing: antialiased; }

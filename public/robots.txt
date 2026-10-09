@@ -1,4 +1,4 @@
-# Search engines and AI assistants are welcome to read and cite Fignda's public pages.
+# Search engines and AI assistants are welcome to read and cite Gazecraft's public pages.
 User-agent: *
 Allow: /
 Disallow: /account

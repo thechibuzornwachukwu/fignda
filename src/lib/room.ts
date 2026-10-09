@@ -132,7 +132,7 @@ async function realtimeRoom(code: string, me: Peer, h: RoomHandlers): Promise<Ro
 
 /** Test transport: same messages over BroadcastChannel, with hello/here/bye standing in for presence. */
 function localRoom(code: string, me: Peer, h: RoomHandlers): Room {
-  const bc = new BroadcastChannel(`fignda-room-${code}`);
+  const bc = new BroadcastChannel(`gazecraft-room-${code}`);
   const others = new Map<string, Peer>();
   let away = false;
   let stats: RoomStats = { finds: 0, hints: 0, pace: 0 };

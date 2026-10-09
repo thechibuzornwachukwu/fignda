@@ -1,4 +1,4 @@
-/* Fignda tokens. Single source. Components read var(--*) only; never hard-code hex. */
+/* Gazecraft tokens. Single source. Components read var(--*) only; never hard-code hex. */
 @import url('https://fonts.googleapis.com/css2?family=Bungee&family=Manrope:wght@400;500;600;700;800&display=swap');
 
 :root, [data-theme="dark"] {
@@ -68,11 +68,14 @@
   --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px; --space-12: 48px; --space-14: 56px; --space-18: 72px; --space-20: 80px; --space-24: 96px; --space-30: 120px;
   --page-max: 1200px; --gutter: 24px;
   --dur-fast: 150ms; --dur-base: 200ms; --dur-slow: 250ms; --dur-slower: 400ms;
-  --ease-std: ease; --ease-out: cubic-bezier(.2,.8,.2,1);
+  --ease-std: ease; --ease-out: cubic-bezier(.23,1,.32,1);
+  --dur-bob: 1600ms; --dur-bounce: 1200ms; --dur-bounce-step: 160ms; --ease-loop: cubic-bezier(.45,0,.55,1); /* Waiting screen */
   --icon-stroke: 1.75;
+  --journey-stop: 64px; --journey-stop-big: 80px; --journey-sway: clamp(24px, 8vw, 44px); --journey-pitch: 148px; --journey-label: 120px; /* The journey */
+  --dur-hop: 520ms; --dur-star: 220ms; --dur-star-step: 140ms; /* The journey: avatar hop, stars */
 }
 @media (prefers-reduced-motion: reduce) {
-  :root { --dur-fast: 0ms; --dur-base: 0ms; --dur-slow: 0ms; --dur-slower: 0ms; }
+  :root { --dur-fast: 0ms; --dur-base: 0ms; --dur-slow: 0ms; --dur-slower: 0ms; --dur-bob: 0ms; --dur-bounce: 0ms; --dur-bounce-step: 0ms; --dur-hop: 0ms; --dur-star: 0ms; --dur-star-step: 0ms; }
 }
 html, body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); -webkit-font-smoothing: antialiased; }
 *, *::before, *::after { box-sizing: border-box; }

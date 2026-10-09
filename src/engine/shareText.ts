@@ -37,7 +37,7 @@ export type ShareTextInput = {
 };
 
 export function shareText(i: ShareTextInput): string {
-  const head = i.daily ? `Fignda Daily #${i.daily}` : `Fignda · ${i.title}`;
+  const head = i.daily ? `Gazecraft Daily #${i.daily}` : `Gazecraft · ${i.title}`;
   const count = i.daily ? `${i.found} found` : `${i.found}/${i.total}`;
   const shown = i.marks.slice(0, MAX_MARKS);
   const rows: string[] = [];

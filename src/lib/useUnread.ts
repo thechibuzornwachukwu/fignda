@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { fetchUnread } from './api';
 import { useAuth } from './auth';
 
-const READ = 'fignda:notifications-read';
+const READ = 'gazecraft:notifications-read';
 
 /** Tell the header the list has been read, so the count clears without a reload. */
 export const announceRead = () => window.dispatchEvent(new Event(READ));

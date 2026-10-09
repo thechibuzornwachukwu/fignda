@@ -7,6 +7,7 @@ import { Button } from './Button';
 import { Header } from './Header';
 import { Icon } from './Icon';
 import { Logo } from './Logo';
+import { LOGO_G, LOGO_REST, LOGO_SHADE } from './logoPaths';
 import { TextLink } from './TextLink';
 import { ThemeToggle } from './ThemeToggle';
 import { THEME_KEY } from '../lib/theme';
@@ -43,13 +44,14 @@ describe('Icon', () => {
 });
 
 describe('Logo', () => {
-  it('renders the mark with the exact spec path', () => {
+  it('renders the wordmark from the spec paths, lime on the shade only', () => {
     const { container } = render(<Logo />);
-    expect(container.querySelector('path')!.getAttribute('d')).toBe(
-      'M40 30V14a10 10 0 0 1 10-10h3M40 20h12M40 30v15a11 11 0 0 1-11 11h-5',
-    );
-    expect(container.querySelector('circle')!.getAttribute('fill')).toBe('var(--accent)');
-    expect(screen.getByText('fignda')).toBeInTheDocument();
+    const [shade, letters] = container.querySelectorAll('path');
+    expect(shade!.getAttribute('d')).toBe(LOGO_SHADE);
+    expect(shade!.getAttribute('fill')).toBe('var(--accent)');
+    expect(letters!.getAttribute('d')).toBe(LOGO_G + LOGO_REST);
+    expect(letters!.getAttribute('fill')).toBe('currentColor');
+    expect(screen.getByRole('img', { name: 'Gazecraft' })).toBeInTheDocument();
   });
 });
 

@@ -172,7 +172,7 @@ export function Circle() {
 
   const url = `${window.location.origin}/c/${info.code}`;
   const invite = async () => {
-    const text = `Join ${info.name} on Fignda. One puzzle a day, one table for us.`;
+    const text = `Join ${info.name} on Gazecraft. One puzzle a day, one table for us.`;
     try {
       if (navigator.share) {
         await navigator.share({ text, url });

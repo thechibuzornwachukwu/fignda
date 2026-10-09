@@ -1,4 +1,5 @@
 import { expect, test, type Page } from '@playwright/test';
+import { skipToName } from './helpers';
 
 // Runs against the local Supabase stack (`npm run db:start`). The app build reads
 // VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY from .env.local. Codes come from the local mail catcher.
@@ -48,6 +49,7 @@ async function signIn(page: Page, email: string, next = '') {
 }
 
 async function createProfile(page: Page, name: string, handle: string) {
+  await skipToName(page);
   await expect(page.getByRole('heading', { name: /What should\s*we call you\?/ })).toBeVisible();
   await page.getByLabel('Name').fill(name);
   await expect(page.getByLabel('Handle')).toHaveValue(name.split(' ')[0]!.toLowerCase());
@@ -56,7 +58,7 @@ async function createProfile(page: Page, name: string, handle: string) {
 }
 
 test('email code sign in, profile page, settings, sign out', async ({ page }) => {
-  const email = `e2e-${uid()}@test.fignda.local`;
+  const email = `e2e-${uid()}@test.gazecraft.local`;
   const handle = `ada_${uid()}`;
   await signIn(page, email, '/play/bible');
   await createProfile(page, 'Ada Obi', handle);
@@ -81,7 +83,7 @@ test('email code sign in, profile page, settings, sign out', async ({ page }) =>
 });
 
 test('a wrong code is refused', async ({ page }) => {
-  const email = `e2e-${uid()}@test.fignda.local`;
+  const email = `e2e-${uid()}@test.gazecraft.local`;
   await page.goto('/signin');
   await page.getByLabel('Email').fill(email);
   await page.getByRole('button', { name: 'Email me a code' }).click();
@@ -106,7 +108,7 @@ test('a bad email is caught before sending', async ({ page }) => {
 });
 
 test('next cannot redirect off site', async ({ page }) => {
-  const email = `e2e-${uid()}@test.fignda.local`;
+  const email = `e2e-${uid()}@test.gazecraft.local`;
   await signIn(page, email, '//evil.example');
   await createProfile(page, 'Eve', `eve_${uid()}`);
   await expect(page).toHaveURL(/\/play$/);
@@ -115,12 +117,14 @@ test('next cannot redirect off site', async ({ page }) => {
 test('handle rules and a taken handle', async ({ page, browser }) => {
   const taken = `tk_${uid()}`;
   const first = await browser.newPage();
-  await signIn(first, `e2e-${uid()}@test.fignda.local`);
+  await signIn(first, `e2e-${uid()}@test.gazecraft.local`);
   await createProfile(first, 'Tolu', taken);
-  await expect(first).toHaveURL(/\/play$/);
+  // A new player's first minute ends on today's daily.
+  await expect(first).toHaveURL(/\/d\/\d+$/);
   await first.close();
 
-  await signIn(page, `e2e-${uid()}@test.fignda.local`);
+  await signIn(page, `e2e-${uid()}@test.gazecraft.local`);
+  await skipToName(page);
   await expect(page.getByRole('heading', { name: /What should/ })).toBeVisible();
   await page.getByLabel('Name').fill('Tolu');
   for (const [h, msg] of [
@@ -142,26 +146,26 @@ test('guest dailies merge into the account on sign in', async ({ page }) => {
     const n = Math.floor((Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) - Date.UTC(2026, 0, 1)) / 864e5);
     const start = Date.now() - 120_000;
     localStorage.setItem(
-      `fignda-daily-${n}`,
+      `gazecraft-daily-${n}`,
       JSON.stringify({ found: [], hinted: [], hints: 0, misses: 0, hintLi: -1, streak: 0, lastFindAt: null, startAt: start, endAt: start + 60_000, resultTitle: 'Next time.' }),
     );
     return n;
   });
   expect(yesterday).toBeGreaterThan(0);
 
-  await signIn(page, `e2e-${uid()}@test.fignda.local`, '/account');
+  await signIn(page, `e2e-${uid()}@test.gazecraft.local`, '/account');
   await createProfile(page, 'Gbenga', `gb_${uid()}`);
   await expect(page).toHaveURL(/\/u\/gb_/);
 
   // Survives a wipe of this browser: the play now lives on the server.
-  await page.evaluate(() => localStorage.removeItem(Object.keys(localStorage).find((k) => k.startsWith('fignda-daily-'))!));
+  await page.evaluate(() => localStorage.removeItem(Object.keys(localStorage).find((k) => k.startsWith('gazecraft-daily-'))!));
   await page.reload();
   const played = page.getByText('Dailies', { exact: true }).locator('..');
   await expect(played).toContainText('1');
 });
 
 test('edit name, then delete the account', async ({ page }) => {
-  const email = `e2e-${uid()}@test.fignda.local`;
+  const email = `e2e-${uid()}@test.gazecraft.local`;
   await signIn(page, email, '/account');
   await createProfile(page, 'Kemi', `km_${uid()}`);
   await expect(page).toHaveURL(/\/u\/km_/);
@@ -188,5 +192,6 @@ test('edit name, then delete the account', async ({ page }) => {
 
   // Same email again is a brand new account.
   await signIn(page, email);
+  await skipToName(page);
   await expect(page.getByRole('heading', { name: /What should/ })).toBeVisible();
 });

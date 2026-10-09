@@ -58,7 +58,7 @@ describe('public community functions', () => {
     expect(Object.keys(data[0]).sort()).toEqual(
       ['best_streak', 'created_at', 'current_streak', 'dailies', 'followers', 'following', 'handle', 'name', 'perfect'].sort(),
     );
-    expect(JSON.stringify(data)).not.toMatch(/@test\.fignda\.local|[0-9a-f]{8}-[0-9a-f]{4}-/);
+    expect(JSON.stringify(data)).not.toMatch(/@test\.gazecraft\.local|[0-9a-f]{8}-[0-9a-f]{4}-/);
   });
 
   it('follower and following lists by handle', async () => {
@@ -134,7 +134,7 @@ describe('people to follow', () => {
     expect(data.length).toBeGreaterThan(0);
     expect(data.length).toBeLessThanOrEqual(50);
     expect(Object.keys(data[0]).sort()).toEqual(['followers', 'handle', 'mutuals', 'name', 'plays']);
-    expect(JSON.stringify(data)).not.toContain('@test.fignda.local');
+    expect(JSON.stringify(data)).not.toContain('@test.gazecraft.local');
     expect(data.every((r: { mutuals: number }) => Number(r.mutuals) === 0)).toBe(true);
   });
 
