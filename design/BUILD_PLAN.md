@@ -60,12 +60,8 @@ Six parts, from the six principles in `INSIGHTS.html`. Each is small enough to s
 **2a. The find itself (principle 1)**
 
 - [ ] Paragraphs worth reading: read the existing packs against `design/PUZZLE_STANDARD.md` and fix the worst. `giveaways` in `src/engine/giveaway.ts` flags bible, bnote, broad, nigeria, bpeople, world, afrobeats and eagles.
-- [ ] Player-made dailies with no person in the loop (the owner has no time to read them). Server done 9 Oct 2026: the `daily_candidates` view holds the rule (20 verified plays are counted as 20 different players other than the maker). Still to do: the join check in `isProfane`, and something that picks a daily from the view. A puzzle from `/make` becomes a daily candidate only when all of these hold:
-  - the word list and the paragraph pass `isProfane`, including every hidden word and every join;
-  - an AI safety check passes: vulgar, sexual, hateful, racist, violent, self-harm, and attacks on a named person. Use a free safety model first (Llama Guard on the Workers AI binding already in `worker/wrangler.toml`; confirm the model id and the free allowance), with the any-topic provider list as the fallback;
-  - players liked it: at least 20 verified plays and 80% "Good one";
-  - nobody has reported it.
-- [ ] Limits to say out loud: an AI check misses things, most of all local slang, in-jokes about real people, and words that are only rude in Pidgin, Yoruba, Igbo or Hausa. Add a local blocklist to `isProfane`, and treat the report rule as the real safety net.
+- [ ] Player-made dailies with no person in the loop: something that picks a daily from the `daily_candidates` view. The view already holds the rule (safety passed, 20 different players other than the maker, 80% "Good one", no reports, not hidden). Nothing reads it yet.
+- [ ] Limits to say out loud: an AI check misses things, most of all local slang and in-jokes about real people. The local blocklist (`worker/src/blocklistLocal.ts`) has 7 terms: read it and add to it. The report rule is the real safety net.
 
 **2b. Local, winnable competition (principle 2)**
 
@@ -83,7 +79,7 @@ Nothing is removed. Things appear when they mean something.
 **2d. Anticipation, not obligation (principle 4)**
 
 - [ ] Rest day: 1 a week, earned by playing 5 of the last 7 days, used by itself when a day is missed. Free. Never sold. The run line says so ("Rest day used. Your run holds.").
-- [ ] "Days this month" where the profile and the account show the run. It is on the games screen.
+- [ ] "Days this month" where the profile and the account show the run.
 - [ ] Friend streaks get the same rest day, shared.
 - [ ] No reward that looks like gambling: no spins, no chests, no paid chances.
 
@@ -91,7 +87,7 @@ Nothing is removed. Things appear when they mean something.
 **2f. Skill over attendance (principle 6)**
 
 - [ ] Keep all 13 badges. Add a skill family, shown first: Clean read, No-hint perfect, Long word (9 or more letters), Deep find (3 joins), Rare eye (a word under 10% found), Pack master (every puzzle in a pack perfect).
-- [ ] Personal records: best week, and a server copy so they follow the player across devices. The first 3 are on the result and the profile, in this browser only.
+- [ ] Personal records: best week, and a server copy so they follow the player across devices.
 - [ ] Sharp eye: the share of rare words you caught over your last 14 dailies, with a 14 day strip. This is the number that shows a player getting better.
 - [ ] Points also pay for skill: a clean read and a rare find add to the tally. Volume alone keeps counting as today.
 - [ ] A few avatar looks unlock from skill badges. Everything that helps someone look like themselves stays free and open.
@@ -113,8 +109,6 @@ The reasoning is in `INSIGHTS.html` sections 7 to 9. Done on 9 Oct 2026: the pho
 
 **3b. The first minute** (owner, 9 Oct 2026: onboarding is not great)
 
-Built 9 Oct 2026 (SPEC section 6, `/welcome`): a playable sentence first on a phone with one guided find, "Keep this score" at the first result, the character step ("This is you."), the outfit question, name and handle last, ending on today's daily. Still to do:
-
 - [ ] `e2e/onboarding.spec.ts`: a guest, a new signed in player and a returning player. Only the unit tests and the sign up path of the other specs cover the flow today.
 - [ ] Edge cases in a browser: one who leaves half way and returns, one who signs in on a second device, reduced motion, a 320px phone, a screen reader.
 - [ ] Push `20261009001000_profile_look.sql` before the site is deployed.
@@ -124,16 +118,14 @@ Built 9 Oct 2026 (SPEC section 6, `/welcome`): a playable sentence first on a ph
 
 The Games tab becomes a path the player travels, the way Duolingo's home is a path and not a list. It replaces the list as the first thing on the tab. It does not sit on top of it.
 
-- [ ] The chapter badge saved on the server. It shows in the browser today.
-- [ ] The daily stays apart: it is on the dock and at the top of the path, and it is never locked.
-- [ ] Nothing is lost: "All games" under the path opens today's list with its filters, every puzzle playable in any order. Finished ones show their stars.
-- [ ] Levels: one number that grows with points. Thresholds rise (level 2 at 500 points, then each level needs about 20% more). Shown on the profile, beside the avatar in rooms and boards, and on a level-up moment after a game. Names for bands of levels come from the promise (for example Skimmer, Reader, Spotter, Sharp eye, Hawk eye). Points already exist and already cannot be farmed by replays. (`<LevelBadge>` is built and tested, not mounted: it needs points from the server.)
+- [ ] The chapter badge saved on the server.
+- [ ] Levels from the server: a view over points with the thresholds of `src/engine/level.ts`. Then `<LevelBadge>` beside the avatar in rooms and boards.
 - [ ] Leagues: the weekly tables of 2b, with tiers. 5 tiers to start. About 20 players in a table, grouped each Monday within a tier. The week's score is the points earned that week from dailies and first clears on the path. Top 5 move up a tier, bottom 5 move down, the top tier keeps its top 3 on a wall. Decided on the server by the hourly job that already exists.
 - [ ] Keep leagues on the right side of principle 4: no message about dropping, a player can leave leagues in Settings, a week with no play moves nobody down more than 1 tier, and rest days (2d) apply.
 - [ ] More stops need more puzzles. New chapters come from puzzles that passed the daily candidate rule (2a), so the path grows without anyone writing to order.
-- [ ] Guests travel the path too, saved in the browser, and it moves to the account on sign in. Levels and leagues need sign in. (Guests travel the path from browser storage: done. Moving it to the account on sign in: to do.)
-- [ ] The level-up moment after a game: `<LevelBadge>` has the fill. Mount it on the result once levels come from the server.
-- [ ] Edge cases: a player with history before the path exists (their finished puzzles show as done, with stars worked out from their best verified play), every stop done, a chapter with a puzzle later removed, 2 devices with different guest progress on sign in, a table with fewer than 5 players (nobody moves down), a tie on the cut line, the week turning over mid game. (Client done: history before the path, every stop done, a removed puzzle, an empty path, missing stars. Stars from verified plays, 2 devices on sign in and the league cases: server to do.)
+- [ ] A guest's path moves to the account on sign in. Leagues need sign in.
+- [ ] The level-up moment after a game, on the result, once levels come from the server.
+- [ ] Edge cases still open: stars worked out from the best verified play, 2 devices with different guest progress on sign in, a table with fewer than 5 players (nobody moves down), a tie on the cut line, the week turning over mid game.
 - [ ] Database: `journey_progress`, `levels` as a view over points, `leagues` and `league_weeks`. Migrations with RLS, written by the Worker only. Read `SECURITY.md` first.
 
 ### 4. Waiting screen with the player's avatar
@@ -157,7 +149,7 @@ Needed because a 1 to 5 minute request that dies with the page is fragile on pho
 
 How it works (decided 9 Oct 2026): `waitUntil` gives a Worker about 30 seconds after its answer, and a puzzle takes 1 to 2.5 minutes, so the slow call cannot hang off the POST. A Queue is not needed either. The POST (with `"background": true`) only writes the job. The page then opens `GET /api/generate/:id/run`, an ordinary long request that does the work and writes the result to the job, while asking `GET /api/generate/:id` every 5 seconds. Only one runner gets a job (a claim in the database, renewed every 20 seconds). If the page dies the claim goes stale after 60 seconds, the state says `run: true`, and the next visit opens `/run` again. Without the flag the POST waits as before, so the current screen keeps working until it is switched.
 
-- [ ] `GET /api/generate/:id` gives the state. The waiting screen asks every 5 seconds. Server done 9 Oct 2026. UI to do: the waiting screen (`startGenerate`, `runGenerateJob`, `getGenerateJob` in `src/lib/api.ts`).
+- [ ] The page uses the background job: `startGenerate`, `runGenerateJob` and `getGenerateJob` in `src/lib/api.ts`, asking every 5 seconds. The server side is in.
 - [ ] The job id is kept in the browser, so closing the tab or losing signal does not lose the puzzle. Coming back to `/play` picks the wait up again, or shows "Your puzzle is ready" with a link.
 
 ### 6. Make a puzzle takes over any-topic

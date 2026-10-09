@@ -3,6 +3,7 @@ import type { Session } from '@supabase/supabase-js';
 import { clearLocalCache, deleteAccount, fetchProfile, mergeGuestDailies, type Profile } from './api';
 import { moveGuestToAccount } from './firstMinute';
 import { disableReminder } from './push';
+import { storage } from './storage';
 import { getSupabase, needsAuthNow, onSupabaseReady, supabaseEnabled } from './supabase';
 
 type Auth = {
@@ -21,9 +22,25 @@ type Auth = {
 
 const AuthContext = createContext<Auth | null>(null);
 
+/** The last profile seen in this browser. A refresh shows the player at once, not "Sign in" for a moment. */
+const PROFILE_KEY = 'gazecraft-profile';
+
+function cachedProfile(): Profile | null {
+  const p = storage.getJSON<Partial<Profile>>(PROFILE_KEY);
+  return p && typeof p.id === 'string' && typeof p.name === 'string' && typeof p.handle === 'string'
+    ? { id: p.id, name: p.name, handle: p.handle, avatar: typeof p.avatar === 'string' ? p.avatar : null }
+    : null;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  // Only with a stored session: a kept profile with no session behind it is nobody.
+  const [profile, setProfileState] = useState<Profile | null>(() => (needsAuthNow() ? cachedProfile() : null));
+  const setProfile = useCallback((p: Profile | null) => {
+    setProfileState(p);
+    if (p) storage.setJSON(PROFILE_KEY, p);
+    else storage.remove(PROFILE_KEY);
+  }, []);
   // Guests with no stored session never load the auth client until a screen asks for it.
   const [loading, setLoading] = useState(() => needsAuthNow());
   const [checking, setChecking] = useState(false);
@@ -79,7 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       off();
       unsubscribe();
     };
-  }, []);
+  }, [setProfile]);
 
   const refreshProfile = useCallback(async () => {
     if (!session) return null;
@@ -89,7 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (p) await mergeGuestDailies().catch(() => {});
     setProfile(p);
     return p;
-  }, [session]);
+  }, [session, setProfile]);
 
   const signOut = useCallback(async () => {
     // Save any dailies played while signed in before the local copy goes.
@@ -100,7 +117,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearLocalCache();
     setSession(null);
     setProfile(null);
-  }, [profile]);
+  }, [profile, setProfile]);
 
   const remove = useCallback(async () => {
     await deleteAccount();

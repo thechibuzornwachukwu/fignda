@@ -14,7 +14,7 @@ const navCls = ({ isActive }: { isActive: boolean }) =>
   [styles.navLink, isActive && styles.active].filter(Boolean).join(' ');
 
 function AccountLink() {
-  const { profile } = useAuth();
+  const { profile, loading } = useAuth();
   const { pathname } = useLocation();
   if (profile) {
     const first = profile.name.split(/\s+/)[0];
@@ -26,6 +26,8 @@ function AccountLink() {
       </Link>
     );
   }
+  // A session is being read: nobody knows yet who this is, so the link does not guess "Sign in".
+  if (loading) return null;
   const next = pathname.startsWith('/signin') ? '' : `?next=${encodeURIComponent(pathname)}`;
   return (
     <Link to={`/signin${next}`} className={styles.account}>

@@ -82,6 +82,23 @@ test('email code sign in, profile page, settings, sign out', async ({ page }) =>
   await expect(page.getByRole('link', { name: 'Sign in' })).toBeVisible();
 });
 
+test('a refresh shows the player at once, never Sign in for a moment', async ({ page }) => {
+  await signIn(page, `e2e-${uid()}@test.gazecraft.local`, '/play');
+  await createProfile(page, 'Zainab', `zn_${uid()}`);
+  await expect(page.getByRole('link', { name: 'Zainab, your profile' })).toBeVisible();
+
+  // Watch the header from the first paint of the next load.
+  await page.addInitScript(() => {
+    (window as unknown as { sawSignIn: boolean }).sawSignIn = false;
+    new MutationObserver(() => {
+      if ([...document.querySelectorAll('header a')].some((a) => a.textContent?.trim() === 'Sign in')) (window as unknown as { sawSignIn: boolean }).sawSignIn = true;
+    }).observe(document, { childList: true, subtree: true });
+  });
+  await page.reload();
+  await expect(page.getByRole('link', { name: 'Zainab, your profile' })).toBeVisible();
+  expect(await page.evaluate(() => (window as unknown as { sawSignIn: boolean }).sawSignIn)).toBe(false);
+});
+
 test('a wrong code is refused', async ({ page }) => {
   const email = `e2e-${uid()}@test.gazecraft.local`;
   await page.goto('/signin');
