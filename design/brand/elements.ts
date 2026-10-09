@@ -79,12 +79,26 @@ export const watermark = (w: number, h: number, opacity = 0.1, scale = 1.25): st
   return `<g opacity="${faint}" transform="translate(${w - CAT_BOX[2] * k * 0.78} ${h - side * 0.86}) scale(${k}) translate(${-CAT_BOX[0]} ${-CAT_BOX[1]})">${cat}</g>`;
 };
 
-/** A tile of the cat's eyes, for a quiet repeating ground. */
-export const eyesPattern = (w: number, h: number, back: string, opacity = 0.5): string =>
-  `<svg ${X} width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><defs><pattern id="eyes" width="120" height="84" patternUnits="userSpaceOnUse" patternTransform="rotate(-8)">` +
-  `<g transform="translate(14 22) scale(.42)" fill="${LIME}" fill-opacity="${opacity}"><path d="M0 20c6-32 46-32 58 0-10 25-48 25-58 0z"/><path d="M70 20c6-32 46-32 58 0-10 25-48 25-58 0z"/></g>` +
-  `<g transform="translate(74 64) scale(.42)" fill="${LIME}" fill-opacity="${opacity * 0.55}"><path d="M0 20c6-32 46-32 58 0-10 25-48 25-58 0z"/><path d="M70 20c6-32 46-32 58 0-10 25-48 25-58 0z"/></g>` +
-  `</pattern></defs><rect width="${w}" height="${h}" fill="${back}"/><rect width="${w}" height="${h}" fill="url(#eyes)"/></svg>`;
+/**
+ * A tile of the cat's eyes, for a quiet repeating ground: pairs of lime almond eyes with slit pupils, looking
+ * out of the dark. Every pair sits whole inside its tile, so none is cut at a seam. One pair in three has
+ * the lowered lid of the logo.
+ */
+let patterns = 0;
+export const eyesPattern = (w: number, h: number, back: string, opacity = 0.5): string => {
+  const a = clamp(opacity, 0.15, 1);
+  // Each tile has its own id: two grounds on one page must not share a pattern.
+  const id = `eyes${patterns++}`;
+  /** One pair, 128 wide before scaling: two almonds, a pupil and a glint in each. */
+  const pair = (x: number, y: number, k: number, alpha: number, sly = false) =>
+    `<g transform="translate(${x} ${y}) scale(${k})"><g fill="${LIME}" fill-opacity="${alpha}"><path d="M0 22c6-32 46-32 58 0-10 25-48 25-58 0z"/><path d="M70 22c6-32 46-32 58 0-10 25-48 25-58 0z"/></g>` +
+    (sly ? `<path d="M66 -6l66 4v20q-30-18-64-10z" fill="${back}"/>` : '') +
+    `<g fill="${INK}" fill-opacity="${Math.min(1, alpha + 0.35)}"><ellipse cx="29" cy="19" rx="6.5" ry="15"/><ellipse cx="99" cy="${sly ? 23 : 19}" rx="6.5" ry="${sly ? 11 : 15}"/></g>` +
+    `<g fill="${WHITE}" fill-opacity="${alpha}"><circle cx="22" cy="10" r="4.4"/><circle cx="92" cy="${sly ? 17 : 10}" r="4.4"/></g></g>`;
+  return `<svg ${X} width="${w}" height="${h}" viewBox="0 0 ${w} ${h}"><defs><pattern id="${id}" width="190" height="132" patternUnits="userSpaceOnUse">` +
+    pair(18, 20, 0.5, a) + pair(112, 84, 0.42, a * 0.55, true) +
+    `</pattern></defs><rect width="${w}" height="${h}" fill="${back}"/><rect width="${w}" height="${h}" fill="url(#${id})"/></svg>`;
+};
 
 /** A rule with paw prints walking along it. */
 export const pawDivider = (w: number, ink: string): string => {

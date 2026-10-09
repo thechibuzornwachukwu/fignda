@@ -119,13 +119,15 @@ const html = `<!doctype html>
   figcaption { margin-top: 6px; font-size: 13px; color: var(--muted); }
   .row { display: flex; flex-wrap: wrap; gap: 16px 22px; align-items: flex-end; }
   .row.tight { gap: 8px 10px; margin-top: 14px; }
-  .row.four { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); align-items: start; }
+  .row.four { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); align-items: start; margin-bottom: 16px; }
   .row.tight figcaption { font-size: 11px; margin-top: 3px; }
   .on { border-radius: 16px; padding: 22px; border: 1px solid var(--line); display: grid; place-items: center; }
   .on.light { background: ${PAPER}; color: #111113; }
   .on.dark { background: ${NIGHT}; color: #ededee; }
   .on.cream { background: ${CREAM}; }
   .pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+  .pair.two { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 700px) { .pair.two { grid-template-columns: 1fr; } }
   .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
   .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; }
   .card ul { margin: 6px 0 0; padding-left: 18px; color: var(--muted); font-size: 15px; }
@@ -220,6 +222,8 @@ ${wordmark('currentColor', 44)}
     fig(character({ who: 'cat', hat: true, coat: true, monocle: true, size: 120, back: CREAM }), 'monocle'),
     fig(character({ who: 'cat', hat: true, coat: true, wave: true, size: 120, back: CREAM }), 'hello'),
   ])}
+  <h4>Every partner says hello</h4>
+  ${row(WHO.map((who) => fig(character({ who, hat: true, coat: true, wave: true, size: 120, back: CREAM }), CAST[who].name)))}
 </section>
 
 <section>
@@ -227,13 +231,18 @@ ${wordmark('currentColor', 44)}
   <h2>Elements</h2>
   <p class="sub">Pieces made from the logo and the cast, kept as files in <code>design/brand/elements</code>, ready to carry into the game.</p>
   <h4>A character with something to say</h4>
-  ${pair(keep('bubble-light', bubble('cat', 'calm', VOICE.cat.line)), keep('bubble-dark', bubble('robot', 'calm', VOICE.robot.line, true)))}
+  <div class="pair two">
+    ${WHO.map((who, i) => `<div class="on ${i % 2 ? 'dark' : 'light'}">${keep(`bubble-${who}`, bubble(who, who === 'dog' ? 'happy' : who === 'dino' ? 'stumped' : 'calm', VOICE[who].line, i % 2 === 1))}</div>`).join('')}
+  </div>
   <h4>Screen states</h4>
-  ${row(STATES.map(([name, mood, title, line]) => fig(keep(`state-${name}`, stateCard('cat', mood, title, line)), name)), 'four')}
+  <p class="sub">Each state in each character. The screen shows the player's own partner.</p>
+  ${WHO.map((who) => row(STATES.map(([name, mood, title, line]) => fig(keep(`state-${name}-${who}`, stateCard(who, mood, title, line)), `${name}, ${CAST[who].name.toLowerCase()}`)), 'four')).join('')}
   <h4>Case files</h4>
   ${row([
-    fig(keep('case-open', caseCard('The missing trophy', 'Case 3 · Football', 2, 5, 'cat')), 'open'),
-    fig(keep('case-closed', caseCard('The last reel', 'Case 2 · Nollywood', 5, 5, 'dog', true)), 'closed'),
+    fig(keep('case-open-cat', caseCard('The missing trophy', 'Case 3 · Football', 2, 5, 'cat')), 'open, cat'),
+    fig(keep('case-closed-dog', caseCard('The last reel', 'Case 2 · Nollywood', 5, 5, 'dog', true)), 'closed, dog'),
+    fig(keep('case-open-dino', caseCard('The lost bone', 'Case 7 · The past', 1, 4, 'dino')), 'open, dino'),
+    fig(keep('case-closed-robot', caseCard('The wrong sum', 'Case 5 · Numbers', 6, 6, 'robot', true)), 'closed, robot'),
   ])}
   <h4>Ranks and stamps</h4>
   ${row(RANKS.map((r, i) => fig(rankBadge(i, 96), r)).concat([fig(`<div class="on cream" style="padding:8px">${stamp('Case closed', '#111113', 120)}</div>`, 'stamp'), fig(`<div class="on dark" style="padding:8px">${stamp('Found', LIME, 120)}</div>`, 'stamp, dark')]))}

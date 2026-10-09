@@ -190,6 +190,11 @@ describe('brand elements', () => {
       sound(eyesPattern(w, 100, '#0d0d0e'));
       sound(pawDivider(w, '#111113'));
     }
+    // Two grounds on one page keep their own pattern, and every eye has a pupil.
+    const [one, two] = [eyesPattern(300, 150, '#0d0d0e'), eyesPattern(300, 150, '#454552')];
+    expect(/pattern id="(eyes\d+)"/.exec(one)![1]).not.toBe(/pattern id="(eyes\d+)"/.exec(two)![1]);
+    expect(two).toContain('fill="#454552"');
+    expect(one.match(/<ellipse /g)!.length).toBe(4);
     expect(pawDivider(20, '#111')).not.toContain('<g ');
     expect((pawDivider(480, '#111').match(/<g /g) ?? []).length).toBeGreaterThan(10);
   });
