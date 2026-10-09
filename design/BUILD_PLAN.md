@@ -4,13 +4,14 @@ What is left. Everything built so far is recorded in git history and `SPEC.md`. 
 
 Deploy: `npm run deploy:site`, `npm run deploy:api`. Database: `npx supabase db push`.
 Seed (after `npm run db:seed:gen`): `npx supabase db query --linked -f supabase/seed.sql`. `db push --include-seed` only records the file's hash, it does not run it.
-Not pushed or deployed yet: the migrations dated 20261009. Push them before `deploy:site`, since the profile query reads the new `plays.clean` column.
 
 ## Live
 
 Since 7 Oct 2026: room games on the Together board, holiday dailies, streak lines, friend streaks with invite links and nudges, room invites, points, the new player profile, "only 8% found", player-made puzzles, answers pages, 4 Naija packs.
 
 Since 8 Oct 2026: any-topic puzzles, and an avatar for every player in a room (guests and your own row included).
+
+Since 9 Oct 2026: the Gazecraft name and logo, the first minute for new players (`/welcome`), the journey path on the Games tab, one header on the 4 tabs, rings, the waiting screen, stars, skill lines and personal records on the result, clean reads, reports on player-made puzzles, the safety check, background puzzle jobs on the server.
 
 ## The promise
 
@@ -111,7 +112,6 @@ The reasoning is in `INSIGHTS.html` sections 7 to 9. Done on 9 Oct 2026: the pho
 
 - [ ] `e2e/onboarding.spec.ts`: a guest, a new signed in player and a returning player. Only the unit tests and the sign up path of the other specs cover the flow today.
 - [ ] Edge cases in a browser: one who leaves half way and returns, one who signs in on a second device, reduced motion, a 320px phone, a screen reader.
-- [ ] Push `20261009001000_profile_look.sql` before the site is deployed.
 - [ ] Measure: new visitors who finish one puzzle, and finished players who then sign in (INSIGHTS section 10). Nothing in the repo counts visits yet.
 
 **3c. The journey** (owner, 9 Oct 2026: the Games page feels boring)
