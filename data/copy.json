@@ -54,9 +54,14 @@
     "That one is yours"
   ],
   "hint": [
-    "One starts at the marked letter",
-    "Look at the marked letter",
-    "Start from the mark"
+    "One starts where the hand points",
+    "Look where the hand points",
+    "Start at the hand"
+  ],
+  "hintStill": [
+    "The hand is still on it",
+    "Same letter. One starts there",
+    "Still marked. Start at the hand"
   ],
   "tapNext": [
     "Now tap the last letter",

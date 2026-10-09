@@ -86,6 +86,17 @@ describe('session transitions', () => {
     expect(s.hintLi).toBe(-1);
   });
 
+  it('asking again while the hand is on the same letter costs nothing', () => {
+    const first = applyHint(newSession(0), mod.hint(bible, new Set()), copy);
+    const again = applyHint(first, mod.hint(bible, new Set()), copy);
+    expect(first.hints).toBe(1);
+    expect(again.hints).toBe(1);
+    expect(again.hintLi).toBe(first.hintLi);
+    // Once that word is found the next hint is a new one, and is charged.
+    const next = applyHint(pick(again, ...spanOf('amos')), mod.hint(bible, new Set(['amos'])), copy);
+    expect(next.hints).toBe(2);
+  });
+
   it('last find finishes and fixes the title', () => {
     let s = newSession(0);
     for (const a of bible.answers) s = pick(s, ...a.spans[0]!, { now: 5000 });

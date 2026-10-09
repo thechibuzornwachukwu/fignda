@@ -118,6 +118,8 @@ export function applyTeamFind(s: Session, ev: Evaluation, o: { now: number; tota
 
 export function applyHint(s: Session, target: { key: string; at: number } | null, copy: Copy): Session {
   if (isFinished(s) || !target) return s;
+  // The hand is already on this letter. Asking again says so and costs nothing.
+  if (s.hintLi === target.at) return { ...s, msg: copy.pick('hintStill') };
   return {
     ...s,
     hints: s.hints + 1,
@@ -260,7 +262,8 @@ export function useGameSession<P>({ mod, puzzle, dailyN, beforeHit, onHit, onFin
     const cur = ref.current;
     const found = new Set(cur.found.map((f) => f.key));
     const next = applyHint(cur, mod.hint(puzzle, found), copy);
-    commit(next === cur ? cur : withLog(next, cur, (l) => ({ ...l, hints: [...l.hints, Date.now() - cur.startAt] })));
+    // Only a hint that was charged goes in the play log, so the server counts what the player paid for.
+    commit(next.hints === cur.hints ? next : withLog(next, cur, (l) => ({ ...l, hints: [...l.hints, Date.now() - cur.startAt] })));
   };
 
   const finish = () => {

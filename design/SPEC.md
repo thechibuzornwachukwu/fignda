@@ -72,7 +72,7 @@ Two faces. Bungee (`--font-display`, 400 only, capitals only) for headings. Manr
 ## 5. The puzzle interaction
 Paragraph renders one span per character. Letters carry `li` (index in lowercase letter stream `S`). Non letters carry `prev` and `next`.
 
-**Letter states:** idle transparent · selecting `--sel`/`--sel-fg` · found `--accent`/`--on-accent` · missed (after finish) `--miss` · hint: whole letter, `--hint-bg` wash inside a 1.5px `--accent-ink` ring (selecting and found win the fill). A non letter takes the state when both neighbours share it, so "a most" is one bar. r4, padding 2 0.
+**Letter states:** idle transparent · selecting `--sel`/`--sel-fg` · found `--accent`/`--on-accent` · missed (after finish) `--miss` · hint: a 2px `--fg` ring around the letter over a `--hint-bg` wash, and a hand (Pointer at 0.62em of the puzzle type, about 12 on a phone and 17 on a desk, `--fg` on `--bg`) under it pointing up, small enough to sit between two lines. Selecting and found win the fill, and the ring and the hand still show on them, so a hint for a word that starts inside a found word is seen. A non letter takes the state when both neighbours share it, so "a most" is one bar. r4, padding 2 0.
 
 **Input**
 - Mouse/pen: drag (pointerdown starts, window pointermove extends via `elementFromPoint`, pointerup evaluates), or click first letter then last. After the first click the range follows the mouse. `user-select: none`.
@@ -91,7 +91,7 @@ Paragraph renders one span per character. Letters carry `li` (index in lowercase
 
 Streak resets on wrong pick and on hint. `onFound` picks: first find, last one left, every 3rd in a row, quick (<6s), long (8+ letters), else generic. Pools never repeat a line twice in a row.
 
-**Hint:** marks first letter of the earliest unfound answer, `hint` line, -25.
+**Hint:** marks first letter of the earliest unfound answer, `hint` line, -25. A hinted letter that is off screen, or under the header or the phone bar, is scrolled to the middle of the screen (smooth, or at once under reduced motion). Asked again while the hand is still on that letter: a `hintStill` line, no charge, nothing in the play log.
 **Finish:** "I'm done" or last find. Missed answers shade. Under the result actions, "What you missed" (h3): one missed word at a time, in reading order. Its name (13/600 `--subtle`) over the words it hides in at `puzzle` size in `--muted`, with the answer's letters on `--miss` in `--fg`, so AMOS shows "a mos" marked and "t" plain. With 2 or more: "1 of 4" and Previous / Next buttons (44 square, r8, 1px `--line-3`, ChevronLeft / ChevronRight at 18) that wrap around. No motion: it is stepped through often. Under it one `readPast` line when the player's own picks ran across any of them. Hidden when nothing was missed.
 **Clean read:** every word found by you, no hints, no wrong picks (near misses do not count; a room game with a teammate's find is not one). One `cleanRead` line under the result title. One rule, `cleanReadOf` in `src/engine/skill.ts`; the session only adds that the game is over. Wrong picks are counted in every game for this and scored only on the daily. Result title picked once from `titlePerfect|titleGood|titleLow|titleZero`, then fixed.
 **Result lines:** under the result title and its line, in this order, each only when it is true: stars, skill lines (2 at most), record lines (2 at most), rare find, the day's count, the run, `doneToday`. A helper with nothing true to say returns no line, so a game with 0 found or ended at once with "I'm done" shows the title, the line and the stats only (plus the run and `doneToday` on today's daily). Line helpers are pure and live in `src/games/resultLines.ts`.
@@ -263,6 +263,7 @@ Rules for any new motion (from Emil Kowalski's design engineering skill, linked 
 | Element | Transition |
 |---|---|
 | Letter | bg, color 180ms ease |
+| Hint hand | rises 6 and fades in once, `--dur-slow` `--ease-out`. It does not loop |
 | Tab bar | active pill pops from 0.8 scale, `--dur-slow` `--ease-out`; a pressed tab's pill scales to 0.9; the Daily disc sinks by `--ledge`, `--dur-fast` |
 | Word chip | bg, color 250ms ease |
 | GameRow hover | padding-left 0→12, color 250ms ease |
