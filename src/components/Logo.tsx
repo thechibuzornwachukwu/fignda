@@ -1,26 +1,32 @@
+import { createElement } from 'react';
 import styles from './Logo.module.css';
-import { LOGO_G, LOGO_REST, LOGO_SHADE, MARK_BOX, WORDMARK_BOX } from './logoPaths';
+import { CAT, CAT_BOX, CAT_IN_WORDMARK, WORDMARK_BOX } from '../brand/cat';
+import { LOGO_G, LOGO_REST } from './logoPaths';
 
 type Props = { height?: number; className?: string };
 
-/** The Gazecraft mark from SPEC section 1: the G on its lime shade. Never redraw. */
+/** SVG attribute names to React prop names (stroke-width to strokeWidth). */
+const toProps = (attrs: Record<string, string | number>) =>
+  Object.fromEntries(Object.entries(attrs).map(([k, v]) => [k.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase()), v]));
+const cat = () => CAT.map((s, i) => createElement(s.tag, { key: i, ...toProps(s.attrs) }));
+
+/** The Gazecraft mark from SPEC section 1: the cat. Never redraw. */
 export function LogoMark({ height = 30, className }: Props) {
   return (
     <svg
-      width={(height * MARK_BOX[2]) / MARK_BOX[3]}
+      width={(height * CAT_BOX[2]) / CAT_BOX[3]}
       height={height}
-      viewBox={MARK_BOX.join(' ')}
+      viewBox={CAT_BOX.join(' ')}
       aria-hidden="true"
       focusable="false"
       className={[styles.logo, className].filter(Boolean).join(' ')}
     >
-      <path d={LOGO_SHADE} fill="var(--accent)" />
-      <path d={LOGO_G} fill="currentColor" />
+      {cat()}
     </svg>
   );
 }
 
-/** The wordmark: GAZECRAFT with the mark as its first letter. Height includes the shade; capitals are 88% of it. */
+/** The wordmark: the cat, then GAZECRAFT. Capitals are 88% of the height. */
 export function Logo({ height = 22, className }: Props) {
   return (
     <svg
@@ -32,7 +38,7 @@ export function Logo({ height = 22, className }: Props) {
       focusable="false"
       className={[styles.logo, className].filter(Boolean).join(' ')}
     >
-      <path d={LOGO_SHADE} fill="var(--accent)" />
+      <g transform={CAT_IN_WORDMARK}>{cat()}</g>
       <path d={LOGO_G + LOGO_REST} fill="currentColor" />
     </svg>
   );

@@ -28,6 +28,8 @@ export type ShareGame = {
   path: string;
   /** Signed in: the sharer's handle. The link becomes a head-to-head challenge (`?vs=`). */
   vs?: string;
+  /** A sponsored puzzle: "With NAME" and the sponsor's site name. */
+  sponsor?: { line: string; host?: string };
 };
 
 export type ShareResult = {
@@ -82,6 +84,8 @@ export function ShareSheet({ open, onClose, game, result, player }: Props) {
       handle: player.handle ? `@${player.handle}` : undefined,
       previewW,
       hideCount: daily,
+      sponsor: game.sponsor?.line,
+      sponsorHost: game.sponsor?.host,
     };
     return kind === 'result'
       ? [resultCard({ ...base, title: game.title, score: result.score, hints: result.hints })]

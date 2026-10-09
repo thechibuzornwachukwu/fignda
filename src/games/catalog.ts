@@ -4,6 +4,7 @@ import raw from '../../data/games.json';
 import rawHolidays from '../../data/holidays.json';
 import { dailyGameId, holidayOn, type Calendar, type Holiday } from '../engine/daily';
 import { buildHiddenWords, type Difficulty, type HiddenWordsPuzzle } from '../engine/hiddenWords';
+import { sponsorOf, type Sponsor } from '../engine/sponsor';
 
 export type GameType = 'hidden-words';
 
@@ -20,6 +21,8 @@ export type GameDef = {
   expectedAnswers: string[];
   dict: string[];
   text: string;
+  /** The "With NAME" mark. Read it with `sponsorFor`, never directly. */
+  sponsor?: { name: string; url?: string };
 };
 
 type GamesFile = { filters: string[]; dailyPool: string[]; games: GameDef[] };
@@ -38,6 +41,10 @@ export const holidayFor = (n: number): Holiday | undefined => holidayOn(n, calen
 export function getGameDef(id: string): GameDef | undefined {
   return games.find((g) => g.id === id);
 }
+
+/** Who the puzzle is with, when its `sponsor` field passes the rule. Catalogue puzzles only: a player-made one never carries it. */
+export const sponsorFor = (def: Pick<GameDef, 'id' | 'sponsor'>): Sponsor | undefined =>
+  getGameDef(def.id) ? sponsorOf(def.sponsor) : undefined;
 
 const built = new Map<string, HiddenWordsPuzzle<GameDef>>();
 

@@ -8,7 +8,7 @@ import { Ring } from '../components/Ring';
 import { TextLink } from '../components/TextLink';
 import { WordList, type WordListHandle, type WordRow } from '../components/WordList';
 import { dayNo } from '../engine/daily';
-import { dailyPool, getGameDef, getPuzzle, type GameDef } from '../games/catalog';
+import { dailyPool, getGameDef, getPuzzle, sponsorFor, type GameDef } from '../games/catalog';
 import { dailyInfo, dailyLabel } from '../games/daily';
 import { registry } from '../games/registry';
 import { dayHidLine, playFacts, rareLine, recordLines, skillLines, starsUpLine, todayHoldsLine } from '../games/resultLines';
@@ -344,6 +344,12 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
     };
   }, [daily, settled, dailyN, auth.enabled]);
 
+  // A sponsored puzzle says who it is with on the result and the share card. Picked once.
+  const sponsor = useMemo(() => {
+    const w = sponsorFor(def);
+    return w ? { line: copy.pick('sponsorWith', { name: w.name }), url: w.url, host: w.host } : undefined;
+  }, [def]);
+
   const Board = mod.Board;
   const perfect = foundCount === total;
   const holiday = dailyN != null && dailyLabel(dailyN) !== 'Daily' ? dailyLabel(dailyN) : '';
@@ -427,6 +433,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
           records={ended?.records}
           day={dayLine}
           done={doneLine}
+          sponsor={sponsor}
         >
           <GameReveal items={reveal} past={pastLine} />
           {isToday && signedIn && <ReminderAsk />}
@@ -479,7 +486,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
         <ShareSheet
           open={sharing}
           onClose={() => setSharing(false)}
-          game={{ ...shareGame(def, puzzle.difficulty, dailyN), vs: auth.profile?.handle }}
+          game={{ ...shareGame(def, puzzle.difficulty, dailyN), vs: auth.profile?.handle, sponsor }}
           result={{
             answers: puzzle.answers.map((a) => {
               const f = s.found.find((x) => x.key === a.key);

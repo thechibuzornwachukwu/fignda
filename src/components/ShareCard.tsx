@@ -57,6 +57,17 @@ function Brand({ date, children }: { date: string; children?: ReactNode }) {
   );
 }
 
+/** "With NAME" and the sponsor's site name, under the title. */
+function With({ card }: { card: CardData }) {
+  if (!card.sponsor) return null;
+  return (
+    <div className={styles.with} data-with="">
+      <span>{card.sponsor}</span>
+      {card.sponsorHost && <span className={styles.withHost}>{card.sponsorHost}</span>}
+    </div>
+  );
+}
+
 function Footer({ card, line1, line2, cta }: { card: CardData; line1: string; line2: string; cta: string }) {
   return (
     <div className={styles.foot}>
@@ -111,6 +122,7 @@ function Result({ card, ref }: { card: ResultCardData; ref?: Ref<HTMLDivElement>
           <div className={styles.title} style={{ fontSize: card.titleSize }}>
             {card.title}
           </div>
+          <With card={card} />
         </div>
         <div className={styles.scoreRow}>
           <span ref={scoreRef} className={styles.score}>
@@ -177,6 +189,7 @@ function Puzzle({ card, onOverflow, ref }: { card: PuzzleCardData; onOverflow?: 
             {card.ptitle}
           </div>
         )}
+        {card.showTitle && <With card={card} />}
       </div>
       <div ref={textRef} className={styles.text} data-text="">
         {card.segs.map((s, i) => (

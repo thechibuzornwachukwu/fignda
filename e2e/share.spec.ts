@@ -118,10 +118,14 @@ test.describe('readability of every card', () => {
   test.describe.configure({ timeout: 240_000 });
   const ids = (gamesFile as { games: Array<{ id: string }> }).games.map((g) => g.id);
 
-  for (const id of ids) {
+  // The "With NAME" mark at its longest, on the longest puzzle and a short one.
+  const marked = ['bible&with=1', 'bnote&with=1'];
+
+  for (const id of [...ids, ...marked]) {
     test(id, async ({ page }) => {
       await page.setViewportSize({ width: 1200, height: 900 });
       await page.goto(`/__cards?game=${id}`);
+      if (id.endsWith('with=1')) await expect(page.locator('[data-with]').first()).toBeVisible();
       // The harness is lazy loaded: wait for real cards before measuring anything.
       await expect(page.locator('[data-harness-card]').first()).toBeVisible();
       await page.evaluate(() => document.fonts.ready);

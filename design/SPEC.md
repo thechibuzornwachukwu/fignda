@@ -1,19 +1,18 @@
 # Gazecraft spec
 
-Values are tokens from `tokens/tokens.css`. Prototype wins on visuals. This file wins on behaviour.
+Values are tokens from `src/styles/tokens.css`. Prototype wins on visuals. This file wins on behaviour.
 
 ## 1. Brand
 
 **Name:** Gazecraft. Two plain words fused, naming what you do. Looking closely is a craft you get better at, whether the puzzle is words, numbers, pictures or a board. In use: "Gazecraft level 12", "my Gazecraft league". One word, capital G only, in running text.
 
-**Logo** (`src/components/logoPaths.ts` holds the outlines; `design/brand-preview.png` shows the whole identity). Drawn from Bungee Regular, never typed, so it needs no font and stays sharp at any size. This section wins over the logo in the prototype files.
-- Mark: the Bungee G in ink on a lime block shade. The shade is the G swept 96 of 1000 font units down and left, the shadow of Bungee Shade. It reads as one letter found.
-- Wordmark: GAZECRAFT in Bungee Regular with the font's own spacing. Its G is the mark. No other letter takes a shade.
-- Ink is `currentColor` (`--fg`). The shade is `--accent` and is the only lime. One colour version: ink only, no shade.
-- Sizes are the height with the shade; capitals are 88% of it. Header wordmark 22; at 400 wide and under the mark alone, 28. Share card 52. Link preview 46. Email 24. Smallest wordmark 16, smallest mark 16.
-- Clear space: the width of the shade (96 units, about 12% of the height) on every side.
-- Other Bungee styles (Inline, Outline, Shade, Hairline) are not used: they fill in under 24px.
-- App icon: mark 62% high, centred, on `#0d0d0e`, radius 25%. Export 16, 32, 180, 512 (`npm run brand:render`).
+**Logo** (`src/brand/cat.ts` holds the cat and `src/components/logoPaths.ts` the letters; `design/brand/index.html` is the brand guide). Drawn, never typed, so it needs no font and stays sharp at any size. This section wins over the logo in the prototype files.
+- Mark: the cat. Dark fur, tall ears, lime almond eyes, one lid lowered, a crooked smile. It is the main character of `design/characters`, head only, no hat.
+- Wordmark: the cat, a gap, then GAZECRAFT in Bungee Regular with the font's own spacing. The letters are ink (`currentColor`, `--fg`). No letter takes a shade.
+- The cat's colours are fixed brand art, the same in both themes. Its eyes are the only lime in the logo.
+- Sizes are the height; capitals are 88% of it. Header wordmark 22; at 400 wide and under the mark alone, 28. Share card 52. Link preview 46. Email 24. Smallest wordmark 16, smallest mark 16.
+- Clear space: about 12% of the height on every side.
+- App icon: the cat's eyes up close, fur (`#454552`) to every edge, radius 25%. Export 32, 180, 512 (`npm run brand:render`). The 16 size is the SVG favicon.
 - Icons used: ArrowLeft, ArrowRight, ChevronLeft, ChevronRight, Contrast, Lightbulb, Clock, Flag, Search, Check, X, Bell, Award, MousePointer2, Pointer.
 
 ## 2. Type
@@ -124,6 +123,15 @@ Streak resets on wrong pick and on hint. `onFound` picks: first find, last one l
 **New player profile:** with no plays, the stats and the 14 day strip are replaced by one block: h2 ("Your run starts with one puzzle." on your own page, "NAME is new here." on another's), a line, and one button (accent "Play today's daily" on your own).
 
 **Rare find:** after a daily, one line under the result: the rarest word you found and the share of players who found it, every day at least 5 verified players are counted. `rareFind` ("Only 8% found...") when half or fewer found it, else `rarestFind`, which says the share plainly. No stats, fewer than 5 players or nothing found: no line. The share is never 0% and never over 100%.
+
+**With NAME (sponsored puzzles):** one field on a catalogue puzzle in `data/games.json`: `"sponsor": { "name": "Chi Farms", "url": "https://chifarms.example" }`. One rule reads it, `sponsorOf` in `src/engine/sponsor.ts`, and every screen goes through `sponsorFor`. The name is 2 to 40 characters once tidied (line breaks and invisible characters become a space). The link is optional and must be `https` with no name or password in it; a bad link leaves the name with no link, and a bad name is no sponsor. `npm test` fails on a sponsor in the file that the rule would drop. The mark is one line from the `sponsorWith` pool, "With NAME", in Manrope and `--muted`: never lime, never Bungee, never a logo or an image. It shows in 5 places and nowhere else:
+- Game row: its own line under the title (13/600), on `/play` and the landing list.
+- Daily card: under the title, on a day whose puzzle carries the field.
+- Result: the last line under the result title (14/600), then " · " and the sponsor's site name (the host, no "www.") as a link that opens in a new tab with `rel="sponsored noopener"`.
+- Share card: under the title on the result card and on the first page of a puzzle card, 30px `--muted`, the site name beside it in `--subtle`. An image has no links, so the site name is printed.
+- Link preview: one line above the question on the image (26px `--muted`), and "With NAME." as the last sentence of the description, the image text and the readable page. Run `npm run og:render` after adding or removing a sponsor.
+
+Everything else about a sponsored puzzle is the same as any puzzle: score, points, stars, boards, its place in the list and on the path. The field lives in the catalogue only. The database, the Worker and player-made puzzles never carry it, so nothing a player types can become a mark.
 
 **Make a puzzle:** `/make`, signed in (the action in the Games header after 5 plays). Title, What is hidden, Paragraph (60 to 900), Hidden words (4 to 20, 3 to 12 letters). Each word shows a check or a cross and why: Hidden, Not in your paragraph, In plain sight, Typed twice. Accent "Publish puzzle" opens `/p/CODE`. Below: Your puzzles (words, plays, liked it). Under the result of a player-made puzzle: "Made by @handle" and Good one / Not for me (one each, never your own).
 **Report:** on the same row, a TextLink "Report this puzzle" for signed in players, never on your own puzzle and never on one with no maker. One confirm step (Dialog: Cancel / Report), then one calm line in place of the link from `reportDone`, or `reportAgain` when the server says it was reported already (`reportPuzzle(code)`). A report that fails says `reportFailed` and keeps the link. 3 reports from different players hide a puzzle (BUILD_PLAN 2a).

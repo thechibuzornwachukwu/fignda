@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { Button } from '../components/Button';
 import { GameRow } from '../components/GameRow';
 import { TextLink } from '../components/TextLink';
-import { getPuzzle } from '../games/catalog';
+import { pick } from '../copy';
+import { getPuzzle, sponsorFor } from '../games/catalog';
 import { today } from '../games/daily';
 import { hasPlayed } from '../lib/firstMinute';
 import { useMediaQuery } from '../lib/media';
@@ -141,6 +142,7 @@ export function Landing() {
           <ul className={styles.games}>
             {PICKS.map(([id, name]) => {
               const p = getPuzzle(id)!;
+              const sponsor = sponsorFor(p);
               return (
                 <GameRow
                   key={id}
@@ -148,6 +150,7 @@ export function Landing() {
                   to={`/play/${id}`}
                   title={name}
                   meta={`${p.answers.length} words · ${p.difficulty}`}
+                  sponsor={sponsor ? pick('sponsorWith', { name: sponsor.name }) : undefined}
                 />
               );
             })}

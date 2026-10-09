@@ -1,0 +1,353 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gazecraft new plan</title>
+<style>
+  :root {
+    --bg: #f6f6f7; --surface: #ffffff; --surface-2: #ececef; --line: #d6d6db; --line-3: #c4c4ca;
+    --fg: #111113; --muted: #55555c; --subtle: #6a6a72;
+    --accent: #d4f04c; --on-accent: #0d0d0e; --accent-ink: #5a6b00;
+    --no: #a3261a; --no-bg: #fdecea;
+    --r: 12px; --ledge: 4px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0d0d0e; --surface: #151517; --surface-2: #1c1c1f; --line: #2a2a2f; --line-3: #34343a;
+      --fg: #ededee; --muted: #a1a1a8; --subtle: #7d7d85; --accent-ink: #d4f04c;
+      --no: #ff8a7a; --no-bg: #2a1512;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0d0d0e; --surface: #151517; --surface-2: #1c1c1f; --line: #2a2a2f; --line-3: #34343a;
+    --fg: #ededee; --muted: #a1a1a8; --subtle: #7d7d85; --accent-ink: #d4f04c;
+    --no: #ff8a7a; --no-bg: #2a1512;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 500 16px/1.5 Manrope, system-ui, "Segoe UI", sans-serif; }
+  main { max-width: 1120px; margin: 0 auto; padding: 40px 16px 96px; }
+  h1 { font-size: clamp(28px, 5vw, 44px); line-height: 1.05; margin: 0 0 8px; letter-spacing: -0.02em; font-weight: 800; }
+  h2 { font-size: 22px; line-height: 1.2; margin: 0 0 4px; font-weight: 800; letter-spacing: -0.01em; }
+  h3 { font-size: 15px; margin: 0 0 6px; font-weight: 800; }
+  p { margin: 0; }
+  section { margin-top: 56px; }
+  .lead { color: var(--muted); max-width: 64ch; }
+  .sub { color: var(--muted); margin-bottom: 16px; max-width: 70ch; }
+  .num { color: var(--subtle); font-weight: 800; font-size: 13px; letter-spacing: 0.04em; text-transform: uppercase; }
+
+  /* A row of steps joined by arrows. Wraps on a phone, and the arrows turn down. */
+  .flow { display: flex; flex-wrap: wrap; gap: 28px 34px; list-style: none; margin: 0; padding: 0; }
+  .flow > li { position: relative; flex: 1 1 150px; min-width: 0; }
+  .flow > li:not(:last-child)::after { content: "→"; position: absolute; right: -26px; top: 50%; translate: 0 -50%; color: var(--muted); font-size: 18px; font-weight: 800; }
+  .node { height: 100%; background: var(--surface); border: 1px solid var(--line-3); border-radius: var(--r); box-shadow: 0 var(--ledge) 0 var(--line-3); padding: 12px 14px; }
+  .node b { display: block; font-weight: 800; }
+  .node > span { display: block; color: var(--muted); font-size: 14px; }
+  .node.key { border-color: var(--fg); box-shadow: 0 var(--ledge) 0 var(--fg); }
+  .node.win { background: var(--accent); color: var(--on-accent); border-color: var(--on-accent); box-shadow: 0 var(--ledge) 0 var(--on-accent); }
+  .node.win > span { color: var(--on-accent); }
+  @media (max-width: 640px) {
+    .flow { flex-direction: column; gap: 30px; }
+    .flow > li { flex: none; }
+    .flow > li:not(:last-child)::after { content: "↓"; right: auto; left: 50%; top: auto; bottom: -27px; translate: -50% 0; }
+  }
+
+  .loop { margin-top: 12px; color: var(--muted); font-size: 14px; }
+  .loop b { color: var(--fg); }
+
+  .grid { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; min-width: 0; }
+  .card ul { margin: 0; padding-left: 18px; color: var(--muted); font-size: 15px; }
+  .card li { margin: 3px 0; }
+  .card li b { color: var(--fg); }
+  .card.no { background: var(--no-bg); border-color: var(--no); }
+  .card.no h3 { color: var(--no); }
+  .card.no ul { color: var(--fg); }
+
+  .tag { display: inline-block; font-size: 11px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 7px; border-radius: 6px; border: 1px solid var(--line-3); color: var(--muted); vertical-align: 1px; white-space: nowrap; }
+  .tag.live { background: var(--accent); color: var(--on-accent); border-color: var(--on-accent); }
+  .tag.next { border-color: var(--fg); color: var(--fg); }
+
+  .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface); }
+  table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 15px; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+  tr:last-child > * { border-bottom: 0; }
+  thead th { font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--subtle); background: var(--surface-2); }
+  tbody th { font-weight: 800; white-space: nowrap; width: 1%; }
+  td { color: var(--muted); }
+  td b { color: var(--fg); }
+  .xmas { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+
+  .uvp { background: var(--fg); color: var(--bg); border-radius: var(--r); padding: 22px; margin-top: 20px; }
+  .uvp p { font-size: clamp(18px, 2.6vw, 24px); font-weight: 800; line-height: 1.25; letter-spacing: -0.01em; }
+  .uvp small { display: block; margin-top: 8px; font-size: 14px; font-weight: 600; opacity: 0.75; }
+
+  .path { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin: 0; padding: 0; list-style: none; }
+  .stop { width: 76px; height: 76px; padding: 6px; border-radius: 50%; display: grid; place-items: center; text-align: center; font-size: 11px; font-weight: 800; line-height: 1.1; background: var(--surface); border: 1px solid var(--line-3); box-shadow: 0 var(--ledge) 0 var(--line-3); }
+  .stop.w { border-color: var(--fg); box-shadow: 0 var(--ledge) 0 var(--fg); }
+  .stop.big { width: 100px; height: 100px; background: var(--accent); color: var(--on-accent); border-color: var(--on-accent); box-shadow: 0 var(--ledge) 0 var(--on-accent); font-size: 12px; }
+  .dash { flex: 0 0 14px; height: 0; border-top: 2px dashed var(--line-3); }
+  .legend { margin-top: 12px; color: var(--muted); font-size: 14px; }
+  ol.order { margin: 0; padding-left: 22px; color: var(--muted); }
+  ol.order li { margin: 6px 0; }
+  ol.order b { color: var(--fg); }
+  footer { margin-top: 56px; color: var(--subtle); font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+
+<p class="num">Gazecraft, new plan, 9 Oct 2026</p>
+<h1>Every sitting is a clue. Every chapter is a case.</h1>
+<p class="lead">One page for what we build, what we sell, what we refuse, and what nobody can copy. Detail and order of work stay in <code>BUILD_PLAN.md</code>. Behaviour stays in <code>SPEC.md</code>.</p>
+
+<div class="uvp">
+  <p>A few minutes of real detective work, in place of scrolling. Something is hidden in plain sight. Look closer and uncover it.</p>
+  <small>One skill across every game: looking closely. Words today, numbers and shapes next. It ends, it is worth doing, it respects you.</small>
+</div>
+
+<!-- 1 -->
+<section>
+  <p class="num">1. Player flow</p>
+  <h2>From first visit to a daily habit</h2>
+  <p class="sub">Play first, account later. Nobody is asked for anything before they have found something.</p>
+  <ol class="flow">
+    <li><div class="node"><b>Arrive</b><span>A playable line, one guided find <span class="tag live">Live</span></span></div></li>
+    <li><div class="node"><b>First clue</b><span>3 to 5 minutes as a guest</span></div></li>
+    <li><div class="node key"><b>Keep this score</b><span>First time sign in is offered <span class="tag live">Live</span></span></div></li>
+    <li><div class="node"><b>This is you</b><span>Character, outfit question, name <span class="tag live">Live</span></span></div></li>
+    <li><div class="node"><b>Today's daily</b><span>One paragraph, count hidden</span></div></li>
+    <li><div class="node win"><b>Done for today</b><span>More is one tap away, never pushed</span></div></li>
+  </ol>
+  <p class="loop"><b>Each day after:</b> the daily (5 minutes), then one stop on the case if the player wants it. <b>Each week:</b> circle board, league table, rest day if earned.</p>
+</section>
+
+<!-- 2 -->
+<section>
+  <p class="num">2. Game flow</p>
+  <h2>One case, start to finish</h2>
+  <p class="sub">A chapter is a case file. Each stop is one short sitting and gives one piece of the secret. The last stop puts the pieces together.</p>
+  <ul class="path" aria-label="A case: five clue stops then the unmasking">
+    <li class="stop w">Word clue</li><li class="dash"></li>
+    <li class="stop w">Word clue</li><li class="dash"></li>
+    <li class="stop">Number clue</li><li class="dash"></li>
+    <li class="stop w">Word clue</li><li class="dash"></li>
+    <li class="stop">Shape clue</li><li class="dash"></li>
+    <li class="stop big">Unmask. Case closed</li>
+  </ul>
+  <p class="legend">Rhythm is fixed, not random: word, word, number, word, shape. The whole puzzle stays as the hard one for players who want it.</p>
+  <ol class="flow" style="margin-top:22px">
+    <li><div class="node"><b>Open the case</b><span>One line: what was hidden, and a masked culprit</span></div></li>
+    <li><div class="node"><b>Sitting</b><span>5 to 9 finds, saved if you leave, breaks cost nothing</span></div></li>
+    <li><div class="node"><b>Piece earned</b><span>Stars, a record, the case ring moves</span></div></li>
+    <li><div class="node key"><b>The secret</b><span>Built by the engine from what you found</span></div></li>
+    <li><div class="node win"><b>Unmasked</b><span>The culprit explains. Rank and outfit earned</span></div></li>
+  </ol>
+</section>
+
+<!-- 3 -->
+<section>
+  <p class="num">3. The cast</p>
+  <h2>Who hides things, and why</h2>
+  <div class="grid">
+    <div class="card"><h3>A new culprit each case</h3><ul>
+      <li>An ordinary character under a disguise, drawn with the avatar parts we have.</li>
+      <li>Tied to the chapter: a mascot head for football, a director for Nollywood.</li>
+      <li>Unmasking is the reward at the end.</li></ul></div>
+    <div class="card"><h3>One thread through all of them</h3><ul>
+      <li>Every culprit leaves the same calling card.</li>
+      <li>Someone taught them all to hide things. Never caught in a single case.</li></ul></div>
+    <div class="card"><h3>The tone rule</h3><ul>
+      <li><b>Motive is mischief, pride or a surprise. Never harm.</b></li>
+      <li>What is hidden is harmless: a trophy, a recipe, a hymn sheet.</li>
+      <li>For all ages. Accounts from 13. Younger players join on a parent's device or room.</li></ul></div>
+  </div>
+</section>
+
+<!-- 4 -->
+<section>
+  <p class="num">4. The games</p>
+  <h2>One skill, three families</h2>
+  <p class="sub">Number and shape games are made and checked by the engine, so they never run out. Word games need a written paragraph.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>Family</th><th>Game</th><th>How it plays</th><th>State</th></tr></thead>
+    <tbody>
+      <tr><th rowspan="5">Verbal</th><td><b>Hidden words</b></td><td>Words hidden across spaces in a paragraph</td><td><span class="tag live">Live</span></td></tr>
+      <tr><td><b>Mirror</b></td><td>Hidden words that read right to left</td><td><span class="tag next">Next</span></td></tr>
+      <tr><td><b>Liar</b></td><td>5 listed, 4 hidden. Call the one that is not there</td><td><span class="tag">Later</span></td></tr>
+      <tr><td><b>Relay</b></td><td>The last letter of a find starts the next</td><td><span class="tag">Later</span></td></tr>
+      <tr><td><b>Unmask</b></td><td>Reveal a phrase letter by letter. The case finale</td><td><span class="tag next">Next</span></td></tr>
+      <tr><th rowspan="2">Quantitative</th><td><b>Buried sums</b></td><td>Runs of digits that add up to a target</td><td><span class="tag next">Next</span></td></tr>
+      <tr><td><b>Number series</b></td><td>One number breaks the rule. Spot it</td><td><span class="tag">Later</span></td></tr>
+      <tr><th rowspan="2">Non-verbal</th><td><b>Odd one out</b></td><td>A row of shapes, one differs by a detail</td><td><span class="tag next">Next</span></td></tr>
+      <tr><td><b>Trace</b></td><td>Shapes buried in a grid, with decoys</td><td><span class="tag">Later</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 5 -->
+<section>
+  <p class="num">5. Holidays</p>
+  <h2>A Christmas case beside any other case</h2>
+  <p class="sub">Holidays dress the whole game for a while, the way endless runners do, and bring one special case. The case arrives on the date and never leaves.</p>
+  <div class="scroll"><table>
+    <thead><tr><th></th><th>Any case</th><th class="xmas">Christmas case</th></tr></thead>
+    <tbody>
+      <tr><th>When it opens</th><td>When the case before it is closed</td><td class="xmas"><b>On the date</b>, for everyone, whatever case they are on</td></tr>
+      <tr><th>Where it sits</th><td>On the main path, in order</td><td class="xmas">Beside the path. It never blocks or replaces the player's case</td></tr>
+      <tr><th>Length</th><td>4 to 6 stops and the whole puzzle</td><td class="xmas">3 to 5 stops, playable across the week</td></tr>
+      <tr><th>Culprit and secret</th><td>From the chapter's theme: who hid the trophy</td><td class="xmas">From the season: who hid the star from the top of the tree</td></tr>
+      <tr><th>Look</th><td>The normal game</td><td class="xmas">Seasonal dress for the path, dock and avatars. Snow, lights. Off under reduced motion</td></tr>
+      <tr><th>Reward</th><td>Rank, case badge, a detective outfit piece</td><td class="xmas">A seasonal outfit piece and a case badge with the year</td></tr>
+      <tr><th>After the date</th><td>Stays on the path</td><td class="xmas"><b>Moves to the case archive, playable forever.</b> The outfit can still be earned</td></tr>
+      <tr><th>Daily that day</th><td>The rotation</td><td class="xmas">"Christmas daily" <span class="tag live">Live</span></td></tr>
+      <tr><th>Sponsor</th><td>Any time of year, marked "With NAME"</td><td class="xmas">The same, plus the seasonal dress</td></tr>
+    </tbody>
+  </table></div>
+  <p class="legend">Calendar: Christmas week, New Year, Easter, Eid, Independence Day (1 Oct), Children's Day, Halloween, Valentine's. Dates live in <code>data/holidays.json</code>.</p>
+</section>
+
+<!-- 6 -->
+<section>
+  <p class="num">6. Progress</p>
+  <h2>What a player earns, and for what</h2>
+  <div class="scroll"><table>
+    <thead><tr><th>Earned</th><th>For</th><th>State</th></tr></thead>
+    <tbody>
+      <tr><th>Stars, 1 to 3</th><td>Finishing, finding 80%, a clean read with no hints</td><td><span class="tag live">Live</span></td></tr>
+      <tr><th>Personal records</th><td>Fastest clean read, most in a daily, longest word</td><td><span class="tag live">Live</span></td></tr>
+      <tr><th>Run and rest day</th><td>Days played. 1 free rest day a week, earned by playing 5 of 7. Duolingo found slack keeps more people playing, not fewer</td><td><span class="tag next">Next</span></td></tr>
+      <tr><th>Rank</th><td>Points. Rookie, Detective, Inspector, Chief</td><td><span class="tag next">Next</span></td></tr>
+      <tr><th>Skill badges</th><td>Clean read, long word, deep find, rare eye</td><td><span class="tag next">Next</span></td></tr>
+      <tr><th>Outfits</th><td>Closing cases and rising in rank. Looking like yourself stays free</td><td><span class="tag next">Next</span></td></tr>
+      <tr><th>Crowns</th><td>First in your circle to find a word today</td><td><span class="tag next">Next</span></td></tr>
+      <tr><th>League</th><td>Weekly table of about 20, 5 tiers, no message about dropping</td><td><span class="tag">Later</span></td></tr>
+    </tbody>
+  </table></div>
+  <h3 style="margin-top:28px">Points: one currency, learned from Duolingo's XP</h3>
+  <div class="scroll"><table>
+    <thead><tr><th>Rule</th><th>What we do</th><th>What it avoids</th></tr></thead>
+    <tbody>
+      <tr><th>One currency</th><td>Points only. They raise rank and fill the weekly table. No gems, no second coin</td><td>An economy nobody can explain</td></tr>
+      <tr><th>Skill pays more</th><td>Base points per find, plus fixed bonuses for a clean read, no hints and a rare find</td><td>Volume beating skill</td></tr>
+      <tr><th>No farming</th><td>A first clear pays in full. A replay pays only the improvement. Unverified plays pay nothing <span class="tag live">Live</span></td><td>Easy puzzles repeated to win a table</td></tr>
+      <tr><th>A goal you choose, apart from the run</th><td>Light, Regular or Keen: 1, 2 or 4 sittings a day. The run needs only the daily. Missing the goal costs nothing</td><td>Duolingo split goal from streak and day 14 retention rose 3.3%</td></tr>
+      <tr><th>Two tallies</th><td>Lifetime points set rank and never drop. Weekly points set the league and reset on Monday</td><td>Losing what you earned</td></tr>
+      <tr><th>No boosts</th><td>No double-points timers, no paid multipliers, no potions</td><td>Grinding against a clock, pay to win</td></tr>
+      <tr><th>A week has a ceiling</th><td>Weekly points come only from dailies and first clears. Both are finite</td><td>Sunday night sniping, and the cheating that Duolingo's open-ended tables drew</td></tr>
+      <tr><th>A skill number beside points</th><td>Sharp eye: the share of rare words you caught in your last 14 dailies</td><td>Points that measure time spent. Duolingo is moving some courses from XP to a Score for this reason</td></tr>
+      <tr><th>Never run out</th><td>No hearts, no energy. A wrong pick costs score on the daily and nothing else</td><td>Duolingo's 2025 energy change let free players run dry even on perfect lessons, and drew a petition</td></tr>
+    </tbody>
+  </table></div>
+  <p class="legend"><b>Sponsored cases pay points at the same rate as any case.</b> More to play is more to earn. A sponsor never buys a multiplier, so nobody ranks higher for playing a brand's case than for playing ours.</p>
+  <p class="legend">Together: rooms are a squad on one case <span class="tag live">Live</span>, circles and friend streaks <span class="tag live">Live</span>, player-made puzzles feed new cases once they pass the safety check, 20 players and 80% liked.</p>
+</section>
+
+<!-- 7 -->
+<section>
+  <p class="num">7. Money</p>
+  <h2>Revenue models</h2>
+  <p class="sub">A business, not a charity. Costs are near zero, so the first sale is profit. One rule: nothing sold or shown may change a score.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>When</th><th>Model</th><th>What is sold</th><th>Who pays</th></tr></thead>
+    <tbody>
+      <tr><th rowspan="5">Now<br><span class="tag live">Sell this week</span></th><td><b>Sponsored puzzle</b></td><td>A puzzle on the sponsor's subject, marked "With NAME", their link on the result and share card</td><td>Brands, any time of year</td></tr>
+      <tr><td><b>Sponsored daily</b></td><td>"Today's daily, with NAME" for a day or a week</td><td>Brands</td></tr>
+      <tr><td><b>Commissioned puzzle</b></td><td>Made to order: a wedding, a launch, a sermon series, a class topic</td><td>People, churches, schools, companies. They bring their own players</td></tr>
+      <tr><td><b>Private board</b></td><td>A circle with its own puzzles for a class, team or congregation</td><td>Schools, companies, churches. By the month or term</td></tr>
+      <tr><td><b>Tournament</b></td><td>A week's contest on one puzzle, prize from the sponsor</td><td>Brands, companies, schools</td></tr>
+      <tr><th rowspan="7">Once built<br><span class="tag next">Next</span></th><td><b>Sponsored case</b></td><td>A whole case in the sponsor's world</td><td>Brands</td></tr>
+      <tr><td><b>Season takeover</b></td><td>A holiday case and the seasonal dress, "with NAME"</td><td>Brands</td></tr>
+      <tr><td><b>Supporter</b></td><td>One payment: no ads ever, a badge</td><td>Players</td></tr>
+      <tr><td><b>Plus</b></td><td>By the month: more puzzles in Make, private rooms, extra outfits</td><td>Players</td></tr>
+      <tr><td><b>Special outfits</b></td><td>Cosmetic only</td><td>Players</td></tr>
+      <tr><td><b>Licence</b></td><td>The game under a school's or publisher's own name</td><td>Schools, publishers, media houses</td></tr>
+      <tr><td><b>Footer ad</b></td><td>One a page, never near a puzzle</td><td>Advertisers</td></tr>
+    </tbody>
+  </table></div>
+  <p class="legend">Recurring: private boards, Plus, licences. One-off: the rest. Needed to sell this week: the "With NAME" mark, a one page pitch with prices, and a report of counts for the sponsor.</p>
+  <div class="grid" style="margin-top:20px">
+    <div class="card"><h3>To decide</h3><ul>
+      <li>The plan lists a paid archive of past dailies. That clashes with "past cases stay free". Suggested: keep every archive free and drop it.</li>
+      <li>Prices for every stage, and what a sponsor may and may not write.</li>
+      <li>The numbers a sponsor will ask for: weekly players, plays per case, finish rate.</li></ul></div>
+    <div class="card"><h3>Data rules (GDPR, NDPA)</h3><ul>
+      <li><b>Sponsors get numbers, never people.</b></li>
+      <li>Play with no account. Accounts from 13.</li>
+      <li>Find data is kept as counts, not as people.</li>
+      <li>Private cases need a data agreement with the school or company.</li>
+      <li>Download my data, and delete, in Settings.</li>
+      <li>No ad cookies without consent. Ads come last.</li></ul></div>
+    <div class="card no"><h3>Never for sale</h3><ul>
+      <li>Hints, extra tries, time, or anything that touches a score.</li>
+      <li>Streak freezes. Rest days are free.</li>
+      <li>Spins, chests, paid chances.</li>
+      <li>Anything that was free on the day a player joined.</li></ul></div>
+  </div>
+</section>
+
+<!-- 8 -->
+<section>
+  <p class="num">8. Refusals</p>
+  <h2>What we will not do</h2>
+  <div class="grid">
+    <div class="card no"><h3>Claims</h3><ul>
+      <li>No word about memory, attention span, focus, IQ, brain training or "proven". Lumosity paid $2 million for that.</li>
+      <li>No "made by AI" and no "written by a person".</li></ul></div>
+    <div class="card no"><h3>Pressure</h3><ul>
+      <li>No guilt or loss in reminders.</li>
+      <li>No content that expires. Seasonal cases stay.</li>
+      <li>No hearts or energy that lock a player out.</li></ul></div>
+    <div class="card no"><h3>Content</h3><ul>
+      <li>No violence, gangs, weapons, romance or fear.</li>
+      <li>No puzzle shown before the safety check and the report rule.</li>
+      <li>No answer count typed by hand or taken from AI. The engine counts.</li></ul></div>
+    <div class="card no"><h3>Scope</h3><ul>
+      <li>No dozen thin games. 2 new ones, done properly, then more.</li>
+      <li>No card-flip or reaction-speed games. Different skill.</li>
+      <li>No feature that does not replace or fold into an old one.</li>
+      <li>No under-13 accounts without legal advice.</li></ul></div>
+  </div>
+</section>
+
+<!-- 9 -->
+<section>
+  <p class="num">9. The moat</p>
+  <h2>What cannot be copied in a weekend</h2>
+  <p class="sub">Any single screen here can be cloned. These grow with every day we run, so a copy starts years behind.</p>
+  <div class="scroll"><table>
+    <thead><tr><th>Asset</th><th>Why it holds</th><th>What feeds it</th></tr></thead>
+    <tbody>
+      <tr><th>The engine</th><td>It builds, checks, cuts and grades every puzzle, and rejects ones that read badly. A copy can show a puzzle. It cannot make a good one on demand</td><td>Each new game type and each rejected puzzle</td></tr>
+      <tr><th>Find data</th><td>We know which words real players miss. Difficulty, rare finds and fair leagues come from it. Nobody can buy this</td><td>Every verified play</td></tr>
+      <tr><th>The case library</th><td>Players write puzzles, the crowd and the checks pick the best, the path grows with no one writing to order</td><td>Make a puzzle, votes, reports</td></tr>
+      <tr><th>Home ground</th><td>Afrobeats, Nollywood, Lagos, the Eagles, Pidgin, a local blocklist, Paystack. Global apps do not do this well</td><td>Each local pack and holiday</td></tr>
+      <tr><th>Your people</th><td>Circles, friend streaks, rooms and crowns are worth nothing in an empty copy</td><td>Each invite</td></tr>
+      <tr><th>Your character</th><td>A look you built, outfits and ranks you earned, a history of closed cases</td><td>Each case closed</td></tr>
+      <tr><th>Trust</th><td>No claims, nothing expires, nothing free is taken away. Slow to earn, and a rival who breaks it cannot get it back</td><td>Every promise kept</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- 10 -->
+<section>
+  <p class="num">10. Order of work</p>
+  <h2>What to build, in this order</h2>
+  <ol class="order">
+    <li><b>Sell now.</b> The "With NAME" mark, the pitch and price list, the sponsor report. Then ask 20 people.</li>
+    <li><b>Sittings.</b> Cut puzzles into passages, save and resume, clock counts time on the puzzle. 25 stops become about 55.</li>
+    <li><b>Cases.</b> Stops become clues, chapters become cases, the secret from the engine, culprits and unmasking, ranks.</li>
+    <li><b>Buried sums, then Mirror.</b> The first number game and the cheapest second word game, on the fixed rhythm.</li>
+    <li><b>Holiday cases.</b> Each with its own theme. Outfits and the archive ship with the first.</li>
+    <li><b>Make takes over any-topic.</b> One box, a preview, player-owned puzzles feeding the library.</li>
+    <li><b>Server rewards.</b> Rest days, crowns, skill badges, then leagues.</li>
+    <li><b>One shape game.</b> Odd one out or Trace.</li>
+    <li><b>Private cases</b> for schools, teams and churches, then supporter payment.</li>
+  </ol>
+</section>
+
+<footer>Tags: Live is on fignda.pages.dev today. Next is decided and unbuilt. Later is wanted and unscheduled.</footer>
+
+</main>
+</body>
+</html>

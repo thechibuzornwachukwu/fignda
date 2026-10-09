@@ -284,5 +284,8 @@
   "reportFailed": [
     "That did not send. Try again in a moment.",
     "Could not send that. Try again in a moment."
+  ],
+  "sponsorWith": [
+    "With {name}"
   ]
 }

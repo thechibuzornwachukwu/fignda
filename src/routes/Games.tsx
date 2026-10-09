@@ -5,7 +5,7 @@ import { GameRow } from '../components/GameRow';
 import { PageHeader } from '../components/PageHeader';
 import { Ring } from '../components/Ring';
 import { buttonClass } from '../components/buttonClass';
-import { filters, games, getPuzzle } from '../games/catalog';
+import { filters, games, getPuzzle, sponsorFor } from '../games/catalog';
 import { pick } from '../copy';
 import { dayProfile } from '../engine/variableDay';
 import { todayHoldsLine } from '../games/resultLines';
@@ -36,6 +36,10 @@ function DailyCard({ streak }: { streak: number }) {
     const p = played ? null : getPuzzle(t.def.id);
     return p ? todayHoldsLine(dayProfile(p), pick) : '';
   }, [played, t.def.id]);
+  const withLine = useMemo(() => {
+    const w = sponsorFor(t.def);
+    return w ? pick('sponsorWith', { name: w.name }) : '';
+  }, [t.def]);
   return (
     <Link to={`/d/${t.n}`} className={styles.daily}>
       <span className={styles.dailyText}>
@@ -43,6 +47,7 @@ function DailyCard({ streak }: { streak: number }) {
           {t.holiday ? `${t.holiday} daily` : 'Daily'} #{t.n} · {t.date}
         </span>
         <span className={styles.dailyTitle}>{t.def.title}</span>
+        {withLine && <span className={styles.dailyWith}>{withLine}</span>}
         <span className={styles.dailySub}>
           {played ? `Done for today. You found ${found}. New puzzle at midnight.` : keep || holds || 'One try. Count hidden. Wrong picks cost 10.'}
         </span>
@@ -103,6 +108,7 @@ function GameList() {
               title: g.title,
               meta: `${p.answers.length} words · ${p.difficulty}`,
               stars: stars[g.id] ?? 0,
+              sponsor: sponsorFor(g)?.name,
             },
           ]
         : [];
@@ -131,7 +137,14 @@ function GameList() {
                     <span>{pick('shelfDone', { n: shelf.done, t: shelf.total })}</span>
                   </li>
                 )}
-                <GameRow to={`/play/${r.id}`} category={r.category} title={r.title} meta={r.meta} stars={r.stars} />
+                <GameRow
+                  to={`/play/${r.id}`}
+                  category={r.category}
+                  title={r.title}
+                  meta={r.meta}
+                  stars={r.stars}
+                  sponsor={r.sponsor ? pick('sponsorWith', { name: r.sponsor }) : undefined}
+                />
               </Fragment>
             );
           })}

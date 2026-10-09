@@ -85,6 +85,23 @@
   overflow-wrap: anywhere;
 }
 
+/* "With NAME": never lime, never a logo. */
+.with {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 20px;
+  row-gap: 4px;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.withHost {
+  font-weight: 600;
+  color: var(--subtle);
+}
+
 .scoreRow {
   display: flex;
   align-items: center;

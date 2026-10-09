@@ -15,8 +15,8 @@ Design: `/design`. Read `SPEC.md` before UI work, `SECURITY.md` before data, aut
 - Bungee is capitals only and its digits are not tabular. Not for clocks, scores, stats, game rows, buttons, inputs, names or puzzle text.
 - Bungee is heavy. Headings use `--ink-display` or `--ink-heading`, never `--fg-strong`.
 - Icons: `lucide-react` through one `<Icon>` wrapper. Stroke 1.75. Sizes 16 inline, 18 controls, 20 cards.
-- Logo: `<Logo>` (wordmark) and `<LogoMark>` (the G) from SPEC section 1. Outlines live in `logoPaths.ts`. Never redraw, never type the name in Bungee as a logo.
-- Lime `--accent` = found or success, and the shade of the logo's G. Never body text, never large fills. One accent button per screen.
+- Logo: `<Logo>` (wordmark) and `<LogoMark>` (the cat) from SPEC section 1. The cat lives in `src/brand/cat.ts`, the letters in `logoPaths.ts`. Never redraw, never type the name in Bungee as a logo.
+- Lime `--accent` = found or success, and the cat's eyes in the logo. Never body text, never large fills. One accent button per screen.
 
 ## Copy
 - No em dashes. No exclamation marks. Short sentences. Digits for numbers.

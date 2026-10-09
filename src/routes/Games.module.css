@@ -50,6 +50,12 @@
 .dailyTitle {
   composes: h2 from '../styles/type.module.css';
 }
+/* "With NAME" on a sponsored daily. Never lime: lime means found. */
+.dailyWith {
+  composes: label from '../styles/type.module.css';
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
 .dailySub {
   composes: caption from '../styles/type.module.css';
   color: var(--muted);

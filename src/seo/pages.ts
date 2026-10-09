@@ -5,9 +5,11 @@
 import gamesFile from '../../data/games.json';
 import holidaysFile from '../../data/holidays.json';
 import { dailyGameId, dayNo, holidayOn, type Calendar } from '../engine/daily';
+import { pick } from '../copy';
 import { buildHiddenWords } from '../engine/hiddenWords';
+import { sponsorOf } from '../engine/sponsor';
 
-type Game = { id: string; category: string; title: string; noun: string; text: string; dict: string[] };
+type Game = { id: string; category: string; title: string; noun: string; text: string; dict: string[]; sponsor?: unknown };
 const data = gamesFile as unknown as { games: Game[]; dailyPool: string[]; filters: string[] };
 const { dailyPool } = data;
 const calendar: Calendar = holidaysFile;
@@ -54,6 +56,14 @@ export const esc = (s: string) =>
 const count = (g: Game) => buildHiddenWords(g).answers.length;
 const level = (g: Game) => buildHiddenWords(g).difficulty;
 const question = (g: Game) => `Can you find ${count(g)} ${g.noun}?`;
+/** "With NAME." on a sponsored puzzle, else nothing. The same rule and the same line as the app. */
+function withLine(g: Game): string {
+  const s = sponsorOf(g.sponsor);
+  // "Chi Farms Ltd." already ends its own sentence.
+  return s ? `${pick('sponsorWith', { name: s.name }).replace(/\.$/, '')}.` : '';
+}
+/** Joins sentences, leaving out the empty ones. */
+const say = (...parts: string[]) => parts.filter(Boolean).join(' ');
 
 export const FAQ: Array<[string, string]> = [
   ['What is Gazecraft?', PITCH],
@@ -142,9 +152,9 @@ function gamePage(origin: string, g: Game): Page {
   const q = question(g);
   return {
     title: `${q} You won't find them all. · Gazecraft`,
-    description: `${DARE[g.category] ?? DARE.General} ${level(g)}, free, no sign up.`,
+    description: say(`${DARE[g.category] ?? DARE.General} ${level(g)}, free, no sign up.`, withLine(g)),
     image: `/og/${g.id}.png`,
-    imageAlt: `Gazecraft puzzle: ${q}`,
+    imageAlt: say(`Gazecraft puzzle: ${q}`, withLine(g)),
     canonical: `/play/${g.id}`,
     jsonLd: [
       {
@@ -164,7 +174,7 @@ function gamePage(origin: string, g: Game): Page {
       ]),
     ],
     body:
-      `<h1>${esc(q)}</h1><p>${esc(g.category)} puzzle, ${esc(level(g))}. Words hide across spaces and punctuation.</p>` +
+      `<h1>${esc(q)}</h1><p>${esc(say(`${g.category} puzzle, ${level(g)}. Words hide across spaces and punctuation.`, withLine(g)))}</p>` +
       `<blockquote>${esc(g.text)}</blockquote>` +
       `<p><a href="/play/${g.id}">Play this puzzle on Gazecraft</a>. <a href="/play">More puzzles</a>.</p>`,
   };
@@ -175,9 +185,9 @@ function dailyPage(origin: string, n: number, g: Game): Page {
   const q = `${label} #${n}: how many ${g.noun} can you find?`;
   return {
     title: `${q} · Gazecraft`,
-    description: 'One try. No count. Everyone plays the same puzzle today. Are you sharper than them?',
+    description: say('One try. No count. Everyone plays the same puzzle today. Are you sharper than them?', withLine(g)),
     image: `/og/daily-${g.id}.png`,
-    imageAlt: `Gazecraft daily puzzle: how many ${g.noun} can you find?`,
+    imageAlt: say(`Gazecraft daily puzzle: how many ${g.noun} can you find?`, withLine(g)),
     canonical: `/d/${n}`,
     jsonLd: [
       {
@@ -190,7 +200,7 @@ function dailyPage(origin: string, n: number, g: Game): Page {
         isPartOf: { '@type': 'VideoGame', name: SITE, url: `${origin}/` },
       },
     ],
-    body: `<h1>${esc(q)}</h1><p>One try. The count stays hidden until midnight UTC. Wrong picks cost 10 points.</p><p><a href="/d/${n}">Play the daily on Gazecraft</a>.</p>`,
+    body: `<h1>${esc(q)}</h1><p>${esc(say('One try. The count stays hidden until midnight UTC. Wrong picks cost 10 points.', withLine(g)))}</p><p><a href="/d/${n}">Play the daily on Gazecraft</a>.</p>`,
   };
 }
 

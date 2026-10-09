@@ -16,3 +16,4 @@ supabase/.env
 # Editor / OS
 .DS_Store
 Thumbs.db
+tsconfig.tsbuildinfo

@@ -1,265 +1,182 @@
 # Build plan
 
-What is left. Everything built so far is recorded in git history and `SPEC.md`. A piece of work is done when its checks pass.
+What is left, in sets that ship one at a time. What is built is in `SPEC.md` and git history. The picture of this plan is `NEWPLAN.html`; where they differ, this file wins.
 
-Deploy: `npm run deploy:site`, `npm run deploy:api`. Database: `npx supabase db push`.
-Seed (after `npm run db:seed:gen`): `npx supabase db query --linked -f supabase/seed.sql`. `db push --include-seed` only records the file's hash, it does not run it.
+Deploy: `npx supabase db push`, then `npm run deploy:api`, then `npm run deploy:site`.
+Seed (after `npm run db:seed:gen`): `npx supabase db query --linked -f supabase/seed.sql`.
 
-## Live
+## Direction
 
-Since 7 Oct 2026: room games on the Together board, holiday dailies, streak lines, friend streaks with invite links and nudges, room invites, points, the new player profile, "only 8% found", player-made puzzles, answers pages, 4 Naija packs.
+- Offer: a few minutes of real detective work, in place of scrolling. Something is hidden in plain sight. Look closer and uncover it.
+- One skill in every game: looking closely. Words today, numbers and shapes next.
+- A case is a run of clues. A clue is one short sitting. The last clue puts the pieces together and unmasks who hid the secret.
+- A new culprit each case, an ordinary character under a disguise. One unseen figure links the cases: every culprit leaves the same calling card.
+- Tone: the motive is mischief, pride or a surprise, never harm. No violence, gangs, weapons, romance or fear.
+- For all ages, not a children's product. Accounts from 13. Younger players join on a parent's device or room.
+- We promise the practice, never a result. No word about memory, attention span, focus, IQ, brain training or "proven". Lumosity paid $2 million for claims like those.
+- Nothing expires and nothing locks a player out: no timed content, no hearts, no energy, no guilt in reminders.
+- AI is never named in the UI. No "made by a machine" and no "written by a person". A puzzle that reads badly is not shown.
+- A new feature replaces or folds into an old one. 2 new games done properly before any more.
+- What a copy cannot have, so build toward it: the engine that makes and grades puzzles, the data on which words players miss, a case library the players write, home ground (Naija packs, Pidgin, Paystack), a player's own circle, a player's earned character, and trust.
 
-Since 8 Oct 2026: any-topic puzzles, and an avatar for every player in a room (guests and your own row included).
+## Revenue
 
-Since 9 Oct 2026: the Gazecraft name and logo, the first minute for new players (`/welcome`), the journey path on the Games tab, one header on the 4 tabs, rings, the waiting screen, stars, skill lines and personal records on the result, clean reads, reports on player-made puzzles, the safety check, background puzzle jobs on the server.
+This is a business. Running costs are near zero, so the first sale is profit. Nothing sold or shown may change a score.
 
-## The promise
+| Model | What is sold | Who pays | Ready |
+|---|---|---|---|
+| Commissioned puzzle | Made to order: a wedding, a launch, a sermon series, a class topic | People, churches, schools, companies | Now |
+| Private board | A circle with its own puzzles, by the month or the term | Schools, companies, churches | Now |
+| Tournament | A week's contest on one puzzle, prize from the sponsor | Brands, companies, schools | Now |
+| Sponsored puzzle | A puzzle on the sponsor's subject, marked "With NAME", their link on the result and the share card | Brands | After set 1a |
+| Sponsored daily | "Today's daily, with NAME" for a day or a week | Brands | After set 1a |
+| Sponsored case | A whole case in the sponsor's world | Brands | After sets 2d and 3c |
+| Season takeover | A holiday case and the seasonal dress, "with NAME" | Brands | After set 5c |
+| Supporter | One payment: no ads ever, a badge | Players | Needs Paystack |
+| Plus, by the month | More puzzles in Make, private rooms, extra outfits | Players | Needs Paystack, set 6e |
+| Special outfits | Cosmetic only | Players | Needs Paystack, set 3d |
+| Licence | The game under a school's or a publisher's own name | Schools, publishers, media houses | After private boards are proven |
+| Footer ad | One a page, still image, never near a puzzle | Advertisers | Needs the domain, and consent in the EU and UK |
 
-Decided direction, 8 Oct 2026. The research and the reasoning are in `design/INSIGHTS.html`.
-
-- Gazecraft is the opposite of a feed: one paragraph a day with words hidden in plain sight. About 5 minutes, then it is over.
-- Line: "Slow down. Look closer." The dare stays as the hook: "Think you read carefully? You don't."
-- We promise the practice, never a result. No claims about attention span, memory, grades or brain rot. Lumosity paid $2 million for claims like those.
-- Every game element stays: score, points, badges, boards, streaks, friend streaks, rooms, avatars. What changes is what they reward: skill and winnable contests, not showing up.
-- One rule from now on: a new feature must replace or fold into an old one.
-- AI is never named in the UI or in any flow (owner, 8 Oct 2026; the way Duolingo makes lessons with AI and does not label them). No "made by a machine" label, and no "written by a person" or "no slop" claim either, since some puzzles are machine-made. The quality bar does the work: a machine-made puzzle that reads badly is not shown. The privacy page still names the AI providers that receive what a player types.
-
-## How the system writes puzzles today
-
-- `AI_PROVIDER` in `worker/wrangler.toml` is a list, asked in order: OpenRouter, then Google, then Groq. A provider without a key is skipped.
-- OpenRouter, `nvidia/nemotron-3-super-120b-a12b:free`: the only free model there that hides words (11 tried). 1 to 2.5 minutes a puzzle. 50 requests a day, 1,000 once the account has bought $10 of credit. Its sentences can be clumsy.
-- Google, `gemini-3.5-flash`: about 30 seconds and cleaner writing, but 20 requests a day.
-- Groq: written and unit tested, never called for real. It joins once `GROQ_API_KEY` is stored.
-- It is live as "Or any topic" on the games screen, open to guests. It moves into Make a puzzle (To build next, 5).
-- The player keeps the page open the whole time. Worst case is about 5 minutes and then a failure.
-- Test models again with `npm run ai:bench` when the free lists change. It spends the daily free requests, so test few topics.
+Never for sale: hints, extra tries, time, or anything that touches a score; streak freezes; spins, chests, paid chances; player data; anything that was free on the day a player joined. A sponsored puzzle pays points at the normal rate, never a multiplier.
 
 ## Owner
 
+- [ ] Decide: the name (suggested: keep Gazecraft, detective theme inside it. Free as .com and .game on 9 Oct 2026, registry check only: gazecraft, keensleuth, sleuthtrail, cluestop, plainsleuth, loupequest).
+- [ ] Prices for the models above. None is set.
+- [ ] A list of 20 people to ask first: brands, schools, churches, event planners.
+- [ ] What a sponsor may and may not write.
 - [ ] Reset the database password (Supabase, Database, Settings). It was shared in chat and is still the live one.
-- [ ] OpenRouter: buy $10 of credit once. Free models stay free, and the daily limit goes from 50 requests to 1,000.
-- [ ] Groq key, optional (console.groq.com, API Keys). Store it as `GROQ_API_KEY` with `npx wrangler secret put GROQ_API_KEY --config worker/wrangler.toml` and in `worker/.dev.vars`.
-- [ ] Reminder keys: `npm run push:keys`, put the public key and `VAPID_SUBJECT` in `worker/wrangler.toml`, `npx wrangler secret put VAPID_PRIVATE_KEY --config worker/wrangler.toml`, `npm run deploy:api`. Reminders are built and stay off until then.
-- [ ] Buy a domain. Unlocks reliable email, ads later, and a keyword in the address.
-- [ ] Custom SMTP (Brevo, free) so sign in emails carry a 6 digit code. The branded code email is ready and applies once this is set. Until then Supabase sends its own plain email with a link.
-- [ ] Review the look tags on hairstyles (`src/avatar/parts/hair.ts`): which are usually feminine, masculine, or for anyone. Outfits no longer count toward the look.
-- [ ] Read the 4 Naija packs (`data/games.json`: afrobeats, nollywood, lagos, eagles) for names you would add or drop. The engine has checked that every word is hidden across word boundaries.
-- [ ] Holiday calendar (`data/holidays.json`): Eid is not in it. Its date depends on the moon sighting and no current puzzle fits. Add the dates and a puzzle when ready.
-- [ ] Read 10 any-topic puzzles made on the live site and say whether the writing is good enough to keep OpenRouter first.
-- Name decided, 8 Oct 2026: Gazecraft. Domains wanted: gazecraft.com and gazecraft.game (not checked or bought). Still under the old name until the domain exists: the address fignda.pages.dev, the Cloudflare project names `fignda` and `fignda-api`, the local Supabase project id, and the database functions `fignda_day_no` and `fignda_score`.
+- [ ] Buy the domain. Unlocks reliable email, Paystack on our own address, and ads.
+- [ ] Paystack: account, the business details it asks for, a test payment.
+- [ ] A lawyer's read before private boards for schools, before ads, and before any under-13 account.
+- [ ] OpenRouter: buy $10 of credit once. The daily limit goes from 50 requests to 1,000.
+- [ ] Custom SMTP (Brevo, free) so sign in emails carry a 6 digit code. The branded email is ready.
+- [ ] Reminder keys: `npm run push:keys`, the public key and `VAPID_SUBJECT` in `worker/wrangler.toml`, `npx wrangler secret put VAPID_PRIVATE_KEY --config worker/wrangler.toml`, `npm run deploy:api`.
+- [ ] Groq key, optional: `npx wrangler secret put GROQ_API_KEY --config worker/wrangler.toml` and `worker/.dev.vars`.
+- [ ] Read: the look tags on hairstyles (`src/avatar/parts/hair.ts`), the 4 Naija packs in `data/games.json`, the 7 terms in `worker/src/blocklistLocal.ts`, and 10 machine-written puzzles from the live site.
+- [ ] Eid dates and a puzzle for `data/holidays.json`.
+- Still under the old name until the domain exists: fignda.pages.dev, the Cloudflare projects `fignda` and `fignda-api`, the local Supabase project id, the database functions `fignda_day_no` and `fignda_score`.
 
-## To build next
+## To build, in sets
 
-Order matters. 1 to 3 make the game better and cost nothing. 4 to 6 serve Make a puzzle.
-Please factor in the ideas herein: https://github.com/emilkowalski/skills/tree/main
+One set at a time. Each set is small, works on its own and leaves the live game whole. After each set: lint, typecheck, unit tests and the browser tests pass, the work stops, the owner tries it and pushes, and only then does the next set start. A set that turns out too big is split, not rushed.
 
+Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with unit tests, and the UI never re-implements matching. Every line comes from `src/copy` pools. Scores on existing boards do not change. Read `SECURITY.md` before data, auth or Worker work. Motion follows `SPEC.md` section 8 (from <https://github.com/emilkowalski/skills>).
 
-### 2. A better game
+### 1. Sell now
 
-Six parts, from the six principles in `INSIGHTS.html`. Each is small enough to ship alone. Engine work is pure TS with unit tests against `data/games.json`; the UI never re-implements matching.
+- [x] **Set 1a.** The "With NAME" mark from one field on a puzzle: game row, daily card, result, share card, link preview. Built 9 Oct 2026, in `SPEC.md` section 5 (With NAME). To try it: add `"sponsor": { "name": "...", "url": "https://..." }` to a puzzle in `data/games.json`, then `npm run og:render`. No puzzle carries one yet.
+- [ ] **Set 1b.** A sponsor report from the database: players, plays, finish rate, shares. Counts only.
+- [ ] **Set 1c.** A one page pitch with the price list.
 
-**2a. The find itself (principle 1)**
+### 2. Sittings
 
-- [ ] Paragraphs worth reading: read the existing packs against `design/PUZZLE_STANDARD.md` and fix the worst. `giveaways` in `src/engine/giveaway.ts` flags bible, bnote, broad, nigeria, bpeople, world, afrobeats and eagles.
-- [ ] Player-made dailies with no person in the loop: something that picks a daily from the `daily_candidates` view. The view already holds the rule (safety passed, 20 different players other than the maker, 80% "Good one", no reports, not hidden). Nothing reads it yet.
-- [ ] Limits to say out loud: an AI check misses things, most of all local slang and in-jokes about real people. The local blocklist (`worker/src/blocklistLocal.ts`) has 7 terms: read it and add to it. The report rule is the real safety net.
+A long puzzle is played in short passages. Short must not mean thin: every sitting ends with something won, and the whole puzzle stays as the hard one.
 
-**2b. Local, winnable competition (principle 2)**
+- [ ] **Set 2a. Engine only, nothing on screen.** `passages(puzzle)` cuts at sentence ends where no answer runs across the cut, 5 to 9 answers each, a short tail joined to the passage before. Measured: all 25 puzzles cut cleanly into about 55 passages. A puzzle with no clean cut stays whole.
+- [ ] **Set 2b. Save and resume.** Leaving a puzzle keeps the finds, the hints and the clock. The clock counts time on the puzzle, not time away. Useful by itself, before passages exist.
+- [ ] **Set 2c. A passage can be played.** Its own screen, result, stars and clean read. Reached by link only. Passages are never ranked against whole puzzles.
+- [ ] **Set 2d. Passages on the path.** Each passage is a clue, the whole puzzle is the last clue of its case, with its board and scores as they are. A whole-puzzle score from before shows its passages as done. A case shows how many clues are left, never how many minutes. A room plays the whole puzzle. The daily is not cut.
 
-- [ ] Crowns: for each hidden word in today's daily, the first player in your circle to find it. Shown in the circle's Today table and under your result ("First in your circle to find KENYA"). Server side only, from verified play logs.
-- [ ] Weekly tables of about 20 players, with tiers to move up and down: see Leagues in 3c.
-- [ ] On the global board, "ahead of 62% today" beside the rank, from 5 verified players up.
-- [ ] A player with no circle is offered one after their third daily, not before.
+### 3. Cases
 
-**2c. Less at once (principle 3)**
+- [ ] **Set 3a. Names.** Case (was chapter), clue (was stop), unmasking (the last clue), in the UI and the code. Ranks replace level bands: Rookie, Detective, Inspector, Chief (`BANDS` in `src/engine/level.ts`).
+- [ ] **Set 3b. The secret, engine only.** Each clue gives one piece and the last puts them together. Never typed by hand. A puzzle that changes must not break its case.
+- [ ] **Set 3c. Culprits and the unmasking.** One disguise per case, drawn on top of an ordinary avatar the way the Festive items are (`src/avatar`, append only). Copy pools: a line to open a case, a confession to close it, the calling card. Motion: a "Case closed" stamp and the mask coming off. No cutscenes.
+- [ ] **Set 3d. Outfits.** Detective pieces (coat, hat, magnifying glass, badge) earned by closing cases and rising in rank. Everything that helps someone look like themselves stays free.
+- [ ] **Set 3e. Server.** Clue progress and case badges saved from verified plays, a guest's progress moved to the account on sign in, ranks as a view over points. 2 devices with different progress, and a player with history before cases exist.
+- [ ] **Set 3f. Rooms as a squad.** Every player's finds count toward the same secret.
 
-Nothing is removed. Things appear when they mean something.
+### 4. More games
 
-- [ ] Count what is used before building more: plays per feature per week from the database (rooms, circles, friend streaks, make, any-topic). Anything under 2% of weekly players after a month moves behind a "More" link.
+Engine first (`expectedAnswers`, unit tests), then the `Board`, with no change to the shell. Number and shape games are made and checked by the engine, so they never run out. Designs are in `prototype/Gazecraft Future Games.dc.html`.
 
-**2d. Anticipation, not obligation (principle 4)**
+- [ ] **Set 4a.** A `family` on each registry type (Verbal, Quantitative, Non-verbal). Nothing new on screen.
+- [ ] **Set 4b. Buried sums.** Runs of digits that add up to a target, same drag. In "All games" first.
+- [ ] **Set 4c. The rhythm.** Number clues join the path: word, word, number, word.
+- [ ] **Set 4d. Mirror.** Hidden words that read right to left. It reuses every paragraph.
+- [ ] **Set 4e. Unmask.** Reveal a phrase letter by letter. It becomes the last clue of a case.
+- [ ] **Set 4f. One shape game.** Odd one out, or Trace. Then the rhythm gains a shape.
+- Later, once those are being played: Liar, Relay, Number series, Bury it.
 
-- [ ] Rest day: 1 a week, earned by playing 5 of the last 7 days, used by itself when a day is missed. Free. Never sold. The run line says so ("Rest day used. Your run holds.").
-- [ ] "Days this month" where the profile and the account show the run.
-- [ ] Friend streaks get the same rest day, shared.
-- [ ] No reward that looks like gambling: no spins, no chests, no paid chances.
+### 5. Holiday cases
 
+- [ ] **Set 5a. The case archive.** A place for cases that are not on the path. Empty until 5b.
+- [ ] **Set 5b. One holiday case.** It opens on the date for everyone, beside the path, 3 to 5 clues, and never blocks the player's own case. After the date it moves to the archive and its outfit piece and badge can still be earned.
+- [ ] **Set 5c. Seasonal dress** for the path, the dock and avatars, from `data/holidays.json`. Off under reduced motion.
+- [ ] **Set 5d. The rest of the calendar,** one case at a time: Christmas week, New Year, Easter, Eid, Independence Day, Children's Day, Halloween, Valentine's.
 
-**2f. Skill over attendance (principle 6)**
+### 6. Make, one feature
 
-- [ ] Keep all 13 badges. Add a skill family, shown first: Clean read, No-hint perfect, Long word (9 or more letters), Deep find (3 joins), Rare eye (a word under 10% found), Pack master (every puzzle in a pack perfect).
-- [ ] Personal records: best week, and a server copy so they follow the player across devices.
-- [ ] Sharp eye: the share of rare words you caught over your last 14 dailies, with a 14 day strip. This is the number that shows a player getting better.
-- [ ] Points also pay for skill: a clean read and a rare find add to the tally. Volume alone keeps counting as today.
-- [ ] A few avatar looks unlock from skill badges. Everything that helps someone look like themselves stays free and open.
+"Any topic" goes away. It is Make with the system making the choices the player did not make. Engine and server parts exist: `hideForMe`, `topicIcon`, `giveaway`, `safetyCheck`, the job endpoints.
 
-**Checks for all of section 2**
+- [ ] **Set 6a. The background wait.** The any-topic box uses the job (`startGenerate`, `runGenerateJob`, `getGenerateJob`), keeps the job id in the browser and picks the wait up on return.
+- [ ] **Set 6b. Topic icons** on every puzzle: lucide through `<Icon>` from `data/topicIcons.json`, 12 of our own for home subjects in `src/components/icons/`, one default. `--muted`, never lime.
+- [ ] **Set 6c. One box on `/make`,** signed in: "What should we hide words in?" Nothing typed and "Surprise me", a topic, an emoji (from `data/topicEmoji.json`; unknown ones are asked about), or a paragraph of 60 or more characters with "Hide some for me". "Write it myself" opens the full form.
+- [ ] **Set 6d. Preview before publishing:** change the title, swap a word, another go, pick the icon. Publish is always the player's tap. Fewer than 4 hidden words: nothing is published.
+- [ ] **Set 6e. One kind of puzzle.** A system-written one belongs to the player who asked ("Made by @handle", votes, reports, the daily candidate rule). Today `player_puzzles` leaves out rows with a `topic_key`. One limit: 20 Make requests an hour. Each player gets their own copy of a cached topic.
+- [ ] **Set 6f. Any topic removed:** the box on the games screen, `CustomTopic.tsx`, the `Custom` category. Old guest-made puzzles keep opening by link.
+- [ ] **Set 6g. Quality:** reject with `readsBadly` or hidden profanity before the player sees it. Google first for signed in players. Log the provider and the seconds on `games`.
+- Edge cases across the sets: one letter, only spaces, a real person's name, emoji in every form, Pidgin, 5,000 characters, the same topic twice, the session expiring mid way, the daily free limit reached.
 
-- [ ] Scores on existing boards do not change. Anything new is additive.
-- [ ] Every new line comes from `src/copy` pools.
-- [ ] Each part has an e2e path for a guest, a new signed in player and a player with history.
-- [ ] `SECURITY.md` read before crowns, weekly tables and rest days: all three are decided on the server from verified plays.
+### 7. Points, ranks and rewards (server)
 
-### 3. Screens that feel like a game
+All decided on the server from verified plays. One currency: lifetime points set rank and never drop, weekly points set the league and reset on Monday. No boosts, paid or free.
 
-The reasoning is in `INSIGHTS.html` sections 7 to 9. Done on 9 Oct 2026: the phone tab bar is now a floating dock with a raised Daily button (SPEC section 5, Tab bar).
+- [ ] **Set 7a. Rest day:** 1 a week, earned by playing 5 of the last 7, used by itself, free. The same for friend streaks.
+- [ ] **Set 7b. Skill pays:** a clean read and a rare find add to the tally. Skill badges shown first: Clean read, No-hint perfect, Long word, Deep find, Rare eye, Case master.
+- [ ] **Set 7c. Sharp eye:** the share of rare words caught over the last 14 dailies.
+- [ ] **Set 7d. Crowns:** the first in your circle to find each word in today's daily. "Ahead of 62% today" on the global board from 5 players up.
+- [ ] **Set 7e. A goal the player picks** (Light, Regular, Keen: 1, 2 or 4 sittings a day), apart from the run. The run needs only the daily.
+- [ ] **Set 7f. Personal records** copied to the server, with best week.
+- [ ] **Set 7g. Leagues:** tables of about 20, 5 tiers, top 5 up, bottom 5 down. Weekly points come only from dailies and first clears, so nobody wins by grinding on Sunday night. No message about dropping, a player can leave, fewer than 5 players moves nobody down.
 
-**3a. Pages that stand alone** (learned from Duolingo's core tabs redesign)
+### 8. Data and privacy (GDPR, Nigeria's NDPA)
 
-- [ ] The dock, still to check: on a real iPhone with the Home Screen app (safe area), on a 320px phone, with the keyboard open on Players search, and that the lime tick appears the moment the daily is finished without a reload.
+Play with no account, and sponsors get numbers, never people.
 
-**3b. The first minute** (owner, 9 Oct 2026: onboarding is not great)
+- [ ] "Download my data" in Settings. Delete exists.
+- [ ] How long play logs, jobs, reports and notifications are kept, written into `SECURITY.md` and deleted by the hourly job.
+- [ ] Find data kept as counts per word and per puzzle. A deleted account leaves the counts and takes the plays.
+- [ ] Private boards: a data agreement with the school or company, and an organiser who sees only its own members.
+- [ ] Age 13 stated at sign up. EU players under 16 checked before any marketing there.
+- [ ] The privacy page lists every company that receives data and where the database sits.
 
-- [ ] `e2e/onboarding.spec.ts`: a guest, a new signed in player and a returning player. Only the unit tests and the sign up path of the other specs cover the flow today.
-- [ ] Edge cases in a browser: one who leaves half way and returns, one who signs in on a second device, reduced motion, a 320px phone, a screen reader.
-- [ ] Measure: new visitors who finish one puzzle, and finished players who then sign in (INSIGHTS section 10). Nothing in the repo counts visits yet.
+### 9. Smaller
 
-**3c. The journey** (owner, 9 Oct 2026: the Games page feels boring)
-
-The Games tab becomes a path the player travels, the way Duolingo's home is a path and not a list. It replaces the list as the first thing on the tab. It does not sit on top of it.
-
-- [ ] The chapter badge saved on the server.
-- [ ] Levels from the server: a view over points with the thresholds of `src/engine/level.ts`. Then `<LevelBadge>` beside the avatar in rooms and boards.
-- [ ] Leagues: the weekly tables of 2b, with tiers. 5 tiers to start. About 20 players in a table, grouped each Monday within a tier. The week's score is the points earned that week from dailies and first clears on the path. Top 5 move up a tier, bottom 5 move down, the top tier keeps its top 3 on a wall. Decided on the server by the hourly job that already exists.
-- [ ] Keep leagues on the right side of principle 4: no message about dropping, a player can leave leagues in Settings, a week with no play moves nobody down more than 1 tier, and rest days (2d) apply.
-- [ ] More stops need more puzzles. New chapters come from puzzles that passed the daily candidate rule (2a), so the path grows without anyone writing to order.
-- [ ] A guest's path moves to the account on sign in. Leagues need sign in.
-- [ ] The level-up moment after a game, on the result, once levels come from the server.
-- [ ] Edge cases still open: stars worked out from the best verified play, 2 devices with different guest progress on sign in, a table with fewer than 5 players (nobody moves down), a tie on the cut line, the week turning over mid game.
-- [ ] Database: `journey_progress`, `levels` as a view over points, `leagues` and `league_weeks`. Migrations with RLS, written by the Worker only. Read `SECURITY.md` first.
-
-### 4. Waiting screen with the player's avatar
-
-Asked for by the owner on 8 Oct 2026. Write it into `SPEC.md` first (section 8, Motion, and the any-topic line), then build.
-
-What it is:
-
-
-Where it is used:
-
-
-Edge cases to test (unit tests for the component, e2e for the flows):
-
-- [ ] Phone locked or app switched mid wait: on return the puzzle opens if it is ready, or the wait carries on.
-- [ ] 320px wide, and both themes.
-
-### 5. Make the puzzle in the background
-
-Needed because a 1 to 5 minute request that dies with the page is fragile on phones. The waiting screen sits on top of this.
-
-How it works (decided 9 Oct 2026): `waitUntil` gives a Worker about 30 seconds after its answer, and a puzzle takes 1 to 2.5 minutes, so the slow call cannot hang off the POST. A Queue is not needed either. The POST (with `"background": true`) only writes the job. The page then opens `GET /api/generate/:id/run`, an ordinary long request that does the work and writes the result to the job, while asking `GET /api/generate/:id` every 5 seconds. Only one runner gets a job (a claim in the database, renewed every 20 seconds). If the page dies the claim goes stale after 60 seconds, the state says `run: true`, and the next visit opens `/run` again. Without the flag the POST waits as before, so the current screen keeps working until it is switched.
-
-- [ ] The page uses the background job: `startGenerate`, `runGenerateJob` and `getGenerateJob` in `src/lib/api.ts`, asking every 5 seconds. The server side is in.
-- [ ] The job id is kept in the browser, so closing the tab or losing signal does not lose the puzzle. Coming back to `/play` picks the wait up again, or shows "Your puzzle is ready" with a link.
-
-### 6. Make a puzzle takes over any-topic
-
-Owner, 8 Oct 2026. There is one feature, Make a puzzle. "Any topic" is not a second feature: it is Make with the system making the choices the player did not make. Everything any-topic has today moves inside Make and the name goes away.
-
-How it works:
-
-- [ ] Sign in is needed for all of Make, as today. A guest who opens `/make` gets the sign in screen and returns to Make after.
-- [ ] `/make` opens with one box: "What should we hide words in?" The player fills as much as they want and the system chooses the rest:
-  - Nothing typed, "Surprise me": the system picks the topic, writes the paragraph and hides the words.
-  - A word, a name or a topic: the system writes the paragraph and hides the words.
-  - An emoji typed as the topic is fine (owner, 8 Oct 2026): a football means football, a pot of food means cooking. Read from a small table in `data/`, not guessed by the AI. An emoji with no entry gets "Tell us in a word what that one means." The emoji is input only: on screen the puzzle shows its topic icon.
-  - A paragraph of 60 characters or more: the player lists the hidden words, as Make does today. A "Hide some for me" button lets the system find words that are already hidden in it, using the engine only.
-- [ ] "Write it myself" opens the full form from the start.
-- [ ] The player sees the result before it is published and can change the title, swap a word or ask for another go. Publish is always the player's tap.
-
-Folding the rest in:
-
-- [ ] One kind of puzzle. A system-written puzzle belongs to the player who asked: it carries "Made by @handle", shows in Your puzzles with plays and likes, takes Good one / Not for me votes, and follows the same safety check, report rule and daily candidate rule (2a). Today those are skipped: `player_puzzles` leaves out rows with a `topic_key`.
-- [ ] One endpoint and one limit. `/api/generate` becomes a step of the Make endpoint, signed in only. The guest limit of 5 an hour goes; the signed in limit of 20 an hour covers every Make request.
-- [ ] The 24 hour topic cache stays as a speed-up, but each player gets their own copy of the puzzle so that plays, votes and the maker's name are theirs.
-- [ ] Remove "Or any topic" from the games screen, `CustomTopic.tsx`, its SPEC line and its tests. Remove the `Custom` category name where it shows; these are player puzzles.
-- [ ] Old any-topic puzzles made by guests keep working by link. They have no maker, so they never become daily candidates.
-- [ ] The waiting screen (4) and background making (5) belong to Make now. Their text says "Making your puzzle", never anything about topics or AI.
-- [ ] Topic icons (owner, 8 Oct 2026: icons, not emoji). Every puzzle and every pack carries one small icon for what it is about.
-  - First choice: `lucide-react` through `<Icon>`, already the rule. Stroke 1.75, size 20 on cards and 16 inline.
-  - `data/topicIcons.json`: topic words to icon names (football, music, food, animals, space, cars, money, school, faith, places, people, and so on). The system picks from this table by matching the topic. The AI never chooses or draws an icon.
-  - Where lucide has nothing fitting, mostly home subjects (a pot of jollof, a talking drum, a danfo bus, a gele, the eagle), draw our own in `src/components/icons/`: same 24 grid, same 1.75 stroke, round caps, `currentColor`, no fills. Start with 12 and add only when a pack needs one.
-  - No match: one neutral default icon. Never a blank space and never a wrong guess.
-  - The maker can change the icon before publishing, from a short picker.
-  - Shown on game rows, Your puzzles, the Make preview and share cards. Colour is `--muted`; never lime, which means found.
-  - Emoji stay only where they already are: the copied text result (the green, white and bulb squares).
-
-Edge cases to test:
-
-- [ ] One letter. Only spaces. A number. A full name of a real person (the safety check decides).
-- [ ] Emoji only, with and without an entry in the table. Emoji mixed with words. A flag. A skin tone variant. 10 emoji in a row. In every case the published puzzle shows an icon, never the emoji.
-- [ ] Topic icon: a topic with no match gets the default; a topic matching 2 icons gets the first in the table; a custom icon and a lucide icon sit on the same baseline at 16 and 20; both themes.
-- [ ] A topic in Pidgin or another language.
-- [ ] 60 characters of one repeated word. A paste of 5,000 characters.
-- [ ] The same topic twice in 24 hours, by the same player and by 2 players.
-- [ ] "Surprise me" 3 times in a row gives 3 different topics.
-- [ ] The system finds fewer than 4 hidden words: the player is told and nothing is published.
-- [ ] Signed out part way through (session expired): the typed text survives the sign in round trip.
-- [ ] The daily free AI limit is reached: "Write it myself" still works, and the short path says to try again tomorrow.
-
-Quality and speed of the system's writing:
-
-- [ ] Reject a puzzle whose paragraph reads badly before it reaches the player. Start cheap: a list of give-away patterns (a hidden word that is also a whole word in the text, the same trick used 3 times).
-- [ ] Filter the hidden words themselves, not only the text: a word hidden across "dog rapeseed" style joins must not spell something rude. `isProfane` checks whole strings today.
-- [ ] Try Google first for signed in players (30 seconds, better writing) and OpenRouter for the rest, within Google's 20 a day.
-- [ ] Log which provider made each puzzle and how long it took (a column on `games`), so the order can be decided on numbers.
-- [ ] Generate one hidden word at a time and check each with the engine, if whole-paragraph quality stays poor.
-
-### 7. Other
-
-- [ ] Holiday dailies, phase 2: a themed puzzle for each holiday, made with the AI, checked by the engine and by the same safety check and standard as any other puzzle (2a). Same file, new puzzle ids.
-- [ ] Player-made puzzles, public list: today they open by link only. A browse list needs a report button and a way to hide a puzzle first. Any-topic puzzles need the same before they are listed anywhere.
-- [ ] Search traffic, name part: "Gazecraft: the hidden words game" in titles. The name is decided (Gazecraft); the titles are not changed yet.
-- [ ] Reminders by email for players whose browser cannot do push. Needs the SMTP above.
-
-## Ideas parked
-
-- More than one game (asked for on 9 Oct 2026): families like the reasoning papers at school, Verbal, Quantitative and Non-verbal, all practising the same close look. Written into `SPEC.md` section 9. After sections 1 to 3. Order when it starts:
-  - A `family` field on each registry type, shown on game rows and as a filter. Nothing new on screen until a second family has a game.
-  - Buried sums as the first Quantitative game: engine first, pure TS, with `expectedAnswers` in `data/games.json` and unit tests, then its `Board`.
-  - One Non-verbal game (Trace) after that.
-  - It follows the one rule: families fold into the games list and the journey (3c), they do not add a screen.
-  - The wish behind it is helping people get their focus back. We can build for that. We cannot say it: the promise allows the practice, never a result.
-- Seasonal avatar touches could switch on by date (a Santa hat row that appears in December), and a few special ones could be earned or sold. Everything that helps someone look like themselves stays free.
-- Notifications by push as well as in the app (a follow, a streak ask, a badge), once reminders are switched on. Each kind needs its own off switch first.
-- A home screen widget or app badge showing the week ring. Duolingo's biggest single lift after the streak itself.
-- Friend streak milestones (7, 30, 100 days together) with a card to share.
-- A push when a background puzzle is ready, once reminders are on.
-
-## Business, once people are playing
-
-- [ ] Paystack: remove ads forever, past dailies archive, paid "make your own puzzle". The streak freeze is no longer for sale: rest days are free (2d). Selling relief from a worry we created breaks the promise, and the EU is looking at exactly that.
-- [ ] A paid AI model for any-topic puzzles if the free ones stay slow. Needs a spending cap and a price per puzzle worked out first.
-- [ ] AdSense footer ad: one per page, still image, never near the puzzle. Needs the domain. Update the privacy page (it says "No ads" today).
-- [ ] Sponsored puzzles for brands, schools and churches, with a one page pitch.
-
-Rule for all of it: nothing sold or shown may affect scores.
+- [ ] Read the packs against `PUZZLE_STANDARD.md` and fix the worst. `giveaways` flags bible, bnote, broad, nigeria, bpeople, world, afrobeats, eagles.
+- [ ] Pick dailies from the `daily_candidates` view. Nothing reads it yet.
+- [ ] Usage per feature per week from the database. Under 2% of weekly players after a month moves behind "More".
+- [ ] A circle offered after the third daily. "Days this month" on the profile.
+- [ ] A public list of player-made puzzles.
+- [ ] "Gazecraft" in page titles. Reminders by email, once SMTP is set.
+- [ ] `e2e/onboarding.spec.ts`, and a count of new visitors who finish a puzzle and then sign in.
 
 ## Checks still owed
 
-- [ ] `npm run e2e` over everything built on 9 Oct 2026. The specs were written or updated and never run.
+- [ ] Signed in browser tests since the sign in flash fix. Docker was down on 9 Oct 2026.
 - [ ] The safety model (Llama Guard) with one real call. Its answer shape is assumed.
-- [ ] The numbers in `INSIGHTS.html` against their primary sources, before any of them goes on a public page. Several came from news reports.
+- [ ] On real phones: the dock on an iPhone Home Screen app, a room game on 2 phones, a machine-written puzzle through the site, the waiting screen with the phone locked.
+- [ ] Signed in screens on the live site with a real second account.
+- [ ] One real push on Android and iPhone. Needs the reminder keys.
+- [ ] The numbers in `INSIGHTS.html` against primary sources before any goes on a public page.
 
-- [ ] One any-topic puzzle from a phone on fignda.pages.dev. Only the API address was tested with a real wait, not the site's `/api` path.
-- [ ] A real room game on 2 phones. The room tests run in tabs of one browser, not over the live connection.
-- [ ] The privacy page: what a player types into Make goes to OpenRouter, Google and Groq. Say so if it does not.
-- [ ] Mobile Lighthouse with Google PageSpeed (92 measured on this machine; Google's quota had run out).
-- [ ] Signed in screens on the live site with a real second account: start a circle, save a character, follow someone, start a friend streak from a link, invite into a room. The Players lists stay empty until a second account exists.
-- [ ] One real push on Android Chrome and on an iPhone with the site on the Home Screen. Needs the reminder keys.
+## How puzzles are written today
+
+`AI_PROVIDER` in `worker/wrangler.toml` is asked in order: OpenRouter (`nvidia/nemotron-3-super-120b-a12b:free`, 1 to 2.5 minutes, 50 a day, clumsy at times), Google (`gemini-3.5-flash`, 30 seconds, 20 a day), Groq (never called for real). The brief is `PUZZLE_STANDARD.md`. Test models with `npm run ai:bench`; it spends the daily free requests.
 
 ## Switched off on purpose
 
-- Google sign in: hidden until the provider is set up in Supabase, then build with `VITE_GOOGLE_AUTH=1`.
-- Reminders: until the keys are set (see Owner). The settings switch says so.
+- Google sign in: until the provider is set up in Supabase, then build with `VITE_GOOGLE_AUTH=1`.
+- Reminders: until the keys are set.
 
 ## Known limits
 
-- The avatar on the waiting screen bobs and does not blink: the face parts cannot blink without redrawing the character.
-- Shelf counts, stars and personal records are kept in the browser, from 9 Oct 2026 on. Earlier plays and other devices are not counted.
-- "5 wrong codes, then a 15 minute lock" cannot be enforced exactly: Supabase checks sign in codes itself, and its own per address limit applies instead.
-- If two players in a room find the same word at the same moment, both see it as theirs in the room. The Together board credits one of them, the earlier find by the server's clock.
-- A room player who closes the tab before the game ends sends no play, so their finds do not count for the team.
-- Reminder times follow the player's time zone as saved when they turned reminders on. The daily itself still changes at midnight UTC.
-- Room plays made before the Together board shipped are not on it.
-- Any-topic puzzles stop for the day when the free limits run out: about 50 requests on OpenRouter and 20 on Google. Players then see the failure line.
+- "5 wrong codes, then a 15 minute lock" cannot be enforced exactly: Supabase checks sign in codes itself.
+- Two players finding the same word at the same moment both see it as theirs. The Together board credits the earlier one.
+- A room player who closes the tab before the end sends no play.
+- Reminder times follow the saved time zone. The daily changes at midnight UTC.
+- Machine-written puzzles stop for the day when the free limits run out.
+- The avatar on the waiting screen bobs and does not blink.
+- Stars, shelf counts and personal records are kept in the browser, from 9 Oct 2026 on.

@@ -7,7 +7,7 @@ import styles from './OgCard.module.css';
 
 export type OgInput =
   | { kind: 'default' }
-  | { kind: 'game'; title: string; noun: string; text: string; dict: readonly string[]; daily?: boolean };
+  | { kind: 'game'; title: string; noun: string; text: string; dict: readonly string[]; daily?: boolean; /** "With NAME" on a sponsored puzzle. */ sponsor?: string };
 
 /**
  * Link preview image, 1200x630. Same language as the share cards: dark ink, Manrope, lime mark.
@@ -44,6 +44,7 @@ export function OgCard({ input }: { input: OgInput }) {
     <div className={styles.og} data-theme="dark" data-og="">
       <Brand kicker={input.daily ? 'Daily puzzle' : input.title} />
       <div className={styles.body}>
+        {input.sponsor && <div className={styles.with}>{input.sponsor}</div>}
         <div className={styles.question}>{question}</div>
         <div className={styles.excerpt}>{cut}</div>
       </div>

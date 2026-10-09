@@ -38,6 +38,8 @@ type Props = {
   day?: string;
   /** After today's daily: one calm line that the day is done. */
   done?: string;
+  /** A sponsored puzzle: "With NAME" and, when there is one, the sponsor's link and its site name. */
+  sponsor?: { line: string; url?: string; host?: string };
   /** Extra actions under the result (the reminder ask). */
   children?: ReactNode;
 };
@@ -45,7 +47,7 @@ type Props = {
 /** Lines worth a paragraph: no blanks, none twice. */
 const lines = (l?: readonly string[]) => [...new Set((l ?? []).filter((x) => typeof x === 'string' && x.trim() !== ''))];
 
-export function GameResults({ title, line, score, found, total, secs, canReplay, onReplay, onShare, onText, boardPath, guest, streak, rare, stars, starsUp, skills, records, day, done, children }: Props) {
+export function GameResults({ title, line, score, found, total, secs, canReplay, onReplay, onShare, onText, boardPath, guest, streak, rare, stars, starsUp, skills, records, day, done, sponsor, children }: Props) {
   const { pathname } = useLocation();
   const [note, setNote] = useState('');
   const earned = clampStars(stars);
@@ -86,6 +88,19 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
         {day && <p className={styles.streak}>{day}</p>}
         {streak && <p className={styles.streak}>{streak}</p>}
         {done && <p className={styles.streak}>{done}</p>}
+        {sponsor?.line && (
+          <p className={styles.with}>
+            {sponsor.line}
+            {sponsor.url && sponsor.host && (
+              <>
+                {' · '}
+                <a href={sponsor.url} target="_blank" rel="sponsored noopener" className={styles.board}>
+                  {sponsor.host}
+                </a>
+              </>
+            )}
+          </p>
+        )}
       </div>
       <div className={styles.row}>
         <dl className={styles.stats}>

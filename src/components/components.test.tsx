@@ -6,8 +6,9 @@ import { ArrowRight } from 'lucide-react';
 import { Button } from './Button';
 import { Header } from './Header';
 import { Icon } from './Icon';
-import { Logo } from './Logo';
-import { LOGO_G, LOGO_REST, LOGO_SHADE } from './logoPaths';
+import { Logo, LogoMark } from './Logo';
+import { CAT } from '../brand/cat';
+import { LOGO_G, LOGO_REST } from './logoPaths';
 import { TextLink } from './TextLink';
 import { ThemeToggle } from './ThemeToggle';
 import { THEME_KEY } from '../lib/theme';
@@ -44,14 +45,20 @@ describe('Icon', () => {
 });
 
 describe('Logo', () => {
-  it('renders the wordmark from the spec paths, lime on the shade only', () => {
+  it('renders the wordmark from the spec paths: the cat, then the letters in ink', () => {
     const { container } = render(<Logo />);
-    const [shade, letters] = container.querySelectorAll('path');
-    expect(shade!.getAttribute('d')).toBe(LOGO_SHADE);
-    expect(shade!.getAttribute('fill')).toBe('var(--accent)');
+    // Every shape of the cat, and nothing else, sits in the group before the letters.
+    expect(container.querySelectorAll('svg > g > *')).toHaveLength(CAT.length);
+    const letters = container.querySelector('svg > path');
     expect(letters!.getAttribute('d')).toBe(LOGO_G + LOGO_REST);
     expect(letters!.getAttribute('fill')).toBe('currentColor');
     expect(screen.getByRole('img', { name: 'Gazecraft' })).toBeInTheDocument();
+  });
+
+  it('the mark is the cat alone, and decorative', () => {
+    const { container } = render(<LogoMark />);
+    expect(container.querySelectorAll('svg > *')).toHaveLength(CAT.length);
+    expect(container.querySelector('svg')).toHaveAttribute('aria-hidden', 'true');
   });
 });
 

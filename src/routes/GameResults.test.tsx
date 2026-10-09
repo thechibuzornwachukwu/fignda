@@ -97,6 +97,24 @@ describe('GameResults', () => {
     expect(container.textContent).not.toMatch(/undefined|NaN|null|\{\w*\}/);
   });
 
+  it('a sponsored puzzle says who it is with, last, and links the sponsor in a new tab', () => {
+    const lines = show({ done: 'That is today done. See you tomorrow.', sponsor: { line: 'With Chi Farms', url: 'https://chifarms.example/', host: 'chifarms.example' } });
+    expect(lines).toEqual([base.line, 'That is today done. See you tomorrow.', 'With Chi Farms · chifarms.example']);
+    const link = screen.getByRole('link', { name: 'chifarms.example' });
+    expect(link).toHaveAttribute('href', 'https://chifarms.example/');
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'sponsored noopener');
+  });
+
+  it('a sponsor with no link is a name and nothing to tap', () => {
+    expect(show({ sponsor: { line: 'With Chi Farms' } })).toEqual([base.line, 'With Chi Farms']);
+    expect(screen.queryByRole('link', { name: /chifarms/ })).toBeNull();
+  });
+
+  it.each([undefined, { line: '' }, { line: '', url: 'https://chifarms.example/', host: 'chifarms.example' }])('sponsor %o adds no line', (sponsor) => {
+    expect(show({ sponsor })).toEqual([base.line]);
+  });
+
   it('keeps the leaderboard link beside the result line', () => {
     show({ boardPath: '/leaderboard/bible' });
     expect(screen.getByRole('link', { name: 'See the leaderboard' })).toHaveAttribute('href', '/leaderboard/bible');

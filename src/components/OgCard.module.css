@@ -47,6 +47,15 @@
 .sub {
   color: var(--subtle);
 }
+/* "With NAME", above the question. One line: a name is 40 characters at most. */
+.with {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
 .question {
   font-size: 64px;
   line-height: 1;

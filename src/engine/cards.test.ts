@@ -148,3 +148,32 @@ describe('resultCard', () => {
     expect(c.hints).toBe('1 hint');
   });
 });
+
+describe('With NAME on a card', () => {
+  const answers = answersFrom('amos and mark', ['amos', 'mark']);
+  const text = 'Amos and Mark went out. Then they came home.';
+  const mark = { sponsor: 'With Chi Farms', sponsorHost: 'chifarms.example' };
+
+  it('a result card carries the line and the site name', () => {
+    expect(resultCard({ ratio: '4:5', answers, secs: 10, ...mark })).toMatchObject(mark);
+  });
+
+  it('every page of a puzzle card carries them, and the card shows them with the title', () => {
+    const cards = puzzleCards({ ratio: '4:5', answers, secs: 10, text, mode: 'full', ...mark });
+    expect(cards.length).toBeGreaterThan(0);
+    for (const c of cards) expect(c).toMatchObject(mark);
+  });
+
+  it('no sponsor is two empty strings, never undefined', () => {
+    expect(resultCard({ ratio: '4:5', answers, secs: 10 })).toMatchObject({ sponsor: '', sponsorHost: '' });
+  });
+
+  it('a site name with no line is dropped', () => {
+    expect(resultCard({ ratio: '4:5', answers, secs: 10, sponsor: '  ', sponsorHost: 'chifarms.example' })).toMatchObject({ sponsor: '', sponsorHost: '' });
+  });
+
+  it('the score on the card is the same with or without it', () => {
+    const found = answers.map((a) => ({ ...a, found: true }));
+    expect(resultCard({ ratio: '4:5', answers: found, secs: 100, ...mark }).score).toBe(resultCard({ ratio: '4:5', answers: found, secs: 100 }).score);
+  });
+});

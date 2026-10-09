@@ -8,9 +8,13 @@ import { ShareCard, type CardData } from '../components/ShareCard';
 import { useCardBudget } from '../components/useCardBudget';
 import { answersFrom, puzzleCards, resultCard, RATIOS, type Ratio } from '../engine/cards';
 import { buildHiddenWords } from '../engine/hiddenWords';
-import { games } from '../games/catalog';
+import { pick } from '../copy';
+import { games, sponsorFor } from '../games/catalog';
 
 const ratios = Object.keys(RATIOS) as Ratio[];
+
+/** `?with=1`: the mark at its longest (a 40 character name), so it is measured like everything else. */
+const WITH = { sponsor: 'With Oluwadamilare and Chukwuemeka Farms Ltd', sponsorHost: 'oluwadamilare-chukwuemeka-farms.example' };
 
 function Deck({ id, input }: { id: string; input: Parameters<typeof puzzleCards>[0] }) {
   const [budgetScale, onOverflow] = useCardBudget(id);
@@ -37,6 +41,7 @@ export function CardsHarness() {
   const list = games.filter((g) => !only || g.id === only);
 
   const longName = { name: 'Oluwadamilare Chukwuemeka-Adebayo Okonkwo', handle: '@oluwadamilare.chukwu' };
+  const mark = q.get('with') === '1' ? WITH : {};
 
   return (
     <div style={{ padding: 8 }}>
@@ -44,7 +49,7 @@ export function CardsHarness() {
         const p = buildHiddenWords(g);
         const found = (i: number) => i % 2 === 0;
         const answers = answersFrom(g.text, p.answers.map((a) => a.key)).map((a, i) => ({ ...a, found: found(i), hinted: i % 5 === 0 }));
-        const base = { answers, secs: 3725, theme, kicker: `${g.category} · ${p.difficulty}`, date: '26 Sept', url: 'fignda.pages.dev/play/' + g.id, noun: g.noun, text: g.text };
+        const base = { answers, secs: 3725, theme, kicker: `${g.category} · ${p.difficulty}`, date: '26 Sept', url: 'fignda.pages.dev/play/' + g.id, noun: g.noun, text: g.text, ...mark };
         return ratios.map((ratio) => (
           <div key={`${g.id}-${ratio}`}>
             {(['excerpt', 'full'] as const).map((mode) =>
@@ -75,8 +80,10 @@ export function CardsHarness() {
 export function OgHarness() {
   const [q] = useSearchParams();
   const g = games.find((x) => x.id === q.get('game'));
+  const w = g && sponsorFor(g);
+  const sponsor = q.get('with') === '1' ? WITH.sponsor : w ? pick('sponsorWith', { name: w.name }) : undefined;
   const input: OgInput = g
-    ? { kind: 'game', title: g.title, noun: g.noun, text: g.text, dict: g.dict, daily: q.get('daily') === '1' }
+    ? { kind: 'game', title: g.title, noun: g.noun, text: g.text, dict: g.dict, daily: q.get('daily') === '1', sponsor }
     : { kind: 'default' };
   return <OgCard input={input} />;
 }

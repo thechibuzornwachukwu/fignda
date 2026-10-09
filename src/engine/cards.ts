@@ -73,6 +73,9 @@ export type CardInput = {
   previewW?: number;
   /** Daily: hide the total. */
   hideCount?: boolean;
+  /** A sponsored puzzle: the "With NAME" line, and the sponsor's site name beside it. */
+  sponsor?: string;
+  sponsorHost?: string;
 };
 
 function base(o: CardInput, r: Layout) {
@@ -92,6 +95,9 @@ function base(o: CardInput, r: Layout) {
     date: o.date ?? '',
     kicker: o.kicker ?? '',
     url: o.url ?? 'gazecraft.com',
+    sponsor: o.sponsor?.trim() ?? '',
+    // A site name with no mark beside it would read as ours.
+    sponsorHost: o.sponsor?.trim() ? (o.sponsorHost?.trim() ?? '') : '',
     guest,
     initial: guest ? 'f' : name.charAt(0).toUpperCase(),
     first: guest ? 'A guest' : name.split(/\s+/)[0]!,
