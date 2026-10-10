@@ -52,7 +52,7 @@ describe('a guest', () => {
     localStorage.setItem(PARTNER_KEY, '{broken');
     forgetPartner();
     expect(loadPartner()).toEqual({ current: 'cat', owned: ['cat'], points: 0, bonds: {} });
-    localStorage.setItem(PARTNER_KEY, JSON.stringify({ current: 'robot', owned: ['robot'], points: 'lots', bonds: 'many' }));
+    localStorage.setItem(PARTNER_KEY, JSON.stringify({ current: 'ghost', owned: ['ghost'], points: 'lots', bonds: 'many' }));
     forgetPartner();
     expect(loadPartner()).toEqual({ current: 'cat', owned: ['cat'], points: 0, bonds: {} });
   });

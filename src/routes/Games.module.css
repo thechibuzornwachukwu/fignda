@@ -111,47 +111,15 @@
   border-top: 2px solid var(--fg);
 }
 
-/* Who is on the case. One row, pressable, to the stage. */
+/* Who is on the case: 2 small faces in the corner of the header, pressable, to the stage. */
 .crew {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  min-width: 0;
-  padding: var(--space-3) var(--space-4);
-  background: var(--surface);
-  border: 1px solid var(--line-3);
-  border-radius: var(--radius-dock);
-  box-shadow: 0 var(--ledge) 0 var(--line-3);
-  color: var(--muted);
-  -webkit-tap-highlight-color: transparent;
-  transition: transform var(--dur-fast) var(--ease-out);
-}
-.crew:active {
-  transform: translateY(var(--ledge));
-  box-shadow: none;
-}
-.crewFaces {
   display: inline-flex;
-  flex: none;
+  align-items: center;
   gap: var(--space-1);
-}
-.crewText {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-width: 0;
-}
-.crewNames {
-  composes: itemTitle from '../styles/type.module.css';
-  color: var(--fg);
-  overflow-wrap: anywhere;
-}
-.crewHint {
-  composes: label from '../styles/type.module.css';
-  overflow-wrap: anywhere;
-}
-@media (prefers-reduced-motion: reduce) {
-  .crew {
-    transition: none;
-  }
+  min-height: 44px;
+  padding: var(--space-1);
+  border: 1px solid var(--line-3);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  -webkit-tap-highlight-color: transparent;
 }

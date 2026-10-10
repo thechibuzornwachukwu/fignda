@@ -68,11 +68,11 @@ const VOICE: Record<Who, Bio> = {
     use: 'First days, streaks, anything that welcomes.',
   },
   robot: {
-    name: 'Robo-cop',
+    name: 'Agent 404',
     meaning: 'Nobody gave it a badge. It printed one.',
     role: "A player's choice",
     nature: 'Exact. Counts everything, misses nothing.',
-    story: 'Robo-cop was put together in Computer Village from a trader\'s calculator and a radio that only got one station. It can count the letters in a paragraph faster than you can blink. It cannot see the word hiding in them until somebody shows it, and it thinks that is the cleverest thing people do.',
+    story: 'Agent 404 was put together in Computer Village from a trader\'s calculator and a radio that only got one station. It can count the letters in a paragraph faster than you can blink. It cannot see the word hiding in them until somebody shows it, and it thinks that is the cleverest thing people do.',
     wants: 'To understand how you noticed. It writes down your answer every time.',
     quirk: 'Says the number first. Scans where the others look. Shows 404 when it is lost, and three dots while it works.',
     weak: 'Cannot round up. 7 of 8 is 7 of 8.',
@@ -261,7 +261,7 @@ ${wordmark('currentColor', 44)}
 <section>
   <p class="num">4</p>
   <h2>The cast</h2>
-  <p class="sub">Four partners and the player. The four work a case beside you: a new player picks 1, free, and can switch to another once it is unlocked with points. Detective X leads, and is the logo. Each has tools of its own: the animals hold a magnifying glass and wear a monocle, and Robo-cop scans and zooms.</p>
+  <p class="sub">Four partners and the player. The four work a case beside you: a new player picks 1, free, and can switch to another once it is unlocked with points. Detective X leads, and is the logo. Each has tools of its own: the animals hold a magnifying glass and wear a monocle, and Agent 404 scans and zooms.</p>
   ${WHO.map(castCard).join('\n')}
   <div class="cast">
     <div class="on cream">${row([you({ back: 3, skin: 4, hair: 33, eyes: 1 }), you({ back: 2, skin: 5, hair: 26, face: 1 }), you({ back: 5, skin: 1, hair: 8, eyes: 1 })].map((s) => fig(s)), 'tight')}</div>

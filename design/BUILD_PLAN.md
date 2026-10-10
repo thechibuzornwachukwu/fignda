@@ -11,7 +11,7 @@ Seed (after `npm run db:seed:gen`): `npx supabase db query --linked -f supabase/
 - One skill in every game: looking closely. Words today, numbers and shapes next.
 - A case is a run of clues. A clue is one short sitting. The last clue puts the pieces together and unmasks who hid the secret.
 - A new culprit each case, an ordinary character under a disguise. One unseen figure links the cases: every culprit leaves the same calling card.
-- Partners work the case beside the player: Detective X (the cat, and the logo), Detective Tobs and Detective Puff, with a robot to come once it is named. A player picks 1, free, and unlocks the others with points. Who they are: `design/brand/index.html`.
+- Partners work the case beside the player: Detective X (the cat, and the logo), Detective Tobs, Detective Puff and Agent 404 (the robot). A player picks 1, free, and unlocks the others with points. Who they are: `design/brand/index.html`.
 - Tone: the motive is mischief, pride or a surprise, never harm. No violence, gangs, weapons, romance or fear.
 - For all ages, not a children's product. Accounts from 13. Younger players join on a parent's device or room.
 - A guest gets 2 games, then signs in. The account is where a detective, a partner and a case live.
@@ -21,6 +21,34 @@ Seed (after `npm run db:seed:gen`): `npx supabase db query --linked -f supabase/
 - AI is never named in the UI. No "made by a machine" and no "written by a person". A puzzle that reads badly is not shown.
 - A new feature replaces or folds into an old one. 2 new games done properly before any more.
 - What a copy cannot have, so build toward it: the engine that makes and grades puzzles, the data on which words players miss, a case library the players write, home ground (Naija packs, Pidgin, Paystack), a player's own circle, a player's earned character, and trust.
+
+## Screens: one job each
+
+The rule for every screen: one job, one main action, and the fewest taps to it. Anything that is not the job moves to the screen whose job it is, or goes. A player should never have to choose where to go to play: the dock's Play button always knows.
+
+Navigation, on a phone: no bar across the top. Each screen is its title, one action at most, and the bell. The dock is the only way around: Cases, You, Play, Squad, Ranks. An icon stands alone only where everyone reads it (a gear, a bell, a pencil on a picture); anything else carries its word.
+
+| Screen | Its one job | Main action | State |
+|---|---|---|---|
+| Play (dock) | Start the next thing | Today's daily, then the next clue | Built |
+| Cases `/play` | Show where you are in the case | The next clue on the path | Built: daily card, then the path. Closed cases fold into one row |
+| Puzzle, clue | Find the words | Done | Built |
+| Result | Say what happened and lead on | Next clue, or Share | Built. To do: one line of result, the rest behind "More" |
+| You `/me` | Who you are: detective, partner, gear | Select, or Wear | Built. Holds the week. To do: fold the profile's badges and records in, so `/u/me` is only what others see |
+| Squad `/players` | The people you play with | Follow, or invite | Built in order: friend streaks, top players, suggestions, find. To do: circles move here from Ranks |
+| Ranks `/leaderboard` | Where you stand today | None: it is read | Built. To do: your own row pinned in view, one board at a time |
+| Settings | The account | Save | Built: account only. Reached from the gear on You |
+| First minute `/welcome` | Get a new player into a game | Keep this look | Built: character and partner on one screen. To do: start in a game, ask after the first result |
+| Guest wall | Turn a guest into a player | Sign in | Built: after 2 games |
+| Make `/make` | Write a puzzle | Publish | Built. To do: sets 6a to 6g. Reached from the foot of Cases, once unlocked |
+| Notifications | What happened while you were away | Open the thing | Built. Reached from the bell |
+
+To do next, in this order, each small:
+- [ ] **Set 9a. Result, shorter.** One title, one line, stars, the case piece, 2 buttons. Everything else behind "More".
+- [ ] **Set 9b. You holds everything about you.** Badges and records on the stage screen. `/u/HANDLE` becomes the public page only.
+- [ ] **Set 9c. Squad holds every person.** Circles move from Ranks to Squad. Ranks becomes one board with your row pinned.
+- [ ] **Set 9d. Play first.** A new player lands in a clue. The character and partner are asked after the first result, not before.
+- [ ] **Set 9e. Wide screens.** The same one-job rule for the desktop header: fewer links, the same Play.
 
 ## Revenue
 
@@ -48,8 +76,8 @@ Never for sale: hints, extra tries, time, or anything that touches a score; stre
 
 - [ ] Set up Google sign in in Supabase. A 6 digit email code is the hardest step for a new player, and one tap removes it. Likely worth more than any change to guest mode.
 - [ ] Decide: the name (suggested: keep Gazecraft, detective theme inside it. Free as .com and .game on 9 Oct 2026, registry check only: gazecraft, keensleuth, sleuthtrail, cluestop, plainsleuth, loupequest).
-- [ ] Prices for the models above. None is set. Partners open at 3,000 and 9,000 points for now (`PARTNER_POINTS` and `partner_slots`): confirm or change.
-- [ ] "Robo-cop" is close to RoboCop, a registered film trademark. Check it, or rename, before the robot is in the game.
+- [ ] Prices for the models above. None is set. Partners open at 3,000, 9,000 and 20,000 points for now (`PARTNER_POINTS` and `partner_slots`): confirm or change.
+- [ ] The robot is named Agent 404. A trademark search on that name has not been run.
 - [ ] A list of 20 people to ask first: brands, schools, churches, event planners.
 - [ ] What a sponsor may and may not write.
 - [ ] Reset the database password (Supabase, Database, Settings). It was shared in chat and is still the live one.
@@ -79,7 +107,6 @@ Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with 
 A case is one puzzle: its passages are the clues and the whole puzzle is the last, the unmasking (SPEC section 6, Games). Each clue gives a piece of the case's secret, and the unmasking shows who hid it (SPEC section 9, The secret).
 
 - [ ] **Set 3l. More a partner does.** Still open from the partner idea: each partner giving its own kind of hint at the usual hint cost, and a mark on the unmasking for a squad whose partners differ. Rule to keep: nothing sold may change a score.
-- [ ] **Set 3h. The robot.** The 4th partner is drawn and held back. Once its name is settled (Owner): add it to `PARTNERS`, to the checks in `player_partners` and `choose_partner`, a 4th threshold, and run `npm run partners:render`.
 - [ ] **Set 3i. Partner moments still to place:** the error state, a closed case, and what each partner says (bubbles are drawn in `design/brand/elements`).
 
 ### 4. More games

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Lock, Pencil } from 'lucide-react';
+import { Lock, Pencil, Settings } from 'lucide-react';
 import { avatarCode, avatarFor, parseAvatar, PARTS, type Avatar as Parts } from '../avatar/draw';
 import { EARNED, howTo, isEarned, type Standing } from '../avatar/earned';
 import { guestAvatar, guestAvatarCode, guestSeed, setGuestAvatarCode } from '../avatar/guest';
@@ -7,6 +7,7 @@ import { setAvatarCode } from '../avatar/store';
 import { Avatar } from '../components/Avatar';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
+import { IconLink } from '../components/IconLink';
 import { LevelBadge } from '../components/LevelBadge';
 import { PageHeader } from '../components/PageHeader';
 import { Partner } from '../components/Partner';
@@ -19,7 +20,9 @@ import { useAuth } from '../lib/auth';
 import { keepLook, loadLook } from '../lib/firstMinute';
 import type { LookChoice } from '../lib/onboarding';
 import { choosePartner, syncPartner, usePartner } from '../lib/partner';
+import { useStreak } from '../lib/useStreak';
 import { CharacterEditor } from './AvatarDesigner';
+import { Week } from './Games';
 import styles from './Me.module.css';
 
 const num = (n: number) => n.toLocaleString('en-US');
@@ -44,6 +47,7 @@ export function Me() {
   const auth = useAuth();
   const profile = auth.profile;
   const partner = usePartner();
+  const run = useStreak();
   const [trying, setTrying] = useState<Trying>(null);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState('');
@@ -119,20 +123,29 @@ export function Me() {
 
   return (
     <div className={styles.page}>
-      <PageHeader title="You" action={profile ? <TextLink to="/settings">Settings</TextLink> : auth.enabled ? <TextLink to="/welcome?from=%2Fme">Sign in</TextLink> : undefined} />
+      <PageHeader title="You" action={profile ? <IconLink to="/settings" icon={Settings} label="Settings" /> : auth.enabled ? <TextLink to="/welcome?from=%2Fme">Sign in</TextLink> : undefined} />
 
       <section className={styles.stage} aria-label="Your detective and your partner" data-trying={trying?.kind}>
         <div className={styles.cast}>
           <figure className={styles.figure}>
-            <Avatar parts={shownParts} size={128} />
+            <span className={styles.portrait}>
+              <Avatar parts={shownParts} size={128} />
+              {/* A pencil on the picture: the way to change it, where the eye already is. */}
+              <button type="button" className={styles.edit} aria-label="Edit character" title="Edit character" onClick={() => setEditing(true)}>
+                <Icon icon={Pencil} size={18} />
+              </button>
+            </span>
             <figcaption className={styles.caption}>{profile?.name ?? 'You'}</figcaption>
+            {profile && <LevelBadge points={partner.points} size="sm" />}
           </figure>
           <figure className={styles.figure}>
-            <Partner who={shownPartner} moment={trying?.kind === 'partner' ? 'hello' : 'done'} size={128} />
+            <span className={styles.portrait}>
+              <Partner who={shownPartner} moment={trying?.kind === 'partner' ? 'hello' : 'done'} size={128} />
+            </span>
             <figcaption className={styles.caption}>{partnerName(shownPartner)}</figcaption>
+            <span className={styles.sub}>Your partner</span>
           </figure>
         </div>
-        {profile && <LevelBadge points={partner.points} size="sm" />}
         <div className={styles.act}>
           {action ? (
             <Button variant="accent" onClick={() => void go()} disabled={busy}>
@@ -143,16 +156,11 @@ export function Me() {
               {line}
             </p>
           )}
-          <Button variant="secondary" onClick={() => setEditing(true)}>
-            <Icon icon={Pencil} size={16} />
-            Edit character
-          </Button>
         </div>
         <p className={styles.note} role="status">
           {note}
         </p>
       </section>
-
       <section className={styles.section} aria-labelledby="me-partners">
         <h2 id="me-partners" className={styles.h2}>
           Partners
@@ -223,6 +231,9 @@ export function Me() {
           })}
         </ul>
       </section>
+
+      {/* How the week went: a fact about you, so it lives here and not in the way of playing. */}
+      <Week run={run} />
 
       <p className={styles.more}>
         {profile ? (

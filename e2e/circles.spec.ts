@@ -182,7 +182,7 @@ test('detective pieces are earned: locked until a case is closed, then they can 
 test('partners: a guest picks one on the first screen, it shows at the end of a game, and Settings shows who is held', async ({ page }) => {
   await page.goto('/welcome');
   const pick = page.getByRole('group', { name: /your partner/i });
-  await expect(pick.getByRole('button')).toHaveText(['Detective X', 'Detective Tobs', 'Detective Puff']);
+  await expect(pick.getByRole('button')).toHaveText(['Detective X', 'Detective Tobs', 'Detective Puff', 'Agent 404']);
   // Left alone, it is Detective X.
   await expect(pick.getByRole('button', { name: 'Detective X' })).toHaveAttribute('aria-pressed', 'true');
   await pick.getByRole('button', { name: 'Detective Puff' }).click();
@@ -209,7 +209,8 @@ test('You is a stage: tap a partner or a piece of gear to try it, and one button
 
   // A locked partner can be tried on the stage, and says what opens it.
   const partners = page.getByRole('region', { name: 'Partners' });
-  await expect(partners.getByRole('button')).toHaveCount(3);
+  await expect(partners.getByRole('button')).toHaveCount(4);
+  await expect(partners.getByRole('button', { name: /^Agent 404\./ })).toBeVisible();
   await partners.getByRole('button', { name: 'Detective Tobs. Locked. 3,000 points.' }).click();
   await expect(stage).toContainText('Detective Tobs');
   await expect(stage.locator('img[data-partner="dino"]')).toBeVisible();
@@ -231,7 +232,6 @@ test('You is a stage: tap a partner or a piece of gear to try it, and one button
   // No sideways scroll on a phone: the rows swipe, the page does not.
   await page.setViewportSize({ width: 360, height: 740 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-  await expect(page.locator('body')).not.toContainText(/robo/i);
   // Settings no longer holds any of this: it points here.
   await page.goto('/settings');
   await expect(page.getByRole('heading', { name: 'Your character' })).toHaveCount(0);

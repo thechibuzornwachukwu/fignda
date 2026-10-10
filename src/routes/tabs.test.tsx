@@ -155,10 +155,11 @@ describe('Games', () => {
     expect(localStorage.getItem('gazecraft-unlocks')).toContain('make');
   });
 
-  it('one finished game brings the way to the board', () => {
+  it('Cases is the daily and the path: no week, no board link, and Make only once it is unlocked', () => {
     localStorage.setItem('gazecraft-finished', JSON.stringify([games[0]!.id]));
     open('/play');
-    expect(screen.getByRole('link', { name: "See today's board" })).toHaveAttribute('href', '/leaderboard');
+    expect(screen.queryByRole('link', { name: "See today's board" })).toBeNull();
+    expect(screen.queryByText(/of the last 7 days/)).toBeNull();
     expect(screen.queryByRole('link', { name: 'Make a puzzle' })).toBeNull();
   });
 
@@ -297,7 +298,8 @@ describe('Players', () => {
   it('leads with one section, and the top lists are one more', async () => {
     open('/players');
     await screen.findByText(/Nobody else has joined yet/);
-    expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)).toEqual(['People to follow', 'Top players']);
+    // The boards first, then who to follow: suggestions never push the people you play with down.
+    expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)).toEqual(['Top players', 'People to follow']);
   });
 
   it('lists that did not load say so, and never claim to be empty', async () => {
@@ -328,7 +330,10 @@ describe('Players', () => {
   it('signed in and new: friend streaks wait, unless the link asks for them', async () => {
     world.me = ADA;
     const first = open('/players');
-    await screen.findByText(/You follow everyone here/);
+    await screen.findByRole('heading', { level: 2, name: 'Top players' });
+    // Nobody to suggest: the section is left out, not shown empty.
+    expect(screen.queryByText(/You follow everyone here/)).toBeNull();
+    expect(screen.queryByRole('heading', { level: 2, name: 'People to follow' })).toBeNull();
     expect(screen.queryByRole('region', { name: 'Friend streaks' })).toBeNull();
     first.unmount();
     open('/players#friend-streaks');

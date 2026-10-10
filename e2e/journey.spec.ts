@@ -142,6 +142,11 @@ test.describe('the journey', () => {
     await expect(box.locator('[data-case-badge]')).toContainText(/closed|found/i);
     // The clues fold away, and the title is the way back in.
     await expect(box.locator('[data-clue]')).toHaveCount(0);
+    // Closed cases fold into one row: open it to reach them.
+    const folded = journey(page).locator('[data-closed-cases]');
+    await expect(folded.locator('summary')).toHaveText('1 case closed');
+    await expect(box.getByRole('link')).toBeHidden();
+    await folded.locator('summary').click();
     const again = (await box.getByRole('link').boundingBox())!;
     expect(again.height).toBeGreaterThanOrEqual(44);
     await expect(journey(page).locator('[data-case]').nth(1)).toHaveAttribute('data-state', 'open');

@@ -60,7 +60,7 @@ describe('choose_partner', () => {
 
   it('refuses a partner that is not in the game, bad input and guests', async () => {
     const u = await makeUser('partner');
-    for (const who of ['robot', 'CAT', '', null, "cat'; drop table plays;--", 7]) expect((await choose(u, who)).error).not.toBeNull();
+    for (const who of ['ghost', 'CAT', '', null, "cat'; drop table plays;--", 7]) expect((await choose(u, who)).error).not.toBeNull();
     expect((await anon().rpc('choose_partner', { p_who: 'cat' })).error).not.toBeNull();
     expect((await anon().rpc('my_partner')).error).not.toBeNull();
     expect(await mine(u)).toBeUndefined();
@@ -90,12 +90,25 @@ describe('choose_partner', () => {
   it('the table refuses a current partner that is not held, and an unknown one', async () => {
     const u = await makeUser('partner');
     expect((await svc.from('player_partners').insert({ user_id: u.id, current: 'dog', owned: ['cat'] })).error).not.toBeNull();
-    expect((await svc.from('player_partners').insert({ user_id: u.id, current: 'robot', owned: ['robot'] })).error).not.toBeNull();
+    expect((await svc.from('player_partners').insert({ user_id: u.id, current: 'ghost', owned: ['ghost'] })).error).not.toBeNull();
   });
 
   it('slots follow points', async () => {
     const slots = async (n: number | null) => (await svc.rpc('partner_slots', { p_points: n })).data;
-    expect(await Promise.all([null, -1, 0, 2999, 3000, 8999, 9000, 10_000_000].map(slots))).toEqual([1, 1, 1, 1, 2, 2, 3, 3]);
+    expect(await Promise.all([null, -1, 0, 2999, 3000, 8999, 9000, 19999, 20000, 10_000_000].map(slots))).toEqual([1, 1, 1, 1, 2, 2, 3, 3, 4, 4]);
+  });
+
+  it('Agent 404 can be the first partner, and the 4th opens at 20,000 points', async () => {
+    const first = await makeUser('partner');
+    expect((await choose(first, 'robot')).data).toEqual([{ current: 'robot', owned: ['robot'] }]);
+    const u = await makeUser('partner');
+    await choose(u, 'cat');
+    await score(u, 9000);
+    await choose(u, 'dino');
+    await choose(u, 'dog');
+    expect((await choose(u, 'robot')).data).toEqual([{ current: 'dog', owned: ['cat', 'dino', 'dog'] }]);
+    await svc.from('plays').insert({ user_id: u.id, game_id: 'science', found: 5, total: 10, secs: 60, score: 11000, verified: true, source: 'worker' });
+    expect((await choose(u, 'robot')).data).toEqual([{ current: 'robot', owned: ['cat', 'dino', 'dog', 'robot'] }]);
   });
 });
 describe('the bond', () => {

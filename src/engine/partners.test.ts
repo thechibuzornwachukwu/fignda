@@ -5,15 +5,15 @@ import { BOND_AT, bondTier, nextBondAt, parseBonds, DEFAULT_PARTNER, MOOD, nextA
 const root = join(__dirname, '..', '..');
 
 describe('the partners', () => {
-  it('3 are in the game, Detective X first and the default, and the robot waits on its name', () => {
-    expect(PARTNERS.map((p) => p.id)).toEqual(['cat', 'dino', 'dog']);
-    expect(PARTNERS.map((p) => p.name)).toEqual(['Detective X', 'Detective Tobs', 'Detective Puff']);
+  it('4 are in the game, Detective X first and the default, and the robot is Agent 404', () => {
+    expect(PARTNERS.map((p) => p.id)).toEqual(['cat', 'dino', 'dog', 'robot']);
+    expect(PARTNERS.map((p) => p.name)).toEqual(['Detective X', 'Detective Tobs', 'Detective Puff', 'Agent 404']);
     expect(DEFAULT_PARTNER).toBe('cat');
     expect(partnerName('dog')).toBe('Detective Puff');
-    expect(JSON.stringify(PARTNERS)).not.toMatch(/robo/i);
+    // Its name stays clear of the film.
   });
 
-  it('every partner has a picture for every moment, and no robot is shipped', () => {
+  it('every partner has a picture for every moment and every bond tier', () => {
     for (const p of PARTNERS) {
       for (const moment of Object.keys(MOOD) as Moment[]) {
         const src = partnerSrc(p.id, moment);
@@ -27,26 +27,26 @@ describe('the partners', () => {
         expect(svg).not.toMatch(/<script|onload=|href=/i);
       }
     }
-    expect(existsSync(join(root, 'public', 'partners', 'robot-calm.svg'))).toBe(false);
+    // Agent 404 shows 404 when stumped.
+    expect(readFileSync(join(root, 'public', 'partners', 'robot-stumped.svg'), 'utf8')).toContain('Agent 404');
   });
 });
 
 describe('slots and thresholds', () => {
   it('the first partner is free and each further one opens at its points', () => {
-    expect(PARTNER_POINTS).toEqual([0, 3000, 9000]);
-    expect([0, 2999, 3000, 8999, 9000, 10_000_000].map(slotsFor)).toEqual([1, 1, 2, 2, 3, 3]);
+    expect(PARTNER_POINTS).toEqual([0, 3000, 9000, 20000]);
+    expect([0, 2999, 3000, 8999, 9000, 19999, 20000, 10_000_000].map(slotsFor)).toEqual([1, 1, 2, 2, 3, 3, 4, 4]);
     expect([Number.NaN, -5, Infinity, undefined as unknown as number].map(slotsFor)).toEqual([1, 1, 1, 1]);
   });
 
   it('partner_slots in the database opens each partner at the same points', () => {
-    const sql = readFileSync(join(root, 'supabase', 'migrations', '20261010000600_partners.sql'), 'utf8');
-    const body = sql.slice(sql.indexOf('create function public.partner_slots'), sql.indexOf('create function public.my_partner'));
+    const sql = readFileSync(join(root, 'supabase', 'migrations', '20261010000800_agent_404.sql'), 'utf8');
+    const body = sql.slice(sql.indexOf('create or replace function public.partner_slots'), sql.indexOf('create or replace function public.choose_partner'));
     const inSql = [...body.matchAll(/>= (\d+) then (\d+)/g)].map((m) => [Number(m[2]), Number(m[1])] as const).sort((a, b) => a[0] - b[0]);
     expect(inSql).toEqual(PARTNER_POINTS.slice(1).map((points, i) => [i + 2, points]));
     expect(body).toContain('else 1');
     // And the database knows the same partners.
     for (const p of PARTNERS) expect(sql).toContain(`'${p.id}'`);
-    expect(sql).not.toMatch(/robot/);
   });
 
   it('own, open or locked: by what is held and what the points allow', () => {
@@ -58,7 +58,8 @@ describe('slots and thresholds', () => {
     expect(standingOf({ ...two, owned: [...two.owned] }, 'dog', 9000)).toBe('open');
     expect(nextAt(START)).toBe(3000);
     expect(nextAt({ current: 'dino', owned: ['cat', 'dino'] })).toBe(9000);
-    expect(nextAt({ current: 'dino', owned: ['cat', 'dino', 'dog'] })).toBeNull();
+    expect(nextAt({ current: 'dino', owned: ['cat', 'dino', 'dog'] })).toBe(20000);
+    expect(nextAt({ current: 'dino', owned: ['cat', 'dino', 'dog', 'robot'] })).toBeNull();
   });
 
   it('taking: a switch among the held, a new one when points allow, nothing when locked, and points are never spent', () => {
@@ -75,8 +76,9 @@ describe('parsePartner', () => {
   it('keeps a good state and mends a bad one', () => {
     expect(parsePartner({ current: 'dog', owned: ['dog'] })).toEqual({ current: 'dog', owned: ['dog'] });
     expect(parsePartner({ current: 'dino', owned: ['cat'] })).toEqual({ current: 'dino', owned: ['cat', 'dino'] });
-    expect(parsePartner({ current: 'robot', owned: ['dog', 'dog', 'robot', 7] })).toEqual({ current: 'dog', owned: ['dog'] });
-    for (const bad of [null, undefined, 'cat', 7, [], {}, { current: 'robot' }, { owned: 'cat' }]) expect(parsePartner(bad)).toEqual(START);
+    expect(parsePartner({ current: 'ghost', owned: ['dog', 'dog', 'ghost', 7] })).toEqual({ current: 'dog', owned: ['dog'] });
+    expect(parsePartner({ current: 'robot', owned: ['robot'] })).toEqual({ current: 'robot', owned: ['robot'] });
+    for (const bad of [null, undefined, 'cat', 7, [], {}, { current: 'ghost' }, { owned: 'cat' }]) expect(parsePartner(bad)).toEqual(START);
   });
 });
 describe('the bond', () => {
@@ -95,7 +97,7 @@ describe('the bond', () => {
   });
 
   it('bonds from the account are made safe', () => {
-    expect(parseBonds({ cat: 4, dino: 0, dog: 2.9, robot: 7, x: 1 })).toEqual({ cat: 4, dog: 2 });
+    expect(parseBonds({ cat: 4, dino: 0, dog: 2.9, robot: 7, x: 1 })).toEqual({ cat: 4, dog: 2, robot: 7 });
     for (const bad of [null, 'cat', 7, [], { cat: 'lots' }, { cat: -1 }]) expect(parseBonds(bad)).toEqual({});
   });
 });

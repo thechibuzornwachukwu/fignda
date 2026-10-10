@@ -181,14 +181,20 @@ test('notifications: a follow rings the bell, the list explains it, opening it c
 test.describe('phone', () => {
   test.use({ hasTouch: true, isMobile: true, viewport: { width: 375, height: 740 } });
 
-  test('the header stays one row with the bell, signed in', async ({ page }) => {
+  test('the bell is beside the title on app screens, with no bar above it, signed in', async ({ page }) => {
     await newPlayer(page, 'Tolu');
-    for (const path of ['/', '/play', '/notifications']) {
+    for (const path of ['/play', '/me', '/players', '/leaderboard']) {
       await page.goto(path);
-      await expect(page.locator('header').getByRole('link', { name: 'Notifications', exact: true })).toBeVisible();
-      const box = (await page.locator('header').first().boundingBox())!;
-      expect(box.height, path).toBeLessThanOrEqual(66);
+      await expect(page.locator('header[data-app]')).toBeHidden();
+      const bell = page.getByRole('link', { name: 'Notifications', exact: true });
+      await expect(bell).toBeVisible();
+      // On the title's row, not on a row of its own.
+      const title = (await page.getByRole('heading', { level: 1 }).boundingBox())!;
+      const b = (await bell.boundingBox())!;
+      expect(Math.abs(b.y + b.height / 2 - (title.y + title.height / 2)), path).toBeLessThan(title.height);
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), path).toBe(true);
     }
+    await page.getByRole('link', { name: 'Notifications', exact: true }).click();
+    await expect(page).toHaveURL(/\/notifications$/);
   });
 });

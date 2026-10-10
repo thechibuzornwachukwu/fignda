@@ -85,7 +85,7 @@
   padding: 0;
   border: 0;
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-3);
 }
 /* The ask, as the group's name. Manrope: it is read. */

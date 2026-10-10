@@ -7,14 +7,15 @@ export const PARTNERS = [
   { id: 'cat', name: 'Detective X' },
   { id: 'dino', name: 'Detective Tobs' },
   { id: 'dog', name: 'Detective Puff' },
+  // The robot. It scans and zooms where the animals hold a glass and wear a monocle.
+  { id: 'robot', name: 'Agent 404' },
 ] as const;
-// The robot is drawn (design/characters) and stays out of the game until its name is settled (BUILD_PLAN, Owner).
 
 export type PartnerId = (typeof PARTNERS)[number]['id'];
 export const DEFAULT_PARTNER: PartnerId = 'cat';
 
-/** Lifetime points at which a player may hold their 1st, 2nd and 3rd partner. The database holds the same numbers. */
-export const PARTNER_POINTS = [0, 3000, 9000] as const;
+/** Lifetime points at which a player may hold their 1st, 2nd, 3rd and 4th partner. The database holds the same numbers. */
+export const PARTNER_POINTS = [0, 3000, 9000, 20000] as const;
 
 export type PartnerState = {
   /** The one beside the player now. Always one of `owned`. */

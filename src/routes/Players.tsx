@@ -192,9 +192,29 @@ export function Players() {
     <div className={styles.page}>
       <PageHeader title="Squad" />
 
+      {/* Friend streaks appear after the third daily. A player already in one, or asked into one, sees it at once. */}
+      {!searching && me && <FriendStreaks quiet={!open.friendStreaks && !asked} />}
+
+      {!searching && <TopPlayers points={open.points} />}
+      {/* Suggestions only when there is someone to suggest: an empty list is one more thing to read. */}
+      {!searching && !(me && Array.isArray(suggested) && suggested.length === 0) && (
+        <section className={styles.section} aria-labelledby="suggested-title">
+          <h2 id="suggested-title" className={styles.h2}>
+            People to follow
+          </h2>
+          <List
+            rows={suggested}
+            empty={me ? 'You follow everyone here. Invite a friend and they will show up.' : 'Nobody else has joined yet. Invite a friend and they will show up here.'}
+            me={me}
+            myHandle={myHandle}
+          />
+          {!me && !auth.loading && Array.isArray(suggested) && <p className={styles.note}>{signIn} to follow players and see them on your own leaderboard.</p>}
+        </section>
+      )}
+
       <section className={styles.section} aria-label="Search players">
         <Field
-          label="Search by handle"
+          label="Find a player by handle"
           prefix="@"
           placeholder="ada"
           autoCapitalize="none"
@@ -210,25 +230,6 @@ export function Players() {
         {searching && <List rows={hits} empty={`No handle starts with @${q.trim().toLowerCase()}.`} me={me} myHandle={myHandle} check />}
       </section>
 
-      {!searching && (
-        <section className={styles.section} aria-labelledby="suggested-title">
-          <h2 id="suggested-title" className={styles.h2}>
-            People to follow
-          </h2>
-          <List
-            rows={suggested}
-            empty={me ? 'You follow everyone here. Invite a friend and they will show up.' : 'Nobody else has joined yet. Invite a friend and they will show up here.'}
-            me={me}
-            myHandle={myHandle}
-          />
-          {!me && !auth.loading && Array.isArray(suggested) && <p className={styles.note}>{signIn} to follow players and see them on your own leaderboard.</p>}
-        </section>
-      )}
-
-      {/* Friend streaks appear after the third daily. A player already in one, or asked into one, sees it at once. */}
-      {!searching && me && <FriendStreaks quiet={!open.friendStreaks && !asked} />}
-
-      {!searching && <TopPlayers points={open.points} />}
     </div>
   );
 }

@@ -1,12 +1,8 @@
 import { useEffect, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
 import { guestAvatar } from '../avatar/guest';
 import { Avatar } from '../components/Avatar';
-import { Icon } from '../components/Icon';
 import { Partner } from '../components/Partner';
-import { partnerName } from '../engine/partners';
-import { usePartner } from '../lib/partner';
 import { PageHeader } from '../components/PageHeader';
 import { Ring } from '../components/Ring';
 import { buttonClass } from '../components/buttonClass';
@@ -60,7 +56,7 @@ function DailyCard({ streak }: { streak: number }) {
 }
 
 /** The last 7 days as a ring, the run, and the days played this month. Shown once there is a daily to count. */
-function Week({ run }: { run: Streak }) {
+export function Week({ run }: { run: Streak }) {
   const days = run.week.filter((d) => d === 'done').length;
   const weekLine = useMemo(() => pick('weekDays', { n: days }), [days]);
   const runLine = useMemo(() => pick('runMonth', { n: run.streak, m: run.month }), [run.streak, run.month]);
@@ -79,17 +75,6 @@ function Week({ run }: { run: Streak }) {
   );
 }
 
-/** The way to the boards, once there is a finished game to find on one. */
-function BoardLink() {
-  return (
-    <p className={styles.more}>
-      <TextLink to="/leaderboard">See today's board</TextLink>
-    </p>
-  );
-}
-
-
-/** /play. The daily first, then what the player has unlocked (src/lib/unlocks.ts), then every game. */
 export function Games() {
   const auth = useAuth();
   const run = useStreak();
@@ -103,19 +88,20 @@ export function Games() {
 
   return (
     <div className={styles.screen}>
-      <PageHeader title="Cases" action={auth.enabled && open.make ? <TextLink to="/make">Make a puzzle</TextLink> : undefined} />
+      {/* One thing to do, then the path. Who is on the case sits small in the corner, and leads to the stage. */}
+      <PageHeader title="Cases" action={<Crew />} />
 
-      <Crew />
-
-      <div className={styles.today}>
-        <DailyCard streak={run.streak} />
-        <Week run={run} />
-        {auth.enabled && open.boards && <BoardLink />}
-      </div>
+      <DailyCard streak={run.streak} />
 
       <GameInvites />
 
       <Journey />
+
+      {auth.enabled && open.make && (
+        <p className={styles.more}>
+          <TextLink to="/make">Make a puzzle</TextLink>
+        </p>
+      )}
 
       {(open.make || asked) && (
         <div id="any-topic">
@@ -126,24 +112,14 @@ export function Games() {
   );
 }
 
-/** Who is on the case: the player's detective and their partner, and the way to the stage where both are chosen. */
+/** Who is on the case, small: the player's detective and their partner. It leads to the stage where both are chosen. */
 function Crew() {
   const { profile } = useAuth();
-  const partner = usePartner();
   const starter = useMemo(() => guestAvatar(), []);
   return (
-    <Link to="/me" className={styles.crew} data-crew>
-      <span className={styles.crewFaces}>
-        {profile ? <Avatar handle={profile.handle} size={48} /> : <Avatar parts={starter} size={48} />}
-        <Partner moment="empty" size={48} />
-      </span>
-      <span className={styles.crewText}>
-        <span className={styles.crewNames}>
-          {profile?.name ?? 'You'} and {partnerName(partner.current)}
-        </span>
-        <span className={styles.crewHint}>Change your detective, partner and gear</span>
-      </span>
-      <Icon icon={ChevronRight} size={18} />
+    <Link to="/me" className={styles.crew} data-crew aria-label="Change your detective, partner and gear">
+      {profile ? <Avatar handle={profile.handle} size={36} /> : <Avatar parts={starter} size={36} />}
+      <Partner moment="empty" size={36} />
     </Link>
   );
 }

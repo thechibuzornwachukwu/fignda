@@ -108,6 +108,35 @@
   min-height: 44px;
   color: inherit;
 }
+/* Closed cases, folded. The row is a card like the rest, and opens to show them. */
+.closedCases {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.closedCases[open] > .closedSummary {
+  margin-bottom: var(--space-4);
+}
+.closedCases > section + section {
+  margin-top: var(--space-4);
+}
+.closedSummary {
+  composes: card;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 44px;
+  padding: var(--space-3) var(--space-5);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--fg);
+  cursor: pointer;
+  list-style: none;
+}
+.closedSummary::-webkit-details-marker {
+  display: none;
+}
 /* Start a room on this case. Quiet: the next clue is the one accent. */
 .together {
   display: inline-flex;

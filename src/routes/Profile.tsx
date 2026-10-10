@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate, useLocation, useParams } from "react-router-dom";
 import { Button } from "../components/Button";
+import { IconLink } from "../components/IconLink";
 import { PageHeader } from "../components/PageHeader";
-import { TextLink } from "../components/TextLink";
+import { Settings } from "lucide-react";
 import { dayNo } from "../engine/daily";
 import { formatTime } from "../engine/time";
 import { getGameDef } from "../games/catalog";
@@ -106,7 +107,7 @@ export function Profile() {
   if (!auth.enabled) return <Navigate to="/play" replace />;
   const title = own ? "You" : "Player";
   const settings = own ? (
-    <TextLink to="/settings">Settings</TextLink>
+    <IconLink to="/settings" icon={Settings} label="Settings" />
   ) : undefined;
   if (state.status === "loading") {
     return (

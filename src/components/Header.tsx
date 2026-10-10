@@ -1,4 +1,5 @@
 import { useRef } from 'react';
+import { hasTabBar } from '../lib/routes';
 import { useTucked } from '../lib/useTucked';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Bell } from 'lucide-react';
@@ -38,7 +39,7 @@ function AccountLink() {
 }
 
 /** The bell. Signed in only. A count sits on it while there is something new. */
-function NotificationsLink() {
+export function NotificationsLink() {
   const { profile } = useAuth();
   const { pathname } = useLocation();
   const unread = useUnread(pathname);
@@ -71,7 +72,7 @@ export function Header() {
   const tucked = useTucked(ref, pathname);
 
   return (
-    <header ref={ref} className={[styles.header, tucked && styles.tucked].filter(Boolean).join(' ')} data-tucked={tucked || undefined}>
+    <header ref={ref} className={[styles.header, tucked && styles.tucked].filter(Boolean).join(' ')} data-tucked={tucked || undefined} data-app={hasTabBar(pathname) || undefined}>
       <div className={styles.inner}>
         <Link to="/" className={styles.home} aria-label="Gazecraft home">
           <Logo className={styles.wordmark} />

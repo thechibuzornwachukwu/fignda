@@ -15,9 +15,9 @@ test('players page: search by handle, wildcards find nothing, lists render', asy
   await expect(top.getByRole('radio', { name: 'Streaks' })).toHaveAttribute('aria-checked', 'true');
   await top.getByRole('radio', { name: 'New' }).click();
   await expect(top.getByRole('listitem').first()).toBeVisible();
-  await page.getByLabel('Search by handle').fill(handle.slice(0, 7));
+  await page.getByLabel('Find a player by handle').fill(handle.slice(0, 7));
   await expect(page.getByRole('link', { name: new RegExp(`@${handle}`) })).toBeVisible();
-  await page.getByLabel('Search by handle').fill('%');
+  await page.getByLabel('Find a player by handle').fill('%');
   await expect(page.getByText('No handle starts with @%.')).toBeVisible();
 });
 
@@ -92,7 +92,7 @@ test('people to follow: follow from the list without opening a profile', async (
   await expect(suggested.getByText(`@${me}`, { exact: true })).toHaveCount(0);
 
   // Follow straight from a search row.
-  await page.getByLabel('Search by handle').fill(b);
+  await page.getByLabel('Find a player by handle').fill(b);
   const row = page.getByRole('listitem').filter({ hasText: `@${b}` });
   await row.getByRole('button', { name: 'Follow Bola' }).click();
   await expect(row.getByRole('button', { name: 'Following Bola' })).toHaveAttribute('aria-pressed', 'true');
@@ -102,10 +102,10 @@ test('people to follow: follow from the list without opening a profile', async (
   await expect(page.getByRole('button', { name: 'Following' })).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByRole('link', { name: /1 follower$/ })).toBeVisible();
   await page.goto('/players');
-  await page.getByLabel('Search by handle').fill(b);
+  await page.getByLabel('Find a player by handle').fill(b);
   await expect(page.getByRole('listitem').filter({ hasText: `@${b}` }).getByRole('button', { name: 'Following Bola' })).toBeVisible();
   // And once followed, they leave the suggestions.
-  await page.getByLabel('Search by handle').fill('');
+  await page.getByLabel('Find a player by handle').fill('');
   const list = page.getByRole('region', { name: 'People to follow' });
   await expect(list.getByRole('listitem').first()).toBeVisible();
   await expect(list.getByText(`@${b}`, { exact: true })).toHaveCount(0);

@@ -1,7 +1,7 @@
 .head {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: var(--space-2) var(--space-5);
   min-width: 0;
@@ -12,8 +12,26 @@
   min-width: 0;
   overflow-wrap: anywhere;
 }
+.side {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.side:empty {
+  display: none;
+}
 .action {
   flex: none;
   display: flex;
   align-items: center;
+}
+/* The bell is in the header bar on wide screens, and here on phones, where that bar is left out. */
+.bell {
+  display: none;
+}
+@media (max-width: 640px) {
+  .bell {
+    display: contents;
+  }
 }

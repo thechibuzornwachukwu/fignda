@@ -134,3 +134,11 @@
     gap: var(--space-3);
   }
 }
+
+/* Phones, app screens: the dock is the navigation and each screen has its own title row with the bell in it,
+   so this bar would only be a row of chrome above the content. It is left out. */
+@media (max-width: 640px) {
+  .header[data-app] {
+    display: none;
+  }
+}

@@ -33,11 +33,19 @@ test.describe('quick return on a phone', () => {
     await expect(header(page)).not.toHaveAttribute('data-tucked');
   });
 
-  test('the header is one row on every kind of page, signed out', async ({ page }) => {
-    for (const path of ['/', '/play', '/play/bible', '/leaderboard']) {
+  test('the top bar is one row where it shows, and is left out on app screens, signed out', async ({ page }) => {
+    for (const path of ['/', '/play/bible']) {
       await page.goto(path);
-      const box = (await page.locator('header').first().boundingBox())!;
+      const box = (await page.locator('header[data-tucked], header').first().boundingBox())!;
       expect(box.height, path).toBeLessThanOrEqual(66);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth), path).toBeLessThanOrEqual(0);
+    }
+    // App screens: the dock is the navigation, so there is no bar above the title.
+    for (const path of ['/play', '/leaderboard', '/players', '/me']) {
+      await page.goto(path);
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+      await expect(page.locator('header[data-app]')).toBeHidden();
+      await expect(page.getByRole('navigation', { name: 'Tabs' })).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth), path).toBeLessThanOrEqual(0);
     }
     await page.goto('/');

@@ -146,34 +146,8 @@ export function Journey({ catalogue = games, path, done, stars, className }: Pro
   const me = (size: number) => (profile ? <Avatar handle={profile.handle} size={size} /> : <Avatar parts={starter} size={size} />);
   const state = view.total === 0 ? 'empty' : view.complete ? 'complete' : 'going';
 
-  return (
-    <section className={[styles.journey, className].filter(Boolean).join(' ')} aria-labelledby={headId} data-journey={state}>
-      <header className={styles.head}>
-        <h2 id={headId} className={styles.title}>
-          Your path
-        </h2>
-        {view.total > 0 && (
-          <p className={styles.count}>
-            <Ring value={view.doneCount / view.total} label="Path progress" />
-            {pick('journeyCount', { n: view.doneCount, t: view.total })}
-          </p>
-        )}
-      </header>
-
-      {state === 'empty' && (
-        <p className={styles.note} data-journey-note="empty">
-          <Partner moment="empty" size={40} />
-          {view.line}
-        </p>
-      )}
-      {state === 'complete' && (
-        <div className={styles.finished} data-journey-note="complete">
-          {me(AVATAR.finished)}
-          <p className={styles.finishedLine}>{view.line}</p>
-        </div>
-      )}
-
-      {view.cases.map((c) => {
+  const closed = view.cases.filter((c) => c.state === 'done');
+  const card = (c: CaseView) => {
         const n = c.clues.length;
         return (
           <section key={c.id} className={styles.case} aria-labelledby={`${headId}-${c.id}`} data-case={c.id} data-state={c.state}>
@@ -199,8 +173,8 @@ export function Journey({ catalogue = games, path, done, stars, className }: Pro
                   {c.line}
                 </p>
               )}
-              {/* A room on this case: for any case that has been opened. A button, so the path stays a list of clues. */}
-              {enabled && c.state !== 'locked' && getGameDef(c.id) && (
+              {/* A room on the case being worked. A button, so the path stays a list of clues. */}
+              {enabled && c.state === 'open' && getGameDef(c.id) && (
                 <button type="button" className={styles.together} data-case-together onClick={() => navigate(`/play/${c.id}?room=${newRoomCode()}`)}>
                   <Icon icon={UsersRound} size={16} />
                   Play together
@@ -315,7 +289,47 @@ export function Journey({ catalogue = games, path, done, stars, className }: Pro
             )}
           </section>
         );
-      })}
+  };
+
+  return (
+    <section className={[styles.journey, className].filter(Boolean).join(' ')} aria-labelledby={headId} data-journey={state}>
+      <header className={styles.head}>
+        <h2 id={headId} className={styles.title}>
+          Your path
+        </h2>
+        {view.total > 0 && (
+          <p className={styles.count}>
+            <Ring value={view.doneCount / view.total} label="Path progress" />
+            {pick('journeyCount', { n: view.doneCount, t: view.total })}
+          </p>
+        )}
+      </header>
+
+      {state === 'empty' && (
+        <p className={styles.note} data-journey-note="empty">
+          <Partner moment="empty" size={40} />
+          {view.line}
+        </p>
+      )}
+      {state === 'complete' && (
+        <div className={styles.finished} data-journey-note="complete">
+          {me(AVATAR.finished)}
+          <p className={styles.finishedLine}>{view.line}</p>
+        </div>
+      )}
+
+      {/* Closed cases fold into one row, so the case being worked is never under a pile of finished ones.
+          With every case closed there is nothing else to show, so the row starts open. */}
+      {closed.length > 0 && (
+        <details className={styles.closedCases} open={view.complete || undefined} data-closed-cases>
+          <summary className={styles.closedSummary}>
+            <Icon icon={Award} size={20} />
+            {closed.length === 1 ? '1 case closed' : `${closed.length} cases closed`}
+          </summary>
+          {closed.map(card)}
+        </details>
+      )}
+      {view.cases.filter((c) => c.state !== 'done').map(card)}
     </section>
   );
 }

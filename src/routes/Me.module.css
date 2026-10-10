@@ -8,7 +8,10 @@
 }
 
 /* The stage carries the dock's pressable edge: it is the thing on this screen. */
+/* A floor under the cast: the lower part of the stage is a shade deeper, so the 2 stand on something. */
 .stage {
+  background-image: linear-gradient(to bottom, transparent 0, transparent 128px, var(--surface-2) 128px, var(--surface-2) 100%);
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -21,11 +24,12 @@
   box-shadow: 0 var(--ledge) 0 var(--line-3);
 }
 .cast {
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  gap: var(--space-5);
-  max-width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: 360px;
 }
 .figure {
   display: flex;
@@ -39,6 +43,32 @@
 .figure img {
   max-width: 100%;
   height: auto;
+}
+.portrait {
+  position: relative;
+  display: block;
+  max-width: 100%;
+  line-height: 0;
+}
+/* On the corner of the picture. Big enough for a thumb. */
+.edit {
+  position: absolute;
+  right: calc(var(--space-1) * -1);
+  bottom: calc(var(--space-1) * -1);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  background: var(--fg);
+  color: var(--bg);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.sub {
+  composes: label from '../styles/type.module.css';
+  color: var(--muted);
 }
 .caption {
   composes: itemTitle from '../styles/type.module.css';
