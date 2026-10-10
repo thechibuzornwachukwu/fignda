@@ -18,6 +18,7 @@ import { GuestWall } from '../components/GuestWall';
 import { clueId } from '../engine/journey';
 import { caseFile, doneClues } from '../games/caseFile';
 import { guestBlocked, markGuestPlayed, playKey } from '../lib/guestLimit';
+import { loadPartner } from '../lib/partner';
 import { starsFor } from '../engine/stars';
 import { dayProfile } from '../engine/variableDay';
 import { countEvent, fetchCustomGame, fetchDailyPlace, fetchWordStats, mergeGuestDailies, submitPlay } from '../lib/api';
@@ -180,7 +181,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
       const spans = gRef.current.s.found.map((f) => f.span);
       if (spans.length) roomRef.current?.sendSync(spans);
     };
-    const me: Peer = { id: roomId, name: myName ?? 'A friend', handle: myHandle };
+    const me: Peer = { id: roomId, name: myName ?? 'A friend', handle: myHandle, partner: loadPartner().current };
     void joinRoom(roomCode, me, {
       onFind: (a, b, from) => gRef.current.teamPick(a, b, from.name),
       onPeers: (p) => alive && setPeers(p),
@@ -470,7 +471,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
         <div className={styles.meta}>
           <Link to="/play" className={styles.back}>
             <Icon icon={ArrowLeft} size={16} />
-            All games
+            Cases
           </Link>
           <span className={styles.metaEnd}>
             <span className={styles.level}>
@@ -493,7 +494,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
         {holdsLine && <p className={styles.holds}>{holdsLine}</p>}
       </div>
 
-      {inRoom && <RoomBar gameId={def.id} code={roomCode} peers={peers} status={roomStatus} me={myStats} you={{ id: roomId, handle: myHandle }} path={sharePath({ id: def.id, code: def.id.startsWith('c-') ? def.id.slice(2).toUpperCase() : undefined })} />}
+      {inRoom && <RoomBar gameId={def.id} code={roomCode} peers={peers} status={roomStatus} me={myStats} you={{ id: roomId, handle: myHandle, partner: loadPartner().current }} path={sharePath({ id: def.id, code: def.id.startsWith('c-') ? def.id.slice(2).toUpperCase() : undefined })} />}
       {squadFile && !finished && (
         <p className={styles.squad} data-squad-secret>
           <SecretSlots slots={squadFile.slots} fresh={freshSlots} />
@@ -533,7 +534,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
           onShare={() => setSharing(true)}
           onText={sendText}
           next={part && (part.n < part.count ? { to: `/play/${def.id}/${part.n + 1}`, label: 'Next clue' } : { to: `/play/${def.id}`, label: 'The unmasking' })}
-          boardPath={part ? undefined : auth.enabled ? (daily ? `/leaderboard?day=${dailyN}` : getGameDef(def.id) ? `/leaderboard/${def.id}${inRoom ? '?board=together' : ''}` : undefined) : undefined}
+          boardPath={part || !auth.enabled ? undefined : daily ? `/leaderboard?day=${dailyN}` : inRoom && getGameDef(def.id) ? `/leaderboard/${def.id}?board=together` : undefined}
           guest={!signedIn}
           guestLine={guestLine}
           streak={streakLine}

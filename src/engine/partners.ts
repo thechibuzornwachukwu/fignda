@@ -68,5 +68,31 @@ export function takePartner(state: PartnerState, id: PartnerId, points: number):
 export const MOOD = { hello: 'wave', empty: 'calm', loading: 'thinking', error: 'stumped', done: 'happy', found: 'found', asleep: 'sleepy' } as const;
 export type Moment = keyof typeof MOOD;
 
-/** The picture of a partner in a moment. */
-export const partnerSrc = (id: PartnerId, moment: Moment): string => `/partners/${id}-${MOOD[moment]}.svg`;
+/**
+ * The bond with a partner: cases closed with them beside the player. It changes no score. At each mark the
+ * partner is drawn with more of its kit: its magnifying glass at the first, its monocle too at the second.
+ */
+export const BOND_AT = [3, 10] as const;
+
+/** 0 before the first mark, then 1, then 2. */
+export function bondTier(cases: number): number {
+  const n = whole(cases);
+  return BOND_AT.filter((at) => n >= at).length;
+}
+
+/** Cases closed together at which the next mark comes. Null at the last. */
+export const nextBondAt = (cases: number): number | null => BOND_AT[bondTier(cases)] ?? null;
+
+/** Cases closed with each partner, made safe: known partners, whole numbers. */
+export function parseBonds(raw: unknown): Partial<Record<PartnerId, number>> {
+  const out: Partial<Record<PartnerId, number>> = {};
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return out;
+  for (const p of PARTNERS) {
+    const n = whole((raw as Record<string, unknown>)[p.id]);
+    if (n > 0) out[p.id] = n;
+  }
+  return out;
+}
+
+/** The picture of a partner in a moment, at a bond tier. */
+export const partnerSrc = (id: PartnerId, moment: Moment, tier = 0): string => `/partners/${id}-${MOOD[moment]}${tier > 0 ? `-${Math.min(BOND_AT.length, Math.floor(tier))}` : ''}.svg`;

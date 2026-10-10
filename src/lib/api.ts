@@ -447,11 +447,11 @@ export async function mergeGuestDailies(): Promise<number> {
 }
 
 /** Your partners on the account, with your points. Null when you have not chosen one yet. */
-export async function fetchMyPartner(): Promise<{ current: string; owned: string[]; points: number } | null> {
+export async function fetchMyPartner(): Promise<{ current: string; owned: string[]; points: number; bonds: unknown } | null> {
   const { data, error } = await (await client()).rpc('my_partner');
   if (error) throw error;
-  const row = (data as Array<{ current: string; owned: string[]; points: number }> | null)?.[0];
-  return row ? { current: row.current, owned: row.owned, points: Number(row.points) } : null;
+  const row = (data as Array<{ current: string; owned: string[]; points: number; bonds?: unknown }> | null)?.[0];
+  return row ? { current: row.current, owned: row.owned, points: Number(row.points), bonds: row.bonds ?? {} } : null;
 }
 
 /** Take a partner or switch to one you hold. The account answers with what you hold now. */

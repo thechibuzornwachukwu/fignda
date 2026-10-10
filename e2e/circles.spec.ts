@@ -205,7 +205,7 @@ test('You is a stage: tap a partner or a piece of gear to try it, and one button
   const stage = page.getByRole('region', { name: 'Your detective and your partner' });
   await expect(stage).toContainText('Tari');
   await expect(stage).toContainText('Detective X');
-  await expect(stage.locator('[data-stage-line]')).toHaveText('Detective X is with you.');
+  await expect(stage.locator('[data-stage-line]')).toHaveText('Detective X is with you. New kit at 3.');
 
   // A locked partner can be tried on the stage, and says what opens it.
   const partners = page.getByRole('region', { name: 'Partners' });
@@ -226,7 +226,7 @@ test('You is a stage: tap a partner or a piece of gear to try it, and one button
   await gear.getByRole('button', { name: 'Badge. Yours.' }).click();
   await stage.getByRole('button', { name: 'Wear the badge' }).click();
   await expect(gear.getByRole('button', { name: 'Badge. On you.' })).toBeVisible();
-  await expect(stage.locator('[data-stage-line]')).toHaveText('Detective X is with you.');
+  await expect(stage.locator('[data-stage-line]')).toHaveText('Detective X is with you. New kit at 3.');
 
   // No sideways scroll on a phone: the rows swipe, the page does not.
   await page.setViewportSize({ width: 360, height: 740 });

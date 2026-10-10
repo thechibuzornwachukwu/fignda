@@ -1,6 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { DEFAULT_PARTNER, MOOD, nextAt, parsePartner, PARTNER_POINTS, PARTNERS, partnerName, partnerSrc, slotsFor, standingOf, START, takePartner, type Moment } from './partners';
+import { BOND_AT, bondTier, nextBondAt, parseBonds, DEFAULT_PARTNER, MOOD, nextAt, parsePartner, PARTNER_POINTS, PARTNERS, partnerName, partnerSrc, slotsFor, standingOf, START, takePartner, type Moment } from './partners';
 
 const root = join(__dirname, '..', '..');
 
@@ -20,6 +20,8 @@ describe('the partners', () => {
         expect(src).toBe(`/partners/${p.id}-${MOOD[moment]}.svg`);
         const file = join(root, 'public', src);
         expect(existsSync(file), src).toBe(true);
+        // And one for each bond tier.
+        for (let tier = 1; tier <= BOND_AT.length; tier++) expect(existsSync(join(root, 'public', partnerSrc(p.id, moment, tier))), `${src} tier ${tier}`).toBe(true);
         const svg = readFileSync(file, 'utf8');
         expect(svg.startsWith('<svg ')).toBe(true);
         expect(svg).not.toMatch(/<script|onload=|href=/i);
@@ -75,5 +77,25 @@ describe('parsePartner', () => {
     expect(parsePartner({ current: 'dino', owned: ['cat'] })).toEqual({ current: 'dino', owned: ['cat', 'dino'] });
     expect(parsePartner({ current: 'robot', owned: ['dog', 'dog', 'robot', 7] })).toEqual({ current: 'dog', owned: ['dog'] });
     for (const bad of [null, undefined, 'cat', 7, [], {}, { current: 'robot' }, { owned: 'cat' }]) expect(parsePartner(bad)).toEqual(START);
+  });
+});
+describe('the bond', () => {
+  it('marks at 3 and 10 cases closed together, and no score in sight', () => {
+    expect(BOND_AT).toEqual([3, 10]);
+    expect([0, 2, 3, 9, 10, 500].map(bondTier)).toEqual([0, 0, 1, 1, 2, 2]);
+    expect([0, 3, 10].map(nextBondAt)).toEqual([3, 10, null]);
+    expect([Number.NaN, -4, undefined as unknown as number].map(bondTier)).toEqual([0, 0, 0]);
+  });
+
+  it('a tier picks its own picture, and never one that does not exist', () => {
+    expect(partnerSrc('cat', 'done', 0)).toBe('/partners/cat-happy.svg');
+    expect(partnerSrc('cat', 'done', 1)).toBe('/partners/cat-happy-1.svg');
+    expect(partnerSrc('dog', 'found', 2)).toBe('/partners/dog-found-2.svg');
+    expect(partnerSrc('dog', 'found', 9)).toBe('/partners/dog-found-2.svg');
+  });
+
+  it('bonds from the account are made safe', () => {
+    expect(parseBonds({ cat: 4, dino: 0, dog: 2.9, robot: 7, x: 1 })).toEqual({ cat: 4, dog: 2 });
+    for (const bad of [null, 'cat', 7, [], { cat: 'lots' }, { cat: -1 }]) expect(parseBonds(bad)).toEqual({});
   });
 });

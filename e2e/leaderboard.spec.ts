@@ -6,7 +6,7 @@ const todayNo = () => {
   return Math.floor((Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) - Date.UTC(2026, 0, 1)) / 864e5) + 1;
 };
 
-test('guest sees the daily board, a sign in prompt and puzzle boards', async ({ page }) => {
+test('guest sees the daily board and a sign in prompt, and no list of puzzle boards', async ({ page }) => {
   await page.goto('/leaderboard');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Ranks');
   await expect(page.getByText(`Today · Daily #${todayNo()}`)).toBeVisible();
@@ -16,8 +16,9 @@ test('guest sees the daily board, a sign in prompt and puzzle boards', async ({ 
   await page.getByRole('button', { name: 'Previous day' }).click();
   await expect(page).toHaveURL(new RegExp(`day=${todayNo() - 1}$`));
   await expect(page.getByText(`Daily #${todayNo() - 1}`)).toBeVisible();
-  await page.getByRole('link', { name: /The classic/ }).click();
-  await expect(page).toHaveURL(/\/leaderboard\/bible$/);
+  await expect(page.getByRole('heading', { name: 'Puzzle boards' })).toHaveCount(0);
+  // An old link to a puzzle's board still opens.
+  await page.goto('/leaderboard/bible');
   await expect(page.getByRole('link', { name: 'Play The classic' })).toBeVisible();
 });
 
@@ -26,10 +27,11 @@ test('future days fall back to today', async ({ page }) => {
   await expect(page.getByText(`Today · Daily #${todayNo()}`)).toBeVisible();
 });
 
-test('results link to the right board', async ({ page }) => {
+test('a puzzle played alone has no board of its own', async ({ page }) => {
   await page.goto('/play/bnote');
   await page.getByRole('button', { name: "I'm done" }).click();
-  await expect(page.getByRole('link', { name: 'See the leaderboard' })).toHaveAttribute('href', '/leaderboard/bnote');
+  await expect(page.locator('[aria-labelledby="results-title"]')).toBeVisible();
+  await expect(page.getByRole('link', { name: 'See the leaderboard' })).toHaveCount(0);
 });
 
 test('header links to Leaders', async ({ page }) => {

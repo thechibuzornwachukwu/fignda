@@ -61,9 +61,9 @@ test.describe('quick return on a phone', () => {
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
   });
 
-  test('on a puzzle the nav row steps aside and All games stays', async ({ page }) => {
+  test('on a puzzle the nav row steps aside and the way back to Cases stays', async ({ page }) => {
     await page.goto('/play/bible');
     await expect(page.getByRole('navigation', { name: 'Main' })).toBeHidden();
-    await expect(page.getByRole('link', { name: /All games/ })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Cases/ }).first()).toBeVisible();
   });
 });

@@ -132,9 +132,9 @@ test("answers: a past daily lists its words; today's are never shown", async ({ 
   await expect(page).toHaveURL(/\/play$/);
 });
 
-test('the Naija packs are on the games list and playable', async ({ page }) => {
-  await page.goto('/play?f=Naija');
-  for (const title of ['Party at ours', 'Farm visit', 'Aunty Mary', 'Band practice']) await expect(page.getByRole('link', { name: new RegExp(title) })).toBeVisible();
+test('the Naija packs are cases on the path and playable', async ({ page }) => {
+  await page.goto('/play');
+  for (const title of ['Party at ours', 'Farm visit', 'Aunty Mary', 'Band practice']) await expect(page.locator('[data-journey]').getByRole('heading', { level: 3, name: new RegExp(title) })).toBeVisible();
   await page.goto('/play/lagos');
   await expect(page.getByRole('heading', { name: 'Find 16 Lagos places' })).toBeVisible();
 });

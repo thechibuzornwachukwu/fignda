@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { UsersRound } from 'lucide-react';
 import { Avatar } from '../components/Avatar';
+import { Partner } from '../components/Partner';
+import { PARTNERS, type PartnerId } from '../engine/partners';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
 import { rankRoom, type Peer, type RoomStats, type RoomStatus, type Row } from '../lib/room';
@@ -9,7 +11,9 @@ import { copyText } from '../lib/share';
 import { InviteFollowing } from './GameInvites';
 import styles from './RoomBar.module.css';
 
-type Props = { code: string; peers: Peer[]; path: string; status: RoomStatus; me: RoomStats; /** Your id in the room, and your handle when signed in. */ you: Pick<Peer, 'id' | 'handle'>; gameId: string };
+type Props = { code: string; peers: Peer[]; path: string; status: RoomStatus; me: RoomStats; /** Your id in the room, and your handle when signed in. */ you: Pick<Peer, 'id' | 'handle' | 'partner'>; gameId: string };
+
+const isPartner = (x: unknown): x is PartnerId => PARTNERS.some((p) => p.id === x);
 
 const line = (r: Row) =>
   [`${r.finds ?? 0} ${r.finds === 1 ? 'word' : 'words'}`, r.finds ? `${r.pace ?? 0}s a word` : '', `${r.hints ?? 0} ${r.hints === 1 ? 'hint' : 'hints'}`]
@@ -52,6 +56,8 @@ export function RoomBar({ code, peers, path, status, me, you, gameId }: Props) {
                 <span className={styles.dot} aria-hidden="true" />
                 {/* Guests have no handle: their room id draws a starter, the same one on every screen. */}
                 <Avatar handle={p.handle ?? p.id} size={24} />
+                {/* The detective working beside them. A teammate's is drawn plain: the bond is one's own. */}
+                {isPartner(p.partner) && <Partner who={p.partner} moment="empty" size={24} plain={!p.you} />}
                 {p.handle && !p.you ? (
                   <Link to={`/u/${p.handle}`} className={styles.name}>
                     {p.name}

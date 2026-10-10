@@ -21,6 +21,7 @@ Risks: leaked keys, faked scores, AI endpoint abuse, injected text in shared con
 | plays | own rows; public view exposes handle, score, time | Worker only |
 | clue_plays (a clue of a case: best stars and score) | own rows, through `my_progress()` only | Worker only, through `record_clue()`; a guest's own progress through `merge_guest_progress()`, unverified |
 | player_partners (which partners a player holds, and the one beside them) | own row, through `my_partner()` only | through `choose_partner()` only: the first is free, another only when checked points allow one more |
+| partner_cases (the cases closed with each partner) | own counts, through `my_partner()` only | database trigger on checked plays only |
 | daily | all | none |
 | daily_answers | service role only until day ends | none |
 | games curated | all | none |

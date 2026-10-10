@@ -11,7 +11,7 @@ import { LevelBadge } from '../components/LevelBadge';
 import { PageHeader } from '../components/PageHeader';
 import { Partner } from '../components/Partner';
 import { TextLink } from '../components/TextLink';
-import { nextAt, partnerName, PARTNERS, standingOf, type PartnerId } from '../engine/partners';
+import { nextAt, nextBondAt, partnerName, PARTNERS, standingOf, type PartnerId } from '../engine/partners';
 import { doneClues } from '../games/caseFile';
 import { games } from '../games/catalog';
 import { saveAvatar, saveLook } from '../lib/api';
@@ -83,11 +83,18 @@ export function Me() {
 
   // What the one button under the stage does, and what it says when there is nothing to do.
   let action: { label: string; run: () => Promise<boolean> } | null = null;
-  let line = `${partnerName(partner.current)} is with you.`;
+  // The bond: cases closed together, and when the partner next gains a piece of kit.
+  const bondLine = (id: PartnerId) => {
+    const n = partner.bonds[id] ?? 0;
+    const at = nextBondAt(n);
+    const together = n === 0 ? '' : n === 1 ? ' 1 case closed together.' : ` ${n} cases closed together.`;
+    return `${partnerName(id)} is with you.${together}${at != null ? ` New kit at ${at}.` : ''}`;
+  };
+  let line = bondLine(partner.current);
   if (trying?.kind === 'partner') {
     const how = standingOf(partner, trying.id, partner.points);
     const at = nextAt(partner);
-    if (trying.id === partner.current) line = `${partnerName(trying.id)} is with you.`;
+    if (trying.id === partner.current) line = bondLine(trying.id);
     else if (how === 'locked') line = at == null ? '' : !profile ? `Locked. Sign in and reach ${num(at)} points.` : `Locked. ${num(Math.max(0, at - partner.points))} points to go.`;
     else action = { label: `Select ${partnerName(trying.id)}`, run: () => choosePartner(trying.id, !!profile) };
     // A guest holds 1 partner and can swap it freely.
@@ -156,7 +163,9 @@ export function Me() {
             const on = p.id === partner.current;
             const locked = how === 'locked' && !!profile;
             const at = nextAt(partner);
-            const state = on ? 'With you' : how === 'own' ? 'Yours' : locked && at != null ? `${num(at)} points` : 'Tap to try';
+            const closed = partner.bonds[p.id] ?? 0;
+            const bond = closed === 0 ? '' : closed === 1 ? ', 1 case' : `, ${closed} cases`;
+            const state = on ? `With you${bond}` : how === 'own' ? `Yours${bond}` : locked && at != null ? `${num(at)} points` : 'Tap to try';
             return (
               <li key={p.id}>
                 <button

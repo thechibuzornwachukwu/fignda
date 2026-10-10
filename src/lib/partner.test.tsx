@@ -4,7 +4,7 @@ import { vi } from 'vitest';
 import { Partner } from '../components/Partner';
 
 const api = vi.hoisted(() => ({
-  mine: null as { current: string; owned: string[]; points: number } | null,
+  mine: null as { current: string; owned: string[]; points: number; bonds?: unknown } | null,
   fail: false,
   asked: [] as string[],
   slots: 1,
@@ -38,7 +38,7 @@ beforeEach(() => {
 
 describe('a guest', () => {
   it('starts with Detective X, unchosen, and holds 1: another pick swaps it', async () => {
-    expect(loadPartner()).toEqual({ current: 'cat', owned: ['cat'], points: 0 });
+    expect(loadPartner()).toEqual({ current: 'cat', owned: ['cat'], points: 0, bonds: {} });
     expect(partnerChosen()).toBe(false);
     expect(await choosePartner('dog', false)).toBe(true);
     expect(loadPartner()).toMatchObject({ current: 'dog', owned: ['dog'] });
@@ -51,10 +51,10 @@ describe('a guest', () => {
   it('broken storage is the start, never a crash', () => {
     localStorage.setItem(PARTNER_KEY, '{broken');
     forgetPartner();
-    expect(loadPartner()).toEqual({ current: 'cat', owned: ['cat'], points: 0 });
-    localStorage.setItem(PARTNER_KEY, JSON.stringify({ current: 'robot', owned: ['robot'], points: 'lots' }));
+    expect(loadPartner()).toEqual({ current: 'cat', owned: ['cat'], points: 0, bonds: {} });
+    localStorage.setItem(PARTNER_KEY, JSON.stringify({ current: 'robot', owned: ['robot'], points: 'lots', bonds: 'many' }));
     forgetPartner();
-    expect(loadPartner()).toEqual({ current: 'cat', owned: ['cat'], points: 0 });
+    expect(loadPartner()).toEqual({ current: 'cat', owned: ['cat'], points: 0, bonds: {} });
   });
 });
 
@@ -77,7 +77,7 @@ describe('signing in', () => {
     api.mine = { current: 'dino', owned: ['cat', 'dino'], points: 4200 };
     await syncPartner();
     expect(api.asked).toEqual([]);
-    expect(loadPartner()).toEqual({ current: 'dino', owned: ['cat', 'dino'], points: 4200 });
+    expect(loadPartner()).toEqual({ current: 'dino', owned: ['cat', 'dino'], points: 4200, bonds: {} });
   });
 
   it('offline: nothing changes', async () => {
@@ -119,6 +119,21 @@ describe('<Partner>', () => {
     expect(img.getAttribute('alt')).toBe('');
     expect(img.getAttribute('width')).toBe('88');
     expect(screen.queryByRole('img')).toBeNull();
+  });
+
+  it('the bond shows on the player’s own partner, and never on someone else’s', async () => {
+    api.mine = { current: 'cat', owned: ['cat'], points: 0, bonds: { cat: 3 } };
+    await syncPartner();
+    expect(loadPartner().bonds).toEqual({ cat: 3 });
+    const mine = render(<Partner moment="done" />);
+    expect(mine.container.querySelector('img')!.getAttribute('src')).toBe('/partners/cat-happy-1.svg');
+    mine.unmount();
+    const theirs = render(<Partner who="cat" moment="empty" plain />);
+    expect(theirs.container.querySelector('img')!.getAttribute('src')).toBe('/partners/cat-calm.svg');
+    // Switching partner keeps what was earned with each.
+    api.fail = true;
+    await choosePartner('cat', true);
+    expect(loadPartner().bonds).toEqual({ cat: 3 });
   });
 
   it('a named partner is drawn whoever the player has', () => {

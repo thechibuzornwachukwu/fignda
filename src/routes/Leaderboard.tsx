@@ -5,7 +5,7 @@ import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
 import { dayNo } from '../engine/daily';
 import { formatTime } from '../engine/time';
-import { dailyIdFor, games, getGameDef } from '../games/catalog';
+import { dailyIdFor, getGameDef } from '../games/catalog';
 import { dailyDate, dailyLabel } from '../games/daily';
 import {
   fetchCircleBoard,
@@ -271,23 +271,6 @@ export function Leaderboard() {
         <GuestNote next="/leaderboard" />
       </section>
 
-      {games.length > 0 && (
-        <section className={styles.section} aria-labelledby="puzzles-title">
-          <h2 id="puzzles-title" className={styles.h2}>
-            Puzzle boards
-          </h2>
-          <ul className={styles.puzzles}>
-            {games.map((g) => (
-              <li key={g.id}>
-                <Link to={`/leaderboard/${g.id}`} className={styles.puzzleLink}>
-                  <span className={styles.puzzleCat}>{g.category}</span>
-                  {g.title}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
     </div>
   );
 }

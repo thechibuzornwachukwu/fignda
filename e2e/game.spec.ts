@@ -68,7 +68,7 @@ test.describe('desktop', () => {
     await expect(page.getByText('1 hint').first()).toBeVisible();
 
     // Another page inside the app, then back.
-    await page.getByRole('link', { name: 'All games' }).click();
+    await page.getByRole('link', { name: 'Cases' }).last().click();
     await expect(page).toHaveURL(/\/play$/);
     await page.goBack();
     await expect(letter(page, a)).toHaveAttribute('data-state', 'found');
@@ -211,15 +211,17 @@ test.describe('desktop', () => {
     await expect(page.getByRole('img', { name: '2 of 3 stars' })).toBeVisible();
   });
 
-  test('games list filters and opens a game', async ({ page }) => {
+  test('there is no list of games: the path is the way in, and an opened case can start a room', async ({ page }) => {
     await page.goto('/play');
-    await page.getByRole('button', { name: 'Football', exact: true }).click();
-    const rows = page.locator('ul li a');
-    await expect(rows).toHaveCount(2);
-    // The shelf line counts the category from the catalogue. A new guest has finished none.
-    await expect(page.getByText('0 of 2 finished')).toBeVisible();
-    await rows.first().click();
-    await expect(page).toHaveURL(/\/play\/(football|legends)$/);
+    await expect(page.getByRole('heading', { name: 'All games' })).toHaveCount(0);
+    await expect(page.getByRole('group', { name: 'Filter games' })).toHaveCount(0);
+    const path = page.locator('[data-journey]');
+    await expect(path.locator('[data-case]').first()).toHaveAttribute('data-state', 'open');
+    // Play together sits on the open case only: a locked case offers nothing.
+    await expect(path.locator('[data-case-together]')).toHaveCount(1);
+    await path.locator('[data-case-together]').click();
+    await expect(page).toHaveURL(/\/play\/[a-z0-9-]+\?room=[A-Z2-9]{6}$/);
+    await expect(page.getByRole('region', { name: 'Playing together' })).toBeVisible();
   });
 
   test('daily hides the count and shows only found rows', async ({ page }) => {

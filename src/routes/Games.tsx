@@ -1,5 +1,5 @@
-import { Fragment, useEffect, useMemo } from 'react';
-import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { useEffect, useMemo } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { guestAvatar } from '../avatar/guest';
 import { Avatar } from '../components/Avatar';
@@ -7,19 +7,14 @@ import { Icon } from '../components/Icon';
 import { Partner } from '../components/Partner';
 import { partnerName } from '../engine/partners';
 import { usePartner } from '../lib/partner';
-import { FilterTabs } from '../components/FilterTabs';
-import { GameRow } from '../components/GameRow';
 import { PageHeader } from '../components/PageHeader';
 import { Ring } from '../components/Ring';
 import { buttonClass } from '../components/buttonClass';
-import { filters, games, getPuzzle, sponsorFor } from '../games/catalog';
+import { getPuzzle, sponsorFor } from '../games/catalog';
 import { pick } from '../copy';
 import { dayProfile } from '../engine/variableDay';
 import { todayHoldsLine } from '../games/resultLines';
 import { loadDaily, today } from '../games/daily';
-import { loadFinished, shelfCounts } from '../lib/shelves';
-import { loadStars } from '../lib/starStore';
-import type from '../styles/type.module.css';
 import { useStreak, type Streak } from '../lib/useStreak';
 import { TextLink } from '../components/TextLink';
 import { useAuth } from '../lib/auth';
@@ -93,73 +88,6 @@ function BoardLink() {
   );
 }
 
-/** The filter and every puzzle in the catalogue, a shelf line above each category. */
-function GameList() {
-  const shelves = useMemo(() => shelfCounts(games, loadFinished()), []);
-  const stars = useMemo(() => loadStars(), []);
-  const [params, setParams] = useSearchParams();
-  const filter = filters.includes(params.get('f') ?? '') ? params.get('f')! : 'All';
-
-  const rows = games
-    .filter((g) => filter === 'All' || g.category === filter)
-    .map((g, i) => ({ g, i }))
-    .sort((x, y) => filters.indexOf(x.g.category) - filters.indexOf(y.g.category) || x.i - y.i)
-    .flatMap(({ g }) => {
-      // A game the engine cannot build is left out, never listed with a blank count.
-      const p = getPuzzle(g.id);
-      return p
-        ? [
-            {
-              id: g.id,
-              category: g.category,
-              title: g.title,
-              meta: `${p.answers.length} words · ${p.difficulty}`,
-              stars: stars[g.id] ?? 0,
-              sponsor: sponsorFor(g)?.name,
-            },
-          ]
-        : [];
-    });
-
-  return (
-    <section className={styles.list} aria-labelledby="all-games">
-      <h2 id="all-games" className={type.h2}>
-        All games
-      </h2>
-      <FilterTabs label="Filter games" options={filters} value={filter} onChange={(f) => setParams(f === 'All' ? {} : { f }, { replace: true })} />
-      {/* An empty list would leave its rule over nothing. */}
-      {rows.length === 0 ? (
-        <p className={styles.empty}>
-          No games here yet. <TextLink onClick={() => setParams({}, { replace: true })}>See all games</TextLink>
-        </p>
-      ) : (
-        <ul className={styles.rows}>
-          {rows.map((r, i) => {
-            const shelf = r.category !== rows[i - 1]?.category ? shelves.get(r.category) : undefined;
-            return (
-              <Fragment key={r.id}>
-                {shelf && shelf.total > 0 && (
-                  <li className={styles.shelf}>
-                    <span className={styles.shelfName}>{r.category}</span>
-                    <span>{pick('shelfDone', { n: shelf.done, t: shelf.total })}</span>
-                  </li>
-                )}
-                <GameRow
-                  to={`/play/${r.id}`}
-                  category={r.category}
-                  title={r.title}
-                  meta={r.meta}
-                  stars={r.stars}
-                  sponsor={r.sponsor ? pick('sponsorWith', { name: r.sponsor }) : undefined}
-                />
-              </Fragment>
-            );
-          })}
-        </ul>
-      )}
-    </section>
-  );
-}
 
 /** /play. The daily first, then what the player has unlocked (src/lib/unlocks.ts), then every game. */
 export function Games() {
@@ -188,8 +116,6 @@ export function Games() {
       <GameInvites />
 
       <Journey />
-
-      <GameList />
 
       {(open.make || asked) && (
         <div id="any-topic">

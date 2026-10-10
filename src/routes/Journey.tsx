@@ -1,6 +1,6 @@
 import { useEffect, useId, useMemo, useState, type CSSProperties, type ReactNode } from 'react';
-import { Link } from 'react-router-dom';
-import { Award, Check, Lock } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Award, Check, Lock, UsersRound } from 'lucide-react';
 import { avatarFor } from '../avatar/draw';
 import { guestSeed } from '../avatar/guest';
 import { Avatar } from '../components/Avatar';
@@ -13,9 +13,10 @@ import { clampStars } from '../components/starsLabel';
 import { pick } from '../copy';
 import { buildPath, clueStates, type CatalogueItem, type ClueState, type Path } from '../engine/journey';
 import { caseFile } from '../games/caseFile';
-import { games } from '../games/catalog';
+import { games, getGameDef, sponsorFor } from '../games/catalog';
 import { useAuth } from '../lib/auth';
 import { PROGRESS_EVENT } from '../lib/progress';
+import { newRoomCode } from '../lib/room';
 import { loadFinished } from '../lib/shelves';
 import { loadStars } from '../lib/starStore';
 import { storage } from '../lib/storage';
@@ -43,7 +44,7 @@ const SWAY = [0, 1, 2, 1, 0, -1, -2, -1] as const;
 const AVATAR = { clue: 56, big: 68, finished: 56 } as const;
 
 type ClueView = { id: string; to: string; name: string; state: ClueState; stars: 0 | 1 | 2 | 3; big: boolean; shift: number };
-type CaseView = { id: string; title: string; clues: ClueView[]; state: 'done' | 'open' | 'locked'; stars: 0 | 1 | 2 | 3; count: string; line: string; /** The case being worked: its opening line and the secret so far. */ open: string; slots: string[] };
+type CaseView = { id: string; title: string; clues: ClueView[]; state: 'done' | 'open' | 'locked'; stars: 0 | 1 | 2 | 3; count: string; line: string; /** "With NAME", on a sponsored case. */ sponsor: string; /** The case being worked: its opening line and the secret so far. */ open: string; slots: string[] };
 
 const EMPTY: Path = { cases: [] };
 
@@ -61,7 +62,8 @@ function safePath(catalogue: readonly JourneyGame[]): Path {
  * are locked. A closed case is a link to its whole puzzle.
  */
 export function Journey({ catalogue = games, path, done, stars, className }: Props) {
-  const { profile } = useAuth();
+  const { profile, enabled } = useAuth();
+  const navigate = useNavigate();
   const headId = useId();
   const starter = useMemo(() => avatarFor(guestSeed()), []);
   // Read again when the account brings clues done on another device.
@@ -113,6 +115,11 @@ export function Journey({ catalogue = games, path, done, stars, className }: Pro
         stars: state === 'done' ? starOf(c.id) : 0,
         count: state === 'done' ? '' : pick(left === 1 ? 'clueLeft' : 'cluesLeft', { n: left }),
         line: state === 'done' ? pick('caseDone', { c: title }) : '',
+        sponsor: (() => {
+          const def = getGameDef(c.id);
+          const who = def && sponsorFor(def)?.name;
+          return who ? pick('sponsorWith', { name: who }) : '';
+        })(),
         open: file ? pick('caseOpen', { n: clues.length }) : '',
         slots: file?.slots ?? [],
       });
@@ -183,6 +190,7 @@ export function Journey({ catalogue = games, path, done, stars, className }: Pro
                   )}
                 </h3>
                 {c.state !== 'done' && <p className={styles.caseCount}>{c.count}</p>}
+                {c.sponsor && <p className={styles.caseCount} data-case-sponsor>{c.sponsor}</p>}
                 {c.stars > 0 && <Stars value={c.stars} pop={c.id === cameFrom} />}
               </div>
               {c.state === 'done' && (
@@ -190,6 +198,13 @@ export function Journey({ catalogue = games, path, done, stars, className }: Pro
                   <Icon icon={Award} size={20} />
                   {c.line}
                 </p>
+              )}
+              {/* A room on this case: for any case that has been opened. A button, so the path stays a list of clues. */}
+              {enabled && c.state !== 'locked' && getGameDef(c.id) && (
+                <button type="button" className={styles.together} data-case-together onClick={() => navigate(`/play/${c.id}?room=${newRoomCode()}`)}>
+                  <Icon icon={UsersRound} size={16} />
+                  Play together
+                </button>
               )}
               {c.state === 'locked' && (
                 <p className={styles.lock} data-case-lock>

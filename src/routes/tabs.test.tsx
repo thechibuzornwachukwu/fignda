@@ -109,11 +109,13 @@ const title = () => screen.getByRole('heading', { level: 1 }).textContent;
 beforeEach(() => emptyWorld());
 
 describe('Games', () => {
-  it('a first visit shows the daily and the games list only', async () => {
+  it('a first visit shows the crew, the daily and the path, and no list of games', async () => {
     open('/play');
     expect(title()).toBe('Cases');
     expect(screen.getByRole('link', { name: /Daily #\d+/ })).toBeInTheDocument();
-    expect(within(screen.getByRole('region', { name: 'All games' })).getAllByRole('link').length).toBeGreaterThan(0);
+    expect(within(screen.getByRole('region', { name: 'Your path' })).getAllByRole('link').length).toBeGreaterThan(0);
+    expect(screen.queryByRole('region', { name: 'All games' })).toBeNull();
+    expect(screen.getByRole('link', { name: /Change your detective, partner and gear/ })).toHaveAttribute('href', '/me');
     // Give the any-topic check time to answer: it still must not show.
     await Promise.resolve();
     expect(screen.queryByLabelText('Or any topic')).toBeNull();
@@ -140,9 +142,11 @@ describe('Games', () => {
     expectNoHoles();
   });
 
-  it('a filter that matches nothing falls back to every game', () => {
+  it('an old filter in the address changes nothing: there is no list to filter', () => {
     open('/play?f=Nothing');
-    expect(within(screen.getByRole('region', { name: 'All games' })).getAllByRole('link').length).toBeGreaterThanOrEqual(games.length);
+    expect(title()).toBe('Cases');
+    expect(screen.queryByRole('group', { name: 'Filter games' })).toBeNull();
+    expect(screen.getByRole('region', { name: 'Your path' })).toBeInTheDocument();
   });
 
   it('the direct link shows any topic before it is unlocked, and keeps it', async () => {

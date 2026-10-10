@@ -6,10 +6,12 @@
 // Ranking: each signed-in player sends their own play log when the game ends; the server replays it for the
 // Together board (worker/src/app.ts). Nothing said in the room is used for ranking.
 
+import { PARTNERS } from '../engine/partners';
 import { getSupabase } from './supabase';
 
 /** A player in the room. Signed in players carry their name and handle; guests are "A friend". */
-export type Peer = { id: string; name: string; handle?: string; away?: boolean } & Partial<RoomStats>;
+/** `partner`: the detective working beside them, shown next to their name. */
+export type Peer = { id: string; name: string; handle?: string; partner?: string; away?: boolean } & Partial<RoomStats>;
 /** What each player reports for the room scoreboard. This is the live view only; the Together board uses the server's replay. */
 export type RoomStats = { finds: number; hints: number; /** Seconds per word, from your start to your last find. */ pace: number };
 export type RoomHandlers = {
@@ -55,12 +57,14 @@ const isIdx = (n: unknown): n is number => Number.isInteger(n) && (n as number) 
 const cleanName = (n: unknown) => (typeof n === 'string' ? n.replace(/\s+/g, ' ').trim().slice(0, 40) : '') || 'A friend';
 const HANDLE_RE = /^[a-z0-9._]{2,20}$/;
 const cleanPeer = (p: unknown): Peer | null => {
-  const o = p as { id?: unknown; name?: unknown; handle?: unknown; away?: unknown } | null;
+  const o = p as { id?: unknown; name?: unknown; handle?: unknown; partner?: unknown; away?: unknown } | null;
   if (!o || typeof o.id !== 'string' || o.id.length > 64) return null;
   const handle = typeof o.handle === 'string' && HANDLE_RE.test(o.handle) ? o.handle : undefined;
   const n = (v: unknown, max: number) => (typeof v === 'number' && Number.isFinite(v) && v >= 0 ? Math.min(Math.round(v), max) : undefined);
   const x = o as { finds?: unknown; hints?: unknown; pace?: unknown };
-  return { id: o.id, name: cleanName(o.name), handle, away: o.away === true, finds: n(x.finds, 500), hints: n(x.hints, 500), pace: n(x.pace, 86_400) };
+  // Only a partner that is in the game is believed.
+  const partner = PARTNERS.find((x) => x.id === o.partner)?.id;
+  return { id: o.id, name: cleanName(o.name), handle, partner, away: o.away === true, finds: n(x.finds, 500), hints: n(x.hints, 500), pace: n(x.pace, 86_400) };
 };
 
 /** Validate an incoming message and hand it on. Anything malformed is dropped. */
@@ -93,7 +97,7 @@ async function realtimeRoom(code: string, me: Peer, h: RoomHandlers): Promise<Ro
     Object.entries(ch.presenceState<Record<string, unknown>>())
       .map(([id, metas]) => cleanPeer({ ...metas[0], id }))
       .filter((p): p is Peer => !!p && p.id !== me.id);
-  const track = () => void ch.track({ name: me.name, handle: me.handle, away, ...stats });
+  const track = () => void ch.track({ name: me.name, handle: me.handle, partner: me.partner, away, ...stats });
   const send = (event: string, payload: object = {}) => void ch.send({ type: 'broadcast', event, payload: { ...payload, from: me } });
   for (const event of ['find', 'sync', 'ask']) ch.on('broadcast', { event }, ({ payload }) => receive(h, me, event, payload));
   ch.on('presence', { event: 'sync' }, () => h.onPeers(peers()))

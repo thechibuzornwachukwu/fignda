@@ -46,18 +46,22 @@ describe('With NAME', () => {
     expect(sponsorFor({ id: 'c-abcdefgh', sponsor: { name: 'Chi Farms' } })).toBeUndefined();
   });
 
-  it('shows on a game row, under the title', () => {
-    showGames();
-    const list = screen.getByRole('region', { name: 'All games' });
-    const row = within(list).getByRole('link', { name: /The classic/ });
-    expect(row).toHaveTextContent('With Chi Farms');
-    expect(within(list).getAllByText('With Chi Farms')).toHaveLength(games.length - 1);
+  it('shows on a case card on the path, under the title', () => {
+    const { container } = showGames();
+    const path = screen.getByRole('region', { name: 'Your path' });
+    const marks = [...container.querySelectorAll('[data-case-sponsor]')];
+    expect(marks).toHaveLength(games.length - 1);
+    for (const m of marks) expect(m.textContent).toBe('With Chi Farms');
+    expect(within(path).getByRole('heading', { level: 3, name: /The classic/ }).closest('[data-case]')!.querySelector('[data-case-sponsor]')).not.toBeNull();
+    // The list of games is gone: the path is the way in.
+    expect(screen.queryByRole('region', { name: 'All games' })).toBeNull();
   });
 
   it('a field that fails the rule shows nothing', () => {
     showGames();
-    const row = within(screen.getByRole('region', { name: 'All games' })).getByRole('link', { name: /Party at ours/ });
-    expect(row).not.toHaveTextContent(/With/);
+    const card = screen.getByRole('heading', { level: 3, name: /Party at ours/ }).closest('[data-case]')!;
+    expect(card.querySelector('[data-case-sponsor]')).toBeNull();
+    expect(card).not.toHaveTextContent(/With /);
   });
 
   it('shows on the daily card when today is a sponsored puzzle', () => {

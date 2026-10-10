@@ -78,8 +78,7 @@ Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with 
 
 A case is one puzzle: its passages are the clues and the whole puzzle is the last, the unmasking (SPEC section 6, Games). Each clue gives a piece of the case's secret, and the unmasking shows who hid it (SPEC section 9, The secret).
 
-- [ ] **Set 3j. Retire the list and the puzzle boards.** The games are cases solved in order, not a list to pick from. Take All games and its filters off Cases, and the links to per-puzzle boards. Keep the routes and the data so old links and scores still open. Keep the daily board and the Together board. Decide first: how a room picks its case, and whether a closed case keeps a board of its own.
-- [ ] **Set 3k. What a partner does.** Partners that differ: each with its own specialty in a case and a tally of cases closed together, and each player's partner shown in a room. Rule to keep: nothing sold may change a score, and points for a partner will be sold, so a specialty must not raise a score. Options that hold: (a) each partner gives a different kind of hint, at the usual hint cost; (b) a bond that grows with cases closed together and opens new poses and gear for that partner; (c) a squad whose partners differ gets a cosmetic mark on the unmasking. Owner to choose.
+- [ ] **Set 3l. More a partner does.** Still open from the partner idea: each partner giving its own kind of hint at the usual hint cost, and a mark on the unmasking for a squad whose partners differ. Rule to keep: nothing sold may change a score.
 - [ ] **Set 3h. The robot.** The 4th partner is drawn and held back. Once its name is settled (Owner): add it to `PARTNERS`, to the checks in `player_partners` and `choose_partner`, a 4th threshold, and run `npm run partners:render`.
 - [ ] **Set 3i. Partner moments still to place:** the error state, a closed case, and what each partner says (bubbles are drawn in `design/brand/elements`).
 

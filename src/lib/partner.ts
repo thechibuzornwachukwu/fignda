@@ -2,21 +2,23 @@
 // account is the truth: what it holds comes down, and a choice made here as a guest goes up once.
 
 import { useSyncExternalStore } from 'react';
-import { parsePartner, START, takePartner, type PartnerId, type PartnerState } from '../engine/partners';
+import { parseBonds, parsePartner, START, takePartner, type PartnerId, type PartnerState } from '../engine/partners';
 import { chooseServerPartner, fetchMyPartner } from './api';
 import { storage } from './storage';
 
 export const PARTNER_KEY = 'gazecraft-partner';
+const SERVER = { ...START, points: 0, bonds: {} };
 
-type Held = PartnerState & { points: number };
+/** `bonds`: cases closed with each partner, as the account counts them. A guest has none. */
+type Held = PartnerState & { points: number; bonds: Partial<Record<PartnerId, number>> };
 
 let cache: Held | null = null;
 const listeners = new Set<() => void>();
 const read = (): Held => {
   if (!cache) {
-    const raw = storage.getJSON<{ points?: unknown }>(PARTNER_KEY);
+    const raw = storage.getJSON<{ points?: unknown; bonds?: unknown }>(PARTNER_KEY);
     const points = typeof raw?.points === 'number' && Number.isFinite(raw.points) ? Math.max(0, raw.points) : 0;
-    cache = { ...parsePartner(raw), points };
+    cache = { ...parsePartner(raw), points, bonds: parseBonds(raw?.bonds) };
   }
   return cache;
 };
@@ -45,7 +47,7 @@ export function usePartner(): Held {
       return () => listeners.delete(l);
     },
     read,
-    () => ({ ...START, points: 0 }),
+    () => SERVER,
   );
 }
 
@@ -57,17 +59,17 @@ export async function choosePartner(id: PartnerId, signedIn: boolean): Promise<b
   const now = read();
   if (!signedIn) {
     // A guest holds 1: choosing another swaps it, since nothing was earned yet.
-    write({ current: id, owned: [id], points: 0 });
+    write({ current: id, owned: [id], points: 0, bonds: {} });
     return true;
   }
   const answer = await chooseServerPartner(id).catch(() => null);
   if (!answer) {
     // Offline: only a switch among what is already held is safe to show.
     if (!now.owned.includes(id)) return false;
-    write({ ...takePartner(now, id, now.points), points: now.points });
+    write({ ...takePartner(now, id, now.points), points: now.points, bonds: now.bonds });
     return true;
   }
-  write({ ...parsePartner(answer), points: now.points });
+  write({ ...parsePartner(answer), points: now.points, bonds: now.bonds });
   return answer.current === id;
 }
 
@@ -78,8 +80,8 @@ export async function choosePartner(id: PartnerId, signedIn: boolean): Promise<b
 export async function syncPartner(): Promise<void> {
   const mine = await fetchMyPartner().catch(() => undefined);
   if (mine === undefined) return;
-  if (mine) return write({ ...parsePartner(mine), points: mine.points });
+  if (mine) return write({ ...parsePartner(mine), points: mine.points, bonds: parseBonds(mine.bonds) });
   if (!partnerChosen()) return;
   const answer = await chooseServerPartner(read().current).catch(() => null);
-  if (answer) write({ ...parsePartner(answer), points: 0 });
+  if (answer) write({ ...parsePartner(answer), points: 0, bonds: {} });
 }

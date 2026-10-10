@@ -13,11 +13,15 @@ mkdirSync(out, { recursive: true });
 let files = 0;
 for (const p of PARTNERS) {
   const base = { who: p.id as Who, hat: true, coat: true, view: 'bust', back: CREAM, size: 240 } as const;
-  for (const mood of MOODS) {
-    writeFileSync(join(out, `${p.id}-${mood}.svg`), character({ ...base, mood }));
+  // Bond tiers: plain, then with the magnifying glass, then with the monocle too (BOND_AT in the engine).
+  const tiers = [{ tag: '', dress: {} }, { tag: '-1', dress: { glass: true } }, { tag: '-2', dress: { glass: true, monocle: true } }];
+  for (const t of tiers) {
+    for (const mood of MOODS) {
+      writeFileSync(join(out, `${p.id}-${mood}${t.tag}.svg`), character({ ...base, ...t.dress, mood }));
+      files++;
+    }
+    writeFileSync(join(out, `${p.id}-wave${t.tag}.svg`), character({ ...base, ...t.dress, wave: true }));
     files++;
   }
-  writeFileSync(join(out, `${p.id}-wave.svg`), character({ ...base, wave: true }));
-  files++;
 }
 console.log(`${files} files in public/partners`);
