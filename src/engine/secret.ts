@@ -135,6 +135,25 @@ export function revealSecret(secret: Secret, have: readonly boolean[]): string[]
   return slots;
 }
 
+/** A squad that finds this share of the words has read every piece but the last. The same mark as 2 stars. */
+export const SQUAD_SHARE = 0.8;
+
+/**
+ * Rooms: how many of a case's passage pieces a squad holds, from the words the whole squad has found.
+ * Pieces come evenly as the finds climb, the last of them at `SQUAD_SHARE` of the words. `pieces` is the count
+ * of passage pieces: every piece of the case but the unmasking's, which only the finish gives.
+ */
+export function squadPieces(pieces: number, found: number, total: number): number {
+  const k = Number.isFinite(pieces) ? Math.max(0, Math.floor(pieces)) : 0;
+  const f = Number.isFinite(found) ? Math.max(0, Math.floor(found)) : 0;
+  const t = Number.isFinite(total) ? Math.floor(total) : 0;
+  if (k === 0 || t <= 0) return 0;
+  let held = 0;
+  // Piece j comes at the find that reaches j shares of the mark. Never more finds than there are words.
+  while (held < k && f >= Math.min(t, Math.ceil(((held + 1) * t * SQUAD_SHARE) / k))) held++;
+  return held;
+}
+
 /** Slot indexes one piece fills. */
 export const pieceSlots = (p: Piece): number[] => Array.from({ length: p.text.length }, (_, k) => p.at + k);
 

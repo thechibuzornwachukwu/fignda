@@ -232,6 +232,14 @@
     "{p}. One more piece of the secret.",
     "The clue gave up a piece: {p}."
   ],
+  "squadSecret": [
+    "One secret for the whole squad. Every find gives up more of it.",
+    "The squad shares this secret. Each word found fills it in."
+  ],
+  "squadShort": [
+    "The squad read {n} of {t} letters. Find more of the words and the mask comes off.",
+    "{n} of {t} letters read. The culprit keeps the mask this time."
+  ],
   "culpritWho": [
     "the baker",
     "the choir leader",

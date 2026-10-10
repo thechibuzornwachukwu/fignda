@@ -6,7 +6,7 @@ import { DISGUISE_STYLES } from '../avatar/parts/disguises';
 import { clampStars } from '../components/starsLabel';
 import { POOLS } from '../copy';
 import { clueId } from '../engine/journey';
-import { caseSecrets, culpritOf, pieceSlots, revealSecret, type Culprit, type Secret } from '../engine/secret';
+import { caseSecrets, culpritOf, pieceSlots, revealSecret, squadPieces, type Culprit, type Secret } from '../engine/secret';
 import { loadFinished } from '../lib/shelves';
 import { loadStars } from '../lib/starStore';
 import { games, getPassage } from './catalog';
@@ -49,12 +49,22 @@ export type CaseFile = {
   piece: (n: number) => { text: string; slots: number[] };
 };
 
-/** The case of a catalogue puzzle, given the clues done. A whole puzzle done closes it, pieces and all. */
-export function caseFile(id: string, done: ReadonlySet<string>): CaseFile | undefined {
+/** A room game as the squad plays it: every word anyone found, of how many, and whether the game has ended. */
+export type Squad = { found: number; total: number; finished: boolean };
+
+/**
+ * The case of a catalogue puzzle, given the clues done. A whole puzzle done closes it, pieces and all.
+ * In a room (`squad`) the finds of the whole squad give the passage pieces too, in the order of the case, and
+ * the finish gives the last. A piece the player already held from a clue of their own stays held.
+ */
+export function caseFile(id: string, done: ReadonlySet<string>, squad?: Squad): CaseFile | undefined {
   const secret = secretOf(id);
   if (!secret) return undefined;
   const last = secret.pieces.length - 1;
-  const have = secret.pieces.map((_, i) => done.has(id) || done.has(clueId(id, i === last ? 0 : i + 1)));
+  const shared = squad ? squadPieces(last, squad.found, squad.total) : 0;
+  const have = secret.pieces.map(
+    (_, i) => done.has(id) || done.has(clueId(id, i === last ? 0 : i + 1)) || (i === last ? !!squad?.finished : i < shared),
+  );
   const slots = revealSecret(secret, have);
   return {
     word: secret.word,

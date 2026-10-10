@@ -3,7 +3,7 @@ import secretsFile from '../../data/secrets.json';
 import { buildHiddenWords } from './hiddenWords';
 import type { CatalogueItem } from './journey';
 import { buildPath } from './journey';
-import { caseSecrets, culpritOf, cutSecret, FALLBACK_SECRET, hashOf, PIECE_MAX, pieceSlots, revealSecret, SECRET_MIN, usableWords } from './secret';
+import { caseSecrets, culpritOf, cutSecret, FALLBACK_SECRET, hashOf, PIECE_MAX, pieceSlots, revealSecret, SECRET_MIN, squadPieces, usableWords } from './secret';
 
 const games = (gamesFile as unknown as { games: CatalogueItem[] }).games;
 const things = (secretsFile as { things: string[] }).things;
@@ -162,5 +162,42 @@ describe('culpritOf', () => {
     expect(hashOf('')).toBe(0x811c9dc5);
     expect(hashOf('bible')).toBe(hashOf('bible'));
     expect(hashOf('bible')).not.toBe(hashOf('bibel'));
+  });
+});
+
+describe('squadPieces', () => {
+  it('pieces come evenly as the squad finds words, the last at 80% of them', () => {
+    // 3 passage pieces over 10 words: at 3, 6 and 8 finds.
+    expect(Array.from({ length: 11 }, (_, found) => squadPieces(3, found, 10))).toEqual([0, 0, 0, 1, 1, 1, 2, 2, 3, 3, 3]);
+    // 7 pieces over 30 words: all of them by 24 finds.
+    expect(squadPieces(7, 23, 30)).toBe(6);
+    expect(squadPieces(7, 24, 30)).toBe(7);
+    expect(squadPieces(7, 30, 30)).toBe(7);
+  });
+
+  it('never fewer as finds climb, never more than there are, and every word found is always all of them', () => {
+    for (const k of [1, 2, 3, 5, 8]) {
+      for (const total of [1, 2, 3, 7, 30]) {
+        let last = 0;
+        for (let found = 0; found <= total; found++) {
+          const held = squadPieces(k, found, total);
+          expect(held).toBeGreaterThanOrEqual(last);
+          expect(held).toBeLessThanOrEqual(k);
+          last = held;
+        }
+        expect(squadPieces(k, total, total)).toBe(k);
+        expect(squadPieces(k, 0, total)).toBe(0);
+      }
+    }
+  });
+
+  it('no pieces, no words and bad numbers give 0', () => {
+    expect(squadPieces(0, 5, 10)).toBe(0);
+    expect(squadPieces(3, 5, 0)).toBe(0);
+    expect(squadPieces(3, -1, 10)).toBe(0);
+    expect(squadPieces(Number.NaN, 5, 10)).toBe(0);
+    expect(squadPieces(3, Number.NaN, 10)).toBe(0);
+    expect(squadPieces(3, 5, Number.NaN)).toBe(0);
+    expect(squadPieces(3, 99, 10)).toBe(3);
   });
 });

@@ -13,7 +13,7 @@ import { dailyInfo, dailyLabel } from '../games/daily';
 import { registry } from '../games/registry';
 import { dayHidLine, playFacts, rareLine, recordLines, skillLines, starsUpLine, todayHoldsLine } from '../games/resultLines';
 import { isCleanRead, scoreOf, secondsOf, useGameSession, type Session } from '../games/session';
-import { CaseClosed, CasePiece } from '../components/CaseFile';
+import { CaseClosed, CasePiece, SecretSlots } from '../components/CaseFile';
 import { clueId } from '../engine/journey';
 import { caseFile, doneClues } from '../games/caseFile';
 import { starsFor } from '../engine/stars';
@@ -341,14 +341,35 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
   const starLine = useMemo(() => starsUpLine(stars, starsUp, copy.pick), [stars, starsUp]);
   // The case this clue belongs to: a passage gives a piece of the secret, the whole puzzle closes the case.
   // A game with stars is a clue done, the same rule the path reads by.
+  // In a room the squad shares the secret: every word anyone finds counts toward it, and the finish gives
+  // the last piece. Catalogue puzzles only.
+  const squadFile = useMemo(
+    () => (inRoom ? caseFile(def.id, doneClues(), { found: foundCount, total, finished }) : undefined),
+    [inRoom, def.id, foundCount, total, finished],
+  );
+  // Slots filled since the last look pop in.
+  const slotsNow = squadFile?.slots ?? null;
+  const slotsKey = slotsNow ? slotsNow.join(',') : '';
+  const [seenSlots, setSeenSlots] = useState<{ key: string; slots: string[] | null; fresh: number[] }>({ key: slotsKey, slots: slotsNow, fresh: [] });
+  if (seenSlots.key !== slotsKey) {
+    const before = seenSlots.slots;
+    setSeenSlots({ key: slotsKey, slots: slotsNow, fresh: (slotsNow ?? []).flatMap((ch, i) => (ch && before && !before[i] ? [i] : [])) });
+  }
+  const freshSlots = seenSlots.fresh;
+  const squadLine = useMemo(() => (inRoom ? copy.pick('squadSecret') : ''), [inRoom]);
   const caseNode = useMemo(() => {
+    if (finished && squadFile) {
+      if (squadFile.closed) return <CaseClosed id={def.id} secret={squadFile.word} />;
+      const read = squadFile.slots.filter(Boolean).length;
+      return <CasePiece slots={squadFile.slots} fresh={[]} piece="" say={copy.pick('squadShort', { n: read, t: squadFile.slots.length })} />;
+    }
     if (!finished || !starred) return null;
     const file = caseFile(def.id, new Set([...doneClues(), gameKey]));
     if (!file) return null;
     if (!part) return <CaseClosed id={def.id} secret={file.word} />;
     const piece = file.piece(part.n);
     return <CasePiece slots={file.slots} fresh={piece.slots} piece={piece.text} />;
-  }, [finished, starred, def.id, gameKey, part]);
+  }, [finished, starred, def.id, gameKey, part, squadFile]);
   // Variable days. Before today's daily: what it holds, never how much. After it: today against a usual day.
   const holdsLine = useMemo(
     () => (isToday && !finished ? todayHoldsLine(dayProfile(puzzle), copy.pick) : ''),
@@ -456,6 +477,12 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
       </div>
 
       {inRoom && <RoomBar gameId={def.id} code={roomCode} peers={peers} status={roomStatus} me={myStats} you={{ id: roomId, handle: myHandle }} path={sharePath({ id: def.id, code: def.id.startsWith('c-') ? def.id.slice(2).toUpperCase() : undefined })} />}
+      {squadFile && !finished && (
+        <p className={styles.squad} data-squad-secret>
+          <SecretSlots slots={squadFile.slots} fresh={freshSlots} />
+          <span>{squadLine}</span>
+        </p>
+      )}
 
       {challenge && !inRoom && (
         <Challenge

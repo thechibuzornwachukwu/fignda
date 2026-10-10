@@ -76,7 +76,6 @@ Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with 
 
 A case is one puzzle: its passages are the clues and the whole puzzle is the last, the unmasking (SPEC section 6, Games). Each clue gives a piece of the case's secret, and the unmasking shows who hid it (SPEC section 9, The secret).
 
-- [ ] **Set 3f. Rooms as a squad.** Every player's finds count toward the same secret.
 - [ ] **Set 3g. Partners** (SPEC section 5, Partners). The art exists: `design/characters` draws them, `design/brand/elements` holds the states, bubbles and case files. To build: the pick in the first minute, the partner on screen states, the waiting screen and the result, the choice saved with the profile, switching in Settings, unlocking with points. Buying points for an unlock waits for Paystack.
 
 ### 4. More games

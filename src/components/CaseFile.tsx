@@ -58,8 +58,9 @@ export function Culprit({ id, size = 48, state, className }: CulpritProps) {
 }
 
 /** A clue just done: the secret with the new piece in place, and one line about it. */
-export function CasePiece({ slots, fresh, piece }: { slots: readonly string[]; fresh: readonly number[]; piece: string }) {
-  const line = useMemo(() => (piece ? pick('pieceFound', { p: piece }) : ''), [piece]);
+/** `say` replaces the line about the piece: a squad that did not read the whole secret is told how far it got. */
+export function CasePiece({ slots, fresh, piece, say }: { slots: readonly string[]; fresh: readonly number[]; piece: string; say?: string }) {
+  const line = useMemo(() => say ?? (piece ? pick('pieceFound', { p: piece }) : ''), [piece, say]);
   return (
     <div className={styles.piece} data-case-piece>
       <SecretSlots slots={slots} fresh={fresh} />

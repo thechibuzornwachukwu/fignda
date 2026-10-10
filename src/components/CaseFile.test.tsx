@@ -48,6 +48,28 @@ describe('caseFile', () => {
     }
   });
 
+  it('a squad: its finds give the passage pieces in order, the finish gives the last, and own clues stay held', () => {
+    const none = caseFile(id, new Set(), { found: 0, total: 10, finished: false })!;
+    expect(none.slots.every((s) => s === '')).toBe(true);
+    const some = caseFile(id, new Set(), { found: 8, total: 10, finished: false })!;
+    expect(some.closed).toBe(false);
+    // Everything but the unmasking's piece.
+    const lastPiece = some.piece(0);
+    expect(some.slots.filter(Boolean)).toHaveLength(some.word.length - lastPiece.text.length);
+    expect(lastPiece.slots.every((s) => some.slots[s] === '')).toBe(true);
+    const done = caseFile(id, new Set(), { found: 10, total: 10, finished: true })!;
+    expect(done.closed).toBe(true);
+    expect(done.slots.join('')).toBe(done.word);
+    // Finished with few words found: the last piece only, and the case is not closed.
+    const short = caseFile(id, new Set(), { found: 1, total: 10, finished: true })!;
+    expect(short.closed).toBe(false);
+    expect(short.slots.filter(Boolean).join('')).toBe(lastPiece.text);
+    // A clue the player did alone is theirs whatever the squad found.
+    const n = clueCount(id) - 1;
+    const mine = caseFile(id, new Set([`${id}~${n}`]), { found: 0, total: 10, finished: false })!;
+    expect(mine.slots.filter(Boolean).join('')).toBe(mine.piece(n).text);
+  });
+
   it('a puzzle that is not ours has no case, and a clue the case does not have gives nothing', () => {
     expect(caseFile('no-such-puzzle', new Set(['no-such-puzzle']))).toBeUndefined();
     expect(caseFile(id, new Set())!.piece(99)).toEqual({ text: '', slots: [] });
@@ -128,6 +150,13 @@ describe('CasePiece and CaseClosed', () => {
     const line = container.querySelector('p')!.textContent!;
     expect(fills(POOLS.pieceFound, line)).toBe(true);
     expect(line).toContain('OP');
+  });
+
+  it('a squad that fell short is told how far it read, in place of the line about a piece', () => {
+    const { container } = render(<CasePiece slots={['A', '', '']} fresh={[]} piece="" say="The squad read 1 of 3 letters." />);
+    expect(container.querySelector('p')!.textContent).toBe('The squad read 1 of 3 letters.');
+    for (const t of [...POOLS.squadShort, ...POOLS.squadSecret]) expect(t).not.toMatch(/minute|second|\bfast/i);
+    for (const t of POOLS.squadShort) expect(t).toMatch(/\{n\}.*\{t\}/);
   });
 
   it('a clue with no piece to give says nothing', () => {
