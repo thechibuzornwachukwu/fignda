@@ -9,7 +9,7 @@ import { durationMs, scrollToTop } from '../lib/media';
 import { chime } from '../lib/sound';
 import { loadDaily, saveDaily } from './daily';
 import type { Evaluation, GameModule } from './registry';
-import { clearResume, loadResume, returned, saveResume, withoutAway } from './resume';
+import { loadResume, returned, saveResume, withoutAway } from './resume';
 
 /** `by`: a teammate's name when the find came from a room. Your own finds have none. */
 export type FoundEntry = { key: string; label: string; span: [number, number]; by?: string };
@@ -34,6 +34,8 @@ export type SavedSession = {
   log?: PlayLog;
   /** In storage only: when the player left an unfinished game. The time since then is not on its clock. */
   leftAt?: number;
+  /** The finished play has gone to the server. Kept so a result opened again is never sent twice. */
+  sent?: boolean;
 };
 
 export type PlayLog = { events: Array<{ a: number; b: number; t: number }>; hints: number[] };
@@ -224,10 +226,8 @@ export function useGameSession<P>({ mod, puzzle, dailyN, resumeId: resumeAs, sha
       const { msg: _m, ...game } = next;
       const saved: SavedSession = leftAt == null ? game : { ...game, leftAt };
       if (dailyN != null) saveDaily(dailyN, saved);
-      else if (resumeId == null) return;
-      // A game that has ended has nothing to carry on: the next visit starts clean.
-      else if (isFinished(next)) clearResume(resumeId);
-      else saveResume(resumeId, saved);
+      // A finished game is kept too: its result, and the way to share it, are still there on the next visit.
+      else if (resumeId != null) saveResume(resumeId, saved);
     },
     [dailyN, resumeId],
   );
@@ -328,6 +328,11 @@ export function useGameSession<P>({ mod, puzzle, dailyN, resumeId: resumeAs, sha
 
   const say = (msg: string) => commit({ ...ref.current, msg });
 
+  /** The finished play is on its way to the server. Stored at once, so a reload in between sends nothing again. */
+  const markSent = () => {
+    if (isFinished(ref.current) && !ref.current.sent) commit({ ...ref.current, sent: true });
+  };
+
   const hint = () => {
     const cur = ref.current;
     const found = new Set(cur.found.map((f) => f.key));
@@ -356,5 +361,5 @@ export function useGameSession<P>({ mod, puzzle, dailyN, resumeId: resumeAs, sha
     window.scrollTo(0, 0);
   };
 
-  return { s, foundSet, total, answers, daily, finished: isFinished(s), pick, teamPick, say, hint, finish, tapStart, dragStart, replay };
+  return { s, foundSet, total, answers, daily, finished: isFinished(s), pick, teamPick, say, markSent, hint, finish, tapStart, dragStart, replay };
 }

@@ -398,6 +398,19 @@ export async function fetchDailyDays(): Promise<number[]> {
   return data.map((r) => r.day_no as number);
 }
 
+/**
+ * Where a score would stand on a daily board: its place and the number of players, the asker counted as one.
+ * For a guest, whose score is never stored. Null when the server cannot say.
+ */
+export async function fetchDailyPlace(day: number, score: number, secs: number): Promise<{ place: number; players: number } | null> {
+  const { data, error } = await (await client()).rpc('daily_place', { p_day: day, p_score: score, p_secs: secs });
+  if (error) return null;
+  const row = (data as Array<{ place: unknown; players: unknown }> | null)?.[0];
+  const place = Number(row?.place);
+  const players = Number(row?.players);
+  return Number.isInteger(place) && Number.isInteger(players) ? { place, players } : null;
+}
+
 /** Finished dailies in this browser, newest first. */
 export function localDailies(limit = 60): Array<{ day_no: number; s: SavedSession }> {
   const out: Array<{ day_no: number; s: SavedSession }> = [];

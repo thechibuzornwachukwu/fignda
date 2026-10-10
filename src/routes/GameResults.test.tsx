@@ -120,3 +120,49 @@ describe('GameResults', () => {
     expect(screen.getByRole('link', { name: 'See the leaderboard' })).toHaveAttribute('href', '/leaderboard/bible');
   });
 });
+
+describe('GameResults on a sitting', () => {
+  it('leads with the way on, which takes the one accent from Share', () => {
+    show({ next: { to: '/play/bible/3', label: 'Next passage' } });
+    const next = screen.getByRole('link', { name: 'Next passage' });
+    expect(next).toHaveAttribute('href', '/play/bible/3');
+    const actions = next.parentElement!;
+    expect(actions.firstElementChild).toBe(next);
+    const accents = [...actions.children].filter((el) => /accent/i.test(el.className));
+    expect(accents).toEqual([next]);
+    expect(screen.getByRole('button', { name: 'Share' })).toBeInTheDocument();
+  });
+
+  it('with no next sitting, Share keeps the accent', () => {
+    show();
+    expect(screen.queryByRole('link', { name: 'Next passage' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Share' }).className).toMatch(/accent/i);
+  });
+});
+
+describe('GameResults for a guest', () => {
+  it('says the plain ask, or the line it is given in its place', () => {
+    const { unmount } = render(
+      <MemoryRouter>
+        <GameResults {...base} guest />
+      </MemoryRouter>,
+    );
+    expect(screen.getByText(/You are playing as a guest/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Keep this score' })).toBeInTheDocument();
+    unmount();
+    render(
+      <MemoryRouter>
+        <GameResults {...base} guest guestLine="That score is place 14 of 60 today. Sign in to put your name on the board." />
+      </MemoryRouter>,
+    );
+    expect(screen.getByText(/place 14 of 60 today/)).toBeInTheDocument();
+    expect(screen.queryByText(/You are playing as a guest/)).toBeNull();
+    expect(screen.getByRole('link', { name: 'Keep this score' })).toBeInTheDocument();
+  });
+
+  it('a signed in player is never asked', () => {
+    show({ guestLine: 'That score is place 14 of 60 today.' });
+    expect(screen.queryByText(/place 14 of 60/)).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Keep this score' })).toBeNull();
+  });
+});

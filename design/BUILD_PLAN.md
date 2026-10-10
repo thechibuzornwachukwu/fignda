@@ -76,16 +76,7 @@ Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with 
 
 A sitting is a sentence, or 2 or 3, hiding 3 to 5 words: about a minute, and rarely longer. Short must not mean thin: every sitting ends with something won, and the whole puzzle stays as the hard one. The engine cuts the 25 puzzles into 83 sittings (`passages`, SPEC section 9). Why a minute: `INSIGHTS.html` section 5.
 
-- [ ] **Set 2c. A passage can be played.** Its own screen, result, stars and clean read. Reached by link only. Passages are never ranked against whole puzzles. The result leads with one button to the next sitting: a visit is several sittings, so the next one is one tap away and never starts by itself.
 - [ ] **Set 2d. Passages on the path.** Each passage is a clue, the whole puzzle is the last clue of its case, with its board and scores as they are. A whole-puzzle score from before shows its passages as done. A case shows how many clues are left, never how many minutes. A room plays the whole puzzle. The daily is not cut.
-
-### 2g. Guests and accounts
-
-Play first stays. What changes is when we ask: today a guest is asked once, after the first result, before there is anything worth keeping. The evidence and the reasoning are in `INSIGHTS.html` section 6. Nothing here locks a guest out or takes progress away.
-
-- [ ] **Set 2g1. Guest funnel in numbers.** New profiles a day against games started a day, from the database. Before anything changes, so a change can be judged.
-- [ ] **Set 2g2. A guest's place.** After a guest's first daily: "You would be 14th of 60 today" with the sign in link. The place comes from the server, from the guest's own score.
-- [ ] **Set 2g3. The run lives here.** At a run of 3 dailies, one line that the run is kept in this browser only and sign in keeps it anywhere. Said once.
 
 ### 3. Cases
 
@@ -188,5 +179,7 @@ Play with no account, and sponsors get numbers, never people.
 - Machine-written puzzles stop for the day when the free limits run out.
 - The avatar on the waiting screen bobs and does not blink.
 - Stars, shelf counts and personal records are kept in the browser, from 9 Oct 2026 on.
+- A sitting is played and scored in the browser only: its stars and result are not on the account, and it earns no points until cases are on the server (set 3e).
+- A guest's place on today's board is worked out from a score the browser sent, so it is a guide, never a rank.
 - An unfinished puzzle is kept in the browser it was played in, not on the account: a second device starts clean. Safari clears a site's stored data after 7 days without a visit, so a guest there can lose a kept game, a run and their stars.
 - The sponsor report's games and shares are counted in the browser from 10 Oct 2026, guests included, and are not checked by replay: anyone can push one up, 240 an hour per address. A deleted account leaves them and comes out of the signed in players.

@@ -1,5 +1,5 @@
 // Save and resume (SPEC section 5). A game left unfinished carries on where it stopped, and its clock counts
-// time on the puzzle, not time away. The clock rule is for every game played alone, the daily included.
+// time on the puzzle, not time away. A finished game keeps its result on screen until `Play again`. The clock rule is for every game played alone, the daily included.
 // The store here is for puzzles that are not the daily, which keeps its own (`gazecraft-daily-N`).
 
 import { storage } from '../lib/storage';
@@ -38,20 +38,20 @@ export function returned<T extends SavedSession>(s: T, now: number): T {
   return withoutAway(rest as T, now - leftAt, now);
 }
 
-/** An unfinished game, or null for anything else that was stored. */
+/** A stored game, or null for anything else that was stored. */
 function read(key: string): SavedSession | null {
   const s = storage.getJSON<Partial<SavedSession> | null>(key);
   if (!s || typeof s !== 'object' || Array.isArray(s)) return null;
-  if (!isTime(s.startAt) || s.endAt != null || !Array.isArray(s.found)) return null;
+  if (!isTime(s.startAt) || (s.endAt != null && !isTime(s.endAt)) || !Array.isArray(s.found)) return null;
   if (!s.found.every((f) => f && typeof f.key === 'string' && Array.isArray(f.span))) return null;
   if (s.leftAt != null && !isTime(s.leftAt)) return null;
   return s as SavedSession;
 }
 
-/** When the player was last on it. */
-const lastOn = (s: SavedSession) => s.leftAt ?? s.startAt;
+/** When the player was last on it. A finished game has nothing left to lose but a result, so it counts as oldest. */
+const lastOn = (s: SavedSession) => (s.endAt != null ? Number.MIN_SAFE_INTEGER + s.endAt : (s.leftAt ?? s.startAt));
 
-/** Remove the game left longest ago, never `keep`. False when there is nothing left to remove. */
+/** Remove a finished game, else the one left longest ago. Never `keep`. False when there is nothing left to remove. */
 function dropOldest(keep: string): boolean {
   let oldest: { key: string; at: number } | null = null;
   for (const key of storage.keys(PREFIX)) {
@@ -66,13 +66,13 @@ function dropOldest(keep: string): boolean {
   return true;
 }
 
-/** The game left unfinished on this puzzle, its clock where it stopped. Null when there is none. */
+/** The game kept for this puzzle: unfinished with its clock where it stopped, or finished with its result. Null when there is none. */
 export function loadResume(id: string, now: number): SavedSession | null {
   const s = read(PREFIX + id);
   return s ? returned(s, now) : null;
 }
 
-/** Keep an unfinished game. With `leftAt` when the player is leaving it. */
+/** Keep a game. With `leftAt` when the player is leaving one that is unfinished. */
 export function saveResume(id: string, s: SavedSession): void {
   const key = PREFIX + id;
   const isNew = storage.get(key) == null;

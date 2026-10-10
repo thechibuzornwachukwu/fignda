@@ -112,14 +112,48 @@ describe('useGameSession save and resume', () => {
     expect(r).toMatchObject({ ok: true, found: spans.length, secs, clean: true });
   });
 
-  it('a finished game is not kept: the next visit starts clean', () => {
-    const first = open();
+  it('a finished game keeps its result on the next visit, until "Play again"', () => {
+    const onStart = vi.fn();
+    const first = open({ resumeId: 'bnote', onStart });
+    vi.advanceTimersByTime(12_000);
     act(() => first.result.current.pick(...spans[0]!));
     act(() => first.result.current.finish());
+    const ended = first.result.current.s;
     first.unmount();
-    expect(localStorage.getItem(KEY)).toBeNull();
-    const s = open().result.current.s;
-    expect(s).toMatchObject({ found: [], endAt: null });
+    vi.advanceTimersByTime(2 * 24 * 60 * MIN);
+
+    const again = open({ resumeId: 'bnote', onStart });
+    expect(again.result.current.finished).toBe(true);
+    expect(again.result.current.s).toMatchObject({ found: ended.found, endAt: ended.endAt, startAt: ended.startAt, resultTitle: ended.resultTitle });
+    expect(secondsOf(again.result.current.s, Date.now())).toBe(12);
+    // Opening a result again is not a new game, and says nothing.
+    expect(onStart).toHaveBeenCalledTimes(1);
+    expect(again.result.current.s.msg).toBe('');
+
+    act(() => again.result.current.replay());
+    expect(again.result.current.s).toMatchObject({ found: [], endAt: null });
+    expect(onStart).toHaveBeenCalledTimes(2);
+    again.unmount();
+    expect(open().result.current.finished).toBe(false);
+  });
+
+  it('a finished play is marked as sent once, and the mark is kept with the result', () => {
+    const first = open();
+    act(() => first.result.current.pick(...spans[0]!));
+    // Nothing to mark while the game is still on.
+    act(() => first.result.current.markSent());
+    expect(first.result.current.s.sent).toBeUndefined();
+    act(() => first.result.current.finish());
+    act(() => first.result.current.markSent());
+    const marked = first.result.current.s;
+    act(() => first.result.current.markSent());
+    expect(first.result.current.s).toBe(marked);
+    first.unmount();
+    expect(open().result.current.s.sent).toBe(true);
+    // A new game has not been sent.
+    const again = open();
+    act(() => again.result.current.replay());
+    expect(again.result.current.s.sent).toBeUndefined();
   });
 
   it('time away after the end changes nothing', () => {

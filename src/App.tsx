@@ -14,6 +14,7 @@ import styles from './App.module.css';
 // Landing loads first and alone; every other screen is fetched when visited.
 const Games = lazy(() => import('./routes/Games').then((m) => ({ default: m.Games })));
 const GameById = lazy(() => import('./routes/Game').then((m) => ({ default: m.GameById })));
+const PassageById = lazy(() => import('./routes/Game').then((m) => ({ default: m.PassageById })));
 const DailyGame = lazy(() => import('./routes/Game').then((m) => ({ default: m.DailyGame })));
 const GameByCode = lazy(() => import('./routes/Game').then((m) => ({ default: m.GameByCode })));
 const SignIn = lazy(() => import('./routes/SignIn').then((m) => ({ default: m.SignIn })));
@@ -78,6 +79,7 @@ export function App() {
         <Route index element={<Landing />} />
         <Route path="play" element={<Games />} />
         <Route path="play/:id" element={<GameById />} />
+        <Route path="play/:id/:n" element={<PassageById />} />
         <Route path="d/:n" element={<DailyGame />} />
         <Route path="d/:n/answers" element={<Answers />} />
         <Route

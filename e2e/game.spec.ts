@@ -85,13 +85,53 @@ test.describe('desktop', () => {
     await page.goto('/play/bnote');
     await expect(page.locator('[data-state="found"]')).toHaveCount(0);
 
-    // A finished game is not kept.
+    // A finished game keeps its result, and the way to share it, until "Play again".
     await page.goto('/play/bible');
     await page.getByRole('button', { name: "I'm done" }).click();
     await expect(page.getByRole('button', { name: 'Play again' })).toBeVisible();
     await page.reload();
+    await expect(page.getByRole('button', { name: 'Share' })).toBeVisible();
+    await expect(page.getByText('1 / 30').first()).toBeVisible();
+    await page.getByRole('button', { name: 'Play again' }).click();
     await expect(page.getByText('0 / 30').first()).toBeVisible();
     await expect(page.locator('[data-state="found"]')).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByText('0 / 30').first()).toBeVisible();
+  });
+
+  test('a sitting: one passage of a puzzle, played alone, with the next one a tap away', async ({ page }) => {
+    await page.goto('/play/bible/2');
+    await expect(page.getByText(/Passage 2 of \d+/)).toBeVisible();
+    const title = await page.getByRole('heading', { level: 1 }).textContent();
+    expect(title).toMatch(/^Find [3-6] books of the Bible$/);
+    // It is a few sentences, not the whole paragraph.
+    expect(await page.locator('[data-li]').count()).toBeLessThan(400);
+    await expect(page.getByRole('button', { name: 'Play together' })).toHaveCount(0);
+
+    await page.getByRole('button', { name: "I'm done" }).click();
+    const next = page.getByRole('link', { name: 'Next passage' });
+    await expect(next).toBeVisible();
+    await expect(page.getByRole('link', { name: 'See the leaderboard' })).toHaveCount(0);
+    await next.click();
+    await expect(page).toHaveURL(/\/play\/bible\/3$/);
+    await expect(page.getByText(/Passage 3 of \d+/)).toBeVisible();
+    // The passage just left kept its result. The whole puzzle is another game, untouched.
+    await page.goto('/play/bible/2');
+    await expect(page.getByRole('link', { name: 'Next passage' })).toBeVisible();
+    await page.goto('/play/bible');
+    await expect(page.getByText('0 / 30').first()).toBeVisible();
+  });
+
+  test('the last sitting leads to the whole puzzle, and a passage that does not exist opens the puzzle', async ({ page }) => {
+    await page.goto('/play/bnote/2');
+    await expect(page.getByText('Passage 2 of 2')).toBeVisible();
+    await page.getByRole('button', { name: "I'm done" }).click();
+    await page.getByRole('link', { name: 'Play the whole puzzle' }).click();
+    await expect(page).toHaveURL(/\/play\/bnote$/);
+    await page.goto('/play/bnote/9');
+    await expect(page).toHaveURL(/\/play\/bnote$/);
+    await page.goto('/play/no-such-game/1');
+    await expect(page).toHaveURL(/\/play$/);
   });
 
   test('keyboard: Shift+arrows select, Enter checks', async ({ page }) => {

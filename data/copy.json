@@ -63,6 +63,14 @@
     "Same letter. One starts there",
     "Still marked. Start at the hand"
   ],
+  "guestPlace": [
+    "That score is place {n} of {m} today. Sign in to put your name on the board.",
+    "Place {n} of {m} today, as a guest. Sign in and the board shows your name."
+  ],
+  "guestRun": [
+    "A run of {n} days, kept in this browser only. Sign in and it goes where you go.",
+    "{n} days in a row. The run lives in this browser. Sign in to keep it on any device."
+  ],
   "resumed": [
     "Back where you left it",
     "Your finds are still here",

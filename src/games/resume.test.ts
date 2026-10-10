@@ -151,13 +151,33 @@ describe('the kept game', () => {
     ['a game with no finds list', '{"startAt":1,"endAt":null,"found":"amos"}'],
     ['a find that is not one', '{"startAt":1,"endAt":null,"found":[null]}'],
     ['a leaving time that is not one', JSON.stringify({ ...game(), leftAt: 'noon' })],
-    ['a finished game', JSON.stringify({ ...game(), endAt: 1_050_000 })],
+    ['an end that is not a time', JSON.stringify({ ...game(), endAt: 'done' })],
   ])('%s in storage is no saved game', (_name, raw) => {
     localStorage.setItem(key('bible'), raw);
     expect(loadResume('bible', 2_000_000)).toBeNull();
     // And saving over it works.
     saveResume('bible', game());
     expect(loadResume('bible', 2_000_000)).not.toBeNull();
+  });
+
+  it('a finished game is kept with its result, as it ended', () => {
+    const done = { ...game(), endAt: 1_050_000, resultTitle: 'Sharp', sent: true };
+    saveResume('bible', done);
+    expect(loadResume('bible', 9_000_000)).toEqual(done);
+  });
+
+  it('when room is needed a finished game goes before any game still being played', () => {
+    saveResume('finished', { ...game(5_000_000), endAt: 5_050_000 });
+    saveResume('old', left(1_000_000, 10));
+    const real = Storage.prototype.setItem;
+    let refusals = 1;
+    vi.spyOn(Storage.prototype, 'setItem').mockImplementation(function (this: Storage, k: string, v: string) {
+      if (k === key('bible') && refusals-- > 0) throw new DOMException('full', 'QuotaExceededError');
+      real.call(this, k, v);
+    });
+    saveResume('bible', game());
+    expect(loadResume('finished', 9_000_000)).toBeNull();
+    expect(loadResume('old', 9_000_000)).not.toBeNull();
   });
 
   it('one bad record does not lose the good ones', () => {

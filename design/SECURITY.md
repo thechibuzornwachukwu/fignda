@@ -46,6 +46,7 @@ Risks: leaked keys, faked scores, AI endpoint abuse, injected text in shared con
 - The client logs real picks only. A word picked twice is not sent, so an honest play is never refused for it.
 - Room plays: each player's own log is replayed and only the words in it are stored, with the time of each. The start is worked out from the server clock. A word two players both found is credited once, to the earlier find, when the board is read. Room plays never write to `plays`.
 - Word stats for today's daily are returned only to players who have a play for today.
+- `daily_place(day, score, secs)` tells anyone where a score would stand on a daily board: 2 numbers, a place and a count of players. It reads checked plays only and returns no handle, score or row. Daily scores are already public on the board, so it gives nothing away. A guest's score is never stored by it.
 - Clean read (every word, no wrong picks, no hints) is worked out by the same replay and stored on the play. It adds nothing to the score. A room play is never one. On today's daily it is masked in public, like the total, since it would give the count away.
 
 ## AI generation `/api/generate`
@@ -133,6 +134,7 @@ Dependabot. `npm audit --audit-level=high`. Lockfile committed.
 - 6th guest generate in an hour returns 429.
 - Two runs of one job make one model call and one puzzle.
 - A third report hides a puzzle at once; a non-owner gets 404 from every owner endpoint.
+- `daily_place()` returns a place and a count and nothing about any player.
 - No client can read `puzzle_counts` or call `sponsor_report()` or `count_event()`.
 - A puzzle the safety check fails is never saved; an unchecked one never becomes a daily candidate.
 - Zero CSP violations on every route.

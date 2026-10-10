@@ -19,9 +19,13 @@ type Props = {
   onShare: () => void;
   /** Copies or shares the text result. Resolves to the line to show ("Copied."). */
   onText: () => Promise<string>;
+  /** A sitting: where the next one is. It leads the actions and takes the accent from Share. */
+  next?: { to: string; label: string };
   /** Where this game's board lives, if it has one. */
   boardPath?: string;
   guest: boolean;
+  /** For a guest, in place of the plain ask: their place today, or where their run lives. */
+  guestLine?: string;
   /** Your run of dailies, said once after a daily. */
   streak?: string;
   /** "Only 8% found Habakkuk." */
@@ -47,7 +51,7 @@ type Props = {
 /** Lines worth a paragraph: no blanks, none twice. */
 const lines = (l?: readonly string[]) => [...new Set((l ?? []).filter((x) => typeof x === 'string' && x.trim() !== ''))];
 
-export function GameResults({ title, line, score, found, total, secs, canReplay, onReplay, onShare, onText, boardPath, guest, streak, rare, stars, starsUp, skills, records, day, done, sponsor, children }: Props) {
+export function GameResults({ title, line, score, found, total, secs, canReplay, onReplay, onShare, onText, next, boardPath, guest, guestLine, streak, rare, stars, starsUp, skills, records, day, done, sponsor, children }: Props) {
   const { pathname } = useLocation();
   const [note, setNote] = useState('');
   const earned = clampStars(stars);
@@ -120,6 +124,12 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
           </div>
         </dl>
         <div className={styles.actions}>
+          {next && (
+            <Button variant="accent" to={next.to}>
+              {next.label}
+              <Icon icon={ArrowRight} size={16} />
+            </Button>
+          )}
           {canReplay && (
             <Button variant="secondary" onClick={onReplay}>
               Play again
@@ -131,9 +141,10 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
           <Button variant="secondary" onClick={() => void onText().then(setNote)}>
             Copy result
           </Button>
-          <Button variant="accent" onClick={onShare}>
+          {/* One accent a screen: on a sitting it is the way on, so Share steps back. */}
+          <Button variant={next ? 'secondary' : 'accent'} onClick={onShare}>
             Share
-            <Icon icon={ArrowRight} size={16} />
+            {!next && <Icon icon={ArrowRight} size={16} />}
           </Button>
         </div>
       </div>
@@ -144,7 +155,7 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
       {guest && (
         <div className={styles.guest}>
           <span className={styles.guestText}>
-            You are playing as a guest. Sign in and this score goes with you, with your streak and your name on shared cards.
+            {guestLine || 'You are playing as a guest. Sign in and this score goes with you, with your streak and your name on shared cards.'}
           </span>
           {/* The first time sign in is offered (SPEC section 6, The first minute). /welcome sends an existing player straight on. */}
           <Link className={styles.signin} to={`/welcome?from=${encodeURIComponent(pathname)}`}>

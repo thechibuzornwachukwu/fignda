@@ -4,6 +4,7 @@ import raw from '../../data/games.json';
 import rawHolidays from '../../data/holidays.json';
 import { dailyGameId, holidayOn, type Calendar, type Holiday } from '../engine/daily';
 import { buildHiddenWords, type Difficulty, type HiddenWordsPuzzle } from '../engine/hiddenWords';
+import { passages } from '../engine/passages';
 import { sponsorOf, type Sponsor } from '../engine/sponsor';
 
 export type GameType = 'hidden-words';
@@ -45,6 +46,29 @@ export function getGameDef(id: string): GameDef | undefined {
 /** Who the puzzle is with, when its `sponsor` field passes the rule. Catalogue puzzles only: a player-made one never carries it. */
 export const sponsorFor = (def: Pick<GameDef, 'id' | 'sponsor'>): Sponsor | undefined =>
   getGameDef(def.id) ? sponsorOf(def.sponsor) : undefined;
+
+/** One sitting of a catalogue puzzle: passage `n` of `count`, counted from 1. */
+export type Part = { n: number; count: number };
+
+const parts = new Map<string, Array<{ def: GameDef; part: Part }>>();
+
+/**
+ * Passage `n` of a puzzle as a game of its own: the same puzzle with the passage as its text. Memoised, so the
+ * same object comes back each time. None when the puzzle is not cut, or has no such passage.
+ */
+export function getPassage(id: string, n: number): { def: GameDef; part: Part } | undefined {
+  let list = parts.get(id);
+  if (!list) {
+    const def = getGameDef(id);
+    const puzzle = getPuzzle(id);
+    if (!def || !puzzle) return undefined;
+    const cut = passages(puzzle);
+    // One passage is the whole puzzle: there is nothing to play apart from it.
+    list = cut.length < 2 ? [] : cut.map((p, i) => ({ def: { ...def, text: p.text }, part: { n: i + 1, count: cut.length } }));
+    parts.set(id, list);
+  }
+  return Number.isInteger(n) ? list[n - 1] : undefined;
+}
 
 const built = new Map<string, HiddenWordsPuzzle<GameDef>>();
 

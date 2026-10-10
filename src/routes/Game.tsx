@@ -8,14 +8,15 @@ import { Ring } from '../components/Ring';
 import { TextLink } from '../components/TextLink';
 import { WordList, type WordListHandle, type WordRow } from '../components/WordList';
 import { dayNo } from '../engine/daily';
-import { dailyPool, getGameDef, getPuzzle, sponsorFor, type GameDef } from '../games/catalog';
+import { dailyPool, getGameDef, getPassage, getPuzzle, sponsorFor, type GameDef, type Part } from '../games/catalog';
 import { dailyInfo, dailyLabel } from '../games/daily';
 import { registry } from '../games/registry';
 import { dayHidLine, playFacts, rareLine, recordLines, skillLines, starsUpLine, todayHoldsLine } from '../games/resultLines';
 import { isCleanRead, scoreOf, secondsOf, useGameSession, type Session } from '../games/session';
 import { starsFor } from '../engine/stars';
 import { dayProfile } from '../engine/variableDay';
-import { countEvent, fetchCustomGame, fetchWordStats, mergeGuestDailies, submitPlay } from '../lib/api';
+import { countEvent, fetchCustomGame, fetchDailyPlace, fetchWordStats, mergeGuestDailies, submitPlay } from '../lib/api';
+import { guestAsk, markRunTold, runTold } from '../lib/guestAsk';
 import { rarestFound } from '../lib/wordStats';
 import { useAuth } from '../lib/auth';
 import { useCoarsePointer } from '../lib/media';
@@ -46,6 +47,15 @@ export function GameById() {
   const def = getGameDef(id);
   if (!def) return <Navigate to="/play" replace />;
   return <GameScreen key={id} def={def} />;
+}
+
+/** One sitting of a catalogue puzzle: `/play/bible/2`. A puzzle that is not cut, or has no such passage, opens whole. */
+export function PassageById() {
+  const { id = '', n = '' } = useParams();
+  if (!getGameDef(id)) return <Navigate to="/play" replace />;
+  const p = /^\d+$/.test(n) ? getPassage(id, Number(n)) : undefined;
+  if (!p) return <Navigate to={`/play/${id}`} replace />;
+  return <GameScreen key={`${id}~${p.part.n}`} def={p.def} part={p.part} />;
 }
 
 export function DailyGame() {
@@ -92,14 +102,16 @@ export function GameByCode() {
 /** A daily says how many are left only from here down. */
 const NEAR = 3;
 
-function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
+function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** A sitting: `def` is the puzzle with one passage as its text. */ part?: Part }) {
   const mod = registry[def.type];
   const puzzle = useMemo(() => mod.build(def), [mod, def]);
   const listRef = useRef<WordListHandle>(null);
   const auth = useAuth();
   const [params] = useSearchParams();
   const navigate = useNavigate();
-  const roomCode = dailyN == null ? (params.get('room') ?? '') : '';
+  // What this browser keeps this game under: stars and the kept game. A sitting is its own game.
+  const gameKey = part ? `${def.id}~${part.n}` : def.id;
+  const roomCode = dailyN == null && !part ? (params.get('room') ?? '') : '';
   const inRoom = auth.enabled && ROOM_RE.test(roomCode);
   const roomRef = useRef<Room | null>(null);
   const [peers, setPeers] = useState<Peer[]>([]);
@@ -111,7 +123,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
     dailyN,
     // Leaving keeps the game. A room game is kept under its room, so a dropped connection or a reload loses
     // nothing and your finds stay yours; its clock is the team's and runs on.
-    resumeId: dailyN != null ? undefined : inRoom ? `room-${roomCode}-${def.id}` : def.id,
+    resumeId: dailyN != null ? undefined : inRoom ? `room-${roomCode}-${def.id}` : gameKey,
     sharedClock: inRoom,
     beforeHit: (k) => listRef.current?.capture(k),
     onHit: (a, b) => roomRef.current?.sendFind(a, b),
@@ -124,7 +136,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
   const signedIn = !!auth.profile;
   const [sharing, setSharing] = useState(false);
   const vs = params.get('vs');
-  const challenge = auth.enabled && vs && vs !== auth.profile?.handle ? vs : null;
+  const challenge = auth.enabled && !part && vs && vs !== auth.profile?.handle ? vs : null;
 
   // Your line on the room scoreboard: your own finds (not teammates'), seconds per word, hints.
   const myFinds = s.found.filter((f) => !f.by).length;
@@ -192,8 +204,13 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
   // Set once the server has answered for this play, so the word stats can include it.
   const [answered, setAnswered] = useState(false);
   useEffect(() => {
-    if (!finished || !signedIn || s.endAt == null || sent.current === s.startAt) return;
+    // A sitting is never sent: the server ranks whole puzzles, and a passage is not one.
+    if (part || !finished || !signedIn || s.endAt == null || sent.current === s.startAt) return;
+    // A result opened again was sent when it was earned. The daily is asked again on purpose: the server
+    // answers "already played", and that answer is what lets the word stats load.
+    if (!daily && s.sent) return;
     sent.current = s.startAt;
+    if (!daily) gRef.current.markSent();
     const isToday = daily && dailyN === dayNo();
     if (daily && !isToday) {
       mergeGuestDailies().catch(() => {});
@@ -210,7 +227,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
       if (daily && !r.ok && r.status !== 409) mergeGuestDailies().catch(() => {});
       setAnswered(true);
     });
-  }, [finished, signedIn, inRoom, roomCode, s.endAt, s.startAt, s.log, daily, dailyN, def.id]);
+  }, [part, finished, signedIn, inRoom, roomCode, s.endAt, s.startAt, s.log, s.sent, daily, dailyN, def.id]);
 
   const foundCount = s.found.length;
   const count = daily && !finished ? `${foundCount} found` : `${foundCount} / ${total}`;
@@ -222,14 +239,14 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
   const hideProgress = daily && !finished && !near;
 
   // Pack shelves: a catalogue puzzle played to the end with at least 1 find is finished in this browser.
-  const inCatalogue = !daily && !!getGameDef(def.id);
+  const inCatalogue = !daily && !part && !!getGameDef(def.id);
   useEffect(() => {
     if (finished && inCatalogue && foundCount > 0) markFinished(def.id);
   }, [finished, inCatalogue, foundCount, def.id]);
 
   // The moment a game ends, once: stars for a catalogue puzzle played alone, then personal records.
   // Both live in this browser. A finished daily opened again does not come through here.
-  const starred = inCatalogue && !inRoom;
+  const starred = (inCatalogue || !!part) && !inRoom;
   const [end, setEnd] = useState<{ at: number; starsUp: boolean; records: string[] } | null>(null);
   function onFinish(fs: Session) {
     // Counted for everyone, guests too: a game played to the end is one with at least 1 word found.
@@ -238,10 +255,11 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
     const mine = fs.found.filter((f) => !f.by);
     const cleanRead = isCleanRead(fs, total);
     const stars = starsFor({ finished: true, found: fs.found.length, total, hints: fs.hints, wrongs: fs.wrongs, byOthers: mine.length !== fs.found.length });
-    const starsUp = starred && recordStars(def.id, stars);
+    const starsUp = starred && recordStars(gameKey, stars);
     const broke = recordPlay({
       pack: daily || inCatalogue ? def.category : null,
-      cleanSecs: cleanRead ? secondsOf(fs, fs.endAt ?? Date.now()) : null,
+      // A sitting is a few words: its time is no record for the pack.
+      cleanSecs: cleanRead && !part ? secondsOf(fs, fs.endAt ?? Date.now()) : null,
       dailyFound: daily ? mine.length : null,
       longest: playFacts(puzzle, fs.found, fs.wrongs, fs.hints).longest,
     });
@@ -273,7 +291,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
   // The text result: paste it in a chat. Phones open the share sheet (WhatsApp is one tap), desktops copy.
   const sendText = async (): Promise<string> => {
     const secs = secondsOf(s, s.endAt ?? Date.now());
-    const base = shareGame(def, puzzle.difficulty, dailyN).path;
+    const base = shareGame(def, puzzle.difficulty, dailyN, part).path;
     const text = shareText({
       title: def.title,
       daily: dailyN,
@@ -282,7 +300,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
       secs,
       score: scoreOf(s, total, daily, secs),
       marks: storyMarks(s.log?.events ?? [], s.log?.hints ?? [], s.found.filter((f) => !f.by).map((f) => f.span)),
-      url: shareUrl(auth.profile ? `${base}?vs=${auth.profile.handle}` : base),
+      url: shareUrl(auth.profile && !part ? `${base}?vs=${auth.profile.handle}` : base),
     });
     if (coarse && navigator.share) {
       try {
@@ -355,6 +373,29 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
     };
   }, [daily, settled, dailyN, auth.enabled]);
 
+  // A guest after today's daily: where their score would stand, or, once, where their run lives. Picked once.
+  const guestToday = isToday && finished && !signedIn && auth.enabled;
+  const [place, setPlace] = useState<{ place: number; players: number } | null>(null);
+  useEffect(() => {
+    if (!guestToday) return;
+    let alive = true;
+    const cur = gRef.current.s;
+    const secs = secondsOf(cur, cur.endAt ?? Date.now());
+    fetchDailyPlace(dailyN!, scoreOf(cur, gRef.current.total, true, secs), secs)
+      .then((p) => alive && setPlace(p))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, [guestToday, dailyN]);
+  const [toldBefore] = useState(runTold);
+  const ask = useMemo(() => (guestToday ? guestAsk({ today: true, streak: run.streak, runTold: toldBefore, place }) : null), [guestToday, run.streak, toldBefore, place]);
+  const guestLine = useMemo(() => (ask ? copy.pick(ask.pool, ask.vars) : ''), [ask]);
+  useEffect(() => {
+    // Said once: the next result goes back to the place.
+    if (ask?.run) markRunTold();
+  }, [ask]);
+
   // A sponsored puzzle says who it is with on the result and the share card. Picked once.
   const sponsor = useMemo(() => {
     const w = sponsorFor(def);
@@ -383,9 +424,9 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
           <span className={styles.metaEnd}>
             <span className={styles.level}>
               {holiday ? `${holiday} · ` : ''}
-              {def.category} · {puzzle.difficulty}
+              {def.category} · {part ? `Passage ${part.n} of ${part.count}` : puzzle.difficulty}
             </span>
-            {auth.enabled && !daily && !inRoom && !finished && (
+            {auth.enabled && !daily && !part && !inRoom && !finished && (
               <button type="button" className={styles.together} onClick={() => navigate(`?room=${newRoomCode()}`)}>
                 <Icon icon={UsersRound} size={16} />
                 Play together
@@ -434,8 +475,10 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
           onReplay={g.replay}
           onShare={() => setSharing(true)}
           onText={sendText}
-          boardPath={auth.enabled ? (daily ? `/leaderboard?day=${dailyN}` : getGameDef(def.id) ? `/leaderboard/${def.id}${inRoom ? '?board=together' : ''}` : undefined) : undefined}
+          next={part && (part.n < part.count ? { to: `/play/${def.id}/${part.n + 1}`, label: 'Next passage' } : { to: `/play/${def.id}`, label: 'Play the whole puzzle' })}
+          boardPath={part ? undefined : auth.enabled ? (daily ? `/leaderboard?day=${dailyN}` : getGameDef(def.id) ? `/leaderboard/${def.id}${inRoom ? '?board=together' : ''}` : undefined) : undefined}
           guest={!signedIn}
+          guestLine={guestLine}
           streak={streakLine}
           rare={rare}
           stars={stars}
@@ -498,7 +541,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
           open={sharing}
           onClose={() => setSharing(false)}
           onShared={() => countEvent(def.id, 'share')}
-          game={{ ...shareGame(def, puzzle.difficulty, dailyN), vs: auth.profile?.handle, sponsor }}
+          game={{ ...shareGame(def, puzzle.difficulty, dailyN, part), vs: part ? undefined : auth.profile?.handle, sponsor }}
           result={{
             answers: puzzle.answers.map((a) => {
               const f = s.found.find((x) => x.key === a.key);
@@ -528,7 +571,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
 }
 
 /** What the share sheet needs to know about this game. */
-function shareGame(def: GameDef, difficulty: string, dailyN?: number): ShareGame {
+function shareGame(def: GameDef, difficulty: string, dailyN?: number, part?: Part): ShareGame {
   const code = def.id.startsWith('c-') ? def.id.slice(2).toUpperCase() : undefined;
   return {
     id: def.id,
@@ -538,6 +581,6 @@ function shareGame(def: GameDef, difficulty: string, dailyN?: number): ShareGame
     difficulty,
     text: def.text,
     daily: dailyN ? { n: dailyN, date: dailyDate(dailyN) } : undefined,
-    path: sharePath({ id: def.id, daily: dailyN, code }),
+    path: part ? `/play/${def.id}/${part.n}` : sharePath({ id: def.id, daily: dailyN, code }),
   };
 }
