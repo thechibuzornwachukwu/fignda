@@ -104,9 +104,9 @@ describe('Header', () => {
   it('in the app: app links, account link and theme toggle, no landing anchors', () => {
     at('/play');
     const nav = screen.getByRole('navigation', { name: 'Main' });
-    expect(nav).toHaveTextContent('GamesLeadersPlayers');
+    expect(nav).toHaveTextContent('CasesRanksSquad');
     expect(nav).not.toHaveTextContent('How it works');
-    expect(screen.getByRole('link', { name: 'Games' }).className).toContain('active');
+    expect(screen.getByRole('link', { name: 'Cases' }).className).toContain('active');
     expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/signin?next=%2Fplay');
     expect(screen.getByRole('button', { name: /Switch to/ })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Play' })).toBeNull();

@@ -178,7 +178,7 @@ export function Leaderboard() {
 
   return (
     <div className={styles.page}>
-      <PageHeader title="Leaders" action={me && (hasCircle || open.circles) ? <TextLink to="/circles">Your circles</TextLink> : undefined} />
+      <PageHeader title="Ranks" action={me && (hasCircle || open.circles) ? <TextLink to="/circles">Your circles</TextLink> : undefined} />
 
       <section className={styles.section} aria-labelledby="daily-title">
         <div className={styles.head}>

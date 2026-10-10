@@ -31,7 +31,7 @@ test('friend streak: a link starts it in one tap, and either side can end it', a
   await newPlayer(page, 'Ada');
   // A new player has not unlocked friend streaks yet (3 dailies). The direct link always works.
   await page.goto('/players');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Players');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Squad');
   await expect(page.getByRole('region', { name: 'Friend streaks' })).toHaveCount(0);
   await page.goto('/players#friend-streaks');
   const mine = page.getByRole('region', { name: 'Friend streaks' });
@@ -100,7 +100,7 @@ test('make a puzzle: every word is checked as you type', async ({ page }) => {
   await newPlayer(page, 'Maker');
   // The link on the games screen appears after 5 plays. The address always works.
   await page.goto('/play');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Games');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Cases');
   await expect(page.getByRole('link', { name: 'Make a puzzle' })).toHaveCount(0);
   await page.goto('/make');
   await expect(page).toHaveURL(/\/make$/);

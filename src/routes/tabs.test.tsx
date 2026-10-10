@@ -111,7 +111,7 @@ beforeEach(() => emptyWorld());
 describe('Games', () => {
   it('a first visit shows the daily and the games list only', async () => {
     open('/play');
-    expect(title()).toBe('Games');
+    expect(title()).toBe('Cases');
     expect(screen.getByRole('link', { name: /Daily #\d+/ })).toBeInTheDocument();
     expect(within(screen.getByRole('region', { name: 'All games' })).getAllByRole('link').length).toBeGreaterThan(0);
     // Give the any-topic check time to answer: it still must not show.
@@ -187,7 +187,7 @@ describe('Games', () => {
 describe('Leaders', () => {
   it('a guest sees everyone, no switch, and a line when nobody is ranked', async () => {
     open('/leaderboard');
-    expect(title()).toBe('Leaders');
+    expect(title()).toBe('Ranks');
     expect(await screen.findByText(/No verified scores yet today\./)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Be the first' })).toBeInTheDocument();
     expect(screen.queryByRole('radiogroup')).toBeNull();
@@ -280,7 +280,7 @@ describe('Leaders', () => {
 describe('Players', () => {
   it('a guest in an empty place: one line per list, no lone heading, and the way to sign in', async () => {
     open('/players');
-    expect(title()).toBe('Players');
+    expect(title()).toBe('Squad');
     expect(await screen.findByText('Nobody else has joined yet. Invite a friend and they will show up here.')).toBeInTheDocument();
     expect(await screen.findByText("No streaks yet. Play today's daily to start one.")).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/signin?next=%2Fplayers');

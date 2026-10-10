@@ -30,15 +30,15 @@ async function clickPair(page: Page, a: number, b: number) {
 test.describe('phone tab bar', () => {
   test.use({ viewport: { width: 375, height: 740 }, hasTouch: true, isMobile: true });
 
-  test('app pages get Games, Leaders, Daily, Players, Sign in; landing and puzzles do not', async ({ page }) => {
+  test('app pages get Cases, Ranks, Today, Squad, Sign in; landing and puzzles do not', async ({ page }) => {
     await page.goto('/play');
     const tabs = page.getByRole('navigation', { name: 'Tabs' });
     await expect(tabs).toBeVisible();
-    await expect(tabs.getByRole('link')).toHaveText(['Games', 'Leaders', 'Daily', 'Players', 'Sign in']);
+    await expect(tabs.getByRole('link')).toHaveText(['Cases', 'Ranks', 'Today', 'Squad', 'Sign in']);
     await expect(tabs.getByRole('link', { name: "Play today's daily" })).toHaveAttribute('href', /^\/d\/\d+$/);
-    await expect(tabs.getByRole('link', { name: 'Games' })).toHaveAttribute('aria-current', 'page');
+    await expect(tabs.getByRole('link', { name: 'Cases' })).toHaveAttribute('aria-current', 'page');
     await expect(page.getByRole('navigation', { name: 'Main' })).toBeHidden();
-    await tabs.getByRole('link', { name: 'Leaders' }).click();
+    await tabs.getByRole('link', { name: 'Ranks' }).click();
     await expect(page).toHaveURL(/\/leaderboard$/);
     await page.goto('/');
     await expect(page.getByRole('navigation', { name: 'Tabs' })).toHaveCount(0);

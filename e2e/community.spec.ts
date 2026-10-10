@@ -8,7 +8,7 @@ test('players page: search by handle, wildcards find nothing, lists render', asy
   await other.close();
 
   await page.goto('/players');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Players');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Squad');
   // One section leads. The 4 top lists are one section with a switch.
   await expect(page.getByRole('region', { name: 'People to follow' })).toBeVisible();
   const top = page.getByRole('region', { name: 'Top players' });

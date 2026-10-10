@@ -1,10 +1,12 @@
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { Check, Gamepad2, Play, Trophy, UserRound, Users, type LucideIcon } from 'lucide-react';
+import type { ReactNode } from 'react';
+import { Check, FolderSearch, Search, Trophy, UserRound, Users } from 'lucide-react';
 import { dayNo } from '../engine/daily';
 import { loadDaily } from '../games/daily';
 import { isFinished } from '../games/session';
 import { useAuth } from '../lib/auth';
 import { hasTabBar } from '../lib/routes';
+import { Avatar } from './Avatar';
 import { Icon } from './Icon';
 import styles from './TabBar.module.css';
 
@@ -24,21 +26,22 @@ export function TabBar() {
   const done = !!saved && isFinished(saved);
   return (
     <nav className={styles.bar} aria-label="Tabs">
-      <Tab to="/play" icon={Gamepad2} label="Games" />
-      <Tab to="/leaderboard" icon={Trophy} label="Leaders" />
+      <Tab to="/play" icon={<Icon icon={FolderSearch} size={20} />} label="Cases" />
+      <Tab to="/leaderboard" icon={<Icon icon={Trophy} size={20} />} label="Ranks" />
       <Link to={`/d/${n}`} className={styles.play} data-done={done || undefined} aria-label={done ? "Today's daily, done" : "Play today's daily"}>
         <span className={styles.disc}>
-          <Icon icon={done ? Check : Play} size="em" />
+          <Icon icon={done ? Check : Search} size="em" />
         </span>
-        <span className={styles.label}>Daily</span>
+        <span className={styles.label}>Today</span>
       </Link>
-      <Tab to="/players" icon={Users} label="Players" />
-      <Tab to={you} icon={UserRound} label={profile ? 'You' : 'Sign in'} active={onYou} />
+      <Tab to="/players" icon={<Icon icon={Users} size={20} />} label="Squad" />
+      {/* Signed in, the tab is the player's own character. */}
+      <Tab to={you} icon={profile ? <Avatar handle={profile.handle} size={24} /> : <Icon icon={UserRound} size={20} />} label={profile ? 'You' : 'Sign in'} active={onYou} />
     </nav>
   );
 }
 
-function Tab({ to, icon, label, active }: { to: string; icon: LucideIcon; label: string; active?: boolean }) {
+function Tab({ to, icon, label, active }: { to: string; icon: ReactNode; label: string; active?: boolean }) {
   return (
     <NavLink
       to={to}
@@ -46,7 +49,7 @@ function Tab({ to, icon, label, active }: { to: string; icon: LucideIcon; label:
       aria-current={active ? 'page' : undefined}
     >
       <span className={styles.pill}>
-        <Icon icon={icon} size={20} />
+        {icon}
       </span>
       <span className={styles.label}>{label}</span>
     </NavLink>

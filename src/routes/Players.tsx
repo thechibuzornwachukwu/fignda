@@ -190,7 +190,7 @@ export function Players() {
 
   return (
     <div className={styles.page}>
-      <PageHeader title="Players" />
+      <PageHeader title="Squad" />
 
       <section className={styles.section} aria-label="Search players">
         <Field

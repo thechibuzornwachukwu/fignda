@@ -168,7 +168,7 @@ export function Games() {
 
   return (
     <div className={styles.screen}>
-      <PageHeader title="Games" action={auth.enabled && open.make ? <TextLink to="/make">Make a puzzle</TextLink> : undefined} />
+      <PageHeader title="Cases" action={auth.enabled && open.make ? <TextLink to="/make">Make a puzzle</TextLink> : undefined} />
 
       <div className={styles.today}>
         <DailyCard streak={run.streak} />
