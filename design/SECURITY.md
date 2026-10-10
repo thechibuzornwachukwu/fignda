@@ -11,7 +11,7 @@ Risks: leaked keys, faked scores, AI endpoint abuse, injected text in shared con
 - Supabase email OTP (6 digits, 10 min expiry, 5 tries then 15 min lock) and Google OAuth with PKCE.
 - Redirect allowlist: prod domain, Pages preview domain.
 - Refresh token rotation on. Sign out clears session and local cache.
-- Guests can play. Guest data stays local until sign in.
+- A guest plays 2 games, then is asked to sign in. The count is in the browser and is a prompt, not a control: clearing storage resets it, and nothing a guest does reaches a board. Guest data stays local until sign in.
 
 ## Database (RLS on, default deny)
 | Table | Read | Write |

@@ -4,7 +4,7 @@ import { join, relative } from 'node:path';
 // BUILD_PLAN 3a: every text style on the 4 tabs comes from src/styles/type.module.css.
 // A size written in one of these files is a one-off, and this fails on it.
 const ROOT = join(__dirname, '..', '..');
-const TABS = ['Games', 'Leaderboard', 'Players', 'Profile'].map((n) => join(ROOT, 'src', 'routes', `${n}.module.css`));
+const TABS = ['Games', 'Leaderboard', 'Players', 'Profile', 'Me'].map((n) => join(ROOT, 'src', 'routes', `${n}.module.css`));
 const FILES = [...TABS, join(ROOT, 'src', 'components', 'PageHeader.module.css')];
 
 /** Lines that set a size: `font-size`, or the `font` shorthand with a number in it. Comments do not count. */
@@ -15,7 +15,7 @@ function rawSizes(css: string): string[] {
     .flatMap((line, i) => (/(^|[\s;{])font-size\s*:/.test(line) || /(^|[\s;{])font\s*:[^;]*\d/.test(line) ? [`${i + 1}: ${line.trim()}`] : []));
 }
 
-describe('the 4 tabs take their type from type.module.css', () => {
+describe('the tabs take their type from type.module.css', () => {
   it('spots a raw size, and leaves a composed step alone', () => {
     expect(rawSizes('.a {\n  font-size: 15px;\n}')).toEqual(['2: font-size: 15px;']);
     expect(rawSizes('.a { font-size:0.45em }')).toHaveLength(1);

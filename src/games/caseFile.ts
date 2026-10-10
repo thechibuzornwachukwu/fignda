@@ -5,7 +5,7 @@ import secretsFile from '../../data/secrets.json';
 import { DISGUISE_STYLES } from '../avatar/parts/disguises';
 import { clampStars } from '../components/starsLabel';
 import { POOLS } from '../copy';
-import { clueId } from '../engine/journey';
+import { buildPath, clueId, clueStates, type Path } from '../engine/journey';
 import { caseSecrets, culpritOf, pieceSlots, revealSecret, squadPieces, type Culprit, type Secret } from '../engine/secret';
 import { loadFinished } from '../lib/shelves';
 import { loadStars } from '../lib/starStore';
@@ -48,6 +48,16 @@ export type CaseFile = {
   /** The piece clue `n` gives (0 is the unmasking): its letters, and the slots they fill. */
   piece: (n: number) => { text: string; slots: number[] };
 };
+
+let path: Path | null = null;
+
+/** Where the next clue on the path is played, for this browser. Null when every case is closed. */
+export function nextClueTo(): string | null {
+  path ??= buildPath(games);
+  const standing = clueStates(path, doneClues());
+  const next = standing.clues.find((c) => c.state === 'next');
+  return next ? (next.n ? `/play/${next.puzzle}/${next.n}` : `/play/${next.puzzle}`) : null;
+}
 
 /** A room game as the squad plays it: every word anyone found, of how many, and whether the game has ended. */
 export type Squad = { found: number; total: number; finished: boolean };

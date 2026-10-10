@@ -1,7 +1,9 @@
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { useRef, type ReactNode } from 'react';
-import { Check, FolderSearch, Search, Trophy, UserRound, Users } from 'lucide-react';
+import { useMemo, useRef, type ReactNode } from 'react';
+import { Check, FolderSearch, Play, Trophy, Users } from 'lucide-react';
+import { guestAvatar } from '../avatar/guest';
 import { dayNo } from '../engine/daily';
+import { nextClueTo } from '../games/caseFile';
 import { loadDaily } from '../games/daily';
 import { isFinished } from '../games/session';
 import { useAuth } from '../lib/auth';
@@ -12,10 +14,18 @@ import { Icon } from './Icon';
 import styles from './TabBar.module.css';
 
 /**
- * Phones only: a floating dock within thumb reach. Four places, icon over label, and today's daily raised in
- * the middle, since playing it is the one thing the app is for. Desktop keeps the header links.
+ * Phones only: a floating dock within thumb reach. Visible navigation, not a hamburger (NN/g: hidden
+ * navigation is found about half as often). Desktop keeps the header links.
+ *
+ * The order follows what a player reaches for, nearest the thumb first:
+ * - Play, raised in the middle: one tap from anywhere to the next thing to play. Today's daily while it is
+ *   unplayed, then the next clue on the path, so the best spot on the screen never goes dead for the day.
+ * - Cases, first: where the game lives. People look for home in the first slot.
+ * - You, beside Play: the stage with the player's detective and partner. Making a character one's own is what
+ *   brings players back to a game like this, so it sits next to the button they press most.
+ * - Squad, then Ranks, on the far side: other people. Fewest visits, so furthest from the thumb.
+ *
  * It slides below the screen on a scroll down and back on any scroll up, as the header does.
- * Visible navigation, not a hamburger (NN/g: hidden navigation is found about half as often).
  */
 export function TabBar() {
   const { pathname } = useLocation();
@@ -23,29 +33,36 @@ export function TabBar() {
   // Out of the way while reading down, back on the first scroll up and at the end of the page.
   const ref = useRef<HTMLElement>(null);
   const tucked = useTucked(ref, pathname, true);
+  // You: the stage. Guests have one too, with their own character on the tab.
+  const starter = useMemo(() => guestAvatar(), []);
   if (!hasTabBar(pathname)) return null;
-  const you = profile ? `/u/${profile.handle}` : `/signin?next=${encodeURIComponent(pathname)}`;
-  const onYou = pathname.startsWith('/u/') || pathname === '/settings' || pathname === '/signin';
+  const onYou = pathname === '/me' || pathname.startsWith('/u/') || pathname === '/settings' || pathname === '/signin';
   const n = dayNo();
   const saved = loadDaily(n);
-  const done = !!saved && isFinished(saved);
+  const dailyDone = !!saved && isFinished(saved);
+  // After the daily, the next clue. Nothing left at all: a tick, and the way back to the cases.
+  const clue = dailyDone ? nextClueTo() : null;
+  const play = !dailyDone
+    ? { to: `/d/${n}`, name: "Play today's daily", done: false }
+    : clue
+      ? { to: clue, name: 'Play the next clue', done: false }
+      : { to: '/play', name: 'All played. See your cases', done: true };
   return (
     <nav ref={ref} className={[styles.bar, tucked && styles.tucked].filter(Boolean).join(' ')} aria-label="Tabs" data-tucked={tucked || undefined}>
       <Tab to="/play" icon={<Icon icon={FolderSearch} size={20} />} label="Cases" />
-      <Tab to="/leaderboard" icon={<Icon icon={Trophy} size={20} />} label="Ranks" />
-      <Link to={`/d/${n}`} className={styles.play} data-done={done || undefined} aria-label={done ? "Today's daily, done" : "Play today's daily"}>
+      {/* The tab is the player's own character: their design, or a guest's. */}
+      <Tab to="/me" icon={profile ? <Avatar handle={profile.handle} size={24} /> : <Avatar parts={starter} size={24} />} label="You" active={onYou} />
+      <Link to={play.to} className={styles.play} data-done={play.done || undefined} data-play={!dailyDone ? 'daily' : clue ? 'clue' : 'done'} aria-label={play.name}>
         <span className={styles.disc}>
-          <Icon icon={done ? Check : Search} size="em" />
+          <Icon icon={play.done ? Check : Play} size="em" />
         </span>
-        <span className={styles.label}>Today</span>
+        <span className={styles.label}>Play</span>
       </Link>
       <Tab to="/players" icon={<Icon icon={Users} size={20} />} label="Squad" />
-      {/* Signed in, the tab is the player's own character. */}
-      <Tab to={you} icon={profile ? <Avatar handle={profile.handle} size={24} /> : <Icon icon={UserRound} size={20} />} label={profile ? 'You' : 'Sign in'} active={onYou} />
+      <Tab to="/leaderboard" icon={<Icon icon={Trophy} size={20} />} label="Ranks" />
     </nav>
   );
 }
-
 function Tab({ to, icon, label, active }: { to: string; icon: ReactNode; label: string; active?: boolean }) {
   return (
     <NavLink

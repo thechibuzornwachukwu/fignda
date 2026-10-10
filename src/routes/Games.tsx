@@ -1,5 +1,12 @@
 import { Fragment, useEffect, useMemo } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router-dom';
+import { ChevronRight } from 'lucide-react';
+import { guestAvatar } from '../avatar/guest';
+import { Avatar } from '../components/Avatar';
+import { Icon } from '../components/Icon';
+import { Partner } from '../components/Partner';
+import { partnerName } from '../engine/partners';
+import { usePartner } from '../lib/partner';
 import { FilterTabs } from '../components/FilterTabs';
 import { GameRow } from '../components/GameRow';
 import { PageHeader } from '../components/PageHeader';
@@ -170,6 +177,8 @@ export function Games() {
     <div className={styles.screen}>
       <PageHeader title="Cases" action={auth.enabled && open.make ? <TextLink to="/make">Make a puzzle</TextLink> : undefined} />
 
+      <Crew />
+
       <div className={styles.today}>
         <DailyCard streak={run.streak} />
         <Week run={run} />
@@ -188,5 +197,27 @@ export function Games() {
         </div>
       )}
     </div>
+  );
+}
+
+/** Who is on the case: the player's detective and their partner, and the way to the stage where both are chosen. */
+function Crew() {
+  const { profile } = useAuth();
+  const partner = usePartner();
+  const starter = useMemo(() => guestAvatar(), []);
+  return (
+    <Link to="/me" className={styles.crew} data-crew>
+      <span className={styles.crewFaces}>
+        {profile ? <Avatar handle={profile.handle} size={48} /> : <Avatar parts={starter} size={48} />}
+        <Partner moment="empty" size={48} />
+      </span>
+      <span className={styles.crewText}>
+        <span className={styles.crewNames}>
+          {profile?.name ?? 'You'} and {partnerName(partner.current)}
+        </span>
+        <span className={styles.crewHint}>Change your detective, partner and gear</span>
+      </span>
+      <Icon icon={ChevronRight} size={18} />
+    </Link>
   );
 }

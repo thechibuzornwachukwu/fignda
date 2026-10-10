@@ -21,6 +21,7 @@ const SignIn = lazy(() => import('./routes/SignIn').then((m) => ({ default: m.Si
 const Account = lazy(() => import('./routes/Account').then((m) => ({ default: m.Account })));
 const Profile = lazy(() => import('./routes/Profile').then((m) => ({ default: m.Profile })));
 const Settings = lazy(() => import('./routes/Settings').then((m) => ({ default: m.Settings })));
+const Me = lazy(() => import('./routes/Me').then((m) => ({ default: m.Me })));
 const Leaderboard = lazy(() => import('./routes/Leaderboard').then((m) => ({ default: m.Leaderboard })));
 const GameLeaderboard = lazy(() => import('./routes/Leaderboard').then((m) => ({ default: m.GameLeaderboard })));
 const Players = lazy(() => import('./routes/Players').then((m) => ({ default: m.Players })));
@@ -94,6 +95,7 @@ export function App() {
         <Route path="welcome" element={<Welcome />} />
         <Route path="account" element={<Account />} />
         <Route path="u/:handle" element={<Profile />} />
+        <Route path="me" element={<Me />} />
         <Route path="settings" element={<Settings />} />
         <Route path="leaderboard" element={<Leaderboard />} />
         <Route path="leaderboard/:id" element={<GameLeaderboard />} />

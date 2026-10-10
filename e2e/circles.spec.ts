@@ -67,8 +67,8 @@ test('circles page: guests are asked to sign in, and it is accessible', async ({
 
 test('design your character: pick parts, save, and it shows as you', async ({ page }) => {
   const handle = await newPlayer(page, 'Dayo');
-  await page.goto('/settings');
-  await expect(page.getByRole('heading', { name: 'Your character' })).toBeVisible();
+  await page.goto('/me');
+  await expect(page.getByRole('region', { name: 'Your detective and your partner' })).toBeVisible();
   await page.getByRole('button', { name: 'Edit character' }).click();
   const editor = page.getByRole('dialog', { name: 'Edit your character' });
   const tab = (name: string) => editor.getByRole('tab', { name, exact: true });
@@ -149,7 +149,7 @@ test('design your character: pick parts, save, and it shows as you', async ({ pa
 
 test('detective pieces are earned: locked until a case is closed, then they can be worn and saved', async ({ page }) => {
   await newPlayer(page, 'Sola');
-  await page.goto('/settings');
+  await page.goto('/me');
   await page.getByRole('button', { name: 'Edit character' }).click();
   const editor = page.getByRole('dialog', { name: 'Edit your character' });
   await editor.getByRole('tab', { name: 'Wear', exact: true }).click();
@@ -199,19 +199,62 @@ test('partners: a guest picks one on the first screen, it shows at the end of a 
   expect(await there.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0)).toBe(true);
 });
 
-test('partners in Settings: the one with you is pressed, and the others say what opens them', async ({ page }) => {
+test('You is a stage: tap a partner or a piece of gear to try it, and one button chooses it', async ({ page }) => {
   await newPlayer(page, 'Tari');
-  await page.goto('/settings');
-  await expect(page.getByRole('heading', { name: 'Your partner' })).toBeVisible();
-  const group = page.getByRole('group', { name: 'Your partner' });
-  await expect(group.getByRole('button')).toHaveCount(3);
-  await expect(group.getByRole('button', { name: 'Detective X', exact: true })).toHaveAttribute('aria-pressed', 'true');
-  const locked = group.getByRole('button', { name: 'Detective Tobs. Locked. Reach 3,000 points.' });
-  await expect(locked).toHaveAttribute('aria-disabled', 'true');
-  await locked.click({ force: true });
-  await expect(group.getByRole('button', { name: 'Detective X', exact: true })).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.getByText('Your next partner opens at 3,000 points. You have 0.')).toBeVisible();
+  await page.goto('/me');
+  const stage = page.getByRole('region', { name: 'Your detective and your partner' });
+  await expect(stage).toContainText('Tari');
+  await expect(stage).toContainText('Detective X');
+  await expect(stage.locator('[data-stage-line]')).toHaveText('Detective X is with you.');
+
+  // A locked partner can be tried on the stage, and says what opens it.
+  const partners = page.getByRole('region', { name: 'Partners' });
+  await expect(partners.getByRole('button')).toHaveCount(3);
+  await partners.getByRole('button', { name: 'Detective Tobs. Locked. 3,000 points.' }).click();
+  await expect(stage).toContainText('Detective Tobs');
+  await expect(stage.locator('img[data-partner="dino"]')).toBeVisible();
+  await expect(stage.locator('[data-stage-line]')).toHaveText('Locked. 3,000 points to go.');
+  await expect(stage.getByRole('button', { name: /^Select / })).toHaveCount(0);
+
+  // Gear: locked pieces say how they are earned. A case closed here opens the badge, and one button wears it.
+  const gear = page.getByRole('region', { name: 'Detective gear' });
+  await expect(gear.getByRole('button')).toHaveCount(6);
+  await gear.getByRole('button', { name: 'Badge. Locked. Close 1 case.' }).click();
+  await expect(stage.locator('[data-stage-line]')).toHaveText('Locked. Close 1 case.');
+  await page.evaluate(() => localStorage.setItem('gazecraft-finished', JSON.stringify(['bnote'])));
+  await page.reload();
+  await gear.getByRole('button', { name: 'Badge. Yours.' }).click();
+  await stage.getByRole('button', { name: 'Wear the badge' }).click();
+  await expect(gear.getByRole('button', { name: 'Badge. On you.' })).toBeVisible();
+  await expect(stage.locator('[data-stage-line]')).toHaveText('Detective X is with you.');
+
+  // No sideways scroll on a phone: the rows swipe, the page does not.
+  await page.setViewportSize({ width: 360, height: 740 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   await expect(page.locator('body')).not.toContainText(/robo/i);
+  // Settings no longer holds any of this: it points here.
+  await page.goto('/settings');
+  await expect(page.getByRole('heading', { name: 'Your character' })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'You', exact: true }).first()).toBeVisible();
+});
+
+test('a guest plays 2 games, then is asked to sign in, and what they played stays open', async ({ page }) => {
+  await page.goto('/play/bnote/1');
+  await page.getByRole('button', { name: "I'm done" }).click();
+  await page.goto('/play/bnote/2');
+  await page.getByRole('button', { name: "I'm done" }).click();
+  // The result of the 2nd game is theirs to read.
+  await expect(page.locator('[aria-labelledby="results-title"]')).toBeVisible();
+  // A 3rd game asks them to sign in.
+  await page.goto('/play/bnote');
+  const wall = page.locator('[data-guest-wall]');
+  await expect(wall.getByRole('heading', { level: 1, name: 'Sign in to keep playing' })).toBeVisible();
+  await expect(wall.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/welcome?from=%2Fplay%2Fbnote');
+  await expect(page.getByRole('button', { name: "I'm done" })).toHaveCount(0);
+  // A game already played opens as before.
+  await page.goto('/play/bnote/1');
+  await expect(page.locator('[data-guest-wall]')).toHaveCount(0);
+  await expect(page.locator('[aria-labelledby="results-title"]')).toBeVisible();
 });
 
 test('copy result puts the spoiler free text on the clipboard', async ({ page, context }) => {
@@ -245,7 +288,7 @@ test.describe('designer on a phone', () => {
 
   test('the editor fills the screen, the character never leaves it, and only the choices scroll', async ({ page }) => {
     await newPlayer(page, 'Efe');
-    await page.goto('/settings');
+    await page.goto('/me');
     await page.getByRole('button', { name: 'Edit character' }).tap();
     const editor = page.getByRole('dialog', { name: 'Edit your character' });
     const hero = editor.locator('svg[width="168"]');

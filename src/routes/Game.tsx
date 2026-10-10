@@ -14,8 +14,10 @@ import { registry } from '../games/registry';
 import { dayHidLine, playFacts, rareLine, recordLines, skillLines, starsUpLine, todayHoldsLine } from '../games/resultLines';
 import { isCleanRead, scoreOf, secondsOf, useGameSession, type Session } from '../games/session';
 import { CaseClosed, CasePiece, SecretSlots } from '../components/CaseFile';
+import { GuestWall } from '../components/GuestWall';
 import { clueId } from '../engine/journey';
 import { caseFile, doneClues } from '../games/caseFile';
+import { guestBlocked, markGuestPlayed, playKey } from '../lib/guestLimit';
 import { starsFor } from '../engine/stars';
 import { dayProfile } from '../engine/variableDay';
 import { countEvent, fetchCustomGame, fetchDailyPlace, fetchWordStats, mergeGuestDailies, submitPlay } from '../lib/api';
@@ -49,7 +51,7 @@ export function GameById() {
   const { id = '' } = useParams();
   const def = getGameDef(id);
   if (!def) return <Navigate to="/play" replace />;
-  return <GameScreen key={id} def={def} />;
+  return <Gated key={id} def={def} />;
 }
 
 /** One sitting of a catalogue puzzle: `/play/bible/2`. A puzzle that is not cut, or has no such passage, opens whole. */
@@ -58,7 +60,7 @@ export function PassageById() {
   if (!getGameDef(id)) return <Navigate to="/play" replace />;
   const p = /^\d+$/.test(n) ? getPassage(id, Number(n)) : undefined;
   if (!p) return <Navigate to={`/play/${id}`} replace />;
-  return <GameScreen key={`${id}~${p.part.n}`} def={p.def} part={p.part} />;
+  return <Gated key={`${id}~${p.part.n}`} def={p.def} part={p.part} />;
 }
 
 export function DailyGame() {
@@ -68,7 +70,7 @@ export function DailyGame() {
   if (!Number.isInteger(num) || num < 1 || num > dayNo()) return <Navigate to="/play" replace />;
   const info = dailyInfo(num);
   if (!info) return <Navigate to="/play" replace />;
-  return <GameScreen key={`d${num}`} def={info.def} dailyN={num} />;
+  return <Gated key={`d${num}`} def={info.def} dailyN={num} />;
 }
 
 /** A custom game opened by its share code. */
@@ -99,11 +101,24 @@ export function GameByCode() {
   }, [code]);
   if (def === undefined) return <div className={styles.screen} aria-busy="true" />;
   if (!def) return <Navigate to="/play" replace />;
-  return <GameScreen key={def.id} def={def} />;
+  return <Gated key={def.id} def={def} />;
 }
 
 /** A daily says how many are left only from here down. */
 const NEAR = 3;
+
+type ScreenProps = { def: GameDef; dailyN?: number; /** A sitting: `def` is the puzzle with one passage as its text. */ part?: Part };
+
+/** A guest plays 2 games. A third asks them to sign in. A game they already played stays open. */
+function Gated(props: ScreenProps) {
+  const auth = useAuth();
+  // Decided when the game opens, so the result of a guest's last game is never walled.
+  const [blocked] = useState(() => guestBlocked(playKey(props.def.id, props.dailyN, props.part?.n)));
+  if (!auth.enabled || !blocked) return <GameScreen {...props} />;
+  // Still finding out who this is: never wall someone who is signed in.
+  if (auth.loading) return <div aria-busy="true" />;
+  return auth.session ? <GameScreen {...props} /> : <GuestWall />;
+}
 
 function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** A sitting: `def` is the puzzle with one passage as its text. */ part?: Part }) {
   const mod = registry[def.type];
@@ -252,6 +267,8 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
   const starred = (inCatalogue || !!part) && !inRoom;
   const [end, setEnd] = useState<{ at: number; starsUp: boolean; records: string[] } | null>(null);
   function onFinish(fs: Session) {
+    // A guest's games are counted: 2, then they are asked to sign in.
+    if (!signedIn) markGuestPlayed(playKey(def.id, dailyN, part?.n));
     // Counted for everyone, guests too: a game played to the end is one with at least 1 word found.
     if (fs.found.length > 0) countEvent(def.id, 'end');
     if (total > 0 && fs.found.length === total) countEvent(def.id, 'full');

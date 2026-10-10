@@ -4,14 +4,13 @@ import { Button } from '../components/Button';
 import { Dialog } from '../components/Dialog';
 import { Field } from '../components/Field';
 import { Segmented } from '../components/Segmented';
+import { TextLink } from '../components/TextLink';
 import { Toggle } from '../components/Toggle';
 import { saveProfile } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { checkProfile } from '../lib/streak';
 import { setSound, soundOn, subscribeSound } from '../lib/sound';
 import { currentTheme, setTheme, type Theme } from '../lib/theme';
-import { AvatarDesigner } from './AvatarDesigner';
-import { PartnerSetting } from './PartnerSetting';
 import { Reminders } from './Reminders';
 import styles from './Settings.module.css';
 
@@ -121,19 +120,10 @@ export function Settings() {
         </form>
       </section>
 
-      <section className={styles.section} aria-labelledby="s-avatar">
-        <h2 id="s-avatar" className={styles.h2}>
-          Your character
-        </h2>
-        <AvatarDesigner id={auth.profile.id} handle={auth.profile.handle} code={auth.profile.avatar} onSaved={() => void auth.refreshProfile()} />
-      </section>
-
-      <section className={styles.section} aria-labelledby="s-partner">
-        <h2 id="s-partner" className={styles.h2}>
-          Your partner
-        </h2>
-        <PartnerSetting />
-      </section>
+      {/* Your character, partner and gear are not settings: they live on the You tab. */}
+      <p className={styles.pointer}>
+        Your detective, partner and gear are on <TextLink to="/me">You</TextLink>.
+      </p>
 
       <section className={styles.section} aria-labelledby="s-account">
         <h2 id="s-account" className={styles.h2}>

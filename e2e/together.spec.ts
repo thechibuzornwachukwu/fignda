@@ -30,11 +30,11 @@ async function clickPair(page: Page, a: number, b: number) {
 test.describe('phone tab bar', () => {
   test.use({ viewport: { width: 375, height: 740 }, hasTouch: true, isMobile: true });
 
-  test('app pages get Cases, Ranks, Today, Squad, Sign in; landing and puzzles do not', async ({ page }) => {
+  test('app pages get Cases, You, Play, Squad, Ranks; landing and puzzles do not', async ({ page }) => {
     await page.goto('/play');
     const tabs = page.getByRole('navigation', { name: 'Tabs' });
     await expect(tabs).toBeVisible();
-    await expect(tabs.getByRole('link')).toHaveText(['Cases', 'Ranks', 'Today', 'Squad', 'Sign in']);
+    await expect(tabs.getByRole('link')).toHaveText(['Cases', 'You', 'Play', 'Squad', 'Ranks']);
     await expect(tabs.getByRole('link', { name: "Play today's daily" })).toHaveAttribute('href', /^\/d\/\d+$/);
     await expect(tabs.getByRole('link', { name: 'Cases' })).toHaveAttribute('aria-current', 'page');
     await expect(page.getByRole('navigation', { name: 'Main' })).toBeHidden();

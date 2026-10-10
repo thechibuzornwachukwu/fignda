@@ -110,3 +110,10 @@
   composes: h3 from '../styles/type.module.css';
   margin: 0;
 }
+
+.pointer {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--muted);
+}
