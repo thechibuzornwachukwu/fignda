@@ -15,7 +15,7 @@ import { dayHidLine, playFacts, rareLine, recordLines, skillLines, starsUpLine, 
 import { isCleanRead, scoreOf, secondsOf, useGameSession, type Session } from '../games/session';
 import { starsFor } from '../engine/stars';
 import { dayProfile } from '../engine/variableDay';
-import { fetchCustomGame, fetchWordStats, mergeGuestDailies, submitPlay } from '../lib/api';
+import { countShare, fetchCustomGame, fetchWordStats, mergeGuestDailies, submitPlay } from '../lib/api';
 import { rarestFound } from '../lib/wordStats';
 import { useAuth } from '../lib/auth';
 import { useCoarsePointer } from '../lib/media';
@@ -279,12 +279,15 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
     if (coarse && navigator.share) {
       try {
         await navigator.share({ text });
+        countShare(def.id);
         return '';
       } catch {
         /* closed the sheet: fall back to copying */
       }
     }
-    return (await copyText(text)) ? 'Copied. Paste it in your group.' : 'Could not copy. Use Share.';
+    if (!(await copyText(text))) return 'Could not copy. Use Share.';
+    countShare(def.id);
+    return 'Copied. Paste it in your group.';
   };
 
   // After today's daily: where the run stands. Picked once per finish.
@@ -486,6 +489,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
         <ShareSheet
           open={sharing}
           onClose={() => setSharing(false)}
+          onShared={() => countShare(def.id)}
           game={{ ...shareGame(def, puzzle.difficulty, dailyN), vs: auth.profile?.handle, sponsor }}
           result={{
             answers: puzzle.answers.map((a) => {

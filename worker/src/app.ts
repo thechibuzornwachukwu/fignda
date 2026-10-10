@@ -46,6 +46,8 @@ export const LIMITS = {
   nudgesPerHour: 20,
   puzzlesPerHour: 10,
   reportsPerHour: 20,
+  /** Per address, guests too: a share has no player on it. */
+  sharesPerHour: 30,
   /** Guests: every background ask, failed ones included. A failure hands back one of the 5, never one of these. */
   guestGenerateTriesPerHour: 15,
   /** Opening /run. It only ever does work for the one runner that wins the claim. */
@@ -622,6 +624,26 @@ async function plays(req: Request, deps: Deps) {
 }
 
 // ---------------------------------------------------------------------------
+// POST /api/shares
+// ---------------------------------------------------------------------------
+
+export const ShareBody = z.object({ game: z.string().regex(/^[a-z0-9-]{2,40}$/) }).strict();
+
+/**
+ * One share of one puzzle, for the sponsor report. A count per puzzle per day and nothing else: guests count too,
+ * and the session token is never read, so no player is on it.
+ */
+async function countShare(req: Request, deps: Deps) {
+  await limit(deps.db, `share:ip:${clientIp(req)}`, LIMITS.sharesPerHour);
+  const parsed = ShareBody.safeParse(await readJson(req));
+  if (!parsed.success) throw new HttpError(400, 'bad_request');
+  const r = await deps.db.rpc('count_share', { p_game: parsed.data.game });
+  if (r.error) throw new HttpError(500, 'save_failed');
+  if (!r.data) throw new HttpError(404, 'unknown_game');
+  return json({ ok: true });
+}
+
+// ---------------------------------------------------------------------------
 // Daily reminders. The cron sends empty pushes; the service worker then asks here what to say.
 // ---------------------------------------------------------------------------
 
@@ -781,6 +803,7 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
     else if ((m = url.pathname.match(/^\/api\/owner\/puzzles\/([^/]+)\/(restore|remove)$/)) && req.method === 'POST')
       res = await ownerAct(req, deps, m[1]!, m[2] as 'restore' | 'remove');
     else if (url.pathname === '/api/plays' && req.method === 'POST') res = await plays(req, deps);
+    else if (url.pathname === '/api/shares' && req.method === 'POST') res = await countShare(req, deps);
     else if (url.pathname === '/api/puzzles' && req.method === 'POST') res = await makePuzzle(req, deps);
     else if (url.pathname === '/api/push/line' && req.method === 'POST') res = await pushLine(req, deps);
     else if (url.pathname === '/api/invite' && req.method === 'POST') res = await invite(req, deps);

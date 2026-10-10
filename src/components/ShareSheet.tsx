@@ -45,6 +45,8 @@ type Props = {
   game: ShareGame;
   result: ShareResult;
   player: { name?: string; handle?: string };
+  /** A share left the sheet: images shared or saved, or the link copied. Never for a closed share sheet. */
+  onShared?: () => void;
 };
 
 type Kind = 'result' | 'puzzle';
@@ -53,7 +55,7 @@ type Mode = 'excerpt' | 'full';
 const PREVIEW_MAX = 300;
 
 /** Defaults: Result, 4:5, Excerpt, off. */
-export function ShareSheet({ open, onClose, game, result, player }: Props) {
+export function ShareSheet({ open, onClose, game, result, player, onShared }: Props) {
   const [kind, setKind] = useState<Kind>('result');
   const [ratio, setRatio] = useState<Ratio>('4:5');
   const [mode, setMode] = useState<Mode>('excerpt');
@@ -121,6 +123,7 @@ export function ShareSheet({ open, onClose, game, result, player }: Props) {
         ),
       );
       const r = await deliver(files, text, link);
+      if (r !== 'cancelled') onShared?.();
       setNote(r === 'shared' ? 'Shared.' : r === 'saved' ? (files.length > 1 ? `Saved ${files.length} images.` : 'Saved.') : '');
     } catch {
       setNote('Could not make the image. Try Copy link.');
@@ -129,7 +132,11 @@ export function ShareSheet({ open, onClose, game, result, player }: Props) {
     }
   };
 
-  const copy = async () => setNote((await copyText(link)) ? 'Link copied.' : link);
+  const copy = async () => {
+    const copied = await copyText(link);
+    if (copied) onShared?.();
+    setNote(copied ? 'Link copied.' : link);
+  };
 
   const modeNote =
     mode === 'full'

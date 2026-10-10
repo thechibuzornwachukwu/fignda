@@ -24,6 +24,7 @@
     "deploy:site": "node scripts/deploy-site.mjs",
     "deploy:api": "wrangler deploy --config worker/wrangler.toml",
     "og:render": "node scripts/render-og.mjs",
+    "sponsor:report": "tsx scripts/sponsor-report.ts",
     "brand:render": "tsx scripts/render-brand.mjs",
     "avatars:render": "tsx scripts/render-avatars.mjs",
     "push:keys": "node scripts/push-keys.mjs",

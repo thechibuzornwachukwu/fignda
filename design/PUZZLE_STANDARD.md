@@ -9,7 +9,7 @@ Write one true small scene, in plain words, where nothing is bent out of shape t
 ## What a good paragraph is
 
 - **A small scene.** One place, one moment, one or two people or things. A kitchen at six, a bus that is late, a boy and his dog at the gate. Something that could have happened.
-- **True to life.** Real objects, real habits, things people recognise. No made up wonders.
+- **True to life.** Real objects, real habits, things people recognise. No made up wonders. No useless metaphors must be used. No useless never before known words must be used
 - **Plain words.** The words a ten year old and a tired adult both know. Short sentences. Active verbs.
 - **Not about the topic.** The topic lives in the hidden words, not in the story. A Bible puzzle is not a sermon. A football puzzle is not a match report.
 - **60 to 110 words.** Five to eight sentences.

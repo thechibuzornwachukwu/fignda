@@ -29,8 +29,8 @@ This is a business. Running costs are near zero, so the first sale is profit. No
 | Commissioned puzzle | Made to order: a wedding, a launch, a sermon series, a class topic | People, churches, schools, companies | Now |
 | Private board | A circle with its own puzzles, by the month or the term | Schools, companies, churches | Now |
 | Tournament | A week's contest on one puzzle, prize from the sponsor | Brands, companies, schools | Now |
-| Sponsored puzzle | A puzzle on the sponsor's subject, marked "With NAME", their link on the result and the share card | Brands | After set 1a |
-| Sponsored daily | "Today's daily, with NAME" for a day or a week | Brands | After set 1a |
+| Sponsored puzzle | A puzzle on the sponsor's subject, marked "With NAME", their link on the result and the share card | Brands | Now |
+| Sponsored daily | "Today's daily, with NAME" for a day or a week | Brands | Now |
 | Sponsored case | A whole case in the sponsor's world | Brands | After sets 2d and 3c |
 | Season takeover | A holiday case and the seasonal dress, "with NAME" | Brands | After set 5c |
 | Supporter | One payment: no ads ever, a badge | Players | Needs Paystack |
@@ -69,8 +69,6 @@ Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with 
 
 ### 1. Sell now
 
-- [x] **Set 1a.** The "With NAME" mark from one field on a puzzle: game row, daily card, result, share card, link preview. Built 9 Oct 2026, in `SPEC.md` section 5 (With NAME). To try it: add `"sponsor": { "name": "...", "url": "https://..." }` to a puzzle in `data/games.json`, then `npm run og:render`. No puzzle carries one yet.
-- [ ] **Set 1b.** A sponsor report from the database: players, plays, finish rate, shares. Counts only.
 - [ ] **Set 1c.** A one page pitch with the price list.
 
 ### 2. Sittings
@@ -159,8 +157,7 @@ Play with no account, and sponsors get numbers, never people.
 
 ## Checks still owed
 
-- [ ] Signed in browser tests since the sign in flash fix. Docker was down on 9 Oct 2026.
-- [ ] The safety model (Llama Guard) with one real call. Its answer shape is assumed.
+- [ ] Signed in browser tests since the sign in flash fix. Docker was down on 9 Oct 2026.- [ ] The safety model (Llama Guard) with one real call. Its answer shape is assumed.
 - [ ] On real phones: the dock on an iPhone Home Screen app, a room game on 2 phones, a machine-written puzzle through the site, the waiting screen with the phone locked.
 - [ ] Signed in screens on the live site with a real second account.
 - [ ] One real push on Android and iPhone. Needs the reminder keys.
@@ -184,3 +181,4 @@ Play with no account, and sponsors get numbers, never people.
 - Machine-written puzzles stop for the day when the free limits run out.
 - The avatar on the waiting screen bobs and does not blink.
 - Stars, shelf counts and personal records are kept in the browser, from 9 Oct 2026 on.
+- The sponsor report counts signed in players only: a guest's play is never stored. A deleted account takes its plays out of the counts. A share count can be pushed up by anyone, 30 an hour per address.

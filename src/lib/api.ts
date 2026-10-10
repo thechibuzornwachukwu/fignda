@@ -554,6 +554,19 @@ export async function submitPlay(p: PlaySubmission): Promise<{ ok: boolean; stat
   }
 }
 
+/**
+ * A share left the game: one more on that puzzle's count for the day. Guests too, and no session goes with it,
+ * so the count has no player on it. Nothing waits on it and nothing is shown if it fails.
+ */
+export function countShare(gameId: string): void {
+  void fetch(`${API}/shares`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ game: gameId }),
+    keepalive: true,
+  }).catch(() => {});
+}
+
 async function postApi(path: string, body: unknown): Promise<{ ok: boolean; status: number; error?: string }> {
   const auth = await authHeader();
   if (!auth.Authorization) return { ok: false, status: 401 };
