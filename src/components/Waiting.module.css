@@ -104,3 +104,10 @@
     animation: none;
   }
 }
+
+/* The player and their partner, side by side. */
+.pair {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}

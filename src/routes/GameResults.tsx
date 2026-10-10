@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
+import { Partner } from '../components/Partner';
 import { clampStars, Stars } from '../components/Stars';
 import { formatTime } from '../engine/time';
 import styles from './GameResults.module.css';
@@ -60,9 +61,13 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
   return (
     <section className={styles.results} aria-labelledby="results-title">
       <div className={styles.head}>
-        <h2 id="results-title" className={styles.title}>
-          {title}
-        </h2>
+        <div className={styles.titleRow}>
+          {/* The partner at the end of a game: pleased, and more so when every word was found. */}
+          <Partner moment={total > 0 && found === total ? 'found' : 'done'} size={56} />
+          <h2 id="results-title" className={styles.title}>
+            {title}
+          </h2>
+        </div>
         <p className={styles.line}>
           {line}
           {boardPath && (

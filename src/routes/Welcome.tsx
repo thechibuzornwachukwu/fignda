@@ -6,13 +6,16 @@ import { guestAvatar, guestAvatarCode, guestSeed, setGuestAvatarCode } from '../
 import { Avatar } from '../components/Avatar';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
+import { Partner } from '../components/Partner';
 import { Ring } from '../components/Ring';
 import { TextLink } from '../components/TextLink';
+import { PARTNERS } from '../engine/partners';
 import { today } from '../games/daily';
 import { saveProfile } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { keepLook, loadFlow, loadLook, saveFlow } from '../lib/firstMinute';
 import { answer, endOf, LOOK_CHOICES, NEUTRAL_NAME, nextStep, progress, suggestName, withTail, type Account, type Answer, type Flow, type LookChoice, type Step } from '../lib/onboarding';
+import { choosePartner, usePartner } from '../lib/partner';
 import { handleFromName, RESERVED_HANDLES, safeNext } from '../lib/streak';
 import { CharacterEditor } from './AvatarDesigner';
 import { EmailSignIn, ProfileForm } from './SignIn';
@@ -175,6 +178,7 @@ function CharacterStep({ heading, onKeep, foot }: { heading: HeadingRef; onKeep:
   const [look, setLook] = useState<LookChoice | null>(loadLook);
   // Their design, else the starter drawn from this browser's seed. Never an empty circle.
   const [parts, setParts] = useState<Parts>(guestAvatar);
+  const partner = usePartner();
 
   return (
     <>
@@ -191,6 +195,16 @@ function CharacterStep({ heading, onKeep, foot }: { heading: HeadingRef; onKeep:
           Change it
         </Button>
       </div>
+      {/* The partner who works every case beside them. One tap, free. Left alone, it is Detective X. */}
+      <fieldset className={styles.partners}>
+        <legend className={styles.partnerAsk}>And your partner. Pick 1, change it any time.</legend>
+        {PARTNERS.map((p) => (
+          <button key={p.id} type="button" className={styles.partner} aria-pressed={p.id === partner.current} onClick={() => void choosePartner(p.id, false)}>
+            <Partner who={p.id} moment="hello" size={72} />
+            <span>{p.name}</span>
+          </button>
+        ))}
+      </fieldset>
       <Button
         variant="accent"
         className={styles.full}

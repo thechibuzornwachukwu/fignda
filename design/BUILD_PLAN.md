@@ -11,7 +11,7 @@ Seed (after `npm run db:seed:gen`): `npx supabase db query --linked -f supabase/
 - One skill in every game: looking closely. Words today, numbers and shapes next.
 - A case is a run of clues. A clue is one short sitting. The last clue puts the pieces together and unmasks who hid the secret.
 - A new culprit each case, an ordinary character under a disguise. One unseen figure links the cases: every culprit leaves the same calling card.
-- 4 partners work the case beside the player: Detective X (the cat, and the logo), Detective Tobs, Detective Puff and Robo-cop. A player picks 1, free, and unlocks the others with points. Who they are: `design/brand/index.html`.
+- Partners work the case beside the player: Detective X (the cat, and the logo), Detective Tobs and Detective Puff, with a robot to come once it is named. A player picks 1, free, and unlocks the others with points. Who they are: `design/brand/index.html`.
 - Tone: the motive is mischief, pride or a surprise, never harm. No violence, gangs, weapons, romance or fear.
 - For all ages, not a children's product. Accounts from 13. Younger players join on a parent's device or room.
 - We promise the practice, never a result. No word about memory, attention span, focus, IQ, brain training or "proven". Lumosity paid $2 million for claims like those.
@@ -36,7 +36,7 @@ This is a business. Running costs are near zero, so the first sale is profit. No
 | Supporter | One payment: no ads ever, a badge | Players | Needs Paystack |
 | Plus, by the month | More puzzles in Make, private rooms, extra outfits | Players | Needs Paystack, set 6e |
 | Special outfits | Cosmetic only | Players | Needs Paystack |
-| Partner unlock | The points to unlock another partner. Bought points unlock partners only and never count for rank, boards or leagues | Players | Needs Paystack, set 3g |
+| Partner unlock | The points to unlock another partner. Bought points unlock partners only and never count for rank, boards or leagues | Players | Needs Paystack |
 | Licence | The game under a school's or a publisher's own name | Schools, publishers, media houses | After private boards are proven |
 | Footer ad | One a page, still image, never near a puzzle | Advertisers | Needs the domain, and consent in the EU and UK |
 
@@ -46,7 +46,7 @@ Never for sale: hints, extra tries, time, or anything that touches a score; stre
 
 - [ ] Set up Google sign in in Supabase. A 6 digit email code is the hardest step for a new player, and one tap removes it. Likely worth more than any change to guest mode.
 - [ ] Decide: the name (suggested: keep Gazecraft, detective theme inside it. Free as .com and .game on 9 Oct 2026, registry check only: gazecraft, keensleuth, sleuthtrail, cluestop, plainsleuth, loupequest).
-- [ ] Prices for the models above, and the points a partner costs. None is set.
+- [ ] Prices for the models above. None is set. Partners open at 3,000 and 9,000 points for now (`PARTNER_POINTS` and `partner_slots`): confirm or change.
 - [ ] "Robo-cop" is close to RoboCop, a registered film trademark. Check it, or rename, before the robot is in the game.
 - [ ] A list of 20 people to ask first: brands, schools, churches, event planners.
 - [ ] What a sponsor may and may not write.
@@ -76,7 +76,8 @@ Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with 
 
 A case is one puzzle: its passages are the clues and the whole puzzle is the last, the unmasking (SPEC section 6, Games). Each clue gives a piece of the case's secret, and the unmasking shows who hid it (SPEC section 9, The secret).
 
-- [ ] **Set 3g. Partners** (SPEC section 5, Partners). The art exists: `design/characters` draws them, `design/brand/elements` holds the states, bubbles and case files. To build: the pick in the first minute, the partner on screen states, the waiting screen and the result, the choice saved with the profile, switching in Settings, unlocking with points. Buying points for an unlock waits for Paystack.
+- [ ] **Set 3h. The robot.** The 4th partner is drawn and held back. Once its name is settled (Owner): add it to `PARTNERS`, to the checks in `player_partners` and `choose_partner`, a 4th threshold, and run `npm run partners:render`.
+- [ ] **Set 3i. Partner moments still to place:** the error state, a closed case, and what each partner says (bubbles are drawn in `design/brand/elements`).
 
 ### 4. More games
 

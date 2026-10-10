@@ -20,6 +20,7 @@ Risks: leaked keys, faked scores, AI endpoint abuse, injected text in shared con
 | profile_private (look) | own row | own row; `feminine`, `masculine`, `mixed` or null |
 | plays | own rows; public view exposes handle, score, time | Worker only |
 | clue_plays (a clue of a case: best stars and score) | own rows, through `my_progress()` only | Worker only, through `record_clue()`; a guest's own progress through `merge_guest_progress()`, unverified |
+| player_partners (which partners a player holds, and the one beside them) | own row, through `my_partner()` only | through `choose_partner()` only: the first is free, another only when checked points allow one more |
 | daily | all | none |
 | daily_answers | service role only until day ends | none |
 | games curated | all | none |

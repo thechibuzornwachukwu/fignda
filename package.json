@@ -30,6 +30,7 @@
     "avatars:render": "tsx scripts/render-avatars.mjs",
     "push:keys": "node scripts/push-keys.mjs",
     "ai:bench": "tsx scripts/ai-bench.ts",
+    "partners:render": "tsx scripts/render-partners.ts",
     "characters:render": "tsx design/characters/build.ts",
     "brand:guide": "tsx design/brand/build.ts"
   },

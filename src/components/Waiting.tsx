@@ -3,6 +3,7 @@ import { guestAvatar } from '../avatar/guest';
 import { pick } from '../copy';
 import { useAuth } from '../lib/auth';
 import { Avatar } from './Avatar';
+import { Partner } from './Partner';
 import { TextLink } from './TextLink';
 import { WAIT_LINE_MS } from './useDelayedWaiting';
 import styles from './Waiting.module.css';
@@ -64,7 +65,11 @@ export function Waiting({ size = 'full', pool = 'waiting', onCancel, cover = fal
 
   return (
     <div ref={ref} className={[styles.waiting, styles[size], covering && styles.cover].filter(Boolean).join(' ')} data-waiting={size} tabIndex={-1} onKeyDown={onKeyDown}>
-      <span className={styles.bob}>{profile ? <Avatar handle={profile.handle} size={SIZE[size]} /> : <Avatar parts={starter} size={SIZE[size]} />}</span>
+      <span className={styles.pair}>
+        <span className={styles.bob}>{profile ? <Avatar handle={profile.handle} size={SIZE[size]} /> : <Avatar parts={starter} size={SIZE[size]} />}</span>
+        {/* The partner thinks it over beside the player. Not on the small one: there is no room. */}
+        {size === 'full' && <Partner moment="loading" size={SIZE.full} />}
+      </span>
       <span className={styles.dots} aria-hidden="true">
         <span className={styles.dot} />
         <span className={styles.dot} />

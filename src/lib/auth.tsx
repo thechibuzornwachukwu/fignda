@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { clearLocalCache, deleteAccount, fetchProfile, mergeGuestDailies, type Profile } from './api';
+import { syncPartner } from './partner';
 import { syncProgress } from './progress';
 import { moveGuestToAccount } from './firstMinute';
 import { disableReminder } from './push';
@@ -68,6 +69,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (p) mergeGuestDailies().catch(() => {});
         // And the path: clues done here go up, clues done elsewhere come down.
         if (p) syncProgress().catch(() => {});
+        // And the partner: the account's comes down, a guest's first choice goes up.
+        if (p) syncPartner().catch(() => {});
         // And the character and look a guest built here. A moved character is read back so Settings shows it.
         if (p && (await moveGuestToAccount(p).catch(() => false)) && alive) setProfile(await fetchProfile(s.user.id));
       } catch {

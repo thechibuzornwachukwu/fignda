@@ -11,6 +11,7 @@ import { checkProfile } from '../lib/streak';
 import { setSound, soundOn, subscribeSound } from '../lib/sound';
 import { currentTheme, setTheme, type Theme } from '../lib/theme';
 import { AvatarDesigner } from './AvatarDesigner';
+import { PartnerSetting } from './PartnerSetting';
 import { Reminders } from './Reminders';
 import styles from './Settings.module.css';
 
@@ -125,6 +126,13 @@ export function Settings() {
           Your character
         </h2>
         <AvatarDesigner id={auth.profile.id} handle={auth.profile.handle} code={auth.profile.avatar} onSaved={() => void auth.refreshProfile()} />
+      </section>
+
+      <section className={styles.section} aria-labelledby="s-partner">
+        <h2 id="s-partner" className={styles.h2}>
+          Your partner
+        </h2>
+        <PartnerSetting />
       </section>
 
       <section className={styles.section} aria-labelledby="s-account">

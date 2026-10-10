@@ -77,3 +77,60 @@
   color: var(--subtle);
   overflow-wrap: anywhere;
 }
+
+/* The partner step: 3 portraits side by side, each a button with the name under it. */
+.partners {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+/* The ask, as the group's name. Manrope: it is read. */
+.partnerAsk {
+  padding: 0;
+  margin-bottom: var(--space-3);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--fg);
+}
+.partner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  padding: var(--space-3) var(--space-2);
+  border: 1px solid var(--line-3);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  box-shadow: 0 var(--ledge) 0 var(--line-3);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--fg);
+  text-align: center;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.partner img {
+  max-width: 100%;
+  height: auto;
+}
+/* The one chosen: a heavier border in the text colour. Shape and weight, not colour alone. */
+.partner[aria-pressed='true'] {
+  border: 2px solid var(--fg);
+}
+.partner:active {
+  transform: translateY(var(--ledge));
+  box-shadow: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .partner {
+    transition: none;
+  }
+}

@@ -1,0 +1,82 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+.tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: var(--space-3) var(--space-2);
+  border: 2px solid var(--line-3);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  font: inherit;
+  color: var(--muted);
+  text-align: center;
+  cursor: pointer;
+  transition: border-color var(--dur-base) var(--ease-std), transform var(--dur-fast) var(--ease-std);
+}
+.tile img {
+  max-width: 100%;
+  height: auto;
+}
+.tile:active {
+  transform: scale(0.97);
+}
+/* The one beside you: a heavier border, not a colour. */
+.tile[aria-pressed='true'] {
+  border-color: var(--fg);
+  color: var(--fg);
+}
+/* Not yet earned: in sight, dashed, and not for pressing. */
+.tile[data-locked] {
+  border-style: dashed;
+  color: var(--subtle);
+  cursor: default;
+}
+.tile[data-locked]:active {
+  transform: none;
+}
+.name {
+  max-width: 100%;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--fg);
+  overflow-wrap: anywhere;
+}
+.tile[data-locked] .name {
+  color: var(--muted);
+}
+.hint {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  max-width: 100%;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+.line {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tile {
+    transition: none;
+  }
+}

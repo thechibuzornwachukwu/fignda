@@ -6,6 +6,7 @@ import { guestSeed } from '../avatar/guest';
 import { Avatar } from '../components/Avatar';
 import { Culprit, SecretSlots } from '../components/CaseFile';
 import { Icon } from '../components/Icon';
+import { Partner } from '../components/Partner';
 import { Ring } from '../components/Ring';
 import { Stars } from '../components/Stars';
 import { clampStars } from '../components/starsLabel';
@@ -154,6 +155,7 @@ export function Journey({ catalogue = games, path, done, stars, className }: Pro
 
       {state === 'empty' && (
         <p className={styles.note} data-journey-note="empty">
+          <Partner moment="empty" size={40} />
           {view.line}
         </p>
       )}

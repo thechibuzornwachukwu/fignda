@@ -446,6 +446,22 @@ export async function mergeGuestDailies(): Promise<number> {
   return data as number;
 }
 
+/** Your partners on the account, with your points. Null when you have not chosen one yet. */
+export async function fetchMyPartner(): Promise<{ current: string; owned: string[]; points: number } | null> {
+  const { data, error } = await (await client()).rpc('my_partner');
+  if (error) throw error;
+  const row = (data as Array<{ current: string; owned: string[]; points: number }> | null)?.[0];
+  return row ? { current: row.current, owned: row.owned, points: Number(row.points) } : null;
+}
+
+/** Take a partner or switch to one you hold. The account answers with what you hold now. */
+export async function chooseServerPartner(who: string): Promise<{ current: string; owned: string[] }> {
+  const { data, error } = await (await client()).rpc('choose_partner', { p_who: who });
+  if (error) throw error;
+  const row = (data as Array<{ current: string; owned: string[] }> | null)?.[0];
+  if (!row) throw new Error('no partner row');
+  return row;
+}
 /** Clues done in this browser, moved to the account unverified: stars only, no points. Safe to send again. */
 export async function mergeGuestProgress(items: ReadonlyArray<{ id: string; stars: number }>): Promise<number> {
   if (!items.length) return 0;

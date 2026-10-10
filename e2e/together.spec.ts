@@ -54,7 +54,11 @@ test.describe('phone tab bar', () => {
     // The page is long enough to scroll once the path has drawn.
     await expect(page.locator('[data-journey] [data-case]').first()).toBeVisible();
     const top = () => tabs.evaluate((el) => Math.round(el.getBoundingClientRect().top));
-    const scrollTo = (y: number | 'end') => page.evaluate((to) => window.scrollTo(0, to === 'end' ? document.documentElement.scrollHeight : to), y);
+    const scrollTo = async (y: number | 'end') => {
+      await page.evaluate((to) => window.scrollTo(0, to === 'end' ? document.documentElement.scrollHeight : to), y);
+      // One frame, so the page has taken this scroll in before the next.
+      await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
+    };
     expect(await top()).toBeLessThan(740);
 
     await scrollTo(500);
@@ -72,6 +76,8 @@ test.describe('phone tab bar', () => {
 
     // Keyboard: focus inside brings it back.
     await scrollTo(300);
+    // Let the page take the first scroll in before the second: 2 in one frame read as one move up.
+    await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
     await scrollTo(600);
     await expect(tabs).toHaveAttribute('data-tucked', 'true');
     await tabs.getByRole('link', { name: 'Cases' }).focus();

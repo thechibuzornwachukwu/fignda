@@ -179,6 +179,41 @@ test('detective pieces are earned: locked until a case is closed, then they can 
   await expect(editor.getByRole('region', { name: 'Detective kit' })).toContainText('Badge');
 });
 
+test('partners: a guest picks one on the first screen, it shows at the end of a game, and Settings shows who is held', async ({ page }) => {
+  await page.goto('/welcome');
+  const pick = page.getByRole('group', { name: /your partner/i });
+  await expect(pick.getByRole('button')).toHaveText(['Detective X', 'Detective Tobs', 'Detective Puff']);
+  // Left alone, it is Detective X.
+  await expect(pick.getByRole('button', { name: 'Detective X' })).toHaveAttribute('aria-pressed', 'true');
+  await pick.getByRole('button', { name: 'Detective Puff' }).click();
+  await expect(pick.getByRole('button', { name: 'Detective Puff' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(pick.getByRole('button', { name: 'Detective X' })).toHaveAttribute('aria-pressed', 'false');
+  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('gazecraft-partner')!).current)).toBe('dog');
+  for (const img of await pick.locator('img').all()) expect(await img.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0)).toBe(true);
+
+  // The partner is there when a game ends, in a picture that loads.
+  await page.goto('/play/bnote');
+  await page.getByRole('button', { name: "I'm done" }).click();
+  const there = page.locator('[aria-labelledby="results-title"] img[data-partner="dog"]');
+  await expect(there).toHaveAttribute('data-moment', 'done');
+  expect(await there.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0)).toBe(true);
+});
+
+test('partners in Settings: the one with you is pressed, and the others say what opens them', async ({ page }) => {
+  await newPlayer(page, 'Tari');
+  await page.goto('/settings');
+  await expect(page.getByRole('heading', { name: 'Your partner' })).toBeVisible();
+  const group = page.getByRole('group', { name: 'Your partner' });
+  await expect(group.getByRole('button')).toHaveCount(3);
+  await expect(group.getByRole('button', { name: 'Detective X', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  const locked = group.getByRole('button', { name: 'Detective Tobs. Locked. Reach 3,000 points.' });
+  await expect(locked).toHaveAttribute('aria-disabled', 'true');
+  await locked.click({ force: true });
+  await expect(group.getByRole('button', { name: 'Detective X', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.getByText('Your next partner opens at 3,000 points. You have 0.')).toBeVisible();
+  await expect(page.locator('body')).not.toContainText(/robo/i);
+});
+
 test('copy result puts the spoiler free text on the clipboard', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await page.goto('/play/bible');
