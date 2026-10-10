@@ -7,6 +7,7 @@
 //   parts/outfits.ts   outfits, one entry per outfit
 //   parts/face.ts      eyes, mouths, facial hair, skin marks, extras, mouth items, hair ties, mood presets
 //   parts/disguises.ts what a culprit wears until their case is closed; a layer of its own, never saved
+//   parts/kit.ts       detective pieces a player earns (badge, magnifying glass, hat); see earned.ts
 //   parts/festive.ts   seasonal and themed touches (Santa hat, hearts, Naija colours), drawn on top
 //   draw.ts (here)     the choices an avatar is made of, its saved code, and the layer order
 //   store.ts           fetching other players' codes in batches
@@ -20,7 +21,9 @@
 
 import { EXTRA_STYLES, EYE_STYLES, FACE_HAIR_STYLES, HAIR_TIE_NAMES, headband, MARK_STYLES, MOUTH_ITEM_STYLES, MOUTH_STYLES, scrunchie } from './parts/face';
 import { DISGUISE_STYLES } from './parts/disguises';
+import { EARNED } from './earned';
 import { FESTIVE_STYLES } from './parts/festive';
+import { KIT_STYLES } from './parts/kit';
 import { HAIR_STYLES } from './parts/hair';
 import { OUTFIT_STYLES, torso } from './parts/outfits';
 import { BACK_NAMES, BACKS, c, HAIR_COLOUR_NAMES, HAIR_COLOURS, INK, LIME, rect, SEAM_DARK, SEAM_LIGHT, SKINS, WHITE, type Kit, type Look, type Shape } from './shapes';
@@ -51,13 +54,14 @@ export const PARTS = [
   { key: 'tie', letter: 'a', title: 'Hair ties', names: HAIR_TIE_NAMES as readonly string[], looks: anyone },
   { key: 'outfit', letter: 'o', title: 'Outfit', names: names(OUTFIT_STYLES), looks: looks(OUTFIT_STYLES) },
   { key: 'festive', letter: 'z', title: 'Festive', names: names(FESTIVE_STYLES), looks: anyone },
+  { key: 'kit', letter: 'd', title: 'Detective kit', names: names(KIT_STYLES), looks: anyone },
 ] as const satisfies ReadonlyArray<{ key: string; letter: string; title: string; names: readonly string[]; looks: ReadonlyArray<Look | undefined> }>;
 
 export type PartKey = (typeof PARTS)[number]['key'];
 /** The position chosen for each part. */
 export type Avatar = Record<PartKey, number>;
 
-export const DEFAULT_AVATAR: Avatar = { back: 0, skin: 3, hair: 0, colour: 0, eyes: 0, mouth: 0, face: 0, extra: 0, mark: 0, item: 0, tie: 0, outfit: 0, festive: 0 };
+export const DEFAULT_AVATAR: Avatar = { back: 0, skin: 3, hair: 0, colour: 0, eyes: 0, mouth: 0, face: 0, extra: 0, mark: 0, item: 0, tie: 0, outfit: 0, festive: 0, kit: 0 };
 
 /** Parse a saved code. Anything missing or out of range falls back to the default choice. */
 export function parseAvatar(code: string | null | undefined): Avatar {
@@ -92,7 +96,9 @@ export function lookOf(a: Avatar): Look | null {
 /** The choices of a part that suit a look: those for anyone, plus those usually worn with that look. */
 function suiting(key: PartKey, look: Look | null): number[] {
   const part = PARTS.find((x) => x.key === key)!;
-  return part.names.flatMap((_, i) => (part.looks[i] === undefined || part.looks[i] === look ? [i] : []));
+  // An earned piece is never handed out by chance: not by Surprise me, not to a starter.
+  const earned = new Set(EARNED.filter((e) => e.part === key).map((e) => e.name));
+  return part.names.flatMap((name, i) => (!earned.has(name) && (part.looks[i] === undefined || part.looks[i] === look) ? [i] : []));
 }
 
 /**
@@ -205,6 +211,8 @@ export function drawAvatar(a: Avatar): Shape[] {
     tie === 'headband' && !hair.headwear && !hair.noHeadband ? [headband(k)] : [],
     // Festive touches go on last, so a hat sits over whatever hair is underneath.
     FESTIVE_STYLES[a.festive]!.draw(k),
+    // Detective kit, earned: the hat sits over everything, the badge and the glass over the outfit.
+    KIT_STYLES[a.kit]!.draw(k),
   ];
   return layers.flat();
 }

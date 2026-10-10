@@ -1,6 +1,7 @@
-import { useState, type KeyboardEvent } from 'react';
-import { Check, Dices, Palette, Pencil, Scissors, Shirt, Smile, Undo2, X, type LucideIcon } from 'lucide-react';
+import { useEffect, useMemo, useState, type KeyboardEvent } from 'react';
+import { Check, Dices, Lock, Palette, Pencil, Scissors, Shirt, Smile, Undo2, X, type LucideIcon } from 'lucide-react';
 import { avatarCode, avatarFor, orderFor, parseAvatar, PARTS, surprise, type Avatar as Parts, type PartKey } from '../avatar/draw';
+import { howTo, isEarned, needOf } from '../avatar/earned';
 import { MOODS } from '../avatar/parts/face';
 import { HAIR_FAMILIES, HAIR_STYLES, type HairFamily } from '../avatar/parts/hair';
 import { BACKS, HAIR_COLOURS, SKINS } from '../avatar/shapes';
@@ -9,7 +10,9 @@ import { Avatar } from '../components/Avatar';
 import { Button } from '../components/Button';
 import { Dialog } from '../components/Dialog';
 import { Icon } from '../components/Icon';
-import { saveAvatar, saveLook } from '../lib/api';
+import { doneClues } from '../games/caseFile';
+import { games } from '../games/catalog';
+import { fetchPoints, saveAvatar, saveLook } from '../lib/api';
 import { keepLook, loadLook } from '../lib/firstMinute';
 import { LOOK_CHOICES, type LookChoice } from '../lib/onboarding';
 import styles from './AvatarDesigner.module.css';
@@ -21,7 +24,7 @@ import styles from './AvatarDesigner.module.css';
 const TABS: Array<{ key: string; title: string; icon: LucideIcon; parts: PartKey[] }> = [
   { key: 'face', title: 'Face', icon: Smile, parts: ['skin', 'eyes', 'mouth', 'mark', 'face'] },
   { key: 'hair', title: 'Hair', icon: Scissors, parts: ['hair', 'colour', 'tie'] },
-  { key: 'wear', title: 'Wear', icon: Shirt, parts: ['outfit', 'extra', 'item'] },
+  { key: 'wear', title: 'Wear', icon: Shirt, parts: ['outfit', 'kit', 'extra', 'item'] },
   { key: 'scene', title: 'Scene', icon: Palette, parts: ['back', 'festive'] },
 ];
 const listed = new Set(TABS.flatMap((t) => t.parts));
@@ -34,7 +37,7 @@ const FACE = '25 31 46 46';
 const HEAD = '6 -2 84 84';
 const CHEST = '12 50 72 72';
 const WHOLE = '-7 -2 110 110';
-const VIEW: Partial<Record<PartKey, string>> = { eyes: FACE, mouth: FACE, mark: FACE, face: FACE, extra: FACE, item: FACE, hair: HEAD, tie: HEAD, outfit: CHEST, festive: WHOLE };
+const VIEW: Partial<Record<PartKey, string>> = { eyes: FACE, mouth: FACE, mark: FACE, face: FACE, extra: FACE, item: FACE, hair: HEAD, tie: HEAD, outfit: CHEST, festive: WHOLE, kit: WHOLE };
 
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const partOf = (key: PartKey) => PARTS.find((p) => p.key === key)!;
@@ -120,6 +123,19 @@ function Editor({ seed, code, look, onSave, onLook, onClose }: EditorProps) {
   // Hair opens on the family the current style belongs to.
   const [family, setFamily] = useState<HairFamily>(() => HAIR_STYLES[parts.hair]!.family);
   const dirty = avatarCode(parts) !== saved;
+  // What the detective pieces are earned against: cases closed in this browser, and points from the account.
+  const [points, setPoints] = useState(0);
+  useEffect(() => {
+    let alive = true;
+    fetchPoints(seed).then((n) => alive && setPoints(n ?? 0), () => {});
+    return () => {
+      alive = false;
+    };
+  }, [seed]);
+  const standing = useMemo(() => {
+    const done = doneClues();
+    return { cases: games.filter((g) => done.has(g.id)).length, points };
+  }, [points]);
   const current = TABS.find((t) => t.key === tab)!;
 
   const choose = (key: PartKey, i: number) => {
@@ -277,15 +293,21 @@ function Editor({ seed, code, look, onSave, onLook, onClose }: EditorProps) {
                 <div className={swatches ? styles.dots : styles.tiles}>
                   {shown.map(({ name, i }) => {
                     const on = parts[key] === i;
-                    const label = `${part.title}: ${cap(name)}`;
+                    // An earned piece not yet earned: shown, so the prize is in sight, and not for choosing.
+                    const need = needOf(key, name);
+                    const locked = !!need && !on && !isEarned(need, standing);
+                    const label = `${part.title}: ${cap(name)}${locked ? `. Locked. ${howTo(need)}` : ''}`;
                     return swatches ? (
                       <button key={name} type="button" className={styles.dot} style={{ background: swatches[i] }} aria-pressed={on} aria-label={label} title={cap(name)} onClick={() => choose(key, i)}>
                         {on && <Icon icon={Check} size={18} className={styles.dotCheck} />}
                       </button>
                     ) : (
-                      <button key={name} type="button" className={styles.tile} aria-pressed={on} aria-label={label} onClick={() => choose(key, i)}>
+                      <button key={name} type="button" className={styles.tile} aria-pressed={on} aria-disabled={locked || undefined} data-locked={locked || undefined} aria-label={label} onClick={() => !locked && choose(key, i)}>
                         <Avatar parts={{ ...parts, [key]: i }} size={72} view={VIEW[key]} tile />
-                        <span className={styles.tileName}>{cap(name)}</span>
+                        <span className={styles.tileName}>
+                          {locked && <Icon icon={Lock} size={16} />}
+                          {locked ? howTo(need) : cap(name)}
+                        </span>
                       </button>
                     );
                   })}

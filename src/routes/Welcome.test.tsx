@@ -45,6 +45,7 @@ vi.mock('../lib/api', () => ({
   saveAvatar: async () => true,
   saveLook: async () => true,
   fetchLook: async () => null,
+  fetchPoints: async () => null,
 }));
 
 const DAILY = `/d/${today().n}`;

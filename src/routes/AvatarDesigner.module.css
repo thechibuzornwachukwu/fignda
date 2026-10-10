@@ -234,6 +234,23 @@
 .tile:active {
   transform: scale(0.97);
 }
+/* An earned piece not yet earned: in sight, dashed, and not for pressing. */
+.tile[data-locked] {
+  border: 2px dashed var(--line-3);
+  color: var(--subtle);
+  cursor: default;
+}
+.tile[data-locked]:hover {
+  background: transparent;
+}
+.tile[data-locked]:active {
+  transform: none;
+}
+.tile[data-locked] .tileName {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
 .tile[aria-pressed='true'] {
   border-color: var(--fg);
   color: var(--fg);

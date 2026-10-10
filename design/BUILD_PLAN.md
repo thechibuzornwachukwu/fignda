@@ -35,7 +35,7 @@ This is a business. Running costs are near zero, so the first sale is profit. No
 | Season takeover | A holiday case and the seasonal dress, "with NAME" | Brands | After set 5c |
 | Supporter | One payment: no ads ever, a badge | Players | Needs Paystack |
 | Plus, by the month | More puzzles in Make, private rooms, extra outfits | Players | Needs Paystack, set 6e |
-| Special outfits | Cosmetic only | Players | Needs Paystack, set 3d |
+| Special outfits | Cosmetic only | Players | Needs Paystack |
 | Partner unlock | The points to unlock another partner. Bought points unlock partners only and never count for rank, boards or leagues | Players | Needs Paystack, set 3g |
 | Licence | The game under a school's or a publisher's own name | Schools, publishers, media houses | After private boards are proven |
 | Footer ad | One a page, still image, never near a puzzle | Advertisers | Needs the domain, and consent in the EU and UK |
@@ -76,7 +76,6 @@ Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with 
 
 A case is one puzzle: its passages are the clues and the whole puzzle is the last, the unmasking (SPEC section 6, Games). Each clue gives a piece of the case's secret, and the unmasking shows who hid it (SPEC section 9, The secret).
 
-- [ ] **Set 3d. Outfits.** Detective pieces (coat, hat, magnifying glass, badge) earned by closing cases and rising in rank. Everything that helps someone look like themselves stays free.
 - [ ] **Set 3f. Rooms as a squad.** Every player's finds count toward the same secret.
 - [ ] **Set 3g. Partners** (SPEC section 5, Partners). The art exists: `design/characters` draws them, `design/brand/elements` holds the states, bubbles and case files. To build: the pick in the first minute, the partner on screen states, the waiting screen and the result, the choice saved with the profile, switching in Settings, unlocking with points. Buying points for an unlock waits for Paystack.
 

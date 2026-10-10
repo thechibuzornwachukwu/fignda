@@ -147,6 +147,38 @@ test('design your character: pick parts, save, and it shows as you', async ({ pa
   await expect(page.locator('main svg path[fill="#b0336f"]').first()).toBeAttached();
 });
 
+test('detective pieces are earned: locked until a case is closed, then they can be worn and saved', async ({ page }) => {
+  await newPlayer(page, 'Sola');
+  await page.goto('/settings');
+  await page.getByRole('button', { name: 'Edit character' }).click();
+  const editor = page.getByRole('dialog', { name: 'Edit your character' });
+  await editor.getByRole('tab', { name: 'Wear', exact: true }).click();
+
+  // In sight, and not for choosing. Each says how it is earned.
+  const badge = editor.getByRole('button', { name: /^Detective kit: Badge/ });
+  await expect(badge).toHaveAccessibleName('Detective kit: Badge. Locked. Close 1 case.');
+  await expect(badge).toHaveAttribute('aria-disabled', 'true');
+  await expect(editor.getByRole('button', { name: 'Detective kit: Detective hat. Locked. Reach the rank of Detective.' })).toBeVisible();
+  await expect(editor.getByRole('button', { name: 'Outfit: Detective coat. Locked. Reach the rank of Inspector.' })).toBeVisible();
+  await expect(editor.locator('[data-locked]')).toHaveCount(5);
+  await badge.click({ force: true });
+  await expect(editor.getByRole('region', { name: 'Detective kit' })).toContainText('None');
+  // Everything else stays free.
+  await expect(editor.getByRole('button', { name: 'Outfit: Agbada', exact: true })).not.toHaveAttribute('aria-disabled', 'true');
+
+  // A case closed in this browser earns the badge.
+  await page.evaluate(() => localStorage.setItem('gazecraft-finished', JSON.stringify(['bnote'])));
+  await page.reload();
+  await page.getByRole('button', { name: 'Edit character' }).click();
+  await editor.getByRole('tab', { name: 'Wear', exact: true }).click();
+  const earned = editor.getByRole('button', { name: 'Detective kit: Badge', exact: true });
+  await expect(earned).not.toHaveAttribute('aria-disabled', 'true');
+  await expect(editor.locator('[data-locked]')).toHaveCount(4);
+  await earned.click();
+  await expect(earned).toHaveAttribute('aria-pressed', 'true');
+  await expect(editor.getByRole('region', { name: 'Detective kit' })).toContainText('Badge');
+});
+
 test('copy result puts the spoiler free text on the clipboard', async ({ page, context }) => {
   await context.grantPermissions(['clipboard-read', 'clipboard-write']);
   await page.goto('/play/bible');

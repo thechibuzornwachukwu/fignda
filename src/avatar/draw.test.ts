@@ -23,8 +23,9 @@ describe('avatar parts are append only', () => {
     mark: ['none', 'freckles', 'pimples', 'beauty mark', 'blush', 'tribal marks', 'tribal marks across', 'single mark'],
     item: ['none', 'toothpick', 'chewing stick', 'rose'],
     tie: ['none', 'scrunchie', 'headband'],
-    outfit: ['tee', 'agbada', 'kaftan', 'dashiki', 'ankara', 'buba and beads', 'suit', 'hoodie', 'jersey', 'turtleneck', 'hero cape', 'wizard robe', 'space suit', 'high collar shirt'],
+    outfit: ['tee', 'agbada', 'kaftan', 'dashiki', 'ankara', 'buba and beads', 'suit', 'hoodie', 'jersey', 'turtleneck', 'hero cape', 'wizard robe', 'space suit', 'high collar shirt', 'detective coat'],
     festive: ['none', 'santa hat', 'antlers', 'witch hat', 'pumpkin', 'ghost', 'hearts', 'party hat', 'naija', 'snow', 'crown', 'bunny ears', 'clown'],
+    kit: ['none', 'badge', 'magnifying glass', 'detective hat', 'full kit'],
   };
 
   it.each(PARTS.map((p) => [p.key, p.letter] as const))('%s keeps its saved order', (key) => {
@@ -59,9 +60,9 @@ describe('avatar drawing', () => {
   });
 
   it('a code round trips, and junk falls back to the default', () => {
-    const a: Avatar = { back: 5, skin: 2, hair: 40, colour: 4, eyes: 3, mouth: 1, face: 2, extra: 3, mark: 7, item: 2, tie: 1, outfit: 13, festive: 11 };
+    const a: Avatar = { back: 5, skin: 2, hair: 40, colour: 4, eyes: 3, mouth: 1, face: 2, extra: 3, mark: 7, item: 2, tie: 1, outfit: 13, festive: 11, kit: 3 };
     expect(parseAvatar(avatarCode(a))).toEqual(a);
-    expect(avatarCode(a)).toMatch(/^([a-z][0-9]{1,2}){13}$/);
+    expect(avatarCode(a)).toMatch(/^([a-z][0-9]{1,2}){14}$/);
     for (const junk of [null, undefined, '', '<svg onload=alert(1)>', 'h999', 'b9s9', 'x'.repeat(500)]) {
       expect(parseAvatar(junk)).toEqual(DEFAULT_AVATAR);
     }
