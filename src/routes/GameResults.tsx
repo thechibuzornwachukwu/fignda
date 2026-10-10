@@ -44,6 +44,8 @@ type Props = {
   done?: string;
   /** A sponsored puzzle: "With NAME" and, when there is one, the sponsor's link and its site name. */
   sponsor?: { line: string; url?: string; host?: string; /** The link was opened. */ onVisit?: () => void };
+  /** A clue of a case: the piece it gave, or the unmasking when it closed the case. */
+  caseFile?: ReactNode;
   /** Extra actions under the result (the reminder ask). */
   children?: ReactNode;
 };
@@ -51,7 +53,7 @@ type Props = {
 /** Lines worth a paragraph: no blanks, none twice. */
 const lines = (l?: readonly string[]) => [...new Set((l ?? []).filter((x) => typeof x === 'string' && x.trim() !== ''))];
 
-export function GameResults({ title, line, score, found, total, secs, canReplay, onReplay, onShare, onText, next, boardPath, guest, guestLine, streak, rare, stars, starsUp, skills, records, day, done, sponsor, children }: Props) {
+export function GameResults({ title, line, score, found, total, secs, canReplay, onReplay, onShare, onText, next, boardPath, guest, guestLine, streak, rare, stars, starsUp, skills, records, day, done, sponsor, caseFile, children }: Props) {
   const { pathname } = useLocation();
   const [note, setNote] = useState('');
   const earned = clampStars(stars);
@@ -78,6 +80,7 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
             {starsUp && <span>{starsUp}</span>}
           </p>
         )}
+        {caseFile}
         {lines(skills).map((l) => (
           <p key={l} className={styles.streak}>
             {l}

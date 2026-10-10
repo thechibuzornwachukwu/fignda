@@ -9,6 +9,7 @@ import { forgetGuestSeed, GUEST_SEED_KEY } from '../avatar/guest';
 import { setAvatarCode } from '../avatar/store';
 import { POOLS } from '../copy';
 import { buildPath, type Path } from '../engine/journey';
+import { caseFile, secretOf } from '../games/caseFile';
 import { games } from '../games/catalog';
 import { Journey, JOURNEY_AT_KEY, type JourneyGame } from './Journey';
 
@@ -58,6 +59,32 @@ describe('Journey', () => {
     expect(screen.getByRole('heading', { level: 2, name: 'Your path' })).toBeInTheDocument();
     expect(screen.getAllByRole('heading', { level: 3 }).map((h) => h.textContent)).toEqual(path.cases.map((c) => titleOf(c.id)));
     expect(text(container)).toContain(`0 of ${all.length} clues`);
+  });
+
+  it('the case being worked shows its file: the culprit in disguise, an opening line, and the secret so far', () => {
+    const { container } = show({ done: [ids[0]!] });
+    const files = container.querySelectorAll('[data-case-file]');
+    expect(files).toHaveLength(1);
+    const file = box(container, first.id).querySelector<HTMLElement>('[data-case-file]')!;
+    expect(file.querySelector('[data-culprit="masked"]')).not.toBeNull();
+    expect(fills(POOLS.caseOpen, file.querySelector('p')!.textContent!)).toBe(true);
+    const want = caseFile(first.id, new Set([ids[0]!]))!;
+    expect(want.slots.filter(Boolean).length).toBeGreaterThan(0);
+    expect([...file.querySelectorAll('[data-slot]')].map((s) => s.textContent)).toEqual(want.slots);
+    expect(within(file).getByRole('img', { name: `The secret: ${want.slots.filter(Boolean).length} of ${want.word.length} letters found.` })).toBeInTheDocument();
+    // The word is never on the page before the case is closed.
+    expect(text(container)).not.toContain(secretOf(first.id)!.word);
+  });
+
+  it('a closed case and a locked case show no file, and a puzzle that is not ours has none', () => {
+    const { container } = show({ done: [first.id] });
+    expect(box(container, first.id).querySelector('[data-case-file]')).toBeNull();
+    expect(box(container, path.cases[2]!.id).querySelector('[data-case-file]')).toBeNull();
+    expect(box(container, second.id).querySelector('[data-case-file]')).not.toBeNull();
+    const mine: JourneyGame = { id: 'mine', category: 'A', title: 'Mine', text: 'Pat omitted a most odd note.', dict: ['atom'] };
+    const other = show({ catalogue: [mine] });
+    expect(other.container.querySelector('[data-case="mine"]')).not.toBeNull();
+    expect(other.container.querySelector('[data-case-file]')).toBeNull();
   });
 
   it('a case says how many clues are left, never how long', () => {

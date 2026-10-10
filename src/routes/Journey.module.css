@@ -122,6 +122,30 @@
   overflow-wrap: anywhere;
 }
 
+/* The case being worked: who hid it, still in disguise, and the secret so far. */
+.file {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 0;
+  padding: 0 var(--space-5);
+}
+.fileText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-width: 0;
+}
+.fileLine {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
 /* The line is drawn behind the clues. Rows are equal in height, so clue i sits i rows down. */
 .track {
   position: relative;

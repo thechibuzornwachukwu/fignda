@@ -1,0 +1,151 @@
+/* The case file: the secret as letter slots, the culprit under a disguise, and the unmasking. */
+
+.slots {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  max-width: 100%;
+  font-size: 15px;
+  font-weight: 800;
+  line-height: 1;
+}
+.slot {
+  display: grid;
+  place-items: center;
+  width: 1.6em;
+  height: 2em;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid var(--line-3);
+  color: var(--fg);
+}
+/* Not found yet: an empty, dashed place. Shape, not colour alone. */
+.slot[data-slot='off'] {
+  background: transparent;
+  border-style: dashed;
+}
+.slot[data-fresh] {
+  animation: pop var(--dur-star) var(--ease-out) backwards;
+}
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+.culprit {
+  position: relative;
+  display: block;
+  flex: none;
+  border-radius: 50%;
+  overflow: hidden;
+}
+.mask {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+/* The mask comes off: up and away, once. */
+.culprit[data-culprit='unmasking'] .mask {
+  animation: unmask var(--dur-unmask) var(--ease-out) var(--dur-slower) forwards;
+}
+@keyframes unmask {
+  to {
+    opacity: 0;
+    transform: translateY(-45%) rotate(-10deg);
+  }
+}
+
+.piece {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-3);
+  margin: var(--space-3) 0 0;
+}
+.line {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.closed {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-3);
+  margin: var(--space-4) 0 0;
+  padding: var(--space-4) var(--space-5);
+  background: var(--surface);
+  border: 1px solid var(--line-3);
+  border-radius: var(--radius-xl);
+}
+.scene {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-4);
+}
+/* A rubber stamp: Bungee in a ruled box, set at a slant. It lands after the mask is off. */
+.stamp {
+  composes: h3 from '../styles/type.module.css';
+  margin: 0;
+  padding: var(--space-1) var(--space-3);
+  border: var(--space-0h) solid var(--ink-heading);
+  border-radius: var(--radius-md);
+  color: var(--ink-heading);
+  transform: rotate(-6deg);
+  animation: stamp var(--dur-stamp) var(--ease-out) calc(var(--dur-slower) + var(--dur-unmask)) backwards;
+}
+@keyframes stamp {
+  from {
+    opacity: 0;
+    transform: rotate(-6deg) scale(1.5);
+  }
+}
+.confession {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.4;
+  color: var(--fg);
+  overflow-wrap: anywhere;
+}
+.card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+/* The calling card: a small card with one open eye. */
+.cardMark {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--space-8);
+  height: var(--space-6);
+  border-radius: var(--radius-xs);
+  background: var(--surface-2);
+  border: 1px solid var(--line-3);
+  color: var(--fg);
+  transform: rotate(-4deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slot[data-fresh],
+  .stamp {
+    animation: none;
+  }
+  /* The mask is simply off. */
+  .culprit[data-culprit='unmasking'] .mask {
+    animation: none;
+    opacity: 0;
+  }
+}

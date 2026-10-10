@@ -1,5 +1,5 @@
 import { createElement, useMemo, useSyncExternalStore } from 'react';
-import { avatarFor, drawAvatar, parseAvatar, VIEW_BOX, type Avatar as AvatarParts } from '../avatar/draw';
+import { avatarFor, drawAvatar, parseAvatar, shapeProps, VIEW_BOX, type Avatar as AvatarParts } from '../avatar/draw';
 import { avatarCodeOf, subscribeAvatars } from '../avatar/store';
 import styles from './Avatar.module.css';
 
@@ -27,14 +27,8 @@ export function Avatar({ handle = '', parts, size = 28, view, tile, className }:
   const shapes = useMemo(() => drawAvatar(parts ?? (code ? parseAvatar(code) : avatarFor(handle))), [parts, code, handle]);
   return (
     <svg className={[tile ? styles.tile : styles.avatar, className].filter(Boolean).join(' ')} width={size} height={size} viewBox={view ?? VIEW_BOX} preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
-      {shapes.map((s, i) => createElement(s.tag, { key: i, ...toProps(s.attrs) }))}
+      {shapes.map((s, i) => createElement(s.tag, { key: i, ...shapeProps(s.attrs) }))}
     </svg>
   );
 }
 
-/** SVG attribute names to React prop names (stroke-width to strokeWidth). */
-function toProps(attrs: Record<string, string | number>): Record<string, string | number> {
-  const out: Record<string, string | number> = {};
-  for (const [k, v] of Object.entries(attrs)) out[k.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())] = v;
-  return out;
-}

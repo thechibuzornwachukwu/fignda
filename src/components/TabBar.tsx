@@ -1,11 +1,12 @@
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import type { ReactNode } from 'react';
+import { useRef, type ReactNode } from 'react';
 import { Check, FolderSearch, Search, Trophy, UserRound, Users } from 'lucide-react';
 import { dayNo } from '../engine/daily';
 import { loadDaily } from '../games/daily';
 import { isFinished } from '../games/session';
 import { useAuth } from '../lib/auth';
 import { hasTabBar } from '../lib/routes';
+import { useTucked } from '../lib/useTucked';
 import { Avatar } from './Avatar';
 import { Icon } from './Icon';
 import styles from './TabBar.module.css';
@@ -13,11 +14,15 @@ import styles from './TabBar.module.css';
 /**
  * Phones only: a floating dock within thumb reach. Four places, icon over label, and today's daily raised in
  * the middle, since playing it is the one thing the app is for. Desktop keeps the header links.
+ * It slides below the screen on a scroll down and back on any scroll up, as the header does.
  * Visible navigation, not a hamburger (NN/g: hidden navigation is found about half as often).
  */
 export function TabBar() {
   const { pathname } = useLocation();
   const { profile } = useAuth();
+  // Out of the way while reading down, back on the first scroll up and at the end of the page.
+  const ref = useRef<HTMLElement>(null);
+  const tucked = useTucked(ref, pathname, true);
   if (!hasTabBar(pathname)) return null;
   const you = profile ? `/u/${profile.handle}` : `/signin?next=${encodeURIComponent(pathname)}`;
   const onYou = pathname.startsWith('/u/') || pathname === '/settings' || pathname === '/signin';
@@ -25,7 +30,7 @@ export function TabBar() {
   const saved = loadDaily(n);
   const done = !!saved && isFinished(saved);
   return (
-    <nav className={styles.bar} aria-label="Tabs">
+    <nav ref={ref} className={[styles.bar, tucked && styles.tucked].filter(Boolean).join(' ')} aria-label="Tabs" data-tucked={tucked || undefined}>
       <Tab to="/play" icon={<Icon icon={FolderSearch} size={20} />} label="Cases" />
       <Tab to="/leaderboard" icon={<Icon icon={Trophy} size={20} />} label="Ranks" />
       <Link to={`/d/${n}`} className={styles.play} data-done={done || undefined} aria-label={done ? "Today's daily, done" : "Play today's daily"}>

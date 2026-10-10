@@ -13,7 +13,9 @@ import { dailyInfo, dailyLabel } from '../games/daily';
 import { registry } from '../games/registry';
 import { dayHidLine, playFacts, rareLine, recordLines, skillLines, starsUpLine, todayHoldsLine } from '../games/resultLines';
 import { isCleanRead, scoreOf, secondsOf, useGameSession, type Session } from '../games/session';
+import { CaseClosed, CasePiece } from '../components/CaseFile';
 import { clueId } from '../engine/journey';
+import { caseFile, doneClues } from '../games/caseFile';
 import { starsFor } from '../engine/stars';
 import { dayProfile } from '../engine/variableDay';
 import { countEvent, fetchCustomGame, fetchDailyPlace, fetchWordStats, mergeGuestDailies, submitPlay } from '../lib/api';
@@ -337,6 +339,16 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
     : 0;
   const starsUp = !!ended?.starsUp;
   const starLine = useMemo(() => starsUpLine(stars, starsUp, copy.pick), [stars, starsUp]);
+  // The case this clue belongs to: a passage gives a piece of the secret, the whole puzzle closes the case.
+  // A game with stars is a clue done, the same rule the path reads by.
+  const caseNode = useMemo(() => {
+    if (!finished || !starred) return null;
+    const file = caseFile(def.id, new Set([...doneClues(), gameKey]));
+    if (!file) return null;
+    if (!part) return <CaseClosed id={def.id} secret={file.word} />;
+    const piece = file.piece(part.n);
+    return <CasePiece slots={file.slots} fresh={piece.slots} piece={piece.text} />;
+  }, [finished, starred, def.id, gameKey, part]);
   // Variable days. Before today's daily: what it holds, never how much. After it: today against a usual day.
   const holdsLine = useMemo(
     () => (isToday && !finished ? todayHoldsLine(dayProfile(puzzle), copy.pick) : ''),
@@ -482,6 +494,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
           guestLine={guestLine}
           streak={streakLine}
           rare={rare}
+          caseFile={caseNode}
           stars={stars}
           starsUp={starLine}
           skills={lines}

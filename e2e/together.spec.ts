@@ -46,6 +46,38 @@ test.describe('phone tab bar', () => {
     await expect(page.getByRole('navigation', { name: 'Tabs' })).toHaveCount(0);
   });
 
+  test('the dock slides below the screen on a scroll down, and back on a scroll up and at the end of the page', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/play');
+    const tabs = page.getByRole('navigation', { name: 'Tabs' });
+    await expect(tabs).toBeVisible();
+    // The page is long enough to scroll once the path has drawn.
+    await expect(page.locator('[data-journey] [data-case]').first()).toBeVisible();
+    const top = () => tabs.evaluate((el) => Math.round(el.getBoundingClientRect().top));
+    const scrollTo = (y: number | 'end') => page.evaluate((to) => window.scrollTo(0, to === 'end' ? document.documentElement.scrollHeight : to), y);
+    expect(await top()).toBeLessThan(740);
+
+    await scrollTo(500);
+    await expect(tabs).toHaveAttribute('data-tucked', 'true');
+    await expect.poll(top).toBeGreaterThanOrEqual(740);
+
+    await scrollTo(440);
+    await expect(tabs).not.toHaveAttribute('data-tucked', 'true');
+    await expect.poll(top).toBeLessThan(740);
+
+    await scrollTo(700);
+    await expect(tabs).toHaveAttribute('data-tucked', 'true');
+    await scrollTo('end');
+    await expect(tabs).not.toHaveAttribute('data-tucked', 'true');
+
+    // Keyboard: focus inside brings it back.
+    await scrollTo(300);
+    await scrollTo(600);
+    await expect(tabs).toHaveAttribute('data-tucked', 'true');
+    await tabs.getByRole('link', { name: 'Cases' }).focus();
+    await expect(tabs).not.toHaveAttribute('data-tucked', 'true');
+  });
+
   test('desktop keeps the header links and no tab bar', async ({ browser }) => {
     const page = await browser.newPage({ viewport: { width: 1280, height: 800 } });
     await page.goto('/play');

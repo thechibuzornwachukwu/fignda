@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState, type RefObject } from 'react';
+import { useRef } from 'react';
+import { useTucked } from '../lib/useTucked';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Bell } from 'lucide-react';
 import { useAuth } from '../lib/auth';
@@ -57,52 +58,6 @@ function NotificationsLink() {
       )}
     </Link>
   );
-}
-
-/** Scroll this far in one direction before the header moves. Stops jitter from small wobbles. */
-const TOLERANCE = 8;
-
-/**
- * Quick return (Material "enterAlways", headroom.js): hide on scroll down, show on any scroll up.
- * Always shown near the top, and whenever focus is inside it so keyboard users never lose it.
- */
-function useTucked(ref: RefObject<HTMLElement | null>, pathname: string) {
-  const [tucked, setTucked] = useState(false);
-  const [prevPath, setPrevPath] = useState(pathname);
-  if (prevPath !== pathname) {
-    setPrevPath(pathname);
-    setTucked(false);
-  }
-
-  useEffect(() => {
-    let last = window.scrollY;
-    let frame = 0;
-    const update = () => {
-      frame = 0;
-      const y = window.scrollY;
-      const d = y - last;
-      if (Math.abs(d) < TOLERANCE) return;
-      const el = ref.current;
-      const height = el?.offsetHeight ?? 0;
-      const focused = !!el && el.contains(document.activeElement);
-      setTucked(d > 0 && y > height && !focused);
-      last = y;
-    };
-    const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(update);
-    };
-    const onFocus = () => setTucked(false);
-    const el = ref.current;
-    window.addEventListener('scroll', onScroll, { passive: true });
-    el?.addEventListener('focusin', onFocus);
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      el?.removeEventListener('focusin', onFocus);
-      if (frame) cancelAnimationFrame(frame);
-    };
-  }, [ref]);
-
-  return tucked;
 }
 
 /**

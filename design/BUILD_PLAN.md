@@ -31,7 +31,7 @@ This is a business. Running costs are near zero, so the first sale is profit. No
 | Tournament | A week's contest on one puzzle, prize from the sponsor | Brands, companies, schools | Now |
 | Sponsored puzzle | A puzzle on the sponsor's subject, marked "With NAME", their link on the result and the share card | Brands | Now |
 | Sponsored daily | "Today's daily, with NAME" for a day or a week | Brands | Now |
-| Sponsored case | A whole case in the sponsor's world | Brands | After set 3c |
+| Sponsored case | A whole case in the sponsor's world | Brands | Now |
 | Season takeover | A holiday case and the seasonal dress, "with NAME" | Brands | After set 5c |
 | Supporter | One payment: no ads ever, a badge | Players | Needs Paystack |
 | Plus, by the month | More puzzles in Make, private rooms, extra outfits | Players | Needs Paystack, set 6e |
@@ -74,10 +74,8 @@ Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with 
 
 ### 3. Cases
 
-A case is one puzzle: its passages are the clues and the whole puzzle is the last, the unmasking (SPEC section 6, Games).
+A case is one puzzle: its passages are the clues and the whole puzzle is the last, the unmasking (SPEC section 6, Games). Each clue gives a piece of the case's secret, and the unmasking shows who hid it (SPEC section 9, The secret).
 
-- [ ] **Set 3b. The secret, engine only.** Each clue gives one piece and the last puts them together. Never typed by hand. A puzzle that changes must not break its case.
-- [ ] **Set 3c. Culprits and the unmasking.** One disguise per case, drawn on top of an ordinary avatar the way the Festive items are (`src/avatar`, append only). Copy pools: a line to open a case, a confession to close it, the calling card. Motion: a "Case closed" stamp and the mask coming off. No cutscenes.
 - [ ] **Set 3d. Outfits.** Detective pieces (coat, hat, magnifying glass, badge) earned by closing cases and rising in rank. Everything that helps someone look like themselves stays free.
 - [ ] **Set 3e. Server.** Clue progress and case badges saved from verified plays, a guest's progress moved to the account on sign in, ranks as a view over points. 2 devices with different progress, and a player with history before cases exist.
 - [ ] **Set 3f. Rooms as a squad.** Every player's finds count toward the same secret.

@@ -120,13 +120,15 @@
   --dur-hop: 520ms;         /* Avatar to the next clue. Once per finished clue */
   --dur-star: 220ms;        /* One star popping in */
   --dur-star-step: 140ms;   /* Each star starts this long after the last */
+  --dur-unmask: 420ms;      /* A culprit's mask lifting off. Once per closed case */
+  --dur-stamp: 280ms;       /* The Case closed stamp landing, after the mask */
 }
 @media (prefers-reduced-motion: reduce) {
   :root {
     --dur-fast: 0ms; --dur-base: 0ms; --dur-slow: 0ms; --dur-slower: 0ms;
     --dur-letter: 0ms; --dur-clock: 0ms; --dur-flip: 0ms; --dur-flip-lead: 0ms;
     --dur-bob: 0ms; --dur-bounce: 0ms; --dur-bounce-step: 0ms;
-    --dur-hop: 0ms; --dur-star: 0ms; --dur-star-step: 0ms;
+    --dur-hop: 0ms; --dur-star: 0ms; --dur-star-step: 0ms; --dur-unmask: 0ms; --dur-stamp: 0ms;
   }
 }
 html, body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); -webkit-font-smoothing: antialiased; }

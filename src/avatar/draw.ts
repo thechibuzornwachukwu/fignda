@@ -6,6 +6,7 @@
 //   parts/hair.ts      hair and headwear, one entry per style
 //   parts/outfits.ts   outfits, one entry per outfit
 //   parts/face.ts      eyes, mouths, facial hair, skin marks, extras, mouth items, hair ties, mood presets
+//   parts/disguises.ts what a culprit wears until their case is closed; a layer of its own, never saved
 //   parts/festive.ts   seasonal and themed touches (Santa hat, hearts, Naija colours), drawn on top
 //   draw.ts (here)     the choices an avatar is made of, its saved code, and the layer order
 //   store.ts           fetching other players' codes in batches
@@ -18,6 +19,7 @@
 // avatars use it so they never change how someone presents. It limits nothing a player picks by hand.
 
 import { EXTRA_STYLES, EYE_STYLES, FACE_HAIR_STYLES, HAIR_TIE_NAMES, headband, MARK_STYLES, MOUTH_ITEM_STYLES, MOUTH_STYLES, scrunchie } from './parts/face';
+import { DISGUISE_STYLES } from './parts/disguises';
 import { FESTIVE_STYLES } from './parts/festive';
 import { HAIR_STYLES } from './parts/hair';
 import { OUTFIT_STYLES, torso } from './parts/outfits';
@@ -205,6 +207,18 @@ export function drawAvatar(a: Avatar): Shape[] {
     FESTIVE_STYLES[a.festive]!.draw(k),
   ];
   return layers.flat();
+}
+
+/** A disguise for this avatar, as a layer of its own to draw on top of it. Nothing for a position that is not in the list. */
+export function drawDisguise(a: Avatar, disguise: number): Shape[] {
+  return DISGUISE_STYLES[disguise]?.draw(kitFor(a)) ?? [];
+}
+
+/** SVG attribute names to React prop names (stroke-width to strokeWidth). */
+export function shapeProps(attrs: Record<string, string | number>): Record<string, string | number> {
+  const out: Record<string, string | number> = {};
+  for (const [k, v] of Object.entries(attrs)) out[k.replace(/-([a-z])/g, (_, ch: string) => ch.toUpperCase())] = v;
+  return out;
 }
 
 /** The same drawing as SVG text (link previews, exports). Values are numbers and fixed palette strings only. */

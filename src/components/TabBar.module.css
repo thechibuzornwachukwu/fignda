@@ -19,6 +19,11 @@
     border: 1px solid var(--line-3);
     border-radius: var(--radius-dock);
     box-shadow: 0 var(--ledge) 0 var(--line-3);
+    transition: transform var(--dur-slow) var(--ease-out);
+  }
+  /* Quick return: below the screen while reading down. Its own height, the gap under it and the ledge. */
+  .tucked {
+    transform: translateY(calc(100% + var(--space-3) + var(--ledge) + env(safe-area-inset-bottom)));
   }
 }
 .tab,

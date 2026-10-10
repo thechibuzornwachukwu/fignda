@@ -222,6 +222,43 @@
   "journeyEmpty": [
     "No cases on the path yet. Every puzzle is in All games."
   ],
+  "caseOpen": [
+    "Something was hidden here. Each clue gives up a piece of its name.",
+    "A secret in {n} pieces. Each clue gives up one.",
+    "Somebody hid something and left in a hurry. Collect the pieces."
+  ],
+  "pieceFound": [
+    "A piece of the secret: {p}.",
+    "{p}. One more piece of the secret.",
+    "The clue gave up a piece: {p}."
+  ],
+  "culpritWho": [
+    "the baker",
+    "the choir leader",
+    "the tailor",
+    "the bus driver",
+    "the librarian",
+    "the gardener",
+    "the drummer",
+    "the caretaker",
+    "the photographer",
+    "the usher",
+    "the stall owner",
+    "the coach",
+    "the art teacher",
+    "the neighbour from 2 doors down"
+  ],
+  "confession": [
+    "It was {who}. \"I hid the {secret}. It was meant to be a surprise.\"",
+    "Under the disguise: {who}. \"The {secret} was with me all along. I wanted to see who would notice.\"",
+    "It was {who}. \"Yes, I hid the {secret}. I was proud of that hiding place.\"",
+    "Unmasked: {who}. \"I took the {secret} for a joke. You were quicker than I thought.\""
+  ],
+  "callingCard": [
+    "Left behind, as always: a card with one open eye.",
+    "The same card again. One open eye, no name.",
+    "And the card with the open eye. Somebody else is behind these."
+  ],
   "cluesLeft": [
     "{n} clues left"
   ],
