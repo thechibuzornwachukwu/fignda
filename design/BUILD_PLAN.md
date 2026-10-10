@@ -77,7 +77,6 @@ Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with 
 A case is one puzzle: its passages are the clues and the whole puzzle is the last, the unmasking (SPEC section 6, Games). Each clue gives a piece of the case's secret, and the unmasking shows who hid it (SPEC section 9, The secret).
 
 - [ ] **Set 3d. Outfits.** Detective pieces (coat, hat, magnifying glass, badge) earned by closing cases and rising in rank. Everything that helps someone look like themselves stays free.
-- [ ] **Set 3e. Server.** Clue progress and case badges saved from verified plays, a guest's progress moved to the account on sign in, ranks as a view over points. 2 devices with different progress, and a player with history before cases exist.
 - [ ] **Set 3f. Rooms as a squad.** Every player's finds count toward the same secret.
 - [ ] **Set 3g. Partners** (SPEC section 5, Partners). The art exists: `design/characters` draws them, `design/brand/elements` holds the states, bubbles and case files. To build: the pick in the first minute, the partner on screen states, the waiting screen and the result, the choice saved with the profile, switching in Settings, unlocking with points. Buying points for an unlock waits for Paystack.
 
@@ -171,8 +170,8 @@ Play with no account, and sponsors get numbers, never people.
 - Reminder times follow the saved time zone. The daily changes at midnight UTC.
 - Machine-written puzzles stop for the day when the free limits run out.
 - The avatar on the waiting screen bobs and does not blink.
-- Stars, shelf counts and personal records are kept in the browser, from 9 Oct 2026 on.
-- A sitting is played and scored in the browser only: its stars and result are not on the account, and it earns no points until cases are on the server (set 3e).
+- Personal records are kept in the browser, from 9 Oct 2026 on. Stars and closed cases are on the account from 10 Oct 2026; a guest's are in the browser until they sign in.
+- A guest's clues move to the account on sign in with their stars but no points: only a clue played signed in is checked and scored. A points badge earned by a clue shows after the next whole puzzle or daily.
 - A guest's place on today's board is worked out from a score the browser sent, so it is a guide, never a rank.
 - An unfinished puzzle is kept in the browser it was played in, not on the account: a second device starts clean. Safari clears a site's stored data after 7 days without a visit, so a guest there can lose a kept game, a run and their stars.
 - The sponsor report's games and shares are counted in the browser from 10 Oct 2026, guests included, and are not checked by replay: anyone can push one up, 240 an hour per address. A deleted account leaves them and comes out of the signed in players.

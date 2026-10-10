@@ -207,8 +207,8 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
   // Set once the server has answered for this play, so the word stats can include it.
   const [answered, setAnswered] = useState(false);
   useEffect(() => {
-    // A sitting is never sent: the server ranks whole puzzles, and a passage is not one.
-    if (part || !finished || !signedIn || s.endAt == null || sent.current === s.startAt) return;
+    // A sitting is sent as a clue of its case: checked and kept on the account, on no board.
+    if (!finished || !signedIn || s.endAt == null || sent.current === s.startAt) return;
     // A result opened again was sent when it was earned. The daily is asked again on purpose: the server
     // answers "already played", and that answer is what lets the word stats load.
     if (!daily && s.sent) return;
@@ -221,7 +221,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
     }
     const log = s.log ?? { events: [], hints: [] };
     void submitPlay({
-      game: daily ? { type: 'daily', day_no: dailyN! } : { type: 'game', id: def.id },
+      game: daily ? { type: 'daily', day_no: dailyN! } : part ? { type: 'game', id: def.id, clue: part.n } : { type: 'game', id: def.id },
       log: { events: log.events, hints: log.hints, finish: Math.max(1, s.endAt - s.startAt) },
       // In a room the log holds only your own picks. The server replays it for the Together board and never
       // for the solo boards: a teammate's find is not yours to score.

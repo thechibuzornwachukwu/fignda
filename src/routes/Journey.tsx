@@ -14,6 +14,7 @@ import { buildPath, clueStates, type CatalogueItem, type ClueState, type Path } 
 import { caseFile } from '../games/caseFile';
 import { games } from '../games/catalog';
 import { useAuth } from '../lib/auth';
+import { PROGRESS_EVENT } from '../lib/progress';
 import { loadFinished } from '../lib/shelves';
 import { loadStars } from '../lib/starStore';
 import { storage } from '../lib/storage';
@@ -62,7 +63,15 @@ export function Journey({ catalogue = games, path, done, stars, className }: Pro
   const { profile } = useAuth();
   const headId = useId();
   const starter = useMemo(() => avatarFor(guestSeed()), []);
-  const browser = useMemo(() => ({ finished: loadFinished(), stars: loadStars() }), []);
+  // Read again when the account brings clues done on another device.
+  const [rev, setRev] = useState(0);
+  useEffect(() => {
+    const on = () => setRev((v) => v + 1);
+    window.addEventListener(PROGRESS_EVENT, on);
+    return () => window.removeEventListener(PROGRESS_EVENT, on);
+  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- `rev` is the reason to read storage again
+  const browser = useMemo(() => ({ finished: loadFinished(), stars: loadStars() }), [rev]);
   const [cameFrom] = useState(() => storage.get(JOURNEY_AT_KEY));
 
   const view = useMemo(() => {

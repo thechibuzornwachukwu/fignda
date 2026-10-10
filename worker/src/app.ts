@@ -5,6 +5,8 @@ import { z } from 'zod';
 import { dayNo } from '../../src/engine/daily';
 import { buildHiddenWords } from '../../src/engine/hiddenWords';
 import { checkDraft, crossesWords, MAKE, WORD_RE } from '../../src/engine/make';
+import { passages } from '../../src/engine/passages';
+import { starsFor } from '../../src/engine/stars';
 import pools from '../../data/copy.json';
 import type { AiGenerate } from './ai';
 import { GUEST_KEY_RE, JOB, JOB_COLS, isDead, jobOut, ownerKey, refunds, withHeartbeat, type JobRow, type JobTiming } from './jobs';
@@ -522,7 +524,8 @@ export const PlayBody = z
   .object({
     game: z.discriminatedUnion('type', [
       z.object({ type: z.literal('daily'), day_no: z.number().int().min(1).max(100000) }).strict(),
-      z.object({ type: z.literal('game'), id: z.string().regex(/^[a-z0-9-]{2,40}$/) }).strict(),
+      // clue: one passage of a catalogue puzzle, counted from 1. Without it, the whole puzzle.
+      z.object({ type: z.literal('game'), id: z.string().regex(/^[a-z0-9-]{2,40}$/), clue: z.number().int().min(1).max(40).optional() }).strict(),
     ]),
     log: z
       .object({
@@ -569,10 +572,25 @@ async function plays(req: Request, deps: Deps) {
     gameId = game.id;
   }
 
-  const g = await deps.db.from('games').select('id, text, dict').eq('id', gameId).maybeSingle();
+  const g = await deps.db.from('games').select('id, kind, text, dict').eq('id', gameId).maybeSingle();
   if (g.error || !g.data) throw new HttpError(404, 'unknown_game');
   const puzzle = buildHiddenWords({ text: g.data.text as string, dict: g.data.dict as string[] });
   if (expected && puzzle.answers.map((x) => x.key).join() !== expected.join()) throw new HttpError(500, 'daily_mismatch');
+
+  if (game.type === 'game' && game.clue != null) {
+    // A clue of a case: one passage, cut by the same engine the client cuts with, replayed as a game of its
+    // own. Alone only, catalogue only. It is kept apart from `plays`, so no board changes.
+    if (room) throw new HttpError(400, 'bad_request');
+    const cut = g.data.kind === 'curated' ? passages(puzzle) : [];
+    const part = cut.length < 2 ? undefined : cut[game.clue - 1];
+    if (!part) throw new HttpError(404, 'unknown_clue');
+    const c = replay(buildHiddenWords({ text: part.text, dict: g.data.dict as string[] }), log, false);
+    if (!c.ok) throw new HttpError(422, c.reason);
+    const stars = starsFor({ finished: true, found: c.found, total: c.total, hints: c.hints, wrongs: c.wrongs });
+    const kept = await deps.db.rpc('record_clue', { p_user: user.id, p_game: gameId, p_clue: game.clue, p_stars: stars, p_score: c.score });
+    if (kept.error || !kept.data) throw new HttpError(500, 'save_failed');
+    return json({ verified: true, clue: game.clue, found: c.found, total: c.total, hints: c.hints, secs: c.secs, score: c.score, stars });
+  }
 
   const r = replay(puzzle, log, game.type === 'daily');
   if (!r.ok) throw new HttpError(422, r.reason);

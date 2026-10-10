@@ -446,6 +446,29 @@ export async function mergeGuestDailies(): Promise<number> {
   return data as number;
 }
 
+/** Clues done in this browser, moved to the account unverified: stars only, no points. Safe to send again. */
+export async function mergeGuestProgress(items: ReadonlyArray<{ id: string; stars: number }>): Promise<number> {
+  if (!items.length) return 0;
+  const { data, error } = await (await client()).rpc('merge_guest_progress', { items: items.slice(0, 400) });
+  if (error) throw error;
+  return data as number;
+}
+
+/** Your clues done on any device: `bible~2` for a passage, `bible` for the whole puzzle, with the best stars. */
+export async function fetchProgress(): Promise<Array<{ clue_id: string; stars: number }>> {
+  const { data, error } = await (await client()).rpc('my_progress');
+  if (error) throw error;
+  return (data ?? []) as Array<{ clue_id: string; stars: number }>;
+}
+
+/** A player's lifetime points, clues included, as the server counts them. Null when there is no such player. */
+export async function fetchPoints(handle: string): Promise<number | null> {
+  const { data, error } = await (await client()).rpc('points_of', { p_handle: handle });
+  if (error) throw error;
+  const row = (data as Array<{ points: number }> | null)?.[0];
+  return row ? Number(row.points) : null;
+}
+
 // ---------------------------------------------------------------------------
 // Worker API (/api). Same origin in production; Vite proxies it to `wrangler dev` locally.
 // ---------------------------------------------------------------------------
@@ -545,7 +568,8 @@ export async function runGenerateJob(id: string, signal?: AbortSignal): Promise<
 }
 
 export type PlaySubmission = {
-  game: { type: 'daily'; day_no: number } | { type: 'game'; id: string };
+  /** `clue`: a passage of a catalogue puzzle, counted from 1. It is kept as a clue of its case, on no board. */
+  game: { type: 'daily'; day_no: number } | { type: 'game'; id: string; clue?: number };
   log: { events: Array<{ a: number; b: number; t: number }>; hints: number[]; finish: number };
   /** Room code when the game was played together. Goes to the Together board only. */
   room?: string;

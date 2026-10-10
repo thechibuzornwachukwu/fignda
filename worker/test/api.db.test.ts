@@ -4,6 +4,7 @@ import { randomUUID } from 'node:crypto';
 import { createClient } from '@supabase/supabase-js';
 import { dayNo } from '../../src/engine/daily';
 import { buildHiddenWords } from '../../src/engine/hiddenWords';
+import { passages } from '../../src/engine/passages';
 import { dailyIdFor, getGameDef } from '../../src/games/catalog';
 import { forgedJwt, makeProfile, makeUser, uniqueHandle, type TestUser } from '../../supabase/tests/helpers';
 import { userMessage, type AiGenerate } from '../src/ai';
@@ -243,6 +244,86 @@ describe('POST /api/plays', () => {
   });
 });
 
+describe('POST /api/plays for a clue of a case', () => {
+  let u: TestUser;
+  beforeEach(async () => {
+    u = await makeUser('clue');
+  });
+
+  const whole = buildHiddenWords(getGameDef('bible')!);
+  const cut = passages(whole);
+  const piece = (n: number) => buildHiddenWords({ text: cut[n - 1]!.text, dict: getGameDef('bible')!.dict });
+  const logOf = (p: ReturnType<typeof piece>, take = p.answers.length) => {
+    const events = p.answers.slice(0, take).map((a, i) => ({ a: a.spans[0]![0], b: a.spans[0]![1], t: (i + 1) * 3000 }));
+    return { events, hints: [], finish: (events.at(-1)?.t ?? 0) + 1000 };
+  };
+  const send = (body: unknown, token = u.token) => handle(post('/api/plays', body, { token }), deps());
+  const clues = async () => (await db.from('clue_plays').select('game_id, clue, stars, score, verified').eq('user_id', u.id).order('clue')).data;
+
+  it('replays the passage, keeps it as a checked clue with stars and the server score, and writes no play', async () => {
+    const r = await send({ game: { type: 'game', id: 'bible', clue: 2 }, log: logOf(piece(2)) });
+    expect(r.status).toBe(200);
+    const out = (await r.json()) as { score: number; stars: number; found: number; total: number };
+    expect(out).toMatchObject({ verified: true, clue: 2, found: piece(2).answers.length, total: piece(2).answers.length, stars: 3 });
+    expect(out.score).toBeGreaterThan(0);
+    expect(await clues()).toEqual([{ game_id: 'bible', clue: 2, stars: 3, score: out.score, verified: true }]);
+    // No board changes: the solo boards read `plays`.
+    expect((await db.from('plays').select('id').eq('user_id', u.id)).data).toEqual([]);
+  });
+
+  it('a replay keeps the better result, and a part find earns fewer stars', async () => {
+    const first = (await (await send({ game: { type: 'game', id: 'bible', clue: 1 }, log: logOf(piece(1), 1) })).json()) as { score: number; stars: number };
+    expect(first.stars).toBe(1);
+    const second = (await (await send({ game: { type: 'game', id: 'bible', clue: 1 }, log: logOf(piece(1)) })).json()) as { score: number; stars: number };
+    expect(second.stars).toBe(3);
+    await send({ game: { type: 'game', id: 'bible', clue: 1 }, log: logOf(piece(1), 1) });
+    expect(await clues()).toEqual([{ game_id: 'bible', clue: 1, stars: 3, score: Math.max(first.score, second.score), verified: true }]);
+  });
+
+  it('the log is checked against the passage, not the whole puzzle', async () => {
+    // Honest picks for the whole puzzle are out of range or wrong inside a short passage.
+    const events = whole.answers.slice(-3).map((a, i) => ({ a: a.spans[0]![0], b: a.spans[0]![1], t: (i + 1) * 3000 }));
+    const r = await send({ game: { type: 'game', id: 'bible', clue: 1 }, log: { events, hints: [], finish: 20_000 } });
+    if (r.status === 200) expect(((await r.json()) as { found: number }).found).toBe(0);
+    else expect(await r.json()).toEqual({ error: 'index_out_of_range' });
+  });
+
+  it.each([
+    ['finds 50ms apart', (l: ReturnType<typeof logOf>) => (l.events.forEach((e, i) => (e.t = 1000 + i * 50)), (l.finish = 10_000), l), 'too_fast'],
+    ['a find sent twice', (l: ReturnType<typeof logOf>) => (l.events.push({ ...l.events[0]!, t: l.finish - 10 }), l), 'duplicate_find'],
+    ['finish before the last find', (l: ReturnType<typeof logOf>) => ({ ...l, finish: 5 }), 'finish_before_last_event'],
+  ])('rejects a tampered log and keeps nothing: %s', async (_, bend, error) => {
+    const r = await send({ game: { type: 'game', id: 'bible', clue: 2 }, log: bend(logOf(piece(2))) });
+    expect(r.status).toBe(422);
+    expect(await r.json()).toEqual({ error });
+    expect(await clues()).toEqual([]);
+  });
+
+  it('a clue the case does not have is 404, and a bad clue number is a bad request', async () => {
+    expect((await send({ game: { type: 'game', id: 'bible', clue: cut.length + 1 }, log: logOf(piece(1)) })).status).toBe(404);
+    for (const clue of [0, -1, 41, 1.5, '2', null]) {
+      expect((await send({ game: { type: 'game', id: 'bible', clue }, log: logOf(piece(1)) })).status).toBe(400);
+    }
+    expect((await send({ game: { type: 'game', id: 'bible', clue: 1, stars: 3 }, log: logOf(piece(1)) })).status).toBe(400);
+    expect((await send({ game: { type: 'daily', day_no: dayNo(), clue: 1 }, log: logOf(piece(1)) })).status).toBe(400);
+    expect(await clues()).toEqual([]);
+  });
+
+  it('guests are refused, and a clue is never a room play', async () => {
+    const body = { game: { type: 'game', id: 'bible', clue: 1 }, log: logOf(piece(1)) };
+    expect((await handle(post('/api/plays', body), deps())).status).toBe(401);
+    expect((await handle(post('/api/plays', body, { token: forgedJwt(u.id) }), deps())).status).toBe(401);
+    expect((await send({ ...body, room: 'ABCDEF' })).status).toBe(400);
+    expect(await clues()).toEqual([]);
+  });
+
+  it('a puzzle that is not in the catalogue has no clues', async () => {
+    const made = await handle(post('/api/generate', { topic: topic() }, { token: u.token }), deps());
+    const id = ((await made.json()) as { game: { id: string } }).game?.id;
+    if (!id) return;
+    expect((await send({ game: { type: 'game', id, clue: 1 }, log: { events: [], hints: [], finish: 1000 } })).status).toBe(404);
+  });
+});
 describe('POST /api/plays in a room (Together board)', () => {
   const bnote = buildHiddenWords(getGameDef('bnote')!);
   const span = (i: number) => ({ a: bnote.answers[i]!.spans[0]![0], b: bnote.answers[i]!.spans[0]![1] });

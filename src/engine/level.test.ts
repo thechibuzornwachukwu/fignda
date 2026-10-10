@@ -1,4 +1,6 @@
-import { RANKS, rankOf, gapAt, levelFor } from './level';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { LEVELS_PER_RANK, RANKS, rankOf, gapAt, levelFor } from './level';
 
 describe('levelFor', () => {
   it('level 1 at 0, level 2 at 500', () => {
@@ -43,5 +45,25 @@ describe('levelFor', () => {
   it('treats bad input as 0 points', () => {
     for (const p of [-50, NaN, Infinity]) expect(levelFor(p).level).toBe(1);
     expect(levelFor(500.9).level).toBe(2);
+  });
+});
+
+describe('ranks on the server', () => {
+  it('rank_of in the database starts each rank at the same points the engine does', () => {
+    const sql = readFileSync(join(__dirname, '..', '..', 'supabase', 'migrations', '20261010000500_cases.sql'), 'utf8');
+    const body = sql.slice(sql.indexOf('create function public.rank_of'), sql.indexOf('create function public.points_of'));
+    const inSql = [...body.matchAll(/>= (\d+) then '([A-Za-z ]+)'/g)].map((m) => [m[2], Number(m[1])] as const).reverse();
+    // Points at which each rank after the first begins: every gap of the levels below it.
+    const starts = RANKS.slice(1).map((rank, i) => {
+      let points = 0;
+      for (let level = 1; level <= (i + 1) * LEVELS_PER_RANK; level++) points += gapAt(level);
+      return [rank, points] as const;
+    });
+    expect(inSql).toEqual(starts);
+    expect(body).toContain(`else '${RANKS[0]}'`);
+    for (const [rank, points] of starts) {
+      expect(levelFor(points).rank).toBe(rank);
+      expect(levelFor(points - 1).rank).not.toBe(rank);
+    }
   });
 });

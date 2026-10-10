@@ -103,15 +103,16 @@ describe('badges', () => {
   it('first game, then points milestones, each announced once', async () => {
     const ada = await player('bga');
     await play(ada, { score: 300 });
-    expect(await codes(ada)).toEqual(['first_game']);
+    // A whole catalogue puzzle is a case closed.
+    expect((await codes(ada)).sort()).toEqual(['cases_1', 'first_game']);
     await play(ada, { game_id: 'space', score: 900 });
-    expect((await codes(ada)).sort()).toEqual(['first_game', 'points_1000']);
+    expect((await codes(ada)).sort()).toEqual(['cases_1', 'first_game', 'points_1000']);
     // Replaying a puzzle for a lower score earns nothing new.
     await play(ada, { game_id: 'space', score: 200 });
     await play(ada, { game_id: 'lagos', score: 4000 });
-    expect((await codes(ada)).sort()).toEqual(['first_game', 'points_1000', 'points_5000']);
+    expect((await codes(ada)).sort()).toEqual(['cases_1', 'first_game', 'points_1000', 'points_5000']);
     const got = (await inbox(ada)).filter((n) => n.kind === 'badge').map((n) => n.data.code);
-    expect(got.sort()).toEqual(['first_game', 'points_1000', 'points_5000']);
+    expect(got.sort()).toEqual(['cases_1', 'first_game', 'points_1000', 'points_5000']);
     expect((await inbox(ada)).every((n) => n.handle === null)).toBe(true);
   });
 

@@ -19,6 +19,7 @@ Risks: leaked keys, faked scores, AI endpoint abuse, injected text in shared con
 | profiles (name, handle) | all | own row |
 | profile_private (look) | own row | own row; `feminine`, `masculine`, `mixed` or null |
 | plays | own rows; public view exposes handle, score, time | Worker only |
+| clue_plays (a clue of a case: best stars and score) | own rows, through `my_progress()` only | Worker only, through `record_clue()`; a guest's own progress through `merge_guest_progress()`, unverified |
 | daily | all | none |
 | daily_answers | service role only until day ends | none |
 | games curated | all | none |
@@ -48,6 +49,10 @@ Risks: leaked keys, faked scores, AI endpoint abuse, injected text in shared con
 - Word stats for today's daily are returned only to players who have a play for today.
 - `daily_place(day, score, secs)` tells anyone where a score would stand on a daily board: 2 numbers, a place and a count of players. It reads checked plays only and returns no handle, score or row. Daily scores are already public on the board, so it gives nothing away. A guest's score is never stored by it.
 - Clean read (every word, no wrong picks, no hints) is worked out by the same replay and stored on the play. It adds nothing to the score. A room play is never one. On today's daily it is masked in public, like the total, since it would give the count away.
+- A clue of a case (`/api/plays` with `clue`): the Worker cuts the catalogue puzzle into passages with the shared engine, replays the log against that passage alone, and works out the stars and the score itself. Only the best of each is kept (`record_clue`), so a replay cannot farm points. A clue never writes to `plays`, so no board changes. Not in a room, not on a puzzle that is not in the catalogue.
+- Guest progress (`merge_guest_progress`): clues done before sign in move to the account as `unverified`. They carry stars so the path matches on every device, and they score nothing, earn no badge and never change what a checked play earned. At most 400 items; anything that is not a clue of a catalogue puzzle is skipped.
+- Points count a clue's best checked score once. A rank (`rank_of`) is worked out from points and never stored. `points_of(handle)` gives a player's points and rank, which are already public on the Players page.
+- Case badges (`cases_1`, `cases_5`, `cases_10`, `cases_25`) count checked plays of whole catalogue puzzles only.
 
 ## AI generation `/api/generate`
 - Rate limit: 5 per hour per IP (guest), 20 per hour per user. Return 429.

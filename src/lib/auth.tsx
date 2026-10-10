@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Session } from '@supabase/supabase-js';
 import { clearLocalCache, deleteAccount, fetchProfile, mergeGuestDailies, type Profile } from './api';
+import { syncProgress } from './progress';
 import { moveGuestToAccount } from './firstMinute';
 import { disableReminder } from './push';
 import { storage } from './storage';
@@ -65,6 +66,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setProfile(p);
         // Bring guest dailies into the account. Idempotent, so every sign-in is fine.
         if (p) mergeGuestDailies().catch(() => {});
+        // And the path: clues done here go up, clues done elsewhere come down.
+        if (p) syncProgress().catch(() => {});
         // And the character and look a guest built here. A moved character is read back so Settings shows it.
         if (p && (await moveGuestToAccount(p).catch(() => false)) && alive) setProfile(await fetchProfile(s.user.id));
       } catch {

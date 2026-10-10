@@ -9,6 +9,7 @@ import { getGameDef } from "../games/catalog";
 import { dailyDate } from "../games/daily";
 import {
   fetchBadges,
+  fetchPoints,
   fetchOwnPlays,
   fetchProfileByHandle,
   fetchPublicPlays,
@@ -38,6 +39,7 @@ type State =
       profile: PublicProfile;
       /** Null when the plays did not load. */ plays: PlayRow[] | null;
       badges: string[];
+      /** Points as the server counts them, clues included. Null when they did not load. */ points: number | null;
     };
 
 /** "Oct 2026", or nothing when the date is missing or unreadable. Never "Invalid Date". */
@@ -92,7 +94,9 @@ export function Profile() {
         (b) => (Array.isArray(b) ? b : []),
         () => [],
       );
-      if (alive) setState({ status: "ready", profile, plays, badges });
+      // Points as the server counts them, clues included. The plays above give a number if this fails.
+      const points = await fetchPoints(handle).catch(() => null);
+      if (alive) setState({ status: "ready", profile, plays, badges, points });
     })();
     return () => {
       alive = false;
@@ -192,7 +196,7 @@ export function Profile() {
         <Avatar handle={profile.handle} size={88} />
         <div className={styles.names}>
           <h2 className={styles.name}>{name}</h2>
-          {open.points && <LevelBadge points={s.points} size="sm" />}
+          {open.points && <LevelBadge points={state.points ?? s.points} size="sm" />}
           <span className={styles.handle}>
             @{profile.handle}
             {since && ` · Playing since ${since}`}

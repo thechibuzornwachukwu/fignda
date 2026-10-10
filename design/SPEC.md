@@ -369,6 +369,13 @@ Nothing else animates.
   - Nothing is stored. The word comes from the puzzle's id and the count of clues in its case, and the pieces a player holds come from the clues they have done (`caseFile`, the same stars and finished puzzles the path reads). So a puzzle whose text changes keeps its secret. One whose count of passages changes may get another word, and the pieces shown are still pieces of the word shown: a change never breaks a case.
   - An empty pool gives the word SECRET. More cases than words: words repeat.
   - The culprit (`culpritOf`): a seed for an ordinary avatar, a disguise and who they are, all from the case id, the same on every device.
+- Cases on the server (`supabase/migrations/20261010000500_cases.sql`, `src/lib/progress.ts`):
+  - Signed in, a finished sitting is sent like any play, with its clue number. The Worker replays it against that passage and keeps the best stars and the best score per clue. A clue is on no board. The whole puzzle is sent and ranked as before.
+  - The path still reads this browser. On sign in and on every visit signed in, the browser and the account are levelled (`syncProgress`): clues done here go up, clues done on another device come down, stars only ever rise, and the path redraws if anything came. Either half can fail and nothing is lost.
+  - A guest's clues and whole puzzles move to the account on sign in, unverified: the stars carry, no points and no badge. A checked play of the same clue later takes its place.
+  - 2 devices with different progress end with both. A player with plays from before cases existed has those cases closed: a checked whole-puzzle play is a closed case, with 3 stars for a clean read, 2 for 80% found, else 1.
+  - Points now count each clue's best checked score once, beside dailies and each whole puzzle's best. Ranks (Rookie, Detective, Inspector, Chief) are worked out from points on the server by the same numbers as `src/engine/level.ts`, and a test fails if the 2 drift apart. The profile's LevelBadge reads points from the server.
+  - Badges: "First case closed", then 5, 10 and 25 cases closed, from checked whole-puzzle plays.
 - Roadmap types (not in v1, see Gazecraft Future Games): Mirror, Liar, Relay, Buried sums, Unmask, Trace, Bury it. Each must fit the registry without shell changes.
 - Families (not in v1). Gazecraft is more than one game, the way the reasoning papers at school were: Verbal, Quantitative and Non-verbal. Every family is the same skill, looking closely, on different material.
   - Verbal: words. `hidden-words` today, then Mirror, Liar, Relay, Unmask, Bury it.
