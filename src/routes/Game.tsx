@@ -109,8 +109,10 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
     mod,
     puzzle,
     dailyN,
-    // Played alone: leaving keeps the game. A room shares one clock, so it is never kept.
-    resumeId: dailyN == null && !inRoom ? def.id : undefined,
+    // Leaving keeps the game. A room game is kept under its room, so a dropped connection or a reload loses
+    // nothing and your finds stay yours; its clock is the team's and runs on.
+    resumeId: dailyN != null ? undefined : inRoom ? `room-${roomCode}-${def.id}` : def.id,
+    sharedClock: inRoom,
     beforeHit: (k) => listRef.current?.capture(k),
     onHit: (a, b) => roomRef.current?.sendFind(a, b),
     onStart: () => countEvent(def.id, 'start'),
@@ -442,7 +444,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
           records={ended?.records}
           day={dayLine}
           done={doneLine}
-          sponsor={sponsor}
+          sponsor={sponsor && { ...sponsor, onVisit: () => countEvent(def.id, 'click') }}
         >
           <GameReveal items={reveal} past={pastLine} />
           {isToday && signedIn && <ReminderAsk />}

@@ -79,7 +79,7 @@ Risks: leaked keys, faked scores, AI endpoint abuse, injected text in shared con
 - Daily candidates (`daily_candidates` view, service role only): has a maker, safety passed, not hidden, never reported, 20 different verified players other than the maker, at least 80% "Good one".
 
 ## Play counts and the sponsor report
-- `POST /api/counts` with `{ "game": id, "kind": "start" | "end" | "full" | "share" }`: guests too, 240 per hour per IP. It adds 1 to a count for that puzzle, that UTC day and that kind. No user id, address or time of day is stored, and a session token is not read. An unknown puzzle is 404, an unknown kind is 400, and neither counts anything. `POST /api/shares` is the same call for a share, kept for pages loaded before the first existed.
+- `POST /api/counts` with `{ "game": id, "kind": "start" | "end" | "full" | "share" | "click" }`: guests too, 240 per hour per IP. It adds 1 to a count for that puzzle, that UTC day and that kind. No user id, address or time of day is stored, and a session token is not read. An unknown puzzle is 404, an unknown kind is 400, and neither counts anything. `POST /api/shares` is the same call for a share, kept for pages loaded before the first existed.
 - These are counts from the browser, not replayed plays. Anyone can push one up, 240 an hour per address. They are numbers for a report and never a score, a rank, a board or a reward.
 - `sponsor_report()` returns counts per puzzle and nothing else: no handle, no user id, no row per play. Service role only. Nothing in the Worker or the client calls it; the owner runs it with `npm run sponsor:report`.
 

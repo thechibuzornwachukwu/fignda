@@ -1,12 +1,19 @@
 // Sittings (SPEC section 9, Passages). A long puzzle cut into short passages that can each be played alone. Pure.
-// A cut is made only at a sentence end that no answer runs across, so a passage hides exactly the words that
-// lie inside it and the passages together hide every word of the whole puzzle.
+// A sitting is a sentence, or 2 or 3: about a minute. A cut is made only at a sentence end that no answer runs
+// across, so a passage hides exactly the words that lie inside it and the passages together hide every word.
 
 import type { HiddenWordsPuzzle } from './hiddenWords';
 import { rangeText, sentences } from './text';
 
-export const PASSAGE_MIN = 5;
-export const PASSAGE_MAX = 9;
+/** Short must not mean thin: a sitting ends with something won, so it hides at least this many answers. */
+export const PASSAGE_MIN = 3;
+/**
+ * Past this a sitting stops being short. People stay on one screen for about 40 seconds before they switch,
+ * so a sitting is sized to end inside a minute: 3 to 5 words.
+ */
+export const PASSAGE_MAX = 5;
+/** A passage is 1 to 3 sentences. Longer only when the text gives no other way to reach `PASSAGE_MIN`. */
+export const PASSAGE_SENTENCES = 3;
 
 export type Passage = {
   /** The passage as written, trimmed. With the puzzle's `dict` it builds into a puzzle of its own. */
@@ -19,13 +26,17 @@ export type Passage = {
   answers: string[];
 };
 
-/** A passage short of the minimum costs far more than one over the maximum: a short tail joins the one before. */
-const SHORT = 1000;
-const cost = (n: number) => (n < PASSAGE_MIN ? (PASSAGE_MIN - n) * SHORT : Math.max(0, n - PASSAGE_MAX));
+// What is wrong with a passage, worst first: too few answers to be worth sitting down to, then too many sentences
+// to be short, then more answers than a sitting needs. Each weight is larger than the next one can ever add up to.
+const THIN = 1_000_000;
+const LONG = 1000;
+const cost = (answers: number, sents: number) =>
+  (answers < PASSAGE_MIN ? (PASSAGE_MIN - answers) * THIN : 0) + Math.max(0, sents - PASSAGE_SENTENCES) * LONG + Math.max(0, answers - PASSAGE_MAX);
 
 /**
- * The puzzle as passages of 5 to 9 answers, in reading order. As many as the text allows, as even as it allows.
- * One passage, the whole text, when no clean cut gives 2 that are both long enough. None for an empty text.
+ * The puzzle as passages of 1 to 3 sentences and 3 to 5 answers, in reading order. As many as the text allows,
+ * as even as it allows. One passage, the whole text, when no clean cut gives 2 that each hide enough. None for
+ * an empty text.
  */
 export function passages(puzzle: Pick<HiddenWordsPuzzle, 'text' | 'chars' | 'S' | 'answers'>): Passage[] {
   const sents = sentences(puzzle.text, puzzle.chars);
@@ -53,14 +64,14 @@ export function passages(puzzle: Pick<HiddenWordsPuzzle, 'text' | 'chars' | 'S' 
   };
 
   // best[j]: the cheapest way to cut everything before stop j. Among equals the one with the most passages,
-  // and among those the most even: 7 and 7 reads better than 5 and 9. Squares are smallest when sizes are level.
+  // and among those the most even: 4 and 4 reads better than 3 and 5. Squares are smallest when sizes are level.
   type Best = { cost: number; count: number; squares: number; from: number };
   const best: Best[] = [{ cost: 0, count: 0, squares: 0, from: -1 }];
   for (let j = 1; j < stops.length; j++) {
     let b: Best | null = null;
     for (let i = 0; i < j; i++) {
       const size = inside(stops[i]!, stops[j]!).length;
-      const c = best[i]!.cost + cost(size);
+      const c = best[i]!.cost + cost(size, stops[j]! - stops[i]!);
       const n = best[i]!.count + 1;
       const sq = best[i]!.squares + size * size;
       if (!b || c < b.cost || (c === b.cost && (n > b.count || (n === b.count && sq < b.squares)))) b = { cost: c, count: n, squares: sq, from: i };
@@ -70,7 +81,7 @@ export function passages(puzzle: Pick<HiddenWordsPuzzle, 'text' | 'chars' | 'S' 
 
   const cuts: Array<[number, number]> = [];
   for (let j = stops.length - 1; j > 0; j = best[j]!.from) cuts.unshift([stops[best[j]!.from]!, stops[j]!]);
-  // A cut that leaves any passage short is no cut: the puzzle stays whole.
+  // A cut that leaves any passage thin is no cut: the puzzle stays whole.
   const parts = cuts.every(([a, b]) => inside(a, b).length >= PASSAGE_MIN) ? cuts : [[0, sents.length] as [number, number]];
 
   return parts.map(([a, b]) => ({

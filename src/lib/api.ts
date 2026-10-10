@@ -554,10 +554,11 @@ export async function submitPlay(p: PlaySubmission): Promise<{ ok: boolean; stat
   }
 }
 
-export type CountKind = 'start' | 'end' | 'full' | 'share';
+export type CountKind = 'start' | 'end' | 'full' | 'share' | 'click';
 
 /**
- * One more on a puzzle's count for the day: a game started, played to the end, every word found, or shared.
+ * One more on a puzzle's count for the day: a game started, played to the end, every word found, or shared,
+ * or the sponsor's link opened.
  * Guests too, and no session goes with it, so the count has no player on it. Nothing waits on it and nothing
  * is shown if it fails.
  */

@@ -627,13 +627,13 @@ async function plays(req: Request, deps: Deps) {
 // POST /api/counts
 // ---------------------------------------------------------------------------
 
-export const COUNT_KINDS = ['start', 'end', 'full', 'share'] as const;
+export const COUNT_KINDS = ['start', 'end', 'full', 'share', 'click'] as const;
 export const CountBody = z.object({ game: z.string().regex(/^[a-z0-9-]{2,40}$/), kind: z.enum(COUNT_KINDS) }).strict();
 /** A page loaded before `/api/counts` existed still posts a share with no kind. */
 const ShareBody = CountBody.pick({ game: true }).strict();
 
 /**
- * One more game started, ended, fully found or shared, for the sponsor report. A count per puzzle per day and
+ * One more game started, ended, fully found or shared, or one more visit to a sponsor's link, for the sponsor report. A count per puzzle per day and
  * nothing else: guests count too, and the session token is never read, so no player is on it.
  */
 async function countEvent(req: Request, deps: Deps, share = false) {

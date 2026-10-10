@@ -39,7 +39,7 @@ type Props = {
   /** After today's daily: one calm line that the day is done. */
   done?: string;
   /** A sponsored puzzle: "With NAME" and, when there is one, the sponsor's link and its site name. */
-  sponsor?: { line: string; url?: string; host?: string };
+  sponsor?: { line: string; url?: string; host?: string; /** The link was opened. */ onVisit?: () => void };
   /** Extra actions under the result (the reminder ask). */
   children?: ReactNode;
 };
@@ -94,7 +94,7 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
             {sponsor.url && sponsor.host && (
               <>
                 {' · '}
-                <a href={sponsor.url} target="_blank" rel="sponsored noopener" className={styles.board}>
+                <a href={sponsor.url} target="_blank" rel="sponsored noopener" className={styles.board} onClick={sponsor.onVisit} onAuxClick={sponsor.onVisit}>
                   {sponsor.host}
                 </a>
               </>

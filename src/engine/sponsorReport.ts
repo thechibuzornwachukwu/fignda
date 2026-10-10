@@ -9,6 +9,8 @@ export type ReportCounts = {
   /** Games that ended with every word found. */
   fulls: number;
   shares: number;
+  /** Times the sponsor's link on the result was opened. */
+  clicks: number;
   /** Different signed in players with a verified play, alone or in a room. */
   players: number;
 };
@@ -51,6 +53,7 @@ export function countsById(rows: unknown): Map<string, ReportCounts> {
       ends: count(r.ends),
       fulls: count(r.fulls),
       shares: count(r.shares),
+      clicks: count(r.clicks),
       players: count(r.players),
     });
   }
@@ -81,7 +84,7 @@ export function rangeLine({ from, to }: ReportRange): string {
 const row = (label: string, value: string) => `${label.padEnd(19)}${value}`;
 const withShare = (n: number, pct: number | null, of = '') => (pct === null ? num(n) : `${num(n)} (${pct}%${of})`);
 
-const NONE: ReportCounts = { starts: 0, ends: 0, fulls: 0, shares: 0, players: 0 };
+const NONE: ReportCounts = { starts: 0, ends: 0, fulls: 0, shares: 0, clicks: 0, players: 0 };
 
 /** The report as lines of plain text, one block per puzzle in the order given. A puzzle with no row reads as zeros. */
 export function reportLines(entries: readonly ReportEntry[], counts: ReadonlyMap<string, ReportCounts>, range: ReportRange = {}): string[] {
@@ -99,12 +102,15 @@ export function reportLines(entries: readonly ReportEntry[], counts: ReadonlyMap
       row('Played to the end', withShare(c.ends, finishRate(c))),
       row('Found every word', withShare(c.fulls, share(c.fulls, c.ends), ' of those')),
       row('Shares', num(c.shares)),
+      // Only a puzzle with a sponsor has a link to open.
+      ...(e.sponsor ? [row('Visits to sponsor', withShare(c.clicks, share(c.clicks, c.starts), ' of games'))] : []),
       row('Signed in players', num(c.players)),
       '',
     );
   }
-  out.push('Games and shares count everyone, guests included. Played to the end means at least 1 word found.');
+  out.push('Games, shares and visits count everyone, guests included. Played to the end means at least 1 word found.');
+  out.push('A visit is the link to the sponsor on the result being opened.');
   out.push('Signed in players are different accounts with a play the server checked.');
-  if (!range.from || range.from < COUNTED_FROM) out.push(`Games and shares are counted from ${day(COUNTED_FROM)}. Nothing before that day is in them.`);
+  if (!range.from || range.from < COUNTED_FROM) out.push(`Games, shares and visits are counted from ${day(COUNTED_FROM)}. Nothing before that day is in them.`);
   return out;
 }

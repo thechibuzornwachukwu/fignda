@@ -11,7 +11,7 @@ const TO = '2026-02-08';
 let game: string;
 const users: Record<string, TestUser> = {};
 
-type Row = { game_id: string; starts: number; ends: number; fulls: number; shares: number; players: number };
+type Row = { game_id: string; starts: number; ends: number; fulls: number; shares: number; clicks: number; players: number };
 
 async function report(from: string | null = FROM, to: string | null = TO): Promise<Row> {
   const { data, error } = await svc.rpc('sponsor_report', { p_games: [game], p_from: from, p_to: to });
@@ -61,6 +61,7 @@ describe('sponsor_report', () => {
     await counted('2026-02-03', 'end', 30);
     await counted('2026-02-03', 'full', 6);
     await counted('2026-02-04', 'share', 4);
+    await counted('2026-02-05', 'click', 3);
     // The day before and the day after the week.
     await counted('2026-02-01', 'start', 500);
     await counted('2026-02-09', 'share', 500);
@@ -86,6 +87,7 @@ describe('sponsor_report', () => {
     expect(r.ends - before.ends).toBe(30);
     expect(r.fulls - before.fulls).toBe(6);
     expect(r.shares - before.shares).toBe(4);
+    expect(r.clicks - before.clicks).toBe(3);
     expect((await report('2026-02-08', '2026-02-08')).starts).toBeGreaterThanOrEqual(10);
     const all = await report(null, null);
     expect(all.starts).toBeGreaterThanOrEqual(r.starts + 500);
@@ -99,12 +101,12 @@ describe('sponsor_report', () => {
   });
 
   it('answers with counts and nothing about a person', async () => {
-    expect(Object.keys(await report()).sort()).toEqual(['ends', 'fulls', 'game_id', 'players', 'shares', 'starts']);
+    expect(Object.keys(await report()).sort()).toEqual(['clicks', 'ends', 'fulls', 'game_id', 'players', 'shares', 'starts']);
   });
 
   it('gives a row of zeros for a puzzle nobody played, and no row for one that does not exist', async () => {
     const { data } = await svc.rpc('sponsor_report', { p_games: ['no-such-game', game, game], p_from: '2020-01-01', p_to: '2020-01-02' });
-    expect(data).toEqual([{ game_id: game, starts: 0, ends: 0, fulls: 0, shares: 0, players: 0 }]);
+    expect(data).toEqual([{ game_id: game, starts: 0, ends: 0, fulls: 0, shares: 0, clicks: 0, players: 0 }]);
   });
 });
 
@@ -113,11 +115,11 @@ describe('count_event', () => {
 
   it('adds 1 to today for that puzzle and that kind', async () => {
     const before = await report(day, day);
-    for (const kind of ['start', 'start', 'end', 'full', 'share', 'share', 'share']) {
+    for (const kind of ['start', 'start', 'end', 'full', 'share', 'share', 'share', 'click']) {
       expect((await svc.rpc('count_event', { p_game: game, p_kind: kind })).data).toBe(true);
     }
     const after = await report(day, day);
-    expect([after.starts - before.starts, after.ends - before.ends, after.fulls - before.fulls, after.shares - before.shares]).toEqual([2, 1, 1, 3]);
+    expect([after.starts - before.starts, after.ends - before.ends, after.fulls - before.fulls, after.shares - before.shares, after.clicks - before.clicks]).toEqual([2, 1, 1, 3, 1]);
   });
 
   it('counts nothing for a puzzle that does not exist or a kind that is not one', async () => {

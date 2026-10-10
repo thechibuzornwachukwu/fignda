@@ -97,7 +97,7 @@ Streak resets on wrong pick and on hint. `onFound` picks: first find, last one l
 - A puzzle that is not the daily is kept in this browser, one record each (`gazecraft-resume-ID`, `src/games/resume.ts`), until the game ends. Finishing it or "Play again" starts clean. The daily is kept as it always was (`gazecraft-daily-N`), finished or not.
 - Nothing is dropped in normal play. The store holds 100 games, more than the catalogue and all its passages; past that, or when storage is full, the game left longest ago goes first and the one being played is never the one to go.
 - A kept game whose words no longer match the puzzle loses those finds and keeps the rest. Stored data that is missing or unreadable is no saved game. Signing out clears it with the rest of this browser's data.
-- Not for a room, where everyone shares one clock.
+- A room game is kept too, under its room (`gazecraft-resume-room-CODE-ID`), so a dropped connection or a reload loses nothing and a player's own finds stay their own. Its clock does not stop: the team plays on in real time, and the server settles who found a word first by that clock.
 
 **Clean read:** every word found by you, no hints, no wrong picks (near misses do not count; a room game with a teammate's find is not one). One `cleanRead` line under the result title. One rule, `cleanReadOf` in `src/engine/skill.ts`; the session only adds that the game is over. Wrong picks are counted in every game for this and scored only on the daily. Result title picked once from `titlePerfect|titleGood|titleLow|titleZero`, then fixed.
 **Result lines:** under the result title and its line, in this order, each only when it is true: stars, skill lines (2 at most), record lines (2 at most), rare find, the day's count, the run, `doneToday`. A helper with nothing true to say returns no line, so a game with 0 found or ended at once with "I'm done" shows the title, the line and the stats only (plus the run and `doneToday` on today's daily). Line helpers are pure and live in `src/games/resultLines.ts`.
@@ -140,14 +140,15 @@ Streak resets on wrong pick and on hint. `onFound` picks: first find, last one l
 
 Everything else about a sponsored puzzle is the same as any puzzle: score, points, stars, boards, its place in the list and on the path. The field lives in the catalogue only. The database, the Worker and player-made puzzles never carry it, so nothing a player types can become a mark.
 
-**Sponsor report:** `npm run sponsor:report`, for the owner, from a terminal. No screen, no route. It prints 5 counts for every catalogue puzzle that carries a sponsor, and nothing about any person:
+**Sponsor report:** `npm run sponsor:report`, for the owner, from a terminal. No screen, no route. It prints 6 counts for every catalogue puzzle that carries a sponsor, and nothing about any person:
 - Games started: new games opened, by everyone, guests included. A game carried on from before is not a new one.
 - Played to the end: games that ended with at least 1 word found, and their share of games started.
 - Found every word: games that ended with nothing missed, and their share of games played to the end.
 - Shares: every time a share left the game: an image shared or saved, a link copied, a text result sent or copied. A closed share sheet is not one.
+- Visits to sponsor: the sponsor's link on the result, opened, and its share of games started. Only for a puzzle that carries a sponsor.
 - Signed in players: different accounts with a play the server checked, alone or in a room.
 
-The first 4 are counted by the game as it is played, per puzzle per UTC day, with no player on the count (`countEvent` in `src/lib/api.ts`, `POST /api/counts`). They are what a sponsor pays for: most people play as guests, and a guest's play is stored nowhere else. They are counts from the browser, limited per address and not checked by replay, so they never touch a score, a rank or a reward. A share with nothing to divide by prints no percentage, never 0%.
+All but the last are counted by the game as it is played, per puzzle per UTC day, with no player on the count (`countEvent` in `src/lib/api.ts`, `POST /api/counts`). They are what a sponsor pays for: most people play as guests, and a guest's play is stored nowhere else. They are counts from the browser, limited per address and not checked by replay, so they never touch a score, a rank or a reward. A share with nothing to divide by prints no percentage, never 0%.
 
 `--from` and `--to` (YYYY-MM-DD, UTC, both days included) narrow it. `--game ID,ID` reports on catalogue puzzles that carry no sponsor, to show a sponsor what a puzzle already draws. `--local` reads the local database. The ids come from the catalogue through `sponsorFor`, the counts from one database function (`sponsor_report`), the wording from `src/engine/sponsorReport.ts`. Games and shares are counted from 10 Oct 2026, and a report that reaches back before that day says so.
 
@@ -325,9 +326,9 @@ Nothing else animates.
 - Daily: `dayNo` from 2026-01-01 UTC, game = `dailyPool[dayNo % len]`. Server decides.
 - Passages (engine only, nothing on screen yet): `passages(puzzle)` in `src/engine/passages.ts` cuts a puzzle into short sittings.
   - A cut is made only at a sentence end that no answer runs across, and never before a sentence that opens on a small letter ("Need a pen? asked Mika." is one sentence to a reader).
-  - Each passage hides 5 to 9 answers. There are as many passages as that allows, and among those the most even: 7 and 7, not 5 and 9. A tail too short to stand alone joins the passage before. A puzzle that cannot be cut into 2 that are both long enough stays whole: one passage.
+  - A sitting is a sentence, or 2 or 3, that hides 3 to 5 answers: about a minute of play. Never fewer than 3, so a sitting ends with something won. There are as many passages as that allows, and among those the most even: 4 and 4, not 3 and 5. A passage runs past 3 sentences only where sentences in a row hide nothing, and holds 6 answers only where the text gives no other clean cut. A puzzle that cannot be cut into 2 that each hide 3 stays whole: one passage.
   - A passage is its text, where it starts in the whole puzzle's letters, and the answers inside it. With the puzzle's `dict` it builds into a puzzle of its own that hides exactly those answers. A word hidden twice can be in 2 passages.
-  - On 10 Oct 2026 the 25 catalogue puzzles cut into 54 passages; the 5 with fewer than 10 answers stay whole.
+  - On 10 Oct 2026 the 25 catalogue puzzles cut into 83 passages, every puzzle into at least 2. 81 are 3 sentences or fewer; the other 2 are in the Bible puzzle.
 - Roadmap types (not in v1, see Gazecraft Future Games): Mirror, Liar, Relay, Buried sums, Unmask, Trace, Bury it. Each must fit the registry without shell changes.
 - Families (not in v1). Gazecraft is more than one game, the way the reasoning papers at school were: Verbal, Quantitative and Non-verbal. Every family is the same skill, looking closely, on different material.
   - Verbal: words. `hidden-words` today, then Mirror, Liar, Relay, Unmask, Bury it.

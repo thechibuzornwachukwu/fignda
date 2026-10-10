@@ -44,6 +44,7 @@ Never for sale: hints, extra tries, time, or anything that touches a score; stre
 
 ## Owner
 
+- [ ] Set up Google sign in in Supabase. A 6 digit email code is the hardest step for a new player, and one tap removes it. Likely worth more than any change to guest mode.
 - [ ] Decide: the name (suggested: keep Gazecraft, detective theme inside it. Free as .com and .game on 9 Oct 2026, registry check only: gazecraft, keensleuth, sleuthtrail, cluestop, plainsleuth, loupequest).
 - [ ] Prices for the models above, and the points a partner costs. None is set.
 - [ ] "Robo-cop" is close to RoboCop, a registered film trademark. Check it, or rename, before the robot is in the game.
@@ -73,10 +74,18 @@ Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with 
 
 ### 2. Sittings
 
-A long puzzle is played in short passages. Short must not mean thin: every sitting ends with something won, and the whole puzzle stays as the hard one.
+A sitting is a sentence, or 2 or 3, hiding 3 to 5 words: about a minute, and rarely longer. Short must not mean thin: every sitting ends with something won, and the whole puzzle stays as the hard one. The engine cuts the 25 puzzles into 83 sittings (`passages`, SPEC section 9). Why a minute: `INSIGHTS.html` section 5.
 
-- [ ] **Set 2c. A passage can be played.** Its own screen, result, stars and clean read. Reached by link only. Passages are never ranked against whole puzzles.
+- [ ] **Set 2c. A passage can be played.** Its own screen, result, stars and clean read. Reached by link only. Passages are never ranked against whole puzzles. The result leads with one button to the next sitting: a visit is several sittings, so the next one is one tap away and never starts by itself.
 - [ ] **Set 2d. Passages on the path.** Each passage is a clue, the whole puzzle is the last clue of its case, with its board and scores as they are. A whole-puzzle score from before shows its passages as done. A case shows how many clues are left, never how many minutes. A room plays the whole puzzle. The daily is not cut.
+
+### 2g. Guests and accounts
+
+Play first stays. What changes is when we ask: today a guest is asked once, after the first result, before there is anything worth keeping. The evidence and the reasoning are in `INSIGHTS.html` section 6. Nothing here locks a guest out or takes progress away.
+
+- [ ] **Set 2g1. Guest funnel in numbers.** New profiles a day against games started a day, from the database. Before anything changes, so a change can be judged.
+- [ ] **Set 2g2. A guest's place.** After a guest's first daily: "You would be 14th of 60 today" with the sign in link. The place comes from the server, from the guest's own score.
+- [ ] **Set 2g3. The run lives here.** At a run of 3 dailies, one line that the run is kept in this browser only and sign in keeps it anywhere. Said once.
 
 ### 3. Cases
 

@@ -175,8 +175,10 @@ type Options<P> = {
   puzzle: P;
   /** Daily number. Persists every change under `gazecraft-daily-N`. */
   dailyN?: number;
-  /** A puzzle played alone that is not the daily: its id. An unfinished game is kept under it and carried on. */
+  /** A puzzle that is not the daily: a name for this game. An unfinished game is kept under it and carried on. */
   resumeId?: string;
+  /** A room: everyone in it plays on one clock, in real time, so time away stays on it. */
+  sharedClock?: boolean;
   /** Called just before a find is committed (WordList FLIP capture). */
   beforeHit?: (key: string) => void;
   /** Called after your own find, with its span (rooms send it to teammates). */
@@ -188,7 +190,7 @@ type Options<P> = {
   copy?: Copy;
 };
 
-export function useGameSession<P>({ mod, puzzle, dailyN, resumeId: resumeAs, beforeHit, onHit, onStart, onFinish, copy = copyDefault }: Options<P>) {
+export function useGameSession<P>({ mod, puzzle, dailyN, resumeId: resumeAs, sharedClock = false, beforeHit, onHit, onStart, onFinish, copy = copyDefault }: Options<P>) {
   const onHitRef = useRef(onHit);
   const onStartRef = useRef(onStart);
   const onFinishRef = useRef(onFinish);
@@ -199,7 +201,6 @@ export function useGameSession<P>({ mod, puzzle, dailyN, resumeId: resumeAs, bef
   });
   const daily = dailyN != null;
   const resumeId = daily ? undefined : resumeAs;
-  /** A game played alone is kept between visits. A room game is not: everyone in it shares one clock. */
   const kept = daily || resumeId != null;
   const answers = mod.answers(puzzle);
   const total = answers.length;
@@ -253,8 +254,9 @@ export function useGameSession<P>({ mod, puzzle, dailyN, resumeId: resumeAs, bef
 
   // Time away is not time on the puzzle. Leaving (another page, another app, a locked phone, a closed tab)
   // keeps the game and stops its clock; coming back starts the clock where it stopped.
+  // Not in a room: the team plays on in real time, and the server settles who found a word first by that clock.
   useEffect(() => {
-    if (!kept) return;
+    if (!kept || sharedClock) return;
     let awayAt: number | null = null;
     const leave = () => {
       const cur = ref.current;
@@ -282,7 +284,7 @@ export function useGameSession<P>({ mod, puzzle, dailyN, resumeId: resumeAs, bef
       window.removeEventListener('pageshow', back);
       leave();
     };
-  }, [kept, keep, commit]);
+  }, [kept, sharedClock, keep, commit]);
   const foundSet = useMemo(() => new Set(s.found.map((f) => f.key)), [s.found]);
 
   const pick = (a: number, b: number) => {

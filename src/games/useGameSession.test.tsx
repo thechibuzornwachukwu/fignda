@@ -29,7 +29,7 @@ function show(state: 'hidden' | 'visible') {
 
 describe('useGameSession save and resume', () => {
   const KEY = 'gazecraft-resume-bnote';
-  const open = (opts: { resumeId?: string; dailyN?: number; onStart?: () => void } = { resumeId: 'bnote' }) =>
+  const open = (opts: { resumeId?: string; dailyN?: number; sharedClock?: boolean; onStart?: () => void } = { resumeId: 'bnote' }) =>
     renderHook(() => useGameSession({ mod, puzzle, ...opts }));
 
   beforeEach(() => {
@@ -156,14 +156,30 @@ describe('useGameSession save and resume', () => {
     expect(open().result.current.s.found.map((f) => f.key)).toEqual([puzzle.answers[0]!.key]);
   });
 
-  it('without an id nothing is kept: a room game starts clean', () => {
-    const first = open({});
+  it('a room game is kept under its room, so a reload loses nothing, and its clock runs on with the team', () => {
+    const room = { resumeId: 'room-ABCDEF-bnote', sharedClock: true };
+    const first = open(room);
+    vi.advanceTimersByTime(10_000);
     act(() => first.result.current.pick(...spans[0]!));
     act(() => show('hidden'));
-    vi.advanceTimersByTime(10 * MIN);
+    vi.advanceTimersByTime(4 * MIN);
     act(() => show('visible'));
-    // A room shares one clock with everyone in it: time away stays on it.
-    expect(secondsOf(first.result.current.s, Date.now())).toBe(600);
+    expect(secondsOf(first.result.current.s, Date.now())).toBe(10 + 4 * 60);
+    first.unmount();
+    vi.advanceTimersByTime(MIN);
+    const again = open(room);
+    // Your own find is still yours: no teammate has to send it back.
+    expect(again.result.current.s.found).toEqual([expect.objectContaining({ key: puzzle.answers[0]!.key })]);
+    expect(again.result.current.s.found[0]!.by).toBeUndefined();
+    expect(secondsOf(again.result.current.s, Date.now())).toBe(10 + 5 * 60);
+    // The same puzzle played alone, and in another room, are other games.
+    expect(open({ resumeId: 'bnote' }).result.current.s.found).toEqual([]);
+    expect(open({ resumeId: 'room-GHJKMN-bnote', sharedClock: true }).result.current.s.found).toEqual([]);
+  });
+
+  it('without a name nothing is kept', () => {
+    const first = open({});
+    act(() => first.result.current.pick(...spans[0]!));
     first.unmount();
     expect(Object.keys(localStorage)).toEqual([]);
     expect(open({}).result.current.s.found).toEqual([]);
