@@ -13,7 +13,7 @@ export function GuestWall() {
       <Partner moment="hello" size={120} />
       <h1 className={styles.title}>Sign in to keep playing</h1>
       <p className={styles.lead}>
-        You have played {GUEST_GAMES} games as a guest. Sign in and the case carries on, with your stars, your detective and your partner. We send a code to your email. No password.
+        You have played {GUEST_GAMES} games as a guest. Sign in and the case carries on, with your stars, your detective and your pet. We send a code to your email. No password.
       </p>
       <Button variant="accent" to={`/welcome?from=${encodeURIComponent(pathname)}`}>
         Sign in

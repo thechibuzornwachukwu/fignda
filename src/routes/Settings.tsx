@@ -122,7 +122,7 @@ export function Settings() {
 
       {/* Your character, partner and gear are not settings: they live on the You tab. */}
       <p className={styles.pointer}>
-        Your detective, partner and gear are on <TextLink to="/me">You</TextLink>.
+        Your detective, pet and gear are on <TextLink to="/me">You</TextLink>.
       </p>
 
       <section className={styles.section} aria-labelledby="s-account">

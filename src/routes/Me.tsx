@@ -149,7 +149,7 @@ export function Me() {
     <div className={styles.page}>
       <PageHeader title="You" action={profile ? <IconLink to="/settings" icon={Settings} label="Settings" /> : auth.enabled ? <TextLink to="/welcome?from=%2Fme">Sign in</TextLink> : undefined} />
 
-      <section className={styles.stage} aria-label="Your detective and your partner" data-trying={trying?.kind}>
+      <section className={styles.stage} aria-label="Your detective and your pet" data-trying={trying?.kind}>
         <div className={styles.cast}>
           <figure className={styles.figure}>
             <span className={styles.portrait}>
@@ -167,7 +167,7 @@ export function Me() {
               <Partner who={shownPartner} moment={trying?.kind === 'partner' ? 'hello' : 'done'} size={128} />
             </span>
             <figcaption className={styles.caption}>{partnerName(shownPartner)}</figcaption>
-            <span className={styles.sub}>Your partner</span>
+            <span className={styles.sub}>Your pet</span>
           </figure>
         </div>
         <div className={styles.act}>
@@ -187,7 +187,7 @@ export function Me() {
       </section>
       <section className={styles.section} aria-labelledby="me-partners">
         <h2 id="me-partners" className={styles.h2}>
-          Partners
+          Pets
         </h2>
         <ul className={styles.row}>
           {PARTNERS.map((p) => {
@@ -282,7 +282,7 @@ export function Me() {
         ) : (
           auth.enabled && (
             <>
-              Your detective and partner are kept in this browser. <TextLink to="/welcome?from=%2Fme">Sign in to keep them everywhere</TextLink>
+              Your detective and pet are kept in this browser. <TextLink to="/welcome?from=%2Fme">Sign in to keep them everywhere</TextLink>
             </>
           )
         )}

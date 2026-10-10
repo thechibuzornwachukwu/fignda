@@ -48,14 +48,12 @@ export function Notifications() {
       {rows == null ? (
         <SkeletonList rows={5} avatar={40} stat={false} />
       ) : rows.length === 0 ? (
-        <div className={styles.empty}>
-          <PartnerNote>
-            <p className={styles.muted}>Nothing yet. Follows, streak asks, room invites and badges will show up here.</p>
-          </PartnerNote>
-          <div>
+        <PartnerNote layout="screen" title="All quiet" className={styles.empty}>
+          <p className={styles.muted}>Nothing yet. Follows, streak asks, room invites and badges will show up here.</p>
+          <div className={styles.emptyAction}>
             <Button to="/players">Find players</Button>
           </div>
-        </div>
+        </PartnerNote>
       ) : (
         <ul className={styles.list}>
           {rows.map((n) => {

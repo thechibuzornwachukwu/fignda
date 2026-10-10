@@ -126,21 +126,21 @@ export function Profile() {
     return (
       <div className={styles.page}>
         <PageHeader title={title} action={settings} />
-        <h2 className={styles.name}>
-          {state.status === "missing"
-            ? `No player called @${handle}.`
-            : "This page did not load."}
-        </h2>
-        <PartnerNote moment="error">
+        <PartnerNote moment="error" layout="screen">
+          <h2 className={styles.name}>
+            {state.status === "missing"
+              ? `No player called @${handle}.`
+              : "This page did not load."}
+          </h2>
           <p className={styles.muted}>
             {state.status === "missing"
               ? "Check the spelling, or find a puzzle instead."
               : "Try again in a moment, or find a puzzle instead."}
           </p>
+          <div className={styles.freshActions}>
+            <Button to="/play">Play</Button>
+          </div>
         </PartnerNote>
-        <div>
-          <Button to="/play">Play</Button>
-        </div>
       </div>
     );
   }
@@ -214,27 +214,27 @@ export function Profile() {
         </section>
       ) : plays.length === 0 ? (
         <section className={styles.fresh} aria-label="New player">
-          <h2 className={styles.freshTitle}>
-            {own ? "Your run starts with one puzzle." : `${name} is new here.`}
-          </h2>
-          <PartnerNote>
+          <PartnerNote layout="screen">
+            <h2 className={styles.freshTitle}>
+              {own ? "Your run starts with one puzzle." : `${name} is new here.`}
+            </h2>
             <p className={styles.muted}>
               {own
                 ? "Find one word and you are on the board. Points, streaks and your last 14 dailies will show up here as you play."
                 : "No plays yet. Their points and streak will show up here after a first game."}
             </p>
+            <div className={styles.freshActions}>
+              {own ? (
+                <Button variant="accent" to={`/d/${today}`}>
+                  Play today's daily
+                </Button>
+              ) : (
+                <Button variant="secondary" to="/play">
+                  Find a puzzle
+                </Button>
+              )}
+            </div>
           </PartnerNote>
-          <div className={styles.freshActions}>
-            {own ? (
-              <Button variant="accent" to={`/d/${today}`}>
-                Play today's daily
-              </Button>
-            ) : (
-              <Button variant="secondary" to="/play">
-                Find a puzzle
-              </Button>
-            )}
-          </div>
         </section>
       ) : (
         <>

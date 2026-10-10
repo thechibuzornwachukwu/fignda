@@ -1,4 +1,3 @@
-import { PartnerNote } from '../components/PartnerNote';
 import { formatTime } from '../engine/time';
 import { BADGES } from '../lib/notifications';
 import { loadRecords } from '../lib/records';
@@ -31,11 +30,7 @@ export function RecordList() {
   const rec = loadRecords();
   const packs = Object.entries(rec.clean).sort((a, b) => a[1] - b[1]);
   if (packs.length === 0 && rec.daily <= 0 && rec.long == null) {
-    return (
-      <PartnerNote>
-        <p className={styles.muted}>Read a puzzle clean, finish a daily or find a long word and your best shows here. Records are kept in this browser.</p>
-      </PartnerNote>
-    );
+    return <p className={styles.muted}>Read a puzzle clean, finish a daily or find a long word and your best shows here. Records are kept in this browser.</p>;
   }
   return (
     <dl className={styles.records}>

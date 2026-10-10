@@ -49,7 +49,6 @@
   gap: var(--space-3);
   padding-top: var(--space-6);
   border-top: 2px solid var(--fg);
-  max-width: 640px;
 }
 .freshTitle {
   composes: h2 from '../styles/type.module.css';
@@ -58,6 +57,7 @@
 .freshActions {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: var(--space-2h);
   padding-top: var(--space-2);
 }

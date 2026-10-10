@@ -68,7 +68,7 @@ test('circles page: guests are asked to sign in, and it is accessible', async ({
 test('design your character: pick parts, save, and it shows as you', async ({ page }) => {
   const handle = await newPlayer(page, 'Dayo');
   await page.goto('/me');
-  await expect(page.getByRole('region', { name: 'Your detective and your partner' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Your detective and your pet' })).toBeVisible();
   await page.getByRole('button', { name: 'Edit character' }).click();
   const editor = page.getByRole('dialog', { name: 'Edit your character' });
   const tab = (name: string) => editor.getByRole('tab', { name, exact: true });
@@ -181,7 +181,7 @@ test('detective pieces are earned: locked until a case is closed, then they can 
 
 test('partners: a guest picks one on the first screen, it shows at the end of a game, and Settings shows who is held', async ({ page }) => {
   await page.goto('/welcome');
-  const pick = page.getByRole('group', { name: /your partner/i });
+  const pick = page.getByRole('group', { name: /your pet/i });
   await expect(pick.getByRole('button')).toHaveText(['Detective X', 'Detective Tobs', 'Detective Puff', 'Agent 404']);
   // Left alone, it is Detective X.
   await expect(pick.getByRole('button', { name: 'Detective X' })).toHaveAttribute('aria-pressed', 'true');
@@ -202,13 +202,13 @@ test('partners: a guest picks one on the first screen, it shows at the end of a 
 test('You is a stage: tap a partner or a piece of gear to try it, and one button chooses it', async ({ page }) => {
   await newPlayer(page, 'Tari');
   await page.goto('/me');
-  const stage = page.getByRole('region', { name: 'Your detective and your partner' });
+  const stage = page.getByRole('region', { name: 'Your detective and your pet' });
   await expect(stage).toContainText('Tari');
   await expect(stage).toContainText('Detective X');
   await expect(stage.locator('[data-stage-line]')).toHaveText('Detective X is with you. New kit at 3.');
 
   // A locked partner can be tried on the stage, and says what opens it.
-  const partners = page.getByRole('region', { name: 'Partners' });
+  const partners = page.getByRole('region', { name: 'Pets' });
   await expect(partners.getByRole('button')).toHaveCount(4);
   await expect(partners.getByRole('button', { name: /^Agent 404\./ })).toBeVisible();
   await partners.getByRole('button', { name: 'Detective Tobs. Locked. 3,000 points.' }).click();

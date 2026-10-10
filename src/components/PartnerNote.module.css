@@ -1,4 +1,4 @@
-/* The partner beside a line: empty states, loads that failed, a closed case (SPEC section 4, Partner moments). */
+/* The pet with a line: empty states, loads that failed, a closed case (SPEC section 4, Pets). */
 .note {
   display: flex;
   align-items: center;
@@ -43,4 +43,42 @@
   border-bottom: 1px solid var(--line-3);
   background: var(--surface);
   transform: translateY(-50%) rotate(45deg);
+}
+.title {
+  font-size: 18px;
+  font-weight: 800;
+  line-height: 1.25;
+  color: var(--fg);
+}
+/* The empty state is the screen: the pet large and centred in the empty space, the words under it. */
+.note[data-layout='screen'] {
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-4);
+  min-height: min(52vh, 440px);
+  padding: var(--space-10) var(--space-4);
+  text-align: center;
+}
+.note[data-layout='screen'] .partner {
+  max-width: 44vw;
+  height: auto;
+}
+.note[data-layout='screen'] .body {
+  flex: none;
+  align-items: center;
+  gap: var(--space-2);
+  max-width: 36ch;
+}
+.note[data-layout='screen'] .say {
+  align-self: center;
+  margin-bottom: var(--space-1);
+}
+/* The bubble sits under the pet here, so its tail points up. */
+.note[data-layout='screen'] .say::before {
+  left: 50%;
+  top: calc(var(--space-1) * -1 - 1px);
+  border: 0;
+  border-left: 1px solid var(--line-3);
+  border-top: 1px solid var(--line-3);
+  transform: translateX(-50%) rotate(45deg);
 }

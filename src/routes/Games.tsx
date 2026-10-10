@@ -117,7 +117,7 @@ function Crew() {
   const { profile } = useAuth();
   const starter = useMemo(() => guestAvatar(), []);
   return (
-    <Link to="/me" className={styles.crew} data-crew aria-label="Change your detective, partner and gear">
+    <Link to="/me" className={styles.crew} data-crew aria-label="Change your detective, pet and gear">
       {profile ? <Avatar handle={profile.handle} size={36} /> : <Avatar parts={starter} size={36} />}
       <Partner moment="empty" size={36} />
     </Link>

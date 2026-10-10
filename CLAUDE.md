@@ -19,6 +19,7 @@ Design: `/design`. Read `SPEC.md` before UI work, `SECURITY.md` before data, aut
 - Lime `--accent` = found or success, and the cat's eyes in the logo. Never body text, never large fills. One accent button per screen.
 
 ## Copy
+- The cat, the dino, the dog and the robot are the player's pets. On screen say "pet", never "partner". Code keeps `partner`.
 - No em dashes. No exclamation marks. Short sentences. Digits for numbers.
 - Feedback lines come only from `src/copy` pools (`data/copy.json`) via `pick` / `onFound`. Never inline them.
 
@@ -40,7 +41,7 @@ supabase/        migrations, RLS
 - Engine is pure and unit tested against `data/games.json` `expectedAnswers`.
 - Answer counts come from the engine, never from AI output or hand typing.
 - UI never re-implements matching.
-- An empty or failed list, board or section sits in `<PartnerNote>` (the player's partner beside the line). The line stays; the partner never replaces it.
+- An empty or failed list, board or section sits in `<PartnerNote>`: `layout="screen"` (pet large and centred, title, line, one action) when the empty state is the screen, inline inside a busy one. One pet a screen. The line stays; the pet never replaces it.
 - Anything that loads ships with its skeleton (`<Skeleton>`, SPEC section 4). New screen, section or component: add the matching skeleton and its row in the SPEC table. Layout changed: change its skeleton.
 
 ## Do not

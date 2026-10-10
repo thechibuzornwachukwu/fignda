@@ -115,7 +115,7 @@ describe('Games', () => {
     expect(screen.getByRole('link', { name: /Daily #\d+/ })).toBeInTheDocument();
     expect(within(screen.getByRole('region', { name: 'Your path' })).getAllByRole('link').length).toBeGreaterThan(0);
     expect(screen.queryByRole('region', { name: 'All games' })).toBeNull();
-    expect(screen.getByRole('link', { name: /Change your detective, partner and gear/ })).toHaveAttribute('href', '/me');
+    expect(screen.getByRole('link', { name: /Change your detective, pet and gear/ })).toHaveAttribute('href', '/me');
     // Give the any-topic check time to answer: it still must not show.
     await Promise.resolve();
     expect(screen.queryByLabelText('Or any topic')).toBeNull();

@@ -53,23 +53,15 @@ const clean = <T extends PlayerRef>(r: unknown): T[] => (Array.isArray(r) ? (r a
 const count = (n: unknown): number => (typeof n === 'number' && Number.isFinite(n) && n > 0 ? Math.floor(n) : 0);
 
 /** `me` (your user id) adds a Follow button to every row but your own. */
-function List({ rows, empty, me, myHandle, check = false }: { rows: Rows; empty: ReactNode; me?: string; myHandle?: string; check?: boolean }) {
+function List({ rows, empty, me, myHandle, check = false, pet = false }: { rows: Rows; empty: ReactNode; me?: string; myHandle?: string; check?: boolean; /** This list carries the screen's one pet when it is empty or did not load. */ pet?: boolean }) {
   if (rows == null) return <SkeletonList rows={5} avatar={40} sub />;
   // A list that failed says so. It never claims to be empty.
-  if (rows === 'failed') {
-    return (
-      <PartnerNote moment="error">
-        <p className={styles.muted}>This list did not load. Try again in a moment.</p>
-      </PartnerNote>
-    );
+  const none = rows === 'failed' ? 'This list did not load. Try again in a moment.' : rows.length === 0 ? empty : null;
+  if (none != null) {
+    const line = <p className={styles.muted}>{none}</p>;
+    return pet ? <PartnerNote moment={rows === 'failed' ? 'error' : 'empty'}>{line}</PartnerNote> : line;
   }
-  if (rows.length === 0) {
-    return (
-      <PartnerNote>
-        <p className={styles.muted}>{empty}</p>
-      </PartnerNote>
-    );
-  }
+  if (rows === 'failed') return null;
   return (
     <ul className={styles.list}>
       {rows.map((p) => (
@@ -133,7 +125,7 @@ function TopPlayers({ points }: { points: boolean }) {
       <div className={styles.switch}>
         <Segmented label="List" hideLabel options={options} value={kind} onChange={setKind} />
       </div>
-      <List rows={lists[kind] ?? null} empty={TOP_EMPTY[kind]} />
+      <List rows={lists[kind] ?? null} empty={TOP_EMPTY[kind]} pet />
     </section>
   );
 }
@@ -174,13 +166,9 @@ function YourCircles({ quiet }: { quiet: boolean }) {
       {list == null ? (
         <SkeletonList rows={2} stat={false} />
       ) : list === 'failed' ? (
-        <PartnerNote moment="error">
-          <p className={styles.muted}>This list did not load. Try again in a moment.</p>
-        </PartnerNote>
+        <p className={styles.muted}>This list did not load. Try again in a moment.</p>
       ) : list.length === 0 ? (
-        <PartnerNote>
-          <p className={styles.muted}>A circle is a private daily table for your family, class, church or office. Start one and send the link.</p>
-        </PartnerNote>
+        <p className={styles.muted}>A circle is a private daily table for your family, class, church or office. Start one and send the link.</p>
       ) : (
         <ul className={circles.list}>
           {list.map((c) => (
@@ -307,7 +295,7 @@ export function Players() {
             setHits(null);
           }}
         />
-        {searching && <List rows={hits} empty={`No handle starts with @${q.trim().toLowerCase()}.`} me={me} myHandle={myHandle} check />}
+        {searching && <List rows={hits} empty={`No handle starts with @${q.trim().toLowerCase()}.`} me={me} myHandle={myHandle} check pet />}
       </section>
 
     </div>

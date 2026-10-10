@@ -198,7 +198,7 @@ function CharacterStep({ heading, onKeep, foot }: { heading: HeadingRef; onKeep:
       </div>
       {/* The partner who works every case beside them. One tap, free. Left alone, it is Detective X. */}
       <fieldset className={styles.partners}>
-        <legend className={styles.partnerAsk}>And your partner. Pick 1, change it any time.</legend>
+        <legend className={styles.partnerAsk}>And your pet. Pick 1, change it any time.</legend>
         {PARTNERS.map((p) => (
           <button key={p.id} type="button" className={styles.partner} aria-pressed={p.id === partner.current} onClick={() => void choosePartner(p.id, false)}>
             <Partner who={p.id} moment="hello" size={72} />

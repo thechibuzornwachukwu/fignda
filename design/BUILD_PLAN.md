@@ -11,11 +11,11 @@ Seed (after `npm run db:seed:gen`): `npx supabase db query --linked -f supabase/
 - One skill in every game: looking closely. Words today, numbers and shapes next.
 - A case is a run of clues. A clue is one short sitting. The last clue puts the pieces together and unmasks who hid the secret.
 - A new culprit each case, an ordinary character under a disguise. One unseen figure links the cases: every culprit leaves the same calling card.
-- Partners work the case beside the player: Detective X (the cat, and the logo), Detective Tobs, Detective Puff and Agent 404 (the robot). A player picks 1, free, and unlocks the others with points. Who they are: `design/brand/index.html`.
+- The player has a pet that comes along on every case: Detective X (the cat, and the logo), Detective Tobs (the dino), Detective Puff (the dog) and Agent 404 (the robot). A player picks 1, free, and unlocks the others with points. They are pets, not partners: something a player owns, dresses and shows off, which is what makes an outfit for one worth buying. Who they are: `design/brand/index.html` (it still says partners).
 - Tone: the motive is mischief, pride or a surprise, never harm. No violence, gangs, weapons, romance or fear.
 - For all ages, not a children's product. Accounts from 13. Younger players join on a parent's device or room.
-- A guest gets 2 games, then signs in. The account is where a detective, a partner and a case live.
-- Who you are is the front of the game: your detective and your partner are chosen on a stage (the You tab), never in Settings.
+- A guest gets 2 games, then signs in. The account is where a detective, a pet and a case live.
+- Who you are is the front of the game: your detective and your pet are chosen on a stage (the You tab), never in Settings.
 - We promise the practice, never a result. No word about memory, attention span, focus, IQ, brain training or "proven". Lumosity paid $2 million for claims like those.
 - Nothing expires and nothing locks a player out: no timed content, no hearts, no energy, no guilt in reminders.
 - AI is never named in the UI. No "made by a machine" and no "written by a person". A puzzle that reads badly is not shown.
@@ -34,11 +34,11 @@ Navigation, on a phone: no bar across the top. Each screen is its title, one act
 | Cases `/play` | Show where you are in the case | The next clue on the path | Built: daily card, then the path. Closed cases fold into one row |
 | Puzzle, clue | Find the words | Done | Built |
 | Result | Say what happened and lead on | Next clue, or Share | Built: one line and 2 buttons, the rest behind "More" |
-| You `/me` | Who you are: detective, partner, gear | Select, or Wear | Built. Holds the week, badges and records. `/u/HANDLE` is only what others see |
+| You `/me` | Who you are: detective, pet, gear | Select, or Wear | Built. Holds the week, badges and records. `/u/HANDLE` is only what others see |
 | Squad `/players` | The people you play with | Follow, or invite | Built in order: friend streaks, circles, top players, suggestions, find |
 | Ranks `/leaderboard` | Where you stand today | None: it is read | Built: one board at a time, your own row pinned in view |
 | Settings | The account | Save | Built: account only. Reached from the gear on You |
-| First minute `/welcome` | Make a new player someone | Keep this look | Built: a new player lands in a clue, and the character and partner are asked after the first result |
+| First minute `/welcome` | Make a new player someone | Keep this look | Built: a new player lands in a clue, and the character and pet are asked after the first result |
 | Guest wall | Turn a guest into a player | Sign in | Built: after 2 games |
 | Make `/make` | Write a puzzle | Publish | Built. To do: sets 6a to 6g. Reached from the foot of Cases, once unlocked |
 | Notifications | What happened while you were away | Open the thing | Built. Reached from the bell |
@@ -58,8 +58,9 @@ This is a business. Running costs are near zero, so the first sale is profit. No
 | Season takeover | A holiday case and the seasonal dress, "with NAME" | Brands | After set 5c |
 | Supporter | One payment: no ads ever, a badge | Players | Needs Paystack |
 | Plus, by the month | More puzzles in Make, private rooms, extra outfits | Players | Needs Paystack, set 6e |
-| Special outfits | Cosmetic only | Players | Needs Paystack |
-| Partner unlock | The points to unlock another partner. Bought points unlock partners only and never count for rank, boards or leagues | Players | Needs Paystack |
+| Pet outfits | Outfits for the player's pet. Cosmetic only | Players | Needs Paystack, set 3m |
+| Special outfits | For the player's own detective. Cosmetic only | Players | Needs Paystack |
+| Pet unlock | The points to unlock another pet. Bought points unlock pets only and never count for rank, boards or leagues | Players | Needs Paystack |
 | Licence | The game under a school's or a publisher's own name | Schools, publishers, media houses | After private boards are proven |
 | Footer ad | One a page, still image, never near a puzzle | Advertisers | Needs the domain, and consent in the EU and UK |
 
@@ -69,7 +70,8 @@ Never for sale: hints, extra tries, time, or anything that touches a score; stre
 
 - [ ] Set up Google sign in in Supabase. A 6 digit email code is the hardest step for a new player, and one tap removes it. Likely worth more than any change to guest mode.
 - [ ] Decide: the name (suggested: keep Gazecraft, detective theme inside it. Free as .com and .game on 9 Oct 2026, registry check only: gazecraft, keensleuth, sleuthtrail, cluestop, plainsleuth, loupequest).
-- [ ] Prices for the models above. None is set. Partners open at 3,000, 9,000 and 20,000 points for now (`PARTNER_POINTS` and `partner_slots`): confirm or change.
+- [ ] Decide: do the pets keep "Detective" and "Agent" in their names now that they are pets, and is the cat in the logo the player's pet or its own character.
+- [ ] Prices for the models above. None is set. Pets open at 3,000, 9,000 and 20,000 points for now (`PARTNER_POINTS` and `partner_slots`): confirm or change.
 - [ ] The robot is named Agent 404. A trademark search on that name has not been run.
 - [ ] A list of 20 people to ask first: brands, schools, churches, event planners.
 - [ ] What a sponsor may and may not write.
@@ -89,7 +91,7 @@ Never for sale: hints, extra tries, time, or anything that touches a score; stre
 
 One set at a time. Each set is small, works on its own and leaves the live game whole. After each set: lint, typecheck, unit tests and the browser tests pass, the work stops, the owner tries it and pushes, and only then does the next set start. A set that turns out too big is split, not rushed.
 
-Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with unit tests, and the UI never re-implements matching. Every line comes from `src/copy` pools. Scores on existing boards do not change. Read `SECURITY.md` before data, auth or Worker work. Motion follows `SPEC.md` section 8 (from <https://github.com/emilkowalski/skills>). A list, board or section that can be empty or fail to load says so beside the player's partner (`<PartnerNote>`, `SPEC.md` section 4). Anything that loads ships with its skeleton (`SPEC.md` section 4, Skeletons): a new screen, section or component gets a matching one in the same set, with a row in the table there, and a set that changes a layout changes its skeleton.
+Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with unit tests, and the UI never re-implements matching. Every line comes from `src/copy` pools. Scores on existing boards do not change. Read `SECURITY.md` before data, auth or Worker work. Motion follows `SPEC.md` section 8 (from <https://github.com/emilkowalski/skills>). A list, board or section that can be empty or fail to load says so with the player's pet (`<PartnerNote>`, `SPEC.md` section 4): large and centred when the empty state is the screen, small beside the line inside a busy one, one pet a screen. Anything that loads ships with its skeleton (`SPEC.md` section 4, Skeletons): a new screen, section or component gets a matching one in the same set, with a row in the table there, and a set that changes a layout changes its skeleton.
 
 ### 1. Sell now
 
@@ -99,7 +101,9 @@ Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with 
 
 A case is one puzzle: its passages are the clues and the whole puzzle is the last, the unmasking (SPEC section 6, Games). Each clue gives a piece of the case's secret, and the unmasking shows who hid it (SPEC section 9, The secret).
 
-- [ ] **Set 3l. More a partner does.** Still open from the partner idea: each partner giving its own kind of hint at the usual hint cost, and a mark on the unmasking for a squad whose partners differ. Rule to keep: nothing sold may change a score.
+- [ ] **Set 3m. Pet outfits.** A pet can wear things: a row of outfits per pet on You, tried on the stage like gear, drawn for all 4 pets in every mood. A few are earned, the rest are bought once Paystack is in. Cosmetic only. Needs the art first.
+- [ ] **Set 3n. The brand guide says pets.** `design/brand` (`build.ts`, `index.html`) and the pictures' names still say partners.
+- [ ] **Set 3l. More a pet does.** Still open from the pet idea: each pet giving its own kind of hint at the usual hint cost, and a mark on the unmasking for a squad whose pets differ. Rule to keep: nothing sold may change a score.
 
 ### 4. More games
 

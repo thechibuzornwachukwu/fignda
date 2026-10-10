@@ -47,7 +47,7 @@ const show = () =>
       <Me />
     </MemoryRouter>,
   );
-const stage = () => screen.getByRole('region', { name: 'Your detective and your partner' });
+const stage = () => screen.getByRole('region', { name: 'Your detective and your pet' });
 const line = () => stage().querySelector('[data-stage-line]')?.textContent ?? '';
 const ADA: Profile = { id: 'u1', name: 'Ada', handle: 'ada', avatar: null };
 
@@ -130,7 +130,7 @@ describe('You, signed in', () => {
     world.mine = { current: 'dog', owned: ['cat', 'dino', 'dog', 'robot'], points: 25000, bonds: { dog: 12, cat: 1 } };
     show();
     await waitFor(() => expect(line()).toBe('Detective Puff is with you. 12 cases closed together.'));
-    expect(screen.getByRole('region', { name: 'Partners' }).querySelectorAll('[data-locked]')).toHaveLength(0);
+    expect(screen.getByRole('region', { name: 'Pets' }).querySelectorAll('[data-locked]')).toHaveLength(0);
     expect(screen.getByRole('button', { name: 'Detective X. Yours, 1 case.' })).toBeInTheDocument();
   });
 

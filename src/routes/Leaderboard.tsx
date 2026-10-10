@@ -31,10 +31,10 @@ import styles from './Leaderboard.module.css';
 type Loaded = { rows: BoardRow[]; me: MyRank | null };
 type Load = { status: 'loading' } | { status: 'error' } | ({ status: 'ready' } & Loaded);
 
-function Board({ rows, me, myHandle, empty }: { rows: BoardRow[]; me: MyRank | null; myHandle?: string; empty: ReactNode }) {
+function Board({ rows, me, myHandle, empty, emptyTitle }: { rows: BoardRow[]; me: MyRank | null; myHandle?: string; empty: ReactNode; emptyTitle: string }) {
   if (rows.length === 0) {
     return (
-      <PartnerNote className={styles.empty}>
+      <PartnerNote layout="screen" title={emptyTitle} className={styles.empty}>
         <p>{empty}</p>
       </PartnerNote>
     );
@@ -191,7 +191,7 @@ export function Leaderboard() {
         )}
         {state.status === 'loading' && <SkeletonList rows={8} avatar={28} />}
         {state.status === 'error' && (
-          <PartnerNote moment="error" className={styles.empty}>
+          <PartnerNote moment="error" layout="screen" className={styles.empty}>
             <p>The board did not load. Try again in a moment.</p>
           </PartnerNote>
         )}
@@ -200,6 +200,7 @@ export function Leaderboard() {
             rows={state.rows}
             me={state.me}
             myHandle={me}
+            emptyTitle={crowd === 'following' ? 'Quiet so far' : day === today ? 'The board is open' : 'A quiet day'}
             empty={
               crowd === 'following' ? (
                 <>
@@ -241,7 +242,7 @@ export function Leaderboard() {
 function TeamBoard({ rows, myHandle }: { rows: TeamRow[]; myHandle?: string }) {
   if (rows.length === 0) {
     return (
-      <PartnerNote className={styles.empty}>
+      <PartnerNote layout="screen" title="No teams yet" className={styles.empty}>
         <p>No teams on this puzzle yet. Open it, choose Play together and send the invite.</p>
       </PartnerNote>
     );
@@ -323,12 +324,12 @@ export function GameLeaderboard() {
         </div>
         {state.status === 'loading' && <SkeletonList rows={8} avatar={28} />}
         {state.status === 'error' && (
-          <PartnerNote moment="error" className={styles.empty}>
+          <PartnerNote moment="error" layout="screen" className={styles.empty}>
             <p>The board did not load. Try again in a moment.</p>
           </PartnerNote>
         )}
         {state.status === 'solo' && (
-          <Board rows={state.rows} me={null} myHandle={auth.profile?.handle} empty={<>No verified scores on this puzzle yet.</>} />
+          <Board rows={state.rows} me={null} myHandle={auth.profile?.handle} emptyTitle="The board is open" empty={<>No verified scores on this puzzle yet.</>} />
         )}
         {state.status === 'together' && <TeamBoard rows={state.rows} myHandle={auth.profile?.handle} />}
         {together && (
