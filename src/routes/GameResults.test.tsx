@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import type { ComponentProps } from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { GameResults } from './GameResults';
 
@@ -29,8 +29,14 @@ function show(over: Partial<Props> = {}) {
   return [...container.querySelectorAll('section > div:first-child > p')].map((p) => p.textContent);
 }
 
+/** Opens "More" and reads its lines. */
+function more() {
+  fireEvent.click(screen.getByRole('button', { name: 'More' }));
+  return [...document.querySelectorAll('#results-more > p')].map((p) => p.textContent);
+}
+
 describe('GameResults', () => {
-  it('shows every line it is given, in order', () => {
+  it('leads with one line, the stars and 2 buttons, and keeps the rest behind More, in order', () => {
     const lines = show({
       stars: 3,
       starsUp: 'New best here: 3 of 3 stars.',
@@ -41,9 +47,14 @@ describe('GameResults', () => {
       streak: '4 days in a row.',
       done: 'That is today done. See you tomorrow.',
     });
-    expect(lines).toEqual([
-      'The ones you missed are shaded below.',
-      'New best here: 3 of 3 stars.',
+    expect(lines).toEqual(['The ones you missed are shaded below.', 'New best here: 3 of 3 stars.']);
+    expect(screen.getByRole('button', { name: 'Share' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Cases' })).toHaveAttribute('href', '/play');
+    expect(screen.queryByText('Score')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Play again' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Copy result' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'More' })).toHaveAttribute('aria-expanded', 'false');
+    expect(more()).toEqual([
       'A clean read. No hints, no wrong picks.',
       'IGOAT ran across 4 words. You followed it.',
       'Your fastest clean read in Bible: 1:15.',
@@ -52,26 +63,38 @@ describe('GameResults', () => {
       '4 days in a row.',
       'That is today done. See you tomorrow.',
     ]);
+    expect(screen.getByRole('button', { name: 'Less' })).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByText('5/8')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Play again' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Copy result' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Less' }));
+    expect(screen.queryByText('Score')).toBeNull();
   });
 
-  it('a game ended at once with 0 found shows the title, the line and the stats, and nothing else', () => {
+  it('a game ended at once with 0 found shows the title and the line, and the stats behind More', () => {
     const lines = show({ title: 'Next time.', found: 0, score: 0, secs: 0, skills: [], records: [], stars: 0, starsUp: '', rare: '', day: '' });
     expect(lines).toEqual(['The ones you missed are shaded below.']);
     expect(screen.getByRole('heading', { name: 'Next time.' })).toBeInTheDocument();
+    expect(more()).toEqual([]);
     expect(screen.getByText('0/8')).toBeInTheDocument();
     expect(screen.getByText('0:00')).toBeInTheDocument();
   });
 
   it('lines that were never passed leave no empty paragraph', () => {
     expect(show()).toEqual(['The ones you missed are shaded below.']);
-    expect(show({ skills: undefined, records: undefined, rare: undefined, day: undefined })).toEqual([base.line]);
+    expect(more()).toEqual([]);
   });
 
   it('drops blank lines and says no line twice', () => {
-    expect(show({ skills: ['', '  ', 'Every word, and no hints.', 'Every word, and no hints.'], records: [''] })).toEqual([
-      base.line,
-      'Every word, and no hints.',
-    ]);
+    show({ skills: ['', '  ', 'Every word, and no hints.', 'Every word, and no hints.'], records: [''], rare: 'Every word, and no hints.' });
+    expect(more()).toEqual(['Every word, and no hints.']);
+  });
+
+  it('a daily has no Play again behind More', () => {
+    show({ canReplay: false });
+    more();
+    expect(screen.queryByRole('button', { name: 'Play again' })).toBeNull();
+    expect(screen.getByRole('button', { name: 'Copy result' })).toBeInTheDocument();
   });
 
   it('shows the stars a catalogue puzzle earned, and pops them only when they went up', () => {
@@ -94,12 +117,13 @@ describe('GameResults', () => {
         <GameResults {...base} found={0} total={0} score={0} secs={0} />
       </MemoryRouter>,
     );
+    more();
     expect(container.textContent).not.toMatch(/undefined|NaN|null|\{\w*\}/);
   });
 
-  it('a sponsored puzzle says who it is with, last, and links the sponsor in a new tab', () => {
+  it('a sponsored puzzle says who it is with, in view, and links the sponsor in a new tab', () => {
     const lines = show({ done: 'That is today done. See you tomorrow.', sponsor: { line: 'With Chi Farms', url: 'https://chifarms.example/', host: 'chifarms.example' } });
-    expect(lines).toEqual([base.line, 'That is today done. See you tomorrow.', 'With Chi Farms · chifarms.example']);
+    expect(lines).toEqual([base.line, 'With Chi Farms · chifarms.example']);
     const link = screen.getByRole('link', { name: 'chifarms.example' });
     expect(link).toHaveAttribute('href', 'https://chifarms.example/');
     expect(link).toHaveAttribute('target', '_blank');
@@ -115,8 +139,10 @@ describe('GameResults', () => {
     expect(show({ sponsor })).toEqual([base.line]);
   });
 
-  it('keeps the leaderboard link beside the result line', () => {
+  it('keeps the leaderboard link behind More', () => {
     show({ boardPath: '/leaderboard/bible' });
+    expect(screen.queryByRole('link', { name: 'See the leaderboard' })).toBeNull();
+    more();
     expect(screen.getByRole('link', { name: 'See the leaderboard' })).toHaveAttribute('href', '/leaderboard/bible');
   });
 });
@@ -131,6 +157,11 @@ describe('GameResults on a sitting', () => {
     const accents = [...actions.children].filter((el) => /accent/i.test(el.className));
     expect(accents).toEqual([next]);
     expect(screen.getByRole('button', { name: 'Share' })).toBeInTheDocument();
+    expect(actions.children).toHaveLength(2);
+    // The way back to Cases steps behind More.
+    expect(screen.queryByRole('link', { name: 'Cases' })).toBeNull();
+    more();
+    expect(screen.getByRole('link', { name: 'Cases' })).toHaveAttribute('href', '/play');
   });
 
   it('with no next sitting, Share keeps the accent', () => {

@@ -239,38 +239,52 @@ describe('Leaders', () => {
     expect(screen.getByRole('link', { name: 'Find players' })).toBeInTheDocument();
   });
 
-  it('in a circle: opens on Circle, counts who has still to play, and links the circle', async () => {
+  it('circles are not on Ranks: an old link to the circle board opens on your crowd', async () => {
+    world.me = ADA;
+    world.api.myCircles = ok([{ code: 'ABCDEF', name: 'Obi family', members: 2, is_owner: true }]);
+    open('/leaderboard?board=circle');
+    expect(await screen.findByRole('radio', { name: 'Everyone' })).toHaveAttribute('aria-checked', 'true');
+    expect(screen.queryByRole('radio', { name: 'Circle' })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Your circles' })).toBeNull();
+  });
+
+  it('the address wins over the default', async () => {
     world.me = ADA;
     world.api.fetchFollowing = ok([{ handle: 'bisi', name: 'Bisi' }]);
-    world.api.myCircles = ok([{ code: 'ABCDEF', name: 'Obi family', members: 2, is_owner: true }]);
-    world.api.fetchCircleBoard = ok([
-      { rank: 1, handle: 'ada', name: 'Ada', score: 700, secs: 80, found: 7, total: null },
-      { rank: null, handle: 'bisi', name: 'Bisi', score: null, secs: null, found: null, total: null },
-    ]);
+    open('/leaderboard?board=everyone');
+    expect(await screen.findByRole('radio', { name: 'Everyone' })).toHaveAttribute('aria-checked', 'true');
+  });
+
+  it('your own row is pinned on the board: marked in the top, and added under it when you are below', async () => {
+    world.me = ADA;
+    const top = [
+      { rank: 1, handle: 'bisi', score: 900, secs: 70, found: 9, total: null },
+      { rank: 2, handle: 'ada', score: 700, secs: 80, found: 7, total: null },
+    ];
+    world.api.fetchDailyBoard = ok(top);
+    world.api.fetchDailyRank = ok({ ...top[1], players: 2 });
+    const first = open('/leaderboard');
+    let board = await screen.findByRole('list', { name: 'Top scores' });
+    expect(within(board).getAllByRole('listitem')).toHaveLength(2);
+    expect(board.querySelectorAll('[data-mine]')).toHaveLength(1);
+    expect(board.querySelector('[data-apart]')).toBeNull();
+    first.unmount();
+
+    world.api.fetchDailyBoard = ok([top[0]]);
+    world.api.fetchDailyRank = ok({ rank: 41, handle: 'ada', score: 300, secs: 200, found: 3, total: null, players: 60 });
     open('/leaderboard');
-    expect(await screen.findByRole('radio', { name: 'Circle' })).toHaveAttribute('aria-checked', 'true');
-    expect(await screen.findByText(/1 still to play\./)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Open Obi family' })).toHaveAttribute('href', '/c/ABCDEF');
-    expect(screen.getByRole('link', { name: 'Your circles' })).toHaveAttribute('href', '/circles');
+    board = await screen.findByRole('list', { name: 'Top scores' });
+    const mine = board.querySelector('[data-mine]')!;
+    expect(mine).toHaveAttribute('data-apart');
+    expect(mine).toHaveTextContent('41');
+    expect(screen.getByText('You are #41 of 60.')).toBeInTheDocument();
     expectNoHoles();
   });
 
-  it('a circle where nobody has played yet gets a line and the way to play', async () => {
-    world.me = ADA;
-    world.api.myCircles = ok([{ code: 'ABCDEF', name: 'Obi family', members: 1, is_owner: true }]);
-    world.api.fetchCircleBoard = ok([{ rank: null, handle: 'ada', name: 'Ada', score: null, secs: null, found: null, total: null }]);
-    open('/leaderboard');
-    expect(await screen.findByText(/Nobody in Obi family has a verified score here yet\./)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: "Play today's daily" })).toBeInTheDocument();
-  });
-
-  it('the address wins over the default, and a circle board with no circle offers one', async () => {
-    world.me = ADA;
-    world.api.fetchFollowing = ok([{ handle: 'bisi', name: 'Bisi' }]);
-    open('/leaderboard?board=circle');
-    expect(await screen.findByText(/You are not in a circle yet\./)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Start one' })).toHaveAttribute('href', '/circles');
-    expect(screen.getByRole('radio', { name: 'Circle' })).toHaveAttribute('aria-checked', 'true');
+  it('a board on its way is a skeleton, not a blank', () => {
+    world.api.fetchDailyBoard = () => new Promise(() => {});
+    const { container } = open('/leaderboard');
+    expect(container.querySelector('[data-skeleton][aria-busy="true"]')).not.toBeNull();
   });
 
   it('when the lookups fail it lands on Everyone', async () => {
@@ -341,6 +355,37 @@ describe('Players', () => {
     expect(await within(region).findByText(/A streak you share with a friend/)).toBeInTheDocument();
   });
 
+  it('circles wait for the third daily, unless the link asks for them', async () => {
+    world.me = ADA;
+    const first = open('/players');
+    await screen.findByRole('heading', { level: 2, name: 'Top players' });
+    expect(screen.queryByRole('region', { name: 'Circles' })).toBeNull();
+    first.unmount();
+    open('/players#circles');
+    const region = await screen.findByRole('region', { name: 'Circles' });
+    expect(await within(region).findByText(/A circle is a private daily table/)).toBeInTheDocument();
+    expect(within(region).getByRole('link', { name: 'Start a circle' })).toHaveAttribute('href', '/circles');
+  });
+
+  it('a player in a circle sees it on Squad whatever the count says, with the way to its board', async () => {
+    world.me = ADA;
+    world.api.myCircles = ok([{ code: 'ABCDEF', name: 'Obi family', members: 1, is_owner: true }, null, { code: 'GHIJKL', name: '', members: undefined }]);
+    open('/players');
+    const region = await screen.findByRole('region', { name: 'Circles' });
+    expect(within(region).getByRole('link', { name: /Obi family/ })).toHaveAttribute('href', '/c/ABCDEF');
+    expect(region).toHaveTextContent('1 player');
+    expect(within(region).getByRole('link', { name: /Your circle/ })).toHaveAttribute('href', '/c/GHIJKL');
+    expectNoHoles();
+  });
+
+  it('circles that did not load say so when they were asked for', async () => {
+    world.me = ADA;
+    world.api.myCircles = fail;
+    open('/players#circles');
+    const region = await screen.findByRole('region', { name: 'Circles' });
+    expect(await within(region).findByText('This list did not load. Try again in a moment.')).toBeInTheDocument();
+  });
+
   it('a player already in a friend streak sees it whatever the count says', async () => {
     world.me = ADA;
     world.api.myFriendStreaks = ok([{ handle: 'bisi', name: 'Bisi', state: 'active', streak: 1, you_today: false, them_today: false }]);
@@ -350,16 +395,23 @@ describe('Players', () => {
   });
 });
 
-describe('You', () => {
+describe('A player\'s page', () => {
   const profile = { id: 'u1', handle: 'ada', name: 'Ada', created_at: '2026-03-04T00:00:00Z' };
 
-  it('your own page says You, with Settings as the one action', async () => {
+  it('your own page is the public one: it says Player, and its one action leads back to You', async () => {
     world.me = ADA;
     world.api.fetchProfileByHandle = ok(profile);
     open('/u/ada');
-    expect(title()).toBe('You');
+    expect(title()).toBe('Player');
     expect(await screen.findByRole('heading', { name: 'Ada' })).toBeInTheDocument();
-    expect(screen.getAllByRole('link', { name: 'Settings' })).toHaveLength(1);
+    expect(screen.getByRole('link', { name: 'Back to You' })).toHaveAttribute('href', '/me');
+    expect(screen.queryByRole('link', { name: 'Settings' })).toBeNull();
+  });
+
+  it('a page on its way is a skeleton of the page, not a blank', () => {
+    world.api.fetchProfileByHandle = () => new Promise(() => {});
+    const { container } = open('/u/ada');
+    expect(container.querySelectorAll('[data-skeleton][aria-busy="true"]').length).toBeGreaterThan(0);
   });
 
   it('a new player gets a welcome and one thing to do, not a wall of zeros', async () => {

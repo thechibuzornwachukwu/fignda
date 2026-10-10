@@ -73,6 +73,8 @@ test('email code sign in, profile page, settings, sign out', async ({ page }) =>
   await expect(page.getByText(new RegExp(`@${handle} · Playing since`))).toBeVisible();
   // The profile never shows the email; settings shows it to its owner.
   await expect(page.getByText(email)).toHaveCount(0);
+  // Your own public page leads back to You, where the gear is.
+  await page.getByRole('link', { name: 'Back to You' }).click();
   await page.getByRole('link', { name: 'Settings' }).click();
   await expect(page).toHaveURL(/\/settings$/);
   await expect(page.getByText(email)).toBeVisible();
@@ -187,6 +189,7 @@ test('edit name, then delete the account', async ({ page }) => {
   await createProfile(page, 'Kemi', `km_${uid()}`);
   await expect(page).toHaveURL(/\/u\/km_/);
 
+  await page.getByRole('link', { name: 'Back to You' }).click();
   await page.getByRole('link', { name: 'Settings' }).click();
   await expect(page.getByLabel('Name')).toHaveValue('Kemi');
   await page.getByLabel('Name').fill('Kemi Ade');
@@ -194,6 +197,7 @@ test('edit name, then delete the account', async ({ page }) => {
   await expect(page.getByRole('status').filter({ hasText: 'Saved.' })).toBeVisible();
   await page.getByRole('link', { name: 'View your profile' }).click();
   await expect(page.getByRole('heading', { name: 'Kemi Ade' })).toBeVisible();
+  await page.getByRole('link', { name: 'Back to You' }).click();
   await page.getByRole('link', { name: 'Settings' }).click();
 
   // Esc closes the confirm without deleting.

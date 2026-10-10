@@ -6,6 +6,7 @@ import { Button } from '../components/Button';
 import { Field } from '../components/Field';
 import { Icon } from '../components/Icon';
 import { Segmented } from '../components/Segmented';
+import { Skeleton, SkeletonGroup, SkeletonList } from '../components/Skeleton';
 import { dayNo } from '../engine/daily';
 import { formatTime } from '../engine/time';
 import {
@@ -56,9 +57,9 @@ export function Circles() {
 
   return (
     <div className={board.page}>
-      <Link to="/leaderboard" className={board.back}>
+      <Link to="/players" className={board.back}>
         <Icon icon={ChevronLeft} size={16} />
-        Leaderboard
+        Squad
       </Link>
       <h1 className={board.title}>
         Circles.
@@ -84,7 +85,7 @@ export function Circles() {
             <h2 id="mine-title" className={board.h2}>
               Your circles
             </h2>
-            {list === null && <div className={board.loading} aria-busy="true" />}
+            {list === null && <SkeletonList rows={2} stat={false} />}
             {list?.length === 0 && <p className={board.empty}>You are not in a circle yet. Start one below.</p>}
             {!!list?.length && (
               <ul className={styles.list}>
@@ -168,7 +169,16 @@ export function Circle() {
 
   if (!auth.enabled) return <Navigate to="/play" replace />;
   if (info === null) return <Navigate to="/circles" replace />;
-  if (info === undefined) return <div className={board.page} aria-busy="true" />;
+  if (info === undefined) {
+    return (
+      <div className={board.page}>
+        <SkeletonGroup>
+          <Skeleton width="60%" height={40} />
+        </SkeletonGroup>
+        <SkeletonList rows={5} avatar={28} />
+      </div>
+    );
+  }
 
   const url = `${window.location.origin}/c/${info.code}`;
   const invite = async () => {
@@ -263,7 +273,7 @@ export function Circle() {
             {note}
           </p>
 
-          {rows === null && <div className={board.loading} aria-busy="true" />}
+          {rows === null && <SkeletonList rows={5} avatar={28} />}
           {view === 'today' && rows && (
             <ol className={board.board} aria-label="Today in this circle">
               {rows.map((r) => (

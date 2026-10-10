@@ -1,14 +1,17 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { Link, Navigate, useLocation } from 'react-router-dom';
+import { Button } from '../components/Button';
 import { Field } from '../components/Field';
 import { PageHeader } from '../components/PageHeader';
 import { Segmented } from '../components/Segmented';
-import { follow, isFollowing, newPlayers, searchPlayers, suggestedPlayers, topPlayers, unfollow, type PlayerRef, type Suggested } from '../lib/api';
+import { SkeletonList } from '../components/Skeleton';
+import { follow, isFollowing, myCircles, newPlayers, searchPlayers, suggestedPlayers, topPlayers, unfollow, type PlayerRef, type Suggested } from '../lib/api';
 import { useStreak } from '../lib/useStreak';
 import { keepUnlocked, useUnlocks } from '../lib/useUnlocks';
 import { useAuth } from '../lib/auth';
 import { Avatar } from '../components/Avatar';
 import { FriendStreaks } from './FriendStreaks';
+import circles from './Circles.module.css';
 import styles from './Players.module.css';
 
 type Row = PlayerRef & { stat?: string };
@@ -50,7 +53,7 @@ const count = (n: unknown): number => (typeof n === 'number' && Number.isFinite(
 
 /** `me` (your user id) adds a Follow button to every row but your own. */
 function List({ rows, empty, me, myHandle, check = false }: { rows: Rows; empty: ReactNode; me?: string; myHandle?: string; check?: boolean }) {
-  if (rows == null) return <div className={styles.loading} aria-busy="true" />;
+  if (rows == null) return <SkeletonList rows={5} avatar={40} sub />;
   // A list that failed says so. It never claims to be empty.
   if (rows === 'failed') return <p className={styles.muted}>This list did not load. Try again in a moment.</p>;
   if (rows.length === 0) return <p className={styles.muted}>{empty}</p>;
@@ -122,7 +125,62 @@ function TopPlayers({ points }: { points: boolean }) {
   );
 }
 
-/** /players. Find people: search and people to follow lead, then friend streaks, then the top players. */
+type CircleRef = { code: string; name: string; members: number };
+
+/**
+ * Your circles: the private tables you sit at. They are people, so they live on Squad, and each circle's board is on the circle.
+ * `quiet`: not offered yet, so it shows only for a player who is already in one.
+ */
+function YourCircles({ quiet }: { quiet: boolean }) {
+  const [list, setList] = useState<CircleRef[] | null | 'failed'>(null);
+  useEffect(() => {
+    let alive = true;
+    myCircles()
+      .then((l) => {
+        if (!alive) return;
+        const rows = (Array.isArray(l) ? l : []).filter((c) => c && typeof c.code === 'string' && c.code !== '');
+        setList(rows.map((c) => ({ code: c.code, name: c.name || 'Your circle', members: count(c.members) })));
+      })
+      .catch(() => alive && setList('failed'));
+    return () => {
+      alive = false;
+    };
+  }, []);
+  const has = Array.isArray(list) && list.length > 0;
+  if (quiet && !has) return null;
+  return (
+    <section id="circles" className={styles.section} aria-labelledby="circles-title">
+      <div className={styles.sectionHead}>
+        <h2 id="circles-title" className={styles.h2}>
+          Circles
+        </h2>
+        <Button variant="secondary" size="sm" to="/circles">
+          Start a circle
+        </Button>
+      </div>
+      {list == null ? (
+        <SkeletonList rows={2} stat={false} />
+      ) : list === 'failed' ? (
+        <p className={styles.muted}>This list did not load. Try again in a moment.</p>
+      ) : list.length === 0 ? (
+        <p className={styles.muted}>A circle is a private daily table for your family, class, church or office. Start one and send the link.</p>
+      ) : (
+        <ul className={circles.list}>
+          {list.map((c) => (
+            <li key={c.code}>
+              <Link to={`/c/${c.code}`} className={circles.circle}>
+                <span className={circles.circleName}>{c.name}</span>
+                <span className={circles.circleMeta}>{c.members === 1 ? '1 player' : `${c.members} players`}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+/** /players. The people you play with: friend streaks, your circles, the top players, people to follow, then search. */
 export function Players() {
   const auth = useAuth();
   const run = useStreak();
@@ -135,9 +193,11 @@ export function Players() {
   const myHandle = auth.profile?.handle;
   // A direct link always works: /players#friend-streaks shows the section, and it stays from then on.
   const asked = hash === '#friend-streaks';
+  const askedCircles = hash === '#circles';
   useEffect(() => {
     if (asked) keepUnlocked(['friendStreaks']);
-  }, [asked]);
+    if (askedCircles) keepUnlocked(['circles']);
+  }, [asked, askedCircles]);
 
   // Suggestions depend on who is asking: they leave out you and the people you already follow.
   useEffect(() => {
@@ -194,6 +254,9 @@ export function Players() {
 
       {/* Friend streaks appear after the third daily. A player already in one, or asked into one, sees it at once. */}
       {!searching && me && <FriendStreaks quiet={!open.friendStreaks && !asked} />}
+
+      {/* Circles are offered after the third daily too. A player already in one sees them whatever the count says. */}
+      {!searching && me && <YourCircles quiet={!open.circles && !askedCircles} />}
 
       {!searching && <TopPlayers points={open.points} />}
       {/* Suggestions only when there is someone to suggest: an empty list is one more thing to read. */}

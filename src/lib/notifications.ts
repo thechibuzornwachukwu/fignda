@@ -37,8 +37,8 @@ const gamePath = (id: string) => (id.startsWith('c-') ? `/p/${id.slice(2).toUppe
 /** A room is only worth joining while it is fresh. */
 const ROOM_MINUTES = 60;
 
-/** The sentence and the link for one notification. `me` is the reader's own handle. */
-export function describe(n: Note, me: string, now = Date.now()): { text: string; to: string } {
+/** The sentence and the link for one notification. */
+export function describe(n: Note, now = Date.now()): { text: string; to: string } {
   const who = n.name ?? 'A player';
   switch (n.kind) {
     case 'follow':
@@ -58,7 +58,7 @@ export function describe(n: Note, me: string, now = Date.now()): { text: string;
       };
     }
     case 'badge':
-      return { text: `New badge: ${badgeLabel(n.data.code)}.`, to: `/u/${me}#badges` };
+      return { text: `New badge: ${badgeLabel(n.data.code)}.`, to: '/me#badges' };
   }
 }
 

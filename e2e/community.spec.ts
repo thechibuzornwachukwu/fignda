@@ -119,16 +119,22 @@ test('guests see people to follow and are asked to sign in', async ({ page }) =>
   await expect(suggested.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/signin?next=%2Fplayers');
 });
 
-test('your records show on your own page only, and a new player sees a calm line', async ({ page, browser }) => {
+test('your records are on You and never on a public page, and a new player sees a calm line', async ({ page, browser }) => {
   const handle = await newPlayer(page, 'Recorda');
   await page.goto(`/u/${handle}`);
-  // No plays yet: no records block, no level.
+  // The public page, your own too: no records block.
   await expect(page.getByRole('heading', { name: 'Your run starts with one puzzle.' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Your records' })).toHaveCount(0);
 
+  // You holds them. None yet: one calm line.
+  await page.goto('/me');
+  await expect(page.getByRole('heading', { name: 'Your records' })).toBeVisible();
+  await expect(page.getByText('Records are kept in this browser.', { exact: false })).toBeVisible();
+
   // Records live in this browser. Unreadable ones are dropped, never shown.
   await page.evaluate(() => localStorage.setItem('gazecraft-records', '{not json'));
-  await page.goto(`/u/${handle}`);
+  await page.goto('/me');
+  await expect(page.getByRole('heading', { name: 'Your records' })).toBeVisible();
   await expect(page.getByText('undefined')).toHaveCount(0);
 
   const other = await browser.newPage();

@@ -86,9 +86,6 @@
   list-style: none;
   border-top: 2px solid var(--fg);
 }
-.board + .board {
-  border-top: 1px dashed var(--line-3);
-}
 .row {
   display: grid;
   grid-template-columns: 3ch minmax(0, 1fr) auto auto 6ch;
@@ -98,8 +95,23 @@
   border-bottom: 1px solid var(--line);
   font-variant-numeric: tabular-nums;
 }
+/* Your own row is pinned: it holds to the edge of the screen while the board scrolls past it. */
 .row[data-mine] {
+  position: sticky;
+  top: var(--space-2);
+  bottom: var(--space-2);
+  z-index: 1;
   background: var(--surface-2);
+}
+/* Below the top of the board: set apart from the rows above it. */
+.row[data-apart] {
+  border-top: 1px dashed var(--line-3);
+}
+/* On a phone the dock floats over the foot of the screen: the pinned row stays clear of it. */
+@media (max-width: 640px) {
+  .row[data-mine] {
+    bottom: calc(var(--tabbar-h) + var(--space-6) + env(safe-area-inset-bottom));
+  }
 }
 .rank {
   composes: label from '../styles/type.module.css';
@@ -164,10 +176,6 @@
   text-decoration: underline;
   text-underline-offset: 4px;
   text-decoration-color: var(--line-3);
-}
-.loading {
-  min-height: 240px;
-  border-top: 2px solid var(--fg);
 }
 
 .team {

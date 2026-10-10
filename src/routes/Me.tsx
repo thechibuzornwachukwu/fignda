@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { Lock, Pencil, Settings } from 'lucide-react';
 import { avatarCode, avatarFor, parseAvatar, PARTS, type Avatar as Parts } from '../avatar/draw';
 import { EARNED, howTo, isEarned, type Standing } from '../avatar/earned';
@@ -11,18 +12,21 @@ import { IconLink } from '../components/IconLink';
 import { LevelBadge } from '../components/LevelBadge';
 import { PageHeader } from '../components/PageHeader';
 import { Partner } from '../components/Partner';
+import { SkeletonPills } from '../components/Skeleton';
 import { TextLink } from '../components/TextLink';
 import { nextAt, nextBondAt, partnerName, PARTNERS, standingOf, type PartnerId } from '../engine/partners';
 import { doneClues } from '../games/caseFile';
 import { games } from '../games/catalog';
-import { saveAvatar, saveLook } from '../lib/api';
+import { fetchBadges, saveAvatar, saveLook } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { keepLook, loadLook } from '../lib/firstMinute';
 import type { LookChoice } from '../lib/onboarding';
 import { choosePartner, syncPartner, usePartner } from '../lib/partner';
 import { useStreak } from '../lib/useStreak';
+import { useUnlocks } from '../lib/useUnlocks';
 import { CharacterEditor } from './AvatarDesigner';
 import { Week } from './Games';
+import { BadgePills, RecordList } from './Yours';
 import styles from './Me.module.css';
 
 const num = (n: number) => n.toLocaleString('en-US');
@@ -39,8 +43,8 @@ const wearing = (parts: Parts, g: Gear) => parts[g.part] === indexOf(g.part, g.n
 const wear = (parts: Parts, g: Gear): Parts => ({ ...parts, [g.part]: indexOf(g.part, g.name) });
 
 /**
- * /me. The player's detective and partner on a stage, and under it the partners and the detective gear as rows
- * to swipe. Tap one to try it on the stage; one button under the stage chooses it. Guests too: what they choose
+ * /me. Everything about the player. Their detective and partner on a stage, and under it the partners and the detective gear as rows
+ * to swipe, then the week, their badges and their records. Tap one to try it on the stage; one button under the stage chooses it. Guests too: what they choose
  * is kept in the browser and moves to the account on sign in.
  */
 export function Me() {
@@ -48,6 +52,10 @@ export function Me() {
   const profile = auth.profile;
   const partner = usePartner();
   const run = useStreak();
+  const open = useUnlocks(run.played);
+  const { hash } = useLocation();
+  // Null while the badges are on their way. A lookup that fails is no badges, never a hole.
+  const [badges, setBadges] = useState<{ handle: string; codes: string[] } | null>(null);
   const [trying, setTrying] = useState<Trying>(null);
   const [busy, setBusy] = useState(false);
   const [note, setNote] = useState('');
@@ -60,6 +68,22 @@ export function Me() {
   useEffect(() => {
     if (profile) void syncPartner();
   }, [profile]);
+
+  const handle = profile?.handle;
+  useEffect(() => {
+    if (!handle) return;
+    let alive = true;
+    fetchBadges(handle)
+      .then((b) => (Array.isArray(b) ? b : []))
+      .catch(() => [] as string[])
+      .then((codes) => alive && setBadges({ handle, codes }));
+    return () => {
+      alive = false;
+    };
+  }, [handle]);
+  const earned = handle && badges?.handle === handle ? badges.codes : null;
+  // Badges appear after the first verified play (src/lib/unlocks.ts). A badge already earned, or a link to #badges, shows them at once.
+  const showBadges = !!handle && (open.badges || hash === '#badges' || (earned?.length ?? 0) > 0);
 
   const code = profile ? profile.avatar : guestAvatarCode();
   // eslint-disable-next-line react-hooks/exhaustive-deps -- `guestRev` is the reason to read the guest's design again
@@ -235,9 +259,26 @@ export function Me() {
       {/* How the week went: a fact about you, so it lives here and not in the way of playing. */}
       <Week run={run} />
 
+      {showBadges && (
+        <section id="badges" className={styles.section} aria-labelledby="me-badges">
+          <h2 id="me-badges" className={styles.h2}>
+            Badges
+          </h2>
+          {/* The next 3 to aim for sit after the earned ones. */}
+          {earned == null ? <SkeletonPills /> : <BadgePills codes={earned} next={3} />}
+        </section>
+      )}
+
+      <section className={styles.section} aria-labelledby="me-records">
+        <h2 id="me-records" className={styles.h2}>
+          Your records
+        </h2>
+        <RecordList />
+      </section>
+
       <p className={styles.more}>
         {profile ? (
-          <TextLink to={`/u/${profile.handle}`}>Your profile, badges and records</TextLink>
+          <TextLink to={`/u/${profile.handle}`}>See your public page</TextLink>
         ) : (
           auth.enabled && (
             <>

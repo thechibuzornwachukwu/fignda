@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { Link, Navigate, useLocation, useParams } from "react-router-dom";
+import { Link, Navigate, useParams } from "react-router-dom";
 import { Button } from "../components/Button";
-import { IconLink } from "../components/IconLink";
 import { PageHeader } from "../components/PageHeader";
-import { Settings } from "lucide-react";
+import { Skeleton, SkeletonGroup, SkeletonList } from "../components/Skeleton";
+import { TextLink } from "../components/TextLink";
 import { dayNo } from "../engine/daily";
 import { formatTime } from "../engine/time";
 import { getGameDef } from "../games/catalog";
@@ -28,7 +28,7 @@ import {
 } from "./ProfileSocial";
 import { Avatar } from "../components/Avatar";
 import { LevelBadge } from "../components/LevelBadge";
-import { emptyRecords, loadRecords } from "../lib/records";
+import { BadgePills } from "./Yours";
 import styles from "./Profile.module.css";
 
 type State =
@@ -64,7 +64,7 @@ function playSub(p: PlayRow) {
   return g ? g.category : "Made from a topic";
 }
 
-/** /u/:handle. A player's public page: identity and play. Settings live elsewhere. */
+/** /u/:handle. A player's public page, and only that: what everyone sees. What is yours alone (records, badges to aim for, settings) is on You. */
 export function Profile() {
   const { handle = "" } = useParams();
   const auth = useAuth();
@@ -72,7 +72,6 @@ export function Profile() {
   const [state, setState] = useState<State>({ status: "loading" });
   const [note, setNote] = useState("");
   const social = useSocial(handle);
-  const { hash } = useLocation();
 
   useEffect(() => {
     let alive = true;
@@ -85,9 +84,7 @@ export function Profile() {
       if (profile === "failed") return setState({ status: "error" });
       if (!profile) return setState({ status: "missing" });
       // Your own page counts every play of yours; everyone else sees verified plays only.
-      const plays = await (
-        own ? fetchOwnPlays() : fetchPublicPlays(handle)
-      ).then(
+      const plays = await (own ? fetchOwnPlays() : fetchPublicPlays(handle)).then(
         (p) => (Array.isArray(p) ? p : []),
         () => null,
       );
@@ -105,14 +102,22 @@ export function Profile() {
   }, [handle, own]);
 
   if (!auth.enabled) return <Navigate to="/play" replace />;
-  const title = own ? "You" : "Player";
-  const settings = own ? (
-    <IconLink to="/settings" icon={Settings} label="Settings" />
-  ) : undefined;
+  const title = "Player";
+  // Your own public page leads back to You, where everything about you is changed.
+  const settings = own ? <TextLink to="/me">Back to You</TextLink> : undefined;
   if (state.status === "loading") {
     return (
-      <div className={styles.page} aria-busy="true">
+      <div className={styles.page}>
         <PageHeader title={title} action={settings} />
+        <SkeletonGroup className={styles.who}>
+          <Skeleton width={88} height={88} round />
+          <div className={styles.names}>
+            <Skeleton width="40%" height={24} />
+            <Skeleton width="56%" />
+            <Skeleton width="32%" />
+          </div>
+        </SkeletonGroup>
+        <SkeletonList rows={4} />
       </div>
     );
   }
@@ -142,11 +147,6 @@ export function Profile() {
   const plays = state.plays ?? [];
   const since = monthYear(profile.created_at);
   const name = profile.name || `@${profile.handle}`;
-  const earned = BADGES.filter((b) => badges.includes(b.code));
-  // Your own page also shows the next few to aim for.
-  const next = own
-    ? BADGES.filter((b) => !badges.includes(b.code)).slice(0, 3)
-    : [];
   const today = dayNo();
   const s = profileStats(plays, today);
   // Points and badges appear after the first verified play (src/lib/unlocks.ts). A link to #badges always shows them.
@@ -156,16 +156,10 @@ export function Profile() {
     dailies: s.dailies,
     verified: plays.filter((p) => p.verified !== false).length,
   });
-  // Records live in this browser, so only your own page has them. Stored junk was already dropped on read.
-  const rec = own ? loadRecords() : emptyRecords();
-  const packs = Object.entries(rec.clean).sort((a, b) => a[1] - b[1]);
-  const hasRecords = packs.length > 0 || rec.daily > 0 || rec.long != null;
   const cleanReads =
     Number.isFinite(s.cleanReads) && s.cleanReads > 0 ? s.cleanReads : 0;
-  const showBadges =
-    (open.badges || earned.length > 0 || hash === "#badges") &&
-    (earned.length > 0 || next.length > 0);
-  const badgeList = showBadges && (
+  const hasBadges = BADGES.some((b) => badges.includes(b.code));
+  const badgeList = hasBadges && (
     <section
       id="badges"
       className={styles.section}
@@ -174,19 +168,7 @@ export function Profile() {
       <h2 id="badges-title" className={styles.h2}>
         Badges
       </h2>
-      <ul className={styles.badges}>
-        {earned.map((b) => (
-          <li key={b.code} className={styles.badge}>
-            {b.label}
-          </li>
-        ))}
-        {next.map((b) => (
-          <li key={b.code} className={styles.badge} data-locked title={b.how}>
-            {b.label}
-            <span className={styles.srOnly}>. Not earned yet. {b.how}</span>
-          </li>
-        ))}
-      </ul>
+      <BadgePills codes={badges} />
     </section>
   );
 
@@ -256,51 +238,6 @@ export function Profile() {
                 {s.points.toLocaleString("en-US")}
               </dd>
             </dl>
-          )}
-
-          {own && (
-            <section className={styles.section} aria-labelledby="records-title">
-              <h2 id="records-title" className={styles.h2}>
-                Your records
-              </h2>
-              {hasRecords ? (
-                <dl className={styles.records}>
-                  {packs.map(([pack, secs]) => (
-                    <div key={pack} className={styles.record}>
-                      <dt className={styles.statLabel}>
-                        Fastest clean read, {pack}
-                      </dt>
-                      <dd className={styles.recordValue}>{formatTime(secs)}</dd>
-                    </div>
-                  ))}
-                  {rec.daily > 0 && (
-                    <div className={styles.record}>
-                      <dt className={styles.statLabel}>
-                        Most found in a daily
-                      </dt>
-                      <dd className={styles.recordValue}>{rec.daily}</dd>
-                    </div>
-                  )}
-                  {rec.long && (
-                    <div className={styles.record}>
-                      <dt className={styles.statLabel}>Longest word</dt>
-                      <dd className={styles.recordValue}>
-                        {rec.long.word}
-                        <span className={styles.unit}>
-                          {" "}
-                          {rec.long.len} letters
-                        </span>
-                      </dd>
-                    </div>
-                  )}
-                </dl>
-              ) : (
-                <p className={styles.muted}>
-                  Read a puzzle clean, finish a daily or find a long word and
-                  your best shows here. Records are kept in this browser.
-                </p>
-              )}
-            </section>
           )}
 
           <dl className={styles.stats} data-count={cleanReads > 0 ? 5 : 4}>

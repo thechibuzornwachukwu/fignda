@@ -68,6 +68,28 @@ Two faces. Bungee (`--font-display`, 400 only, capitals only) for headings. Manr
 | Input form | h52 r8 1px `--line-2` bg `--surface` 16px, focus `--line-4` |
 | Dialog | scrim `--scrim`, panel max 820 r14 1px `--line-2` bg `--bg`. Esc and outside click close. Focus trapped and restored |
 
+**Skeletons** (`<Skeleton>`, `<SkeletonGroup>`, `<SkeletonList>`, `<SkeletonPills>` in `src/components/Skeleton.tsx`)
+Anything that waits on the network shows the shape of what is coming, in the place it will land, so the screen never sits blank and nothing jumps. One rule for every screen, and for every new screen, section or component: if it loads, it ships with its skeleton, and the skeleton changes when the layout does.
+- Shapes are `--surface-2` blocks, radius `--radius-sm` (`--radius-pill` for a picture or a pill), sized like the content: a circle the size of the avatar, a line the height of the text, a row with the list's own rule and padding. Never a spinner, never a grey box the size of the page.
+- The group is `aria-busy="true"` with one hidden word, "Loading."; the shapes are hidden from a screen reader.
+- Shown at once, in place, with no delay: a skeleton is quiet enough not to flash.
+- A skeleton is for content loading into a screen whose frame is already there. The Waiting screen (the avatar and dots) stays for something being made or a whole page being fetched, after 1 second. Nothing at all for a check that answers in a moment (who is signed in), and for a section that may turn out not to exist (room invites, a friend streak that is not offered yet): space is never held for nothing.
+- A load that fails says so in a line. A skeleton never stays up in place of an error.
+
+| Where | Skeleton |
+|---|---|
+| Ranks, a puzzle's board, a circle's board | 8 rows (5 in a circle): a 28 circle, a line, a number |
+| Squad: top players, people to follow, search results | 5 rows: a 40 circle, 2 lines, a number |
+| Squad: friend streaks | 2 rows: a 40 circle, 2 lines, a number |
+| Squad: Circles, and the list on `/circles` | 2 rows: a line |
+| A circle `/c/CODE`, before it is known | a title block, then 5 board rows |
+| Player `/u/HANDLE` | an 88 circle beside 3 lines, then 4 rows |
+| You: Badges | 4 pills |
+| Notifications | 5 rows: a 40 circle, a line |
+| Make: Your puzzles | 3 rows: a line, a number |
+| Play together: Invite someone you follow | 3 rows: a 32 circle, a line |
+| Settings: Reminders | one control-sized block |
+
 ## 5. The puzzle interaction
 Paragraph renders one span per character. Letters carry `li` (index in lowercase letter stream `S`). Non letters carry `prev` and `next`.
 
@@ -243,12 +265,12 @@ What was on each page on 9 Oct 2026, and where it sits now. Nothing was dropped.
 | Tab | Job | Leads with | Then | Moved |
 |---|---|---|---|---|
 | Games `/play` | Play | Daily card | Week, room invites, games list with shelves, any topic | The two line `display` heading is now the PageHeader. Room invites went under the daily and the week. "Make your own puzzle" went from under the list to the header action. Any topic waits for the Make unlock (`/play#any-topic` always shows it) |
-| Leaders `/leaderboard` | See where you stand | Today's board for your crowd | Day buttons, the line about totals, puzzle boards | "Your circles" went from a link above the title to the header action. "Find players" left the top: Players is a tab, and the empty Following board still links it |
+| Leaders `/leaderboard` | See where you stand | Today's board for your crowd, your row pinned | Day buttons, the line about totals | Circles went to Players (One job a screen, below). "Find players" left the top: Players is a tab, and the empty Following board still links it |
 | Players `/players` | Find people | People to follow, with search over it | Friend streaks, Top players | Most points, Longest streaks, Most perfect dailies and New this week were 4 sections side by side. They are 1 section, Top players, with a Segmented (Streaks, Perfect, New, Points) and one list. Friend streaks went from first to second |
-| You `/u/:handle` | Your records | Avatar, name and level badge, then Points, Your records (own page only) and the stats | Last 14 dailies, badges, recent plays, followers and following | Settings went from the button row to the header action (your own page). The name is Manrope (`row`), not Bungee: a name is never set in the display face. Badges went under the 14 day strip |
+| Player `/u/:handle` | What others see of a player | Avatar, name and level badge, then Points and the stats | Last 14 dailies, badges, recent plays, followers and following | Your records, the badges to aim for and Settings went to You `/me`. The name is Manrope (`row`), not Bungee: a name is never set in the display face. Badges went under the 14 day strip |
 
-- PageHeader titles: "Cases", "Ranks", "Squad", "You". The dock and the header use the same names, and the dock's middle button is "Today" with a Search icon. Signed in, the dock's You tab is the player's own avatar at 24, not an icon. In this spec the tabs are still called by their old names, Games, Leaders and Players (another player's page: "Player"). `/leaderboard/:id`, `/circles` and `/c/CODE` are not tabs and keep their own titles.
-- Leaders, signed in: the board opens on your crowd. Circle (your first circle) if you are in one, else Following if you follow anyone, else Everyone. Segmented Circle / Following / Everyone; a choice is kept in the address as `?board=circle|following|everyone` and wins over the default. Circle is offered once you are in one or circles are unlocked. The circle board lists members with a verified score, then "N still to play." and a link to the circle. Guests see Everyone and no Segmented.
+- PageHeader titles: "Cases", "Ranks", "Squad", "You" (`/me`). The dock and the header use the same names, and the dock's middle button is "Today" with a Search icon. Signed in, the dock's You tab is the player's own avatar at 24, not an icon. In this spec the tabs are still called by their old names, Games, Leaders and Players (another player's page: "Player"). `/leaderboard/:id`, `/circles` and `/c/CODE` are not tabs and keep their own titles.
+- Leaders, signed in: the board opens on your crowd. Following if you follow anyone, else Everyone. Segmented Following / Everyone; a choice is kept in the address as `?board=following|everyone` and wins over the default. A circle's board is on the circle. Guests see Everyone and no Segmented.
 - Bordered boxes, counted 9 Oct 2026. Games: 2 kinds, both objects, both kept (daily card, room invite). Leaders, Players, You: none that only group. Controls (day buttons, Follow, the "You" chip, badge pills) are not sections.
 
 **Less at once** (BUILD_PLAN 2c, `src/lib/unlocks.ts`)
@@ -258,14 +280,14 @@ An entry point appears when the player has done what it scores. The rules hide l
 |---|---|---|
 | boards | 1 finished game | "See the board" under the week on Games |
 | points, badges | 1 verified play | Points and Badges on a profile, the Points list on Players |
-| circles, friend streaks | 3 dailies | "Your circles" and the Circle board on Leaders, Friend streaks on Players |
+| circles, friend streaks | 3 dailies | Circles and Friend streaks on Players |
 | make | 5 plays | "Make a puzzle" in the Games header, any topic under the list |
 
 - First visit: the daily card and the games list, nothing else.
 - Counted from what the browser already holds (finished dailies, `gazecraft-finished`) and, signed in, the player's stored plays. Stored data that is missing or unreadable counts as a first visit.
-- Once shown, always shown: unlocked names are kept under `gazecraft-unlocks`. A player who is already in a circle or a friend streak sees it whatever the count says. Opening `/players#friend-streaks`, `/play#any-topic` or `/u/NAME#badges` shows that section at once.
+- Once shown, always shown: unlocked names are kept under `gazecraft-unlocks`. A player who is already in a circle or a friend streak sees it whatever the count says. Opening `/players#friend-streaks`, `/players#circles`, `/play#any-topic` or `/me#badges` shows that section at once.
 
-**Empty states on the 4 tabs.** A list never leaves a heading over nothing. Nothing yet: one calm line and, where it helps, one link. A list that did not load says so ("This list did not load. Try again in a moment.") and never claims to be empty. A stat with nothing behind it is left out, not shown as 0 of 0: Clean reads appears beside the 4 stats only at 1 or more. Your records (own page, in this browser) lists only the records that exist; with none it is one line that says where they come from. Unreadable storage is no records. A title, maker or date that is missing is replaced or left out, never printed as a blank or "undefined".
+**Empty states on the 4 tabs.** A list never leaves a heading over nothing. Nothing yet: one calm line and, where it helps, one link. A list that did not load says so ("This list did not load. Try again in a moment.") and never claims to be empty. A stat with nothing behind it is left out, not shown as 0 of 0: Clean reads appears beside the 4 stats only at 1 or more. Your records (on You, in this browser) lists only the records that exist; with none it is one line that says where they come from. Unreadable storage is no records. A title, maker or date that is missing is replaced or left out, never printed as a blank or "undefined".
 
 **Game `/play/:id`, `/d/:n`**
 - Back "All games", `Category · Level`.
@@ -278,7 +300,7 @@ An entry point appears when the player has done what it scores. The rules hide l
 - Daily list shows found rows only + "More are hiding. How many? That is the game."
 
 **Results** (above puzzle, smooth scroll to top)
-Title, line ("Every answer found." or "The ones you missed are shaded below."), stats Score / Found / Time, actions Play again (not daily), More games, Share (accent). Guest strip: "You are playing as a guest. Sign in and this score goes with you, with your streak and your name on shared cards." and the link "Keep this score" to `/welcome?from=` this page. After today's daily the text is one earned fact in its place (`guestAsk` in `src/lib/guestAsk.ts`), and the link stays:
+One job: say what happened and lead on. In view: the title, one line ("Every answer found." or "The ones you missed are shaded below."), the Stars, the case piece or the unmasking, a sponsor's "With NAME" line, and 2 buttons. The buttons are Share (accent) and "Cases"; on a clue they are the way on (accent) and Share. Under them a "More" link (`aria-expanded`, a chevron) opens the rest in place and "Less" closes it: the stats Score / Found / Time, the skill, record, rare, day, run and done lines, then Play again (not daily), Copy result, "See the leaderboard" where the game has a board, and "Cases" on a clue. Closed each time a result opens. No line is said twice. Guest strip: "You are playing as a guest. Sign in and this score goes with you, with your streak and your name on shared cards." and the link "Keep this score" to `/welcome?from=` this page. After today's daily the text is one earned fact in its place (`guestAsk` in `src/lib/guestAsk.ts`), and the link stays:
 - Where the score would stand: one `guestPlace` line, "That score is place 14 of 60 today." The place comes from the server (`daily_place`), from the guest's own score against the checked plays, with the guest counted as one more player. Only on a board of 6 or more. A place that cannot be one is never printed.
 - Where the run lives: at a run of 3 days or more, one `guestRun` line, said once in this browser (`gazecraft-run-told`) and before the place: the run is kept in this browser only, and sign in keeps it anywhere. Information, never a threat: no line says what the player would lose.
 Nothing is locked for a guest and nothing is taken away. Play first stays.
@@ -291,7 +313,9 @@ A stage, the way a runner game shows its characters: who you are is the front of
 - Tap a card to try it: it goes onto the stage at once, nothing is saved. The accent button then says what choosing it does ("Select Detective Tobs", "Wear the badge", "Take the gear off") and choosing it saves and clears the try. A locked card says what opens it in place of the button ("Locked. 1,760 points to go.", "Locked. Close 5 cases.").
 - Partners row: the partners. State: "With you", "Yours", "Tap to try", or the points it opens at.
 - Detective gear row: "No gear" and the 5 earned pieces, each drawn on the player's own avatar. State: "On you", "Yours", or how it is earned.
-- Last, one link: the player's profile, badges and records. A guest is told their choices are kept in this browser, with a link to sign in.
+- Under the rows, everything else about the player: the week, Badges (signed in: the earned ones, then the next 3 to aim for, said as not earned yet; `#badges`; a skeleton of pills while they load), and Your records (kept in this browser, so guests have them too; with none, one line that says where they come from).
+- Last, one link, "See your public page", to `/u/HANDLE`. A guest is told their choices are kept in this browser, with a link to sign in.
+- A badge notification opens `/me#badges`.
 - Settings holds the account only (name, sign out, reminders, theme, delete) and one line pointing here.
 
 **Cases:** one thing to do, then the path. In order: PageHeader "Cases" with the crew as its action, the daily card, room invites, the path, and at the foot "Make a puzzle" once it is unlocked. Nothing else: the week and the way to the board are not here. The crew is 2 faces at 36 in a pill, the player's avatar and their partner, leading to `/me` ("Change your detective, partner and gear").
@@ -301,7 +325,11 @@ A stage, the way a runner game shows its characters: who you are is the front of
 - `<IconLink>`: a page action as a 44 square with a 1px `--line-3` border, radius `--radius-lg`. An icon stands alone only where everyone reads it: a gear for Settings, the bell, a pencil on a picture. Anything else carries its word beside the icon.
 - On the path, closed cases fold into one row, "3 cases closed" with an Award icon, which opens to show them. So the case being worked is never under a pile of finished ones. With every case closed the row starts open. "Play together" is on the open case only.
 - You: the week (`<Week>`) is under the rows. The way to edit the character is a round 44 pencil on the corner of the avatar on the stage, named "Edit character". Under the avatar: the name and the LevelBadge. Under the partner: its name and "Your partner".
-- Squad, in order: friend streaks, top players, people to follow (left out when there is nobody to suggest), then "Find a player by handle". Searching shows the results alone.
+- Squad holds every person. In order: friend streaks, Circles, top players, people to follow (left out when there is nobody to suggest), then "Find a player by handle". Searching shows the results alone.
+- Circles on Squad (`#circles`), signed in: h2 "Circles" with a secondary "Start a circle" to `/circles`, then each circle as a row (its name, "3 players") to `/c/CODE`, where that circle's board is. In no circle: one line saying what a circle is. Offered after the third daily; a player already in one sees it whatever the count says. `/circles` leads back to Squad.
+- Ranks is one board at a time, and no circles: today's board for Everyone or Following (Segmented, signed in; `?board=following|everyone`; it opens on Following when you follow anyone). An old `?board=circle` link opens on your crowd. No header action.
+- Your row on a board is pinned in view: it carries the "You" chip on `--surface-2` and sticks to the top or the foot of the screen while the board scrolls past, clear of the dock on a phone. Outside the top of the board it is added as the last row, set apart by a dashed rule, over "You are #41 of 60."
+- `/u/HANDLE` is the public page only, your own too: PageHeader "Player", earned badges, no records and no badges to aim for. Your own still counts your plays that are not verified yet, marked "Unverified", so nothing of yours goes missing. On your own, the one action is "Back to You" to `/me`.
 
 **Cases are the only way in.** There is no list of games and no filter: the path is the game, and a case not yet reached cannot be opened from Cases. A sponsored case carries "With NAME" on its card. "Play together" is a quiet pill button on the card of any case that has been opened (open or closed): it starts a room on that case's whole puzzle. The puzzle screen's way back says "Cases".
 
@@ -312,7 +340,7 @@ A stage, the way a runner game shows its characters: who you are is the front of
 **Sitting `/play/:id/:n`**
 One passage of a catalogue puzzle, played as a game of its own: a clue of its case, reached from the path. The same screen as a puzzle, with these differences:
 - The meta line says `Category · Clue 2 of 8` in place of the level, the whole puzzle counted as the last. The title counts the words in the passage: "Find 4 books of the Bible".
-- The result leads with one accent button to the next sitting, "Next clue". On the last passage it is "The unmasking", the whole puzzle, which stays the hard one. It takes the screen's one accent, so Share is secondary here. The next sitting is one tap away and never starts by itself.
+- The result leads with one accent button to the next sitting, "Next clue". On the last passage it is "The unmasking", the whole puzzle, which stays the hard one. It takes the screen's one accent, so Share is secondary here, and the way back to Cases is behind More. The next sitting is one tap away and never starts by itself.
 - Its own kept game, result and stars (`gazecraft-resume-ID~N`, and `ID~N` in `gazecraft-stars`). A clean read is said as in any game.
 - Never ranked and never sent to the server: no board link, no `?vs=`, no room, no points. Its time is no personal record. A passage is never set against a whole puzzle.
 - Games started and finished on a passage count toward its puzzle in the sponsor report, and the sponsor's mark shows as on the puzzle.
@@ -383,7 +411,8 @@ Rules for any new motion (from Emil Kowalski's design engineering skill, linked 
 | Landing how-to | two loops of 420ms beats. The pointer moves between letters with `--dur-slower` `--ease-out` and shrinks to 0.84 while pressed, `--dur-fast`. Drag: wait, reach the first letter, press and mark one more letter each beat, let go and the word is found, hold 3 beats. Tap: wait, reach the first letter, tap (it marks), move to the last, tap (the whole word marks), found, hold 3 beats. Reduced motion: no loop, the word shown found with the pointer on its last letter |
 | First find guide | first visit on a phone only, on the landing demo, the same beats and moves as the how-to: the hand reaches the first letter, taps, moves to the last, taps, waits, and starts again. `transform` only. It stops for good on the first find or Skip. Reduced motion: no loop, the hand rests on the first letter, which keeps its hint ring |
 | Welcome steps | no motion between steps. The Ring uses its own transition as it fills |
-| Waiting | the one loop outside the landing, so it is allowed past 300ms. Avatar bobs up `--space-1` and back, `--dur-bob` each way, `--ease-loop`. 3 dots in `--muted` hop `--space-1h` one after the other, a `--dur-bounce` cycle, each `--dur-bounce-step` behind the last, `--ease-loop`. Only `transform` moves. No blink: the avatar is drawn by `<Avatar>` and is not redrawn. The line changes every 20 seconds with no motion. Shown after 1 second, kept at least 600ms. Reduced motion: no bob, no hop, the line still changes |
+| Skeleton | opacity 1 to 0.5 and back, `--dur-skeleton` each way, `--ease-loop`. A second loop allowed past 300ms, because it only says "still coming". Still under reduced motion |
+| Waiting | the other loop outside the landing, so it is allowed past 300ms. Avatar bobs up `--space-1` and back, `--dur-bob` each way, `--ease-loop`. 3 dots in `--muted` hop `--space-1h` one after the other, a `--dur-bounce` cycle, each `--dur-bounce-step` behind the last, `--ease-loop`. Only `transform` moves. No blink: the avatar is drawn by `<Avatar>` and is not redrawn. The line changes every 20 seconds with no motion. Shown after 1 second, kept at least 600ms. Reduced motion: no bob, no hop, the line still changes |
 | Journey hop | once, when the player returns to the path with a new next clue: the avatar hops from the clue it stood on to the new one in an arc, or drops in when the new one opens a case, `--dur-hop` `--ease-out`. `transform` only. A rare moment (once per finished clue), so it may pass 300ms. Pressing a clue sinks it by `--ledge`, `--dur-fast`. The line and the discs do not animate. Reduced motion: the avatar is simply on the new clue |
 | Stars | on the clue or the case just finished, and on the result screen: earned stars pop in one at a time, each from 0.8 scale and 0 opacity, `--dur-star` `--ease-out`, each `--dur-star-step` behind the last. Stars already seen do not move. Reduced motion: all shown at once |
 | Secret piece | on a clue's result: the slots this clue filled pop in, each from 0.8 scale and 0 opacity, `--dur-star` `--ease-out`. Slots held before do not move. Reduced motion: shown at once |

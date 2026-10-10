@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Avatar } from '../components/Avatar';
 import { Button } from '../components/Button';
+import { SkeletonList } from '../components/Skeleton';
 import { askFriendStreak, endFriendStreak, myFriendStreaks, myStreakLink, nudgeFriend, type FriendStreak } from '../lib/api';
 import { copyText } from '../lib/share';
 import styles from './Players.module.css';
@@ -102,7 +103,7 @@ export function FriendStreaks({ quiet = false }: { /** Not unlocked yet: show no
         </Button>
       </div>
       {rows == null ? (
-        <div className={styles.loading} aria-busy="true" />
+        <SkeletonList rows={2} avatar={40} sub />
       ) : rows.length === 0 ? (
         <p className={styles.muted}>
           A streak you share with a friend. It grows each day you both play the daily. Send your link to anyone, or open a player's profile and

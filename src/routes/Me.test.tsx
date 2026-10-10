@@ -15,6 +15,8 @@ const world = vi.hoisted(() => ({
   saveOk: true,
   chooseFails: false,
   saved: [] as string[],
+  badges: [] as string[],
+  plays: [] as unknown[],
 }));
 
 vi.mock('../lib/auth', () => ({
@@ -27,6 +29,8 @@ vi.mock('../lib/api', async (original) => ({
     return world.saveOk;
   },
   saveLook: async () => true,
+  fetchBadges: async () => world.badges,
+  fetchOwnPlays: async () => world.plays,
   fetchPoints: async () => world.mine?.points ?? 0,
   fetchMyPartner: async () => world.mine,
   chooseServerPartner: async (who: string) => {
@@ -55,6 +59,8 @@ beforeEach(() => {
   world.saveOk = true;
   world.chooseFails = false;
   world.saved = [];
+  world.badges = [];
+  world.plays = [];
 });
 
 describe('You, as a guest', () => {
@@ -148,6 +154,69 @@ describe('You, signed in', () => {
     const { container } = show();
     expect(await within(stage()).findByText(world.profile.name)).toBeInTheDocument();
     expect(container.querySelector('b')).toBeNull();
+  });
+});
+
+describe('You holds everything about you', () => {
+  const records = () => screen.getByRole('region', { name: 'Your records' });
+
+  it('a guest with no records gets one calm line, and no badges', () => {
+    show();
+    expect(within(records()).getByText(/shows here\. Records are kept in this browser\./)).toBeInTheDocument();
+    expect(screen.queryByText('Longest word')).toBeNull();
+    expect(screen.queryByRole('heading', { name: 'Badges' })).toBeNull();
+    expect(document.body.textContent).not.toMatch(/undefined|NaN|\bnull\b/);
+  });
+
+  it('records kept in this browser are listed', () => {
+    localStorage.setItem('gazecraft-records', JSON.stringify({ clean: { Bible: 75 }, daily: 7, long: { word: 'Habakkuk', len: 8 } }));
+    show();
+    expect(within(records()).getByText('Fastest clean read, Bible')).toBeInTheDocument();
+    expect(within(records()).getByText('1:15')).toBeInTheDocument();
+    expect(within(records()).getByText('Most found in a daily')).toBeInTheDocument();
+    expect(within(records()).getByText('Habakkuk')).toBeInTheDocument();
+  });
+
+  it('malformed storage reads as no records, and half valid storage keeps only what is a record', () => {
+    localStorage.setItem('gazecraft-records', '{not json');
+    const first = show();
+    expect(within(records()).getByText(/Records are kept in this browser\./)).toBeInTheDocument();
+    first.unmount();
+    localStorage.setItem('gazecraft-records', JSON.stringify({ clean: { Bible: 'fast', Cities: 90 }, daily: -3, long: { word: '', len: 'x' } }));
+    show();
+    expect(within(records()).getByText('Fastest clean read, Cities')).toBeInTheDocument();
+    expect(within(records()).queryByText(/Bible/)).toBeNull();
+    expect(screen.queryByText('Most found in a daily')).toBeNull();
+    expect(screen.queryByText('Longest word')).toBeNull();
+  });
+
+  it('signed in with a badge: the earned one, the next 3 to aim for, and the way to the public page', async () => {
+    world.profile = ADA;
+    world.badges = ['first_game'];
+    show();
+    const badges = await screen.findByRole('region', { name: 'Badges' });
+    await waitFor(() => expect(within(badges).getAllByRole('listitem')).toHaveLength(4));
+    expect(within(badges).getAllByText(/Not earned yet/)).toHaveLength(3);
+    expect(badges).toHaveAttribute('id', 'badges');
+    expect(screen.getByRole('link', { name: 'See your public page' })).toHaveAttribute('href', '/u/ada');
+  });
+
+  it('signed in and new: badges wait for a first verified play', async () => {
+    world.profile = ADA;
+    show();
+    await act(async () => {});
+    expect(screen.queryByRole('heading', { name: 'Badges' })).toBeNull();
+    expect(screen.getByRole('heading', { name: 'Your records' })).toBeInTheDocument();
+  });
+
+  it('badges on their way are a skeleton, and a lookup that fails leaves the ones to aim for', async () => {
+    world.profile = ADA;
+    world.plays = [{ verified: true }];
+    world.badges = null as unknown as string[];
+    show();
+    const badges = await screen.findByRole('region', { name: 'Badges' });
+    await waitFor(() => expect(within(badges).getAllByRole('listitem')).toHaveLength(3));
+    expect(badges.querySelector('[data-skeleton]')).toBeNull();
   });
 });
 

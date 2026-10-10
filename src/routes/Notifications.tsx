@@ -4,6 +4,7 @@ import { Award } from 'lucide-react';
 import { Avatar } from '../components/Avatar';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
+import { SkeletonList } from '../components/Skeleton';
 import { fetchNotifications, markNotificationsRead } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { ago, describe, type Note } from '../lib/notifications';
@@ -44,7 +45,7 @@ export function Notifications() {
         <span className={styles.sub}>What you missed.</span>
       </h1>
       {rows == null ? (
-        <div className={styles.loading} aria-busy="true" />
+        <SkeletonList rows={5} avatar={40} stat={false} />
       ) : rows.length === 0 ? (
         <div className={styles.empty}>
           <p className={styles.muted}>Nothing yet. Follows, streak asks, room invites and badges will show up here.</p>
@@ -55,7 +56,7 @@ export function Notifications() {
       ) : (
         <ul className={styles.list}>
           {rows.map((n) => {
-            const d = describe(n, me.handle);
+            const d = describe(n);
             return (
               <li key={n.id}>
                 <Link to={d.to} className={styles.row} data-unread={n.unread || undefined}>

@@ -87,10 +87,6 @@
   border-top: 2px solid var(--fg);
   color: var(--muted);
 }
-.loading {
-  min-height: 160px;
-  border-top: 2px solid var(--fg);
-}
 @media (prefers-reduced-motion: reduce) {
   .row:hover {
     padding-left: 0;

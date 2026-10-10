@@ -73,10 +73,6 @@
   font-weight: 500;
   color: var(--muted);
 }
-.loading {
-  min-height: 160px;
-  border-top: 2px solid var(--fg);
-}
 .srOnly {
   position: absolute;
   width: 1px;

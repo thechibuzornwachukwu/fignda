@@ -33,10 +33,10 @@ Navigation, on a phone: no bar across the top. Each screen is its title, one act
 | Play (dock) | Start the next thing | Today's daily, then the next clue | Built |
 | Cases `/play` | Show where you are in the case | The next clue on the path | Built: daily card, then the path. Closed cases fold into one row |
 | Puzzle, clue | Find the words | Done | Built |
-| Result | Say what happened and lead on | Next clue, or Share | Built. To do: one line of result, the rest behind "More" |
-| You `/me` | Who you are: detective, partner, gear | Select, or Wear | Built. Holds the week. To do: fold the profile's badges and records in, so `/u/me` is only what others see |
-| Squad `/players` | The people you play with | Follow, or invite | Built in order: friend streaks, top players, suggestions, find. To do: circles move here from Ranks |
-| Ranks `/leaderboard` | Where you stand today | None: it is read | Built. To do: your own row pinned in view, one board at a time |
+| Result | Say what happened and lead on | Next clue, or Share | Built: one line and 2 buttons, the rest behind "More" |
+| You `/me` | Who you are: detective, partner, gear | Select, or Wear | Built. Holds the week, badges and records. `/u/HANDLE` is only what others see |
+| Squad `/players` | The people you play with | Follow, or invite | Built in order: friend streaks, circles, top players, suggestions, find |
+| Ranks `/leaderboard` | Where you stand today | None: it is read | Built: one board at a time, your own row pinned in view |
 | Settings | The account | Save | Built: account only. Reached from the gear on You |
 | First minute `/welcome` | Get a new player into a game | Keep this look | Built: character and partner on one screen. To do: start in a game, ask after the first result |
 | Guest wall | Turn a guest into a player | Sign in | Built: after 2 games |
@@ -44,9 +44,6 @@ Navigation, on a phone: no bar across the top. Each screen is its title, one act
 | Notifications | What happened while you were away | Open the thing | Built. Reached from the bell |
 
 To do next, in this order, each small:
-- [ ] **Set 9a. Result, shorter.** One title, one line, stars, the case piece, 2 buttons. Everything else behind "More".
-- [ ] **Set 9b. You holds everything about you.** Badges and records on the stage screen. `/u/HANDLE` becomes the public page only.
-- [ ] **Set 9c. Squad holds every person.** Circles move from Ranks to Squad. Ranks becomes one board with your row pinned.
 - [ ] **Set 9d. Play first.** A new player lands in a clue. The character and partner are asked after the first result, not before.
 - [ ] **Set 9e. Wide screens.** The same one-job rule for the desktop header: fewer links, the same Play.
 
@@ -96,7 +93,7 @@ Never for sale: hints, extra tries, time, or anything that touches a score; stre
 
 One set at a time. Each set is small, works on its own and leaves the live game whole. After each set: lint, typecheck, unit tests and the browser tests pass, the work stops, the owner tries it and pushes, and only then does the next set start. A set that turns out too big is split, not rushed.
 
-Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with unit tests, and the UI never re-implements matching. Every line comes from `src/copy` pools. Scores on existing boards do not change. Read `SECURITY.md` before data, auth or Worker work. Motion follows `SPEC.md` section 8 (from <https://github.com/emilkowalski/skills>).
+Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with unit tests, and the UI never re-implements matching. Every line comes from `src/copy` pools. Scores on existing boards do not change. Read `SECURITY.md` before data, auth or Worker work. Motion follows `SPEC.md` section 8 (from <https://github.com/emilkowalski/skills>). Anything that loads ships with its skeleton (`SPEC.md` section 4, Skeletons): a new screen, section or component gets a matching one in the same set, with a row in the table there, and a set that changes a layout changes its skeleton.
 
 ### 1. Sell now
 
@@ -199,6 +196,7 @@ Play with no account, and sponsors get numbers, never people.
 - Reminder times follow the saved time zone. The daily changes at midnight UTC.
 - Machine-written puzzles stop for the day when the free limits run out.
 - The avatar on the waiting screen bobs and does not blink.
+- A following board shows your own row only when it is among its rows: your place among the people you follow is not worked out by the server.
 - Personal records are kept in the browser, from 9 Oct 2026 on. Stars and closed cases are on the account from 10 Oct 2026; a guest's are in the browser until they sign in.
 - A guest's clues move to the account on sign in with their stars but no points: only a clue played signed in is checked and scored. A points badge earned by a clue shows after the next whole puzzle or daily.
 - A guest's place on today's board is worked out from a score the browser sent, so it is a guide, never a rank.

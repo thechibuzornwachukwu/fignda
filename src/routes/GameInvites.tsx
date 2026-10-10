@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Avatar } from '../components/Avatar';
 import { buttonClass } from '../components/buttonClass';
+import { SkeletonList } from '../components/Skeleton';
 import { fetchFollowing, inviteToRoom, myGameInvites, type GameInvite, type PlayerRef } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import styles from './GameInvites.module.css';
@@ -76,7 +77,7 @@ export function InviteFollowing({ gameId, room }: { gameId: string; room: string
       </button>
       {open &&
         (people == null ? (
-          <div aria-busy="true" />
+          <SkeletonList rows={3} avatar={32} stat={false} />
         ) : people.length === 0 ? (
           <p className={styles.sub}>
             You follow nobody yet.{' '}

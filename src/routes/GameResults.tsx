@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
+import { ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
 import { Partner } from '../components/Partner';
@@ -57,6 +57,7 @@ const lines = (l?: readonly string[]) => [...new Set((l ?? []).filter((x) => typ
 export function GameResults({ title, line, score, found, total, secs, canReplay, onReplay, onShare, onText, next, boardPath, guest, guestLine, streak, rare, stars, starsUp, skills, records, day, done, sponsor, caseFile, children }: Props) {
   const { pathname } = useLocation();
   const [note, setNote] = useState('');
+  const [more, setMore] = useState(false);
   const earned = clampStars(stars);
   return (
     <section className={styles.results} aria-labelledby="results-title">
@@ -68,17 +69,7 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
             {title}
           </h2>
         </div>
-        <p className={styles.line}>
-          {line}
-          {boardPath && (
-            <>
-              {' '}
-              <Link to={boardPath} className={styles.board}>
-                See the leaderboard
-              </Link>
-            </>
-          )}
-        </p>
+        <p className={styles.line}>{line}</p>
         {earned > 0 && (
           <p className={styles.stars}>
             <Stars value={earned} size={20} pop={!!starsUp} />
@@ -86,20 +77,6 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
           </p>
         )}
         {caseFile}
-        {lines(skills).map((l) => (
-          <p key={l} className={styles.streak}>
-            {l}
-          </p>
-        ))}
-        {lines(records).map((l) => (
-          <p key={l} className={styles.streak}>
-            {l}
-          </p>
-        ))}
-        {rare && <p className={styles.streak}>{rare}</p>}
-        {day && <p className={styles.streak}>{day}</p>}
-        {streak && <p className={styles.streak}>{streak}</p>}
-        {done && <p className={styles.streak}>{done}</p>}
         {sponsor?.line && (
           <p className={styles.with}>
             {sponsor.line}
@@ -114,48 +91,80 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
           </p>
         )}
       </div>
-      <div className={styles.row}>
-        <dl className={styles.stats}>
-          <div className={styles.stat}>
-            <dt className={styles.statLabel}>Score</dt>
-            <dd className={styles.statValue}>{score.toLocaleString('en-US')}</dd>
-          </div>
-          <div className={styles.stat}>
-            <dt className={styles.statLabel}>Found</dt>
-            <dd className={styles.statValue}>
-              {found}/{total}
-            </dd>
-          </div>
-          <div className={styles.stat}>
-            <dt className={styles.statLabel}>Time</dt>
-            <dd className={styles.statValue}>{formatTime(secs)}</dd>
-          </div>
-        </dl>
-        <div className={styles.actions}>
-          {next && (
+      {/* 2 buttons: the way on, and one other. One accent a screen: on a sitting it is the way on, so Share steps back. */}
+      <div className={styles.actions}>
+        {next ? (
+          <>
             <Button variant="accent" to={next.to}>
               {next.label}
               <Icon icon={ArrowRight} size={16} />
             </Button>
-          )}
-          {canReplay && (
-            <Button variant="secondary" onClick={onReplay}>
-              Play again
+            <Button variant="secondary" onClick={onShare}>
+              Share
             </Button>
-          )}
-          <Button variant="secondary" to="/play">
-            More games
-          </Button>
-          <Button variant="secondary" onClick={() => void onText().then(setNote)}>
-            Copy result
-          </Button>
-          {/* One accent a screen: on a sitting it is the way on, so Share steps back. */}
-          <Button variant={next ? 'secondary' : 'accent'} onClick={onShare}>
-            Share
-            {!next && <Icon icon={ArrowRight} size={16} />}
-          </Button>
-        </div>
+          </>
+        ) : (
+          <>
+            <Button variant="accent" onClick={onShare}>
+              Share
+              <Icon icon={ArrowRight} size={16} />
+            </Button>
+            <Button variant="secondary" to="/play">
+              Cases
+            </Button>
+          </>
+        )}
       </div>
+      {/* Everything else about this play is one tap away, and never in the way of the next thing. */}
+      <button type="button" className={styles.moreToggle} aria-expanded={more} aria-controls="results-more" onClick={() => setMore((m) => !m)}>
+        {more ? 'Less' : 'More'}
+        <Icon icon={more ? ChevronUp : ChevronDown} size={16} />
+      </button>
+      {more && (
+        <div id="results-more" className={styles.more}>
+          <dl className={styles.stats}>
+            <div className={styles.stat}>
+              <dt className={styles.statLabel}>Score</dt>
+              <dd className={styles.statValue}>{score.toLocaleString('en-US')}</dd>
+            </div>
+            <div className={styles.stat}>
+              <dt className={styles.statLabel}>Found</dt>
+              <dd className={styles.statValue}>
+                {found}/{total}
+              </dd>
+            </div>
+            <div className={styles.stat}>
+              <dt className={styles.statLabel}>Time</dt>
+              <dd className={styles.statValue}>{formatTime(secs)}</dd>
+            </div>
+          </dl>
+          {lines([...(skills ?? []), ...(records ?? []), rare ?? '', day ?? '', streak ?? '', done ?? '']).map((l) => (
+            <p key={l} className={styles.streak}>
+              {l}
+            </p>
+          ))}
+          <div className={styles.actions}>
+            {canReplay && (
+              <Button variant="secondary" onClick={onReplay}>
+                Play again
+              </Button>
+            )}
+            <Button variant="secondary" onClick={() => void onText().then(setNote)}>
+              Copy result
+            </Button>
+            {boardPath && (
+              <Button variant="secondary" to={boardPath}>
+                See the leaderboard
+              </Button>
+            )}
+            {next && (
+              <Button variant="secondary" to="/play">
+                Cases
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
       <p className={styles.note} role="status">
         {note}
       </p>

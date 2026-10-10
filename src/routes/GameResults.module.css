@@ -72,18 +72,11 @@
   align-items: center;
   gap: var(--space-2) var(--space-3);
 }
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: var(--stat-gap);
-}
 .stats {
   display: flex;
   flex-wrap: wrap;
   gap: var(--stat-gap);
   margin: 0;
-  flex: 1 1 auto;
 }
 .stat {
   display: flex;
@@ -147,4 +140,31 @@
   align-items: center;
   gap: var(--space-3);
   min-width: 0;
+}
+
+/* "More": the rest of the result, closed until asked for. */
+.moreToggle {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  min-height: var(--space-12);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--line-3);
+  cursor: pointer;
+}
+.more {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--line);
 }

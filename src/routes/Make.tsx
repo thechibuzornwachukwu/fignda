@@ -4,6 +4,7 @@ import { Check, X } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Field } from '../components/Field';
 import { Icon } from '../components/Icon';
+import { SkeletonList } from '../components/Skeleton';
 import { useDelayedWaiting } from '../components/useDelayedWaiting';
 import { Waiting } from '../components/Waiting';
 import { checkDraft, MAKE, splitWords, type WordState } from '../engine/make';
@@ -151,7 +152,7 @@ export function Make() {
           Your puzzles
         </h2>
         {mine == null ? (
-          <div aria-busy="true" />
+          <SkeletonList rows={3} />
         ) : mine.length === 0 ? (
           <p className={styles.muted}>Nothing yet. Publish one and send the link to a friend.</p>
         ) : (

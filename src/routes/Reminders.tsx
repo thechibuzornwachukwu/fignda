@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Segmented } from '../components/Segmented';
+import { Skeleton, SkeletonGroup } from '../components/Skeleton';
 import { Toggle } from '../components/Toggle';
 import { DEFAULT_HOUR, disableReminder, enableReminder, reminderState, setReminderHour, type ReminderState } from '../lib/push';
 import styles from './Settings.module.css';
@@ -25,7 +26,13 @@ export function Reminders() {
     };
   }, []);
 
-  if (!state) return <div aria-busy="true" />;
+  if (!state) {
+    return (
+      <SkeletonGroup>
+        <Skeleton width="70%" height={44} />
+      </SkeletonGroup>
+    );
+  }
   const on = state.status === 'on';
   const canToggle = on || state.status === 'off';
 

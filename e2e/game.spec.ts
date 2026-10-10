@@ -88,10 +88,12 @@ test.describe('desktop', () => {
     // A finished game keeps its result, and the way to share it, until "Play again".
     await page.goto('/play/bible');
     await page.getByRole('button', { name: "I'm done" }).click();
-    await expect(page.getByRole('button', { name: 'Play again' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'More' })).toBeVisible();
     await page.reload();
     await expect(page.getByRole('button', { name: 'Share' })).toBeVisible();
     await expect(page.getByText('1 / 30').first()).toBeVisible();
+    // Play again is behind More: the result leads with the way on.
+    await page.getByRole('button', { name: 'More' }).click();
     await page.getByRole('button', { name: 'Play again' }).click();
     await expect(page.getByText('0 / 30').first()).toBeVisible();
     await expect(page.locator('[data-state="found"]')).toHaveCount(0);
@@ -159,6 +161,7 @@ test.describe('desktop', () => {
     await expect(page.getByRole('heading', { level: 2 })).toBeVisible();
     await expect(page.getByText('The ones you missed are shaded below.')).toBeVisible();
     await expect(page.locator('[data-state="missed"]').first()).toBeVisible();
+    await page.getByRole('button', { name: 'More' }).click();
     await expect(page.getByRole('button', { name: 'Play again' })).toBeVisible();
     await expect(page.getByText('Playing as a guest.', { exact: false })).toBeVisible();
   });
@@ -189,6 +192,8 @@ test.describe('desktop', () => {
       await drag(page, a, b);
     }
     await expect(page.getByText('Every answer found.')).toBeVisible();
+    // The skill lines are behind More.
+    await page.getByRole('button', { name: 'More' }).click();
     await expect(page.getByText(/clean read/i)).toBeVisible();
     // A catalogue puzzle played alone earns stars. A first finish raises them, so the line is said.
     await expect(page.getByRole('img', { name: '3 of 3 stars' })).toBeVisible();
@@ -205,6 +210,7 @@ test.describe('desktop', () => {
       await drag(page, a, b);
     }
     await expect(page.getByText('Every answer found.')).toBeVisible();
+    await page.getByRole('button', { name: 'More' }).click();
     await expect(page.getByText(/clean read/i)).toHaveCount(0);
     // Every word with no hint is still said, and it is 2 stars, not 3.
     await expect(page.getByText(/no hints\.$/)).toBeVisible();

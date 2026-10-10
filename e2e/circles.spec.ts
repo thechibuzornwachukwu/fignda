@@ -271,6 +271,7 @@ test('copy result puts the spoiler free text on the clipboard', async ({ page, c
   // The range shows for a moment before it is checked: let the miss land.
   await expect(page.locator('[data-li="3"]')).not.toHaveAttribute('data-state', 'selecting');
   await page.getByRole('button', { name: "I'm done" }).first().click();
+  await page.getByRole('button', { name: 'More' }).click();
   await page.getByRole('button', { name: 'Copy result' }).click();
   await expect(page.getByText('Copied. Paste it in your group.')).toBeVisible();
   const text = await page.evaluate(() => navigator.clipboard.readText());

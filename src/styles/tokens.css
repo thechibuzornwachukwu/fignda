@@ -111,6 +111,7 @@
   --dur-bounce: 1200ms;     /* Dots, one full cycle */
   --dur-bounce-step: 160ms; /* Each dot starts this long after the last */
   --ease-loop: cubic-bezier(.45,0,.55,1);
+  --dur-skeleton: 900ms;   /* A skeleton fading down and back, one way. Opacity only, still under reduced motion */
   --z-cover: 12;            /* Full waiting screen: above the tab bar, below the header */
   /* The journey, SPEC sections 6 and 8. */
   --journey-clue: 64px; --journey-clue-big: 80px; /* A clue, and the last clue of a case */
@@ -127,7 +128,7 @@
   :root {
     --dur-fast: 0ms; --dur-base: 0ms; --dur-slow: 0ms; --dur-slower: 0ms;
     --dur-letter: 0ms; --dur-clock: 0ms; --dur-flip: 0ms; --dur-flip-lead: 0ms;
-    --dur-bob: 0ms; --dur-bounce: 0ms; --dur-bounce-step: 0ms;
+    --dur-bob: 0ms; --dur-bounce: 0ms; --dur-bounce-step: 0ms; --dur-skeleton: 0ms;
     --dur-hop: 0ms; --dur-star: 0ms; --dur-star-step: 0ms; --dur-unmask: 0ms; --dur-stamp: 0ms;
   }
 }

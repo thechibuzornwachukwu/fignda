@@ -19,26 +19,26 @@ describe('notification text and links', () => {
     [{ kind: 'streak_ask' }, 'Ada wants a streak with you.', '/players#friend-streaks'],
     [{ kind: 'streak_start' }, 'Your streak with Ada has started.', '/players#friend-streaks'],
     [{ kind: 'nudge' }, 'Ada has played today and nudged you.', `/d/${dayNo(new Date(NOW))}`],
-    [{ kind: 'badge', handle: null, name: null, data: { code: 'streak_7' } }, 'New badge: 7 day streak.', '/u/me#badges'],
-    [{ kind: 'badge', handle: null, name: null, data: { code: 'points_1000' } }, 'New badge: 1,000 points.', '/u/me#badges'],
+    [{ kind: 'badge', handle: null, name: null, data: { code: 'streak_7' } }, 'New badge: 7 day streak.', '/me#badges'],
+    [{ kind: 'badge', handle: null, name: null, data: { code: 'points_1000' } }, 'New badge: 1,000 points.', '/me#badges'],
   ] as const)('%o', (over, text, to) => {
-    expect(say(note(over as Partial<Note>), 'me', NOW)).toEqual({ text, to });
+    expect(say(note(over as Partial<Note>), NOW)).toEqual({ text, to });
   });
 
   it('a fresh room invite opens the room; an old one opens the puzzle', () => {
     const data = { game: 'lagos', room: 'ABCDEF', title: 'Aunty Mary' };
-    expect(say(note({ kind: 'room_invite', data }), 'me', NOW)).toEqual({
+    expect(say(note({ kind: 'room_invite', data }), NOW)).toEqual({
       text: 'Ada invited you to play Aunty Mary together.',
       to: '/play/lagos?room=ABCDEF',
     });
     const old = note({ kind: 'room_invite', data, created_at: new Date(NOW - 2 * 3600_000).toISOString() });
-    expect(say(old, 'me', NOW).to).toBe('/play/lagos');
+    expect(say(old, NOW).to).toBe('/play/lagos');
     // Player-made puzzles open by their code.
-    expect(say(note({ kind: 'room_invite', data: { ...data, game: 'c-abcdefgh' } }), 'me', NOW).to).toBe('/p/ABCDEFGH?room=ABCDEF');
+    expect(say(note({ kind: 'room_invite', data: { ...data, game: 'c-abcdefgh' } }), NOW).to).toBe('/p/ABCDEFGH?room=ABCDEF');
   });
 
   it('a player whose account is gone still reads as a sentence', () => {
-    expect(say(note({ handle: null, name: null }), 'me', NOW)).toEqual({ text: 'A player followed you.', to: '/players' });
+    expect(say(note({ handle: null, name: null }), NOW)).toEqual({ text: 'A player followed you.', to: '/players' });
   });
 });
 

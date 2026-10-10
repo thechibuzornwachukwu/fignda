@@ -1,0 +1,62 @@
+/* Badges and records: on You, and badges on a player's public page. */
+.badges {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+.badge {
+  composes: small from '../styles/type.module.css';
+  padding: var(--space-1h) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--fg);
+  color: var(--bg);
+  font-weight: 700;
+}
+.badge[data-locked] {
+  background: transparent;
+  color: var(--muted);
+  box-shadow: inset 0 0 0 1px var(--line-3);
+}
+.records {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--space-4) var(--space-6);
+}
+.record {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.label {
+  composes: label from '../styles/type.module.css';
+  color: var(--subtle);
+}
+.value {
+  composes: stat from '../styles/type.module.css';
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.unit {
+  composes: small from '../styles/type.module.css';
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--muted);
+}
+.muted {
+  composes: body from '../styles/type.module.css';
+  margin: 0;
+  color: var(--muted);
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

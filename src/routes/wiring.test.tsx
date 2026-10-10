@@ -128,76 +128,25 @@ function openProfile() {
   );
 }
 
-describe("Profile records, clean reads and level", () => {
+describe("Profile clean reads and level", () => {
   beforeEach(() => {
     world.api.fetchProfileByHandle = ok(profile);
   });
 
-  it("your own records show, with the browser noted nowhere they are not true", async () => {
+  it("your own public page shows no records and no badges to aim for: those are on You", async () => {
     world.me = ADA;
     world.api.fetchOwnPlays = ok([play(1)]);
+    world.api.fetchBadges = ok(["first_game"]);
     localStorage.setItem(
       "gazecraft-records",
-      JSON.stringify({
-        clean: { Bible: 75 },
-        daily: 7,
-        long: { word: "Habakkuk", len: 8 },
-      }),
+      JSON.stringify({ clean: { Bible: 75 }, daily: 7, long: null }),
     );
     openProfile();
     expect(
-      await screen.findByRole("heading", { name: "Your records" }),
+      await screen.findByRole("heading", { name: "Badges" }),
     ).toBeInTheDocument();
-    expect(screen.getByText("Fastest clean read, Bible")).toBeInTheDocument();
-    expect(screen.getByText("1:15")).toBeInTheDocument();
-    expect(screen.getByText("Most found in a daily")).toBeInTheDocument();
-    expect(screen.getByText("Habakkuk")).toBeInTheDocument();
-    expectNoHoles();
-  });
-
-  it("no records yet is one calm line, not an empty heading", async () => {
-    world.me = ADA;
-    world.api.fetchOwnPlays = ok([play(1)]);
-    openProfile();
-    expect(
-      await screen.findByRole("heading", { name: "Your records" }),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/shows here\. Records are kept in this browser\./),
-    ).toBeInTheDocument();
-    expect(screen.queryByText("Longest word")).toBeNull();
-    expectNoHoles();
-  });
-
-  it("malformed storage reads as no records", async () => {
-    world.me = ADA;
-    world.api.fetchOwnPlays = ok([play(1)]);
-    localStorage.setItem("gazecraft-records", "{not json");
-    openProfile();
-    expect(
-      await screen.findByText(/Records are kept in this browser\./),
-    ).toBeInTheDocument();
-    expectNoHoles();
-  });
-
-  it("half valid storage keeps only what is a record", async () => {
-    world.me = ADA;
-    world.api.fetchOwnPlays = ok([play(1)]);
-    localStorage.setItem(
-      "gazecraft-records",
-      JSON.stringify({
-        clean: { Bible: "fast", Cities: 90 },
-        daily: -3,
-        long: { word: "", len: "x" },
-      }),
-    );
-    openProfile();
-    expect(
-      await screen.findByText("Fastest clean read, Cities"),
-    ).toBeInTheDocument();
-    expect(screen.queryByText(/Bible/)).toBeNull();
-    expect(screen.queryByText("Most found in a daily")).toBeNull();
-    expect(screen.queryByText("Longest word")).toBeNull();
+    expect(screen.queryByRole("heading", { name: "Your records" })).toBeNull();
+    expect(screen.queryByText(/Not earned yet/)).toBeNull();
     expectNoHoles();
   });
 
