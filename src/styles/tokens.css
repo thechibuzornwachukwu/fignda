@@ -113,11 +113,11 @@
   --ease-loop: cubic-bezier(.45,0,.55,1);
   --z-cover: 12;            /* Full waiting screen: above the tab bar, below the header */
   /* The journey, SPEC sections 6 and 8. */
-  --journey-stop: 64px; --journey-stop-big: 80px; /* A stop, and the last stop of a chapter */
+  --journey-clue: 64px; --journey-clue-big: 80px; /* A clue, and the last clue of a case */
   --journey-sway: clamp(24px, 8vw, 44px);          /* One step left or right on the winding line */
-  --journey-pitch: 148px;   /* Least height of one stop row: the hop's drop */
-  --journey-label: 120px;   /* Widest a title under a stop may run */
-  --dur-hop: 520ms;         /* Avatar to the next stop. Once per finished stop */
+  --journey-pitch: 148px;   /* Least height of one clue row: the hop's drop */
+  --journey-label: 120px;   /* Widest a title under a clue may run */
+  --dur-hop: 520ms;         /* Avatar to the next clue. Once per finished clue */
   --dur-star: 220ms;        /* One star popping in */
   --dur-star-step: 140ms;   /* Each star starts this long after the last */
 }

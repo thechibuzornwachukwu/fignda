@@ -36,13 +36,13 @@
   min-width: 0;
   line-height: 1.25;
 }
-.band {
+.rank {
   font-size: 14px;
   font-weight: 700;
   color: var(--fg);
   overflow-wrap: anywhere;
 }
-.sm .band {
+.sm .rank {
   font-size: 13px;
 }
 .points {

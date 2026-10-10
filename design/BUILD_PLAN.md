@@ -31,7 +31,7 @@ This is a business. Running costs are near zero, so the first sale is profit. No
 | Tournament | A week's contest on one puzzle, prize from the sponsor | Brands, companies, schools | Now |
 | Sponsored puzzle | A puzzle on the sponsor's subject, marked "With NAME", their link on the result and the share card | Brands | Now |
 | Sponsored daily | "Today's daily, with NAME" for a day or a week | Brands | Now |
-| Sponsored case | A whole case in the sponsor's world | Brands | After sets 2d and 3c |
+| Sponsored case | A whole case in the sponsor's world | Brands | After set 3c |
 | Season takeover | A holiday case and the seasonal dress, "with NAME" | Brands | After set 5c |
 | Supporter | One payment: no ads ever, a badge | Players | Needs Paystack |
 | Plus, by the month | More puzzles in Make, private rooms, extra outfits | Players | Needs Paystack, set 6e |
@@ -72,15 +72,10 @@ Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with 
 
 - [ ] **Set 1c.** A one page pitch with the price list.
 
-### 2. Sittings
-
-A sitting is a sentence, or 2 or 3, hiding 3 to 5 words: about a minute, and rarely longer. Short must not mean thin: every sitting ends with something won, and the whole puzzle stays as the hard one. The engine cuts the 25 puzzles into 83 sittings (`passages`, SPEC section 9). Why a minute: `INSIGHTS.html` section 5.
-
-- [ ] **Set 2d. Passages on the path.** Each passage is a clue, the whole puzzle is the last clue of its case, with its board and scores as they are. A whole-puzzle score from before shows its passages as done. A case shows how many clues are left, never how many minutes. A room plays the whole puzzle. The daily is not cut.
-
 ### 3. Cases
 
-- [ ] **Set 3a. Names.** Case (was chapter), clue (was stop), unmasking (the last clue), in the UI and the code. Ranks replace level bands: Rookie, Detective, Inspector, Chief (`BANDS` in `src/engine/level.ts`).
+A case is one puzzle: its passages are the clues and the whole puzzle is the last, the unmasking (SPEC section 6, Games).
+
 - [ ] **Set 3b. The secret, engine only.** Each clue gives one piece and the last puts them together. Never typed by hand. A puzzle that changes must not break its case.
 - [ ] **Set 3c. Culprits and the unmasking.** One disguise per case, drawn on top of an ordinary avatar the way the Festive items are (`src/avatar`, append only). Copy pools: a line to open a case, a confession to close it, the calling card. Motion: a "Case closed" stamp and the mask coming off. No cutscenes.
 - [ ] **Set 3d. Outfits.** Detective pieces (coat, hat, magnifying glass, badge) earned by closing cases and rising in rank. Everything that helps someone look like themselves stays free.

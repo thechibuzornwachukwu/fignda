@@ -1,4 +1,4 @@
-// Stars on a path stop, 1 to 3, earned by skill. 0 until the puzzle is finished.
+// Stars on a path clue, 1 to 3, earned by skill. 0 until the puzzle is finished.
 
 export type StarsInput = {
   finished: boolean;

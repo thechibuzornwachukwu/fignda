@@ -1,5 +1,5 @@
-/* The path: chapters of round stops on a winding line. The cards and the discs carry the dock's ledge,
-   so every stop reads as something to press. */
+/* The path: cases of round clues on a winding line. The cards and the discs carry the dock's ledge,
+   so every clue reads as something to press. */
 .journey {
   display: flex;
   flex-direction: column;
@@ -61,13 +61,13 @@
   overflow-wrap: anywhere;
 }
 
-.chapter {
+.case {
   display: flex;
   flex-direction: column;
   gap: var(--space-6);
   min-width: 0;
 }
-.chapterHead {
+.caseHead {
   composes: card;
   display: flex;
   flex-wrap: wrap;
@@ -76,26 +76,39 @@
   gap: var(--space-2) var(--space-4);
   padding: var(--space-4) var(--space-5);
 }
-/* A chapter not reached yet: flat, no ledge. */
-.chapter[data-state='locked'] .chapterHead {
+/* A case not reached yet: flat, no ledge. */
+.case[data-state='locked'] .caseHead {
   background: var(--bg);
   border-color: var(--line-2);
   box-shadow: none;
 }
-.chapterText {
+.caseText {
   min-width: 0;
 }
-.chapterTitle {
+.caseTitle {
   composes: h3 from '../styles/type.module.css';
   margin: 0;
   overflow-wrap: anywhere;
 }
-.chapterCount {
+.caseCount {
   margin: var(--space-0h) 0 0;
   font-size: 13px;
   font-weight: 600;
   color: var(--muted);
   font-variant-numeric: tabular-nums;
+}
+/* A closed case: its title is the way back into the whole puzzle. */
+.caseLink {
+  display: inline-flex;
+  align-items: center;
+  min-width: 44px;
+  min-height: 44px;
+  color: inherit;
+}
+.lock {
+  display: inline-flex;
+  margin: 0;
+  color: var(--subtle);
 }
 .badge {
   display: inline-flex;
@@ -109,14 +122,14 @@
   overflow-wrap: anywhere;
 }
 
-/* The line is drawn behind the stops. Rows are equal in height, so stop i sits i rows down. */
+/* The line is drawn behind the clues. Rows are equal in height, so clue i sits i rows down. */
 .track {
   position: relative;
   min-width: 0;
 }
 .line {
   position: absolute;
-  top: calc(var(--journey-stop-big) / 2);
+  top: calc(var(--journey-clue-big) / 2);
   left: 50%;
   width: calc(var(--journey-sway) * 4);
   height: calc(100% * (var(--count) - 1) / var(--count));
@@ -136,9 +149,9 @@
 .ahead {
   stroke: var(--line-3);
 }
-.stops {
+.clues {
   position: relative;
-  /* A stop is a full row moved sideways. Only its disc and label are seen, so the row must not widen the page. */
+  /* A clue is a full row moved sideways. Only its disc and label are seen, so the row must not widen the page. */
   overflow-x: clip;
   display: grid;
   grid-auto-rows: 1fr;
@@ -146,7 +159,7 @@
   padding: 0;
   list-style: none;
 }
-.stop {
+.clue {
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -169,14 +182,14 @@
 .slot {
   display: grid;
   place-items: center;
-  height: var(--journey-stop-big);
+  height: var(--journey-clue-big);
 }
 .disc {
   position: relative;
   display: grid;
   place-items: center;
-  width: var(--journey-stop);
-  height: var(--journey-stop);
+  width: var(--journey-clue);
+  height: var(--journey-clue);
   border-radius: 50%;
   background: var(--surface);
   border: var(--space-0h) solid var(--line-3);
@@ -185,12 +198,12 @@
   color: var(--accent-ink);
   transition: transform var(--dur-fast) var(--ease-out);
 }
-/* The last stop of a chapter is the big one: a wider disc with a second ring. */
-.stop[data-big] .disc {
-  width: var(--journey-stop-big);
-  height: var(--journey-stop-big);
+/* The last clue of a case is the big one: a wider disc with a second ring. */
+.clue[data-big] .disc {
+  width: var(--journey-clue-big);
+  height: var(--journey-clue-big);
 }
-.stop[data-big]:not([data-state='next']) .disc::after {
+.clue[data-big]:not([data-state='next']) .disc::after {
   content: '';
   position: absolute;
   inset: var(--space-1);
@@ -198,19 +211,19 @@
   border: 1px solid var(--line-3);
 }
 /* Next: the one accent on the screen. The avatar stands on it. */
-.stop[data-state='next'] .disc {
+.clue[data-state='next'] .disc {
   background: var(--surface-2);
   border-color: var(--accent);
   box-shadow: 0 var(--ledge) 0 var(--accent);
 }
 /* Locked: flat, dashed, muted. Nothing to press. */
-.stop[data-state='locked'] .disc {
+.clue[data-state='locked'] .disc {
   background: var(--bg);
   border-style: dashed;
   box-shadow: none;
   color: var(--subtle);
 }
-.stop[data-state='locked'] .disc::after {
+.clue[data-state='locked'] .disc::after {
   border-style: dashed;
 }
 a.link:active .disc {
@@ -238,11 +251,11 @@ a.link:active .disc {
   text-transform: uppercase;
   white-space: nowrap;
 }
-.stop[data-state='next'] .tag {
+.clue[data-state='next'] .tag {
   background: var(--fg);
   color: var(--bg);
 }
-.stop[data-state='locked'] .tag {
+.clue[data-state='locked'] .tag {
   background: var(--bg);
   color: var(--subtle);
 }
@@ -255,14 +268,14 @@ a.link:active .disc {
   overflow-wrap: anywhere;
   transition: color var(--dur-base) var(--ease-std);
 }
-.stop[data-state='done'] .name {
+.clue[data-state='done'] .name {
   color: var(--muted);
 }
-.stop[data-state='locked'] .name {
+.clue[data-state='locked'] .name {
   color: var(--subtle);
 }
 
-/* The avatar hops to the new stop, once. Transform only (and opacity for a drop from nowhere). */
+/* The avatar hops to the new clue, once. Transform only (and opacity for a drop from nowhere). */
 .rider {
   display: block;
   line-height: 0;

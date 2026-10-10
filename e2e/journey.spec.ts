@@ -6,8 +6,8 @@ import { newPlayer } from './helpers';
 // test sets it up in localStorage before the page loads. Needs <Journey /> mounted on /play.
 
 const journey = (page: Page) => page.locator('[data-journey]');
-const stops = (page: Page) => journey(page).locator('[data-stop]');
-const stop = (page: Page, id: string) => journey(page).locator(`[data-stop="${id}"]`);
+const clues = (page: Page) => journey(page).locator('[data-clue]');
+const clue = (page: Page, id: string) => journey(page).locator(`[data-clue="${id}"]`);
 
 async function seed(page: Page, data: { finished?: string[]; stars?: Record<string, number>; at?: string; theme?: 'dark' | 'light' }) {
   await page.addInitScript((d) => {
@@ -26,40 +26,43 @@ async function open(page: Page) {
   await expect(journey(page)).toBeVisible();
 }
 
-const order = (page: Page) => stops(page).evaluateAll((els) => els.map((el) => el.getAttribute('data-stop')!));
-const statesOf = (page: Page) => stops(page).evaluateAll((els) => els.map((el) => el.getAttribute('data-state')));
+const order = (page: Page) => clues(page).evaluateAll((els) => els.map((el) => el.getAttribute('data-clue')!));
+/** Where a clue is played: a passage at /play/ID/N, the whole puzzle at /play/ID. */
+const href = (id: string) => `/play/${id.replace('~', '/')}`;
+const caseIds = (page: Page) => journey(page).locator('[data-case]').evaluateAll((els) => els.map((el) => el.getAttribute('data-case')!));
+const statesOf = (page: Page) => clues(page).evaluateAll((els) => els.map((el) => el.getAttribute('data-state')));
 
 test.describe('the journey', () => {
-  test('a new guest: the first stop is next with their avatar on it, the rest are locked', async ({ page }) => {
+  test('a new guest: the first clue is next with their avatar on it, the rest are locked', async ({ page }) => {
     await open(page);
     await expect(journey(page)).toHaveAttribute('data-journey', 'going');
     await expect(journey(page).getByRole('heading', { level: 2, name: 'Your path' })).toBeVisible();
     const states = await statesOf(page);
-    expect(states.length).toBeGreaterThan(10);
+    expect(states.length).toBeGreaterThan(1);
     expect(states[0]).toBe('next');
     expect(states.slice(1).every((s) => s === 'locked')).toBe(true);
 
-    // One link on the path: the next stop. Locked stops are not links.
+    // One link on the path: the next clue. Locked clues are not links.
     await expect(journey(page).getByRole('link')).toHaveCount(1);
     const next = journey(page).locator('[data-state="next"]');
     await expect(next.getByRole('link')).toHaveAttribute('aria-current', 'step');
     await expect(next.locator('svg').first()).toBeVisible();
     expect(await page.evaluate(() => localStorage.getItem('gazecraft-guest-seed'))).toMatch(/^[a-z0-9]{4,16}$/);
 
-    const locked = journey(page).locator('[data-state="locked"]').first();
+    const locked = journey(page).locator('[data-clue][data-state="locked"]').first();
     await expect(locked.locator('a')).toHaveCount(0);
     await expect(locked.locator('[aria-disabled="true"]')).toContainText(/Locked\..*Finish .+ to open this\./);
   });
 
-  test('the next stop opens its puzzle', async ({ page }) => {
+  test('the next clue opens its puzzle', async ({ page }) => {
     await open(page);
     const [first] = await order(page);
     await journey(page).getByRole('link').click();
-    await expect(page).toHaveURL(new RegExp(`/play/${first}$`));
+    await expect(page).toHaveURL(new RegExp(`${href(first!)}$`));
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
   });
 
-  test('finished stops show a tick and stars, and can be replayed', async ({ page }) => {
+  test('finished clues show a tick and stars, and can be replayed', async ({ page }) => {
     await open(page);
     const ids = await order(page);
     const [a, b, c] = ids as [string, string, string];
@@ -67,15 +70,15 @@ test.describe('the journey', () => {
     await page.reload();
     await expect(journey(page)).toBeVisible();
 
-    expect((await statesOf(page)).slice(0, 4)).toEqual(['done', 'done', 'next', 'locked']);
-    await expect(stop(page, a).getByRole('img', { name: '3 of 3 stars' })).toBeVisible();
-    await expect(stop(page, b).getByRole('img', { name: '1 of 3 stars' })).toBeVisible();
-    await expect(stop(page, a).getByRole('link')).toHaveAccessibleName(/\. Done\. 3 of 3 stars ?\. Play again\.$/);
-    await expect(stop(page, c).getByRole('link')).toHaveAttribute('aria-current', 'step');
+    expect((await statesOf(page)).slice(0, 3)).toEqual(['done', 'done', 'next']);
+    await expect(clue(page, a).getByRole('img', { name: '3 of 3 stars' })).toBeVisible();
+    await expect(clue(page, b).getByRole('img', { name: '1 of 3 stars' })).toBeVisible();
+    await expect(clue(page, a).getByRole('link')).toHaveAccessibleName(/\. Done\. 3 of 3 stars ?\. Play again\.$/);
+    await expect(clue(page, c).getByRole('link')).toHaveAttribute('aria-current', 'step');
     await expect(journey(page).getByRole('link')).toHaveCount(3);
 
-    await stop(page, a).getByRole('link').click();
-    await expect(page).toHaveURL(new RegExp(`/play/${a}$`));
+    await clue(page, a).getByRole('link').click();
+    await expect(page).toHaveURL(new RegExp(`${href(a)}$`));
   });
 
   test('history from before the path: a finished puzzle with no stars shows done, with no stars and no broken text', async ({ page }) => {
@@ -83,31 +86,37 @@ test.describe('the journey', () => {
     const [a] = await order(page);
     await seed(page, { finished: [a!] });
     await page.reload();
-    await expect(stop(page, a!)).toHaveAttribute('data-state', 'done');
-    await expect(stop(page, a!).locator('[data-stars]')).toHaveCount(0);
-    await expect(stop(page, a!).getByRole('link')).toHaveAccessibleName(/\. Done\. Play again\.$/);
+    await expect(clue(page, a!)).toHaveAttribute('data-state', 'done');
+    await expect(clue(page, a!).locator('[data-stars]')).toHaveCount(0);
+    await expect(clue(page, a!).getByRole('link')).toHaveAccessibleName(/\. Done\. Play again\.$/);
     await expect(journey(page)).not.toContainText(/undefined|NaN/);
   });
 
-  test('a cleared chapter shows its badge, and the last stop of each chapter is the big one', async ({ page }) => {
+  test('a cleared case shows its badge, and the last clue of each case is the big one', async ({ page }) => {
     await open(page);
-    const chapter = journey(page).locator('[data-chapter]').first();
-    const mine = await chapter.locator('[data-stop]').evaluateAll((els) => els.map((el) => el.getAttribute('data-stop')!));
-    await expect(chapter.locator('[data-stop]').last()).toHaveAttribute('data-big', 'true');
-    const small = (await chapter.locator('[data-stop]').first().locator('[class*="disc"]').boundingBox())!;
-    const big = (await chapter.locator('[data-big]').locator('[class*="disc"]').boundingBox())!;
+    const box = journey(page).locator('[data-case]').first();
+    const mine = await box.locator('[data-clue]').evaluateAll((els) => els.map((el) => el.getAttribute('data-clue')!));
+    await expect(box.locator('[data-clue]').last()).toHaveAttribute('data-big', 'true');
+    const small = (await box.locator('[data-clue]').first().locator('[class*="disc"]').boundingBox())!;
+    const big = (await box.locator('[data-big]').locator('[class*="disc"]').boundingBox())!;
     expect(big.width).toBeGreaterThan(small.width);
 
     await seed(page, { finished: mine });
     await page.reload();
-    await expect(chapter).toHaveAttribute('data-state', 'done');
-    await expect(chapter.locator('[data-chapter-badge]')).toContainText(/cleared|done/);
-    await expect(journey(page).locator('[data-chapter-badge]')).toHaveCount(1);
+    await expect(box).toHaveAttribute('data-state', 'done');
+    await expect(box.locator('[data-case-badge]')).toContainText(/closed|found/i);
+    // The clues fold away, and the title is the way back in.
+    await expect(box.locator('[data-clue]')).toHaveCount(0);
+    const again = (await box.getByRole('link').boundingBox())!;
+    expect(again.height).toBeGreaterThanOrEqual(44);
+    await expect(journey(page).locator('[data-case]').nth(1)).toHaveAttribute('data-state', 'open');
+    await expect(journey(page).locator('[data-case-badge]')).toHaveCount(1);
   });
 
-  test('every stop done: a calm finished state, no next stop, nothing locked', async ({ page }) => {
+  test('every clue done: a calm finished state, no next clue, nothing locked', async ({ page }) => {
     await open(page);
-    const ids = await order(page);
+    const ids = await caseIds(page);
+    expect(ids.length).toBeGreaterThan(10);
     await seed(page, { finished: ids });
     await page.reload();
     await expect(journey(page)).toHaveAttribute('data-journey', 'complete');
@@ -127,7 +136,7 @@ test.describe('the journey', () => {
     const states = await statesOf(page);
     expect(states[0]).toBe('next');
     expect(states.slice(1).every((s) => s === 'locked')).toBe(true);
-    await expect(journey(page).locator('[data-stop="long-gone"]')).toHaveCount(0);
+    await expect(journey(page).locator('[data-clue="long-gone"]')).toHaveCount(0);
     await expect(journey(page).locator('[data-hop]')).toHaveCount(0);
   });
 
@@ -144,9 +153,9 @@ test.describe('the journey', () => {
     await expect(links.nth(1)).toBeFocused();
     await page.keyboard.press('Tab');
     await expect(links.nth(2)).toBeFocused();
-    await expect(links.nth(2)).toHaveAttribute('href', `/play/${ids[2]}`);
+    await expect(links.nth(2)).toHaveAttribute('href', href(ids[2]!));
     await page.keyboard.press('Enter');
-    await expect(page).toHaveURL(new RegExp(`/play/${ids[2]}$`));
+    await expect(page).toHaveURL(new RegExp(`${href(ids[2]!)}$`));
   });
 
   test('a signed in player travels the path with their own avatar', async ({ page }) => {
@@ -170,16 +179,16 @@ test.describe('the journey', () => {
       await expect(journey(page)).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.getAttribute('data-theme'))).toBe(theme);
 
-      // No sideways scroll, and every stop is inside the screen.
+      // No sideways scroll, and every clue is inside the screen.
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
-      const boxes = await stops(page).evaluateAll((els) => els.map((el) => el.firstElementChild!.getBoundingClientRect().toJSON() as DOMRect));
+      const boxes = await clues(page).evaluateAll((els) => els.map((el) => el.firstElementChild!.getBoundingClientRect().toJSON() as DOMRect));
       for (const b of boxes) {
         expect(b.left).toBeGreaterThanOrEqual(0);
         expect(b.right).toBeLessThanOrEqual(320);
       }
-      // Stops in a chapter run top to bottom and wind: not all in one column.
-      const chapter = journey(page).locator('[data-chapter]').first();
-      const centres = await chapter.locator('[data-stop]').evaluateAll((els) =>
+      // Stops in a case run top to bottom and wind: not all in one column.
+      const box = journey(page).locator('[data-case]').first();
+      const centres = await box.locator('[data-clue]').evaluateAll((els) =>
         els.map((el) => {
           const r = el.firstElementChild!.getBoundingClientRect();
           return { x: r.left + r.width / 2, y: r.top };
@@ -207,24 +216,24 @@ test.describe('the journey', () => {
     expect(r.violations.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).join(' | ')}`)).toEqual([]);
   });
 
-  test('motion: back on the path after a finished stop, the avatar hops once and the new stars pop, from tokens', async ({ page }) => {
+  test('motion: back on the path after a finished clue, the avatar hops once and the new stars pop, from tokens', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'no-preference' });
     await open(page);
     const [a, b] = (await order(page)) as [string, string];
     expect(await page.evaluate(() => localStorage.getItem('gazecraft-journey-at'))).toBe(a);
     await expect(journey(page).locator('[data-hop]')).toHaveCount(0);
 
-    // The stop is finished somewhere else, then the player comes back.
+    // The clue is finished somewhere else, then the player comes back.
     await page.evaluate((id) => localStorage.setItem('gazecraft-stars', JSON.stringify({ [id]: 3 })), a);
     await page.reload();
-    const rider = stop(page, b).locator('[data-hop]');
+    const rider = clue(page, b).locator('[data-hop]');
     await expect(rider).toHaveAttribute('data-hop', 'arc');
     const m = await page.evaluate(
       ([from, to]) => {
         const token = (v: string) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
         const secs = (v: string) => (v.endsWith('ms') ? parseFloat(v) / 1000 : parseFloat(v));
-        const hop = getComputedStyle(document.querySelector(`[data-stop="${to}"] [data-hop]`)!);
-        const stars = [...document.querySelectorAll(`[data-stop="${from}"] [data-star="on"]`)].map((s) => getComputedStyle(s));
+        const hop = getComputedStyle(document.querySelector(`[data-clue="${to}"] [data-hop]`)!);
+        const stars = [...document.querySelectorAll(`[data-clue="${from}"] [data-star="on"]`)].map((s) => getComputedStyle(s));
         return {
           hopName: hop.animationName,
           hop: secs(hop.animationDuration),
@@ -250,14 +259,14 @@ test.describe('the journey', () => {
     await expect(journey(page).locator('[data-pop]')).toHaveCount(0);
   });
 
-  test('reduced motion: the avatar is on the new stop and nothing moves', async ({ page }) => {
+  test('reduced motion: the avatar is on the new clue and nothing moves', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await open(page);
     const [a, b] = (await order(page)) as [string, string];
     await page.evaluate((id) => localStorage.setItem('gazecraft-stars', JSON.stringify({ [id]: 3 })), a);
     await page.reload();
-    await expect(stop(page, b)).toHaveAttribute('data-state', 'next');
-    await expect(stop(page, b).locator('svg').first()).toBeVisible();
+    await expect(clue(page, b)).toHaveAttribute('data-state', 'next');
+    await expect(clue(page, b).locator('svg').first()).toBeVisible();
     const running = await page.evaluate(() => document.querySelector('[data-journey]')!.getAnimations({ subtree: true }).length);
     expect(running).toBe(0);
   });

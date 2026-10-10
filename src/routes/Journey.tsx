@@ -9,7 +9,7 @@ import { Ring } from '../components/Ring';
 import { Stars } from '../components/Stars';
 import { clampStars } from '../components/starsLabel';
 import { pick } from '../copy';
-import { buildPath, stopStates, type CatalogueItem, type Path, type StopState } from '../engine/journey';
+import { buildPath, clueStates, type CatalogueItem, type ClueState, type Path } from '../engine/journey';
 import { games } from '../games/catalog';
 import { useAuth } from '../lib/auth';
 import { loadFinished } from '../lib/shelves';
@@ -22,26 +22,26 @@ export type JourneyGame = CatalogueItem & { title: string };
 type Props = {
   /** The puzzles the path is made of. Defaults to the catalogue. Null or empty: the empty state. */
   catalogue?: readonly JourneyGame[] | null;
-  /** A path built earlier. Stops whose puzzle has left the catalogue are skipped. Defaults to one built from the catalogue. */
+  /** A path built earlier. Cases whose puzzle has left the catalogue are skipped. Defaults to one built from the catalogue. */
   path?: Path | null;
-  /** Ids of finished puzzles. Defaults to this browser's. */
+  /** Ids of finished clues. A puzzle's own id closes its whole case. Defaults to this browser's. */
   done?: Iterable<string> | null;
-  /** Best stars per puzzle id. Defaults to this browser's. A puzzle with stars counts as done. */
+  /** Best stars per clue id. Defaults to this browser's. A clue with stars counts as done. */
   stars?: Readonly<Record<string, unknown>> | null;
   className?: string;
 };
 
-/** The stop the player stood on at their last visit, so the avatar can hop from it once. */
+/** The clue the player stood on at their last visit, so the avatar can hop from it once. */
 export const JOURNEY_AT_KEY = 'gazecraft-journey-at';
 
-/** Steps left and right down a chapter: the winding line. */
+/** Steps left and right down a case: the winding line. */
 const SWAY = [0, 1, 2, 1, 0, -1, -2, -1] as const;
-const AVATAR = { stop: 56, big: 68, finished: 56 } as const;
+const AVATAR = { clue: 56, big: 68, finished: 56 } as const;
 
-type StopView = { id: string; title: string; state: StopState; stars: 0 | 1 | 2 | 3; big: boolean; shift: number };
-type ChapterView = { id: string; title: string; stops: StopView[]; done: number; state: 'done' | 'open' | 'locked'; line: string };
+type ClueView = { id: string; to: string; name: string; state: ClueState; stars: 0 | 1 | 2 | 3; big: boolean; shift: number };
+type CaseView = { id: string; title: string; clues: ClueView[]; state: 'done' | 'open' | 'locked'; stars: 0 | 1 | 2 | 3; count: string; line: string };
 
-const EMPTY: Path = { chapters: [] };
+const EMPTY: Path = { cases: [] };
 
 function safePath(catalogue: readonly JourneyGame[]): Path {
   try {
@@ -52,8 +52,9 @@ function safePath(catalogue: readonly JourneyGame[]): Path {
 }
 
 /**
- * The path on the Games tab: chapters of round stops on a winding line. A list of links in order.
- * Done stops can be replayed, the next one carries the player's avatar, the rest are locked.
+ * The path on the Games tab: a card per case, and the clues of the case being worked as round discs on a winding
+ * line. A list of links in order. Done clues can be replayed, the next one carries the player's avatar, the rest
+ * are locked. A closed case is a link to its whole puzzle.
  */
 export function Journey({ catalogue = games, path, done, stars, className }: Props) {
   const { profile } = useAuth();
@@ -65,45 +66,55 @@ export function Journey({ catalogue = games, path, done, stars, className }: Pro
   const view = useMemo(() => {
     const list = Array.isArray(catalogue) ? (catalogue as readonly JourneyGame[]) : [];
     const titles = new Map(list.map((g) => [g.id, g.title || g.id]));
-    const built = path && Array.isArray(path.chapters) ? path : safePath(list);
+    const built = path && Array.isArray(path.cases) ? path : safePath(list);
     const best = stars ?? browser.stars;
     const starOf = (id: string) => clampStars(best[id]);
     const finished = new Set<string>(done ?? browser.finished);
     for (const id of Object.keys(best)) if (starOf(id) > 0) finished.add(id);
 
-    const standing = stopStates(built, finished, new Set(titles.keys()));
-    const nextTitle = standing.next ? (titles.get(standing.next) ?? standing.next) : '';
-    const chapters: ChapterView[] = [];
-    built.chapters.forEach((c, ci) => {
-      const mine = standing.stops.filter((s) => s.chapter === ci);
-      // Every puzzle of the chapter has left the catalogue: nothing to draw.
+    const standing = clueStates(built, finished, new Set(titles.keys()));
+    const next = standing.clues.find((s) => s.state === 'next');
+    const cases: CaseView[] = [];
+    built.cases.forEach((c, ci) => {
+      const mine = standing.clues.filter((s) => s.case === ci);
+      // The puzzle has left the catalogue: nothing to draw.
       if (!mine.length) return;
-      const dir = chapters.length % 2 ? -1 : 1;
-      const stops = mine.map((s, i) => ({
+      const title = titles.get(c.id) ?? c.id;
+      const left = standing.left[ci]!;
+      const state = left === 0 ? 'done' : next?.case === ci ? 'open' : 'locked';
+      const clues = mine.map((s, i) => ({
         id: s.id,
-        title: titles.get(s.id) ?? s.id,
+        to: s.n ? `/play/${s.puzzle}/${s.n}` : `/play/${s.puzzle}`,
+        name: s.n ? `Clue ${s.n}` : 'Unmasking',
         state: s.state,
         stars: s.state === 'done' ? starOf(s.id) : 0,
         big: i === mine.length - 1,
-        shift: SWAY[i % SWAY.length]! * dir,
+        shift: SWAY[i % SWAY.length]!,
       }));
-      const doneCount = stops.filter((s) => s.state === 'done').length;
-      const state = doneCount === stops.length ? 'done' : stops[0]!.state === 'locked' ? 'locked' : 'open';
-      chapters.push({ id: c.id, title: c.title, stops, done: doneCount, state, line: state === 'done' ? pick('chapterDone', { c: c.title }) : '' });
+      cases.push({
+        id: c.id,
+        title,
+        clues,
+        state,
+        stars: state === 'done' ? starOf(c.id) : 0,
+        count: state === 'done' ? '' : pick(left === 1 ? 'clueLeft' : 'cluesLeft', { n: left }),
+        line: state === 'done' ? pick('caseDone', { c: title }) : '',
+      });
     });
-    const total = standing.stops.length;
+    const total = standing.clues.length;
+    const walked = standing.clues.filter((s) => s.state === 'done');
     return {
-      chapters,
-      walked: new Set(standing.stops.filter((x) => x.state === 'done').map((x) => x.id)),
+      cases,
+      walked: new Set(walked.map((s) => s.id)),
       total,
-      doneCount: standing.stops.filter((s) => s.state === 'done').length,
+      doneCount: walked.length,
       next: standing.next,
       complete: standing.complete,
-      locked: nextTitle ? pick('journeyLocked', { title: nextTitle }) : '',
+      lockedClue: next ? pick('journeyLocked', { title: next.n ? `clue ${next.n}` : 'the unmasking' }) : '',
+      lockedCase: next ? pick('journeyLocked', { title: titles.get(next.puzzle) ?? next.puzzle }) : '',
       line: standing.complete ? pick('journeyDone') : total === 0 ? pick('journeyEmpty') : '',
     };
   }, [catalogue, path, done, stars, browser]);
-
   useEffect(() => {
     if (view.next) storage.set(JOURNEY_AT_KEY, view.next);
     else storage.remove(JOURNEY_AT_KEY);
@@ -138,112 +149,128 @@ export function Journey({ catalogue = games, path, done, stars, className }: Pro
         </div>
       )}
 
-      {view.chapters.map((c) => {
-        const n = c.stops.length;
+      {view.cases.map((c) => {
+        const n = c.clues.length;
         return (
-          <section key={c.id} className={styles.chapter} aria-labelledby={`${headId}-${c.id}`} data-chapter={c.id} data-state={c.state}>
-            <header className={styles.chapterHead}>
-              <div className={styles.chapterText}>
-                <h3 id={`${headId}-${c.id}`} className={styles.chapterTitle}>
-                  {c.title}
+          <section key={c.id} className={styles.case} aria-labelledby={`${headId}-${c.id}`} data-case={c.id} data-state={c.state}>
+            <header className={styles.caseHead}>
+              <div className={styles.caseText}>
+                <h3 id={`${headId}-${c.id}`} className={styles.caseTitle}>
+                  {c.state === 'done' ? (
+                    <Link to={`/play/${c.id}`} className={styles.caseLink}>
+                      {c.title}
+                      <span className={styles.srOnly}>. Closed. Play again.</span>
+                    </Link>
+                  ) : (
+                    c.title
+                  )}
                 </h3>
-                <p className={styles.chapterCount}>{pick('journeyCount', { n: c.done, t: n })}</p>
+                {c.state !== 'done' && <p className={styles.caseCount}>{c.count}</p>}
+                {c.stars > 0 && <Stars value={c.stars} pop={c.id === cameFrom} />}
               </div>
               {c.state === 'done' && (
-                <p className={styles.badge} data-chapter-badge>
+                <p className={styles.badge} data-case-badge>
                   <Icon icon={Award} size={20} />
                   {c.line}
                 </p>
               )}
+              {c.state === 'locked' && (
+                <p className={styles.lock} data-case-lock>
+                  <Icon icon={Lock} size={20} />
+                  <span className={styles.srOnly}>Locked. {view.lockedCase}</span>
+                </p>
+              )}
             </header>
 
-            <div className={styles.track} style={{ '--count': n } as CSSProperties}>
-              {n > 1 && (
-                <svg className={styles.line} viewBox={`-2 0 4 ${n - 1}`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
-                  {c.stops.slice(0, -1).map((a, i) => {
-                    const b = c.stops[i + 1]!;
-                    const walked = a.state === 'done' && b.state !== 'locked';
-                    return (
-                      <path
-                        key={a.id}
-                        className={walked ? styles.walked : styles.ahead}
-                        data-line={walked ? 'walked' : 'ahead'}
-                        d={`M${a.shift} ${i} C${a.shift} ${i + 0.5} ${b.shift} ${i + 0.5} ${b.shift} ${i + 1}`}
-                        strokeWidth={3}
-                        strokeDasharray={walked ? undefined : '1 9'}
-                      />
-                    );
-                  })}
-                </svg>
-              )}
-              <ol className={styles.stops}>
-                {c.stops.map((s, i) => {
-                  const last = s.big ? 'Last stop of the chapter. ' : '';
-                  const prev = c.stops[i - 1];
-                  const slot = (inside: ReactNode) => (
-                    <span className={styles.slot}>
-                      <span className={styles.disc}>{inside}</span>
-                    </span>
-                  );
-                  const tag = (text: string) => (
-                    <span className={styles.tag} aria-hidden="true">
-                      {text}
-                    </span>
-                  );
-                  let body: ReactNode;
-                  if (s.state === 'locked') {
-                    body = (
-                      <span className={styles.link} aria-disabled="true">
-                        {slot(<Icon icon={Lock} size={20} />)}
-                        {s.big && tag('Last stop')}
-                        <span className={styles.name}>{s.title}</span>
-                        <span className={styles.srOnly}>
-                          . Locked. {last}
-                          {view.locked}
-                        </span>
+            {c.state === 'open' && (
+              <div className={styles.track} style={{ '--count': n } as CSSProperties}>
+                {n > 1 && (
+                  <svg className={styles.line} viewBox={`-2 0 4 ${n - 1}`} preserveAspectRatio="none" aria-hidden="true" focusable="false">
+                    {c.clues.slice(0, -1).map((a, i) => {
+                      const b = c.clues[i + 1]!;
+                      const walked = a.state === 'done' && b.state !== 'locked';
+                      return (
+                        <path
+                          key={a.id}
+                          className={walked ? styles.walked : styles.ahead}
+                          data-line={walked ? 'walked' : 'ahead'}
+                          d={`M${a.shift} ${i} C${a.shift} ${i + 0.5} ${b.shift} ${i + 0.5} ${b.shift} ${i + 1}`}
+                          strokeWidth={3}
+                          strokeDasharray={walked ? undefined : '1 9'}
+                        />
+                      );
+                    })}
+                  </svg>
+                )}
+                <ol className={styles.clues}>
+                  {c.clues.map((s, i) => {
+                    const last = s.big ? 'The last clue of the case. ' : '';
+                    const prev = c.clues[i - 1];
+                    const slot = (inside: ReactNode) => (
+                      <span className={styles.slot}>
+                        <span className={styles.disc}>{inside}</span>
                       </span>
                     );
-                  } else if (s.state === 'next') {
-                    // The avatar hops in once, from the stop it stood on last time, if that stop is now done.
-                    const moved = !!cameFrom && view.walked.has(cameFrom);
-                    const hop = !moved ? undefined : prev?.id === cameFrom ? 'arc' : 'drop';
-                    body = (
-                      <Link to={`/play/${s.id}`} className={styles.link} aria-current="step">
-                        {slot(
-                          <span className={styles.rider} data-hop={hop} style={{ '--hop-x': hop === 'arc' ? prev!.shift - s.shift : 0 } as CSSProperties}>
-                            {me(s.big ? AVATAR.big : AVATAR.stop)}
-                          </span>,
-                        )}
-                        {tag('Next stop')}
-                        <span className={styles.name}>{s.title}</span>
-                        <span className={styles.srOnly}>. Next stop. {last}Play.</span>
-                      </Link>
+                    const tag = (text: string) => (
+                      <span className={styles.tag} aria-hidden="true">
+                        {text}
+                      </span>
                     );
-                  } else {
-                    body = (
-                      <Link to={`/play/${s.id}`} className={styles.link}>
-                        {slot(<Icon icon={Check} size={20} />)}
-                        {s.big && tag('Last stop')}
-                        <span className={styles.name}>{s.title}</span>
-                        <span className={styles.srOnly}>. Done. {last}</span>{' '}
-                        {s.stars > 0 && (
-                          <>
-                            <Stars value={s.stars} pop={s.id === cameFrom} />
-                            <span className={styles.srOnly}>.</span>{' '}
-                          </>
-                        )}
-                        <span className={styles.srOnly}>Play again.</span>
-                      </Link>
+                    let body: ReactNode;
+                    if (s.state === 'locked') {
+                      body = (
+                        <span className={styles.link} aria-disabled="true">
+                          {slot(<Icon icon={Lock} size={20} />)}
+                          {s.big && tag('Last clue')}
+                          <span className={styles.name}>{s.name}</span>
+                          <span className={styles.srOnly}>
+                            . Locked. {last}
+                            {view.lockedClue}
+                          </span>
+                        </span>
+                      );
+                    } else if (s.state === 'next') {
+                      // The avatar hops in once, from the clue it stood on last time, if that clue is now done.
+                      const moved = !!cameFrom && view.walked.has(cameFrom);
+                      const hop = !moved ? undefined : prev?.id === cameFrom ? 'arc' : 'drop';
+                      body = (
+                        <Link to={s.to} className={styles.link} aria-current="step">
+                          {slot(
+                            <span className={styles.rider} data-hop={hop} style={{ '--hop-x': hop === 'arc' ? prev!.shift - s.shift : 0 } as CSSProperties}>
+                              {me(s.big ? AVATAR.big : AVATAR.clue)}
+                            </span>,
+                          )}
+                          {tag('Next clue')}
+                          <span className={styles.name}>{s.name}</span>
+                          <span className={styles.srOnly}>. Next clue. {last}Play.</span>
+                        </Link>
+                      );
+                    } else {
+                      body = (
+                        <Link to={s.to} className={styles.link}>
+                          {slot(<Icon icon={Check} size={20} />)}
+                          {s.big && tag('Last clue')}
+                          <span className={styles.name}>{s.name}</span>
+                          <span className={styles.srOnly}>. Done. {last}</span>{' '}
+                          {s.stars > 0 && (
+                            <>
+                              <Stars value={s.stars} pop={s.id === cameFrom} />
+                              <span className={styles.srOnly}>.</span>{' '}
+                            </>
+                          )}
+                          <span className={styles.srOnly}>Play again.</span>
+                        </Link>
+                      );
+                    }
+                    return (
+                      <li key={s.id} className={styles.clue} data-clue={s.id} data-state={s.state} data-big={s.big || undefined} style={{ '--shift': s.shift } as CSSProperties}>
+                        {body}
+                      </li>
                     );
-                  }
-                  return (
-                    <li key={s.id} className={styles.stop} data-stop={s.id} data-state={s.state} data-big={s.big || undefined} style={{ '--shift': s.shift } as CSSProperties}>
-                      {body}
-                    </li>
-                  );
-                })}
-              </ol>
-            </div>
+                  })}
+                </ol>
+              </div>
+            )}
           </section>
         );
       })}

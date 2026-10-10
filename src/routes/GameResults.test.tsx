@@ -123,8 +123,8 @@ describe('GameResults', () => {
 
 describe('GameResults on a sitting', () => {
   it('leads with the way on, which takes the one accent from Share', () => {
-    show({ next: { to: '/play/bible/3', label: 'Next passage' } });
-    const next = screen.getByRole('link', { name: 'Next passage' });
+    show({ next: { to: '/play/bible/3', label: 'Next clue' } });
+    const next = screen.getByRole('link', { name: 'Next clue' });
     expect(next).toHaveAttribute('href', '/play/bible/3');
     const actions = next.parentElement!;
     expect(actions.firstElementChild).toBe(next);
@@ -135,7 +135,7 @@ describe('GameResults on a sitting', () => {
 
   it('with no next sitting, Share keeps the accent', () => {
     show();
-    expect(screen.queryByRole('link', { name: 'Next passage' })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Next clue' })).toBeNull();
     expect(screen.getByRole('button', { name: 'Share' }).className).toMatch(/accent/i);
   });
 });

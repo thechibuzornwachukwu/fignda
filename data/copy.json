@@ -210,22 +210,28 @@
     "{n} of {t} finished"
   ],
   "journeyCount": [
-    "{n} of {t} stops"
+    "{n} of {t} clues"
   ],
   "journeyLocked": [
     "Finish {title} to open this."
   ],
   "journeyDone": [
-    "Every stop on the path is done. Play any one again for more stars.",
-    "The whole path, walked. Any stop can be played again."
+    "Every case on the path is closed. Play any one again for more stars.",
+    "The whole path, walked. Any case can be played again."
   ],
   "journeyEmpty": [
-    "No stops on the path yet. Every puzzle is in All games."
+    "No cases on the path yet. Every puzzle is in All games."
   ],
-  "chapterDone": [
-    "{c} is cleared.",
-    "Every stop in {c}, done.",
-    "{c}: cleared, start to end."
+  "cluesLeft": [
+    "{n} clues left"
+  ],
+  "clueLeft": [
+    "1 clue left"
+  ],
+  "caseDone": [
+    "{c}: case closed.",
+    "Every clue in {c}, found.",
+    "Case closed: {c}."
   ],
   "starsOf": [
     "{n} of 3 stars"

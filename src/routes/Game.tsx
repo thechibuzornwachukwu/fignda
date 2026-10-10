@@ -13,6 +13,7 @@ import { dailyInfo, dailyLabel } from '../games/daily';
 import { registry } from '../games/registry';
 import { dayHidLine, playFacts, rareLine, recordLines, skillLines, starsUpLine, todayHoldsLine } from '../games/resultLines';
 import { isCleanRead, scoreOf, secondsOf, useGameSession, type Session } from '../games/session';
+import { clueId } from '../engine/journey';
 import { starsFor } from '../engine/stars';
 import { dayProfile } from '../engine/variableDay';
 import { countEvent, fetchCustomGame, fetchDailyPlace, fetchWordStats, mergeGuestDailies, submitPlay } from '../lib/api';
@@ -110,7 +111,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
   const [params] = useSearchParams();
   const navigate = useNavigate();
   // What this browser keeps this game under: stars and the kept game. A sitting is its own game.
-  const gameKey = part ? `${def.id}~${part.n}` : def.id;
+  const gameKey = clueId(def.id, part?.n ?? 0);
   const roomCode = dailyN == null && !part ? (params.get('room') ?? '') : '';
   const inRoom = auth.enabled && ROOM_RE.test(roomCode);
   const roomRef = useRef<Room | null>(null);
@@ -424,7 +425,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
           <span className={styles.metaEnd}>
             <span className={styles.level}>
               {holiday ? `${holiday} · ` : ''}
-              {def.category} · {part ? `Passage ${part.n} of ${part.count}` : puzzle.difficulty}
+              {def.category} · {part ? `Clue ${part.n} of ${part.count + 1}` : puzzle.difficulty}
             </span>
             {auth.enabled && !daily && !part && !inRoom && !finished && (
               <button type="button" className={styles.together} onClick={() => navigate(`?room=${newRoomCode()}`)}>
@@ -475,7 +476,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
           onReplay={g.replay}
           onShare={() => setSharing(true)}
           onText={sendText}
-          next={part && (part.n < part.count ? { to: `/play/${def.id}/${part.n + 1}`, label: 'Next passage' } : { to: `/play/${def.id}`, label: 'Play the whole puzzle' })}
+          next={part && (part.n < part.count ? { to: `/play/${def.id}/${part.n + 1}`, label: 'Next clue' } : { to: `/play/${def.id}`, label: 'The unmasking' })}
           boardPath={part ? undefined : auth.enabled ? (daily ? `/leaderboard?day=${dailyN}` : getGameDef(def.id) ? `/leaderboard/${def.id}${inRoom ? '?board=together' : ''}` : undefined) : undefined}
           guest={!signedIn}
           guestLine={guestLine}

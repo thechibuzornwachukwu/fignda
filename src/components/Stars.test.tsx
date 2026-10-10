@@ -60,10 +60,10 @@ describe('LevelBadge', () => {
   it('shows the level, the band and the points into the level', () => {
     const { container } = render(<LevelBadge points={620} />);
     expect(levelFor(620)).toMatchObject({ level: 2, into: 120, need: 600 });
-    const ring = screen.getByRole('progressbar', { name: 'Level 2, Skimmer. 120 of 600 points to level 3.' });
+    const ring = screen.getByRole('progressbar', { name: 'Level 2, Rookie. 120 of 600 points to level 3.' });
     expect(ring).toHaveAttribute('aria-valuenow', '20');
     expect(container.firstElementChild!.getAttribute('data-level')).toBe('2');
-    expect(container.textContent).toBe('2Skimmer120 / 600');
+    expect(container.textContent).toBe('2Rookie120 / 600');
   });
 
   it.each([
@@ -74,21 +74,21 @@ describe('LevelBadge', () => {
     ['a negative number', -40],
   ] as Array<[string, number | null | undefined]>)('%s points: level 1 with an empty ring', (_, points) => {
     const { container } = render(<LevelBadge points={points} />);
-    const ring = screen.getByRole('progressbar', { name: 'Level 1, Skimmer. 0 of 500 points to level 2.' });
+    const ring = screen.getByRole('progressbar', { name: 'Level 1, Rookie. 0 of 500 points to level 2.' });
     expect(ring).toHaveAttribute('aria-valuenow', '0');
     expect(ring).toHaveAttribute('data-closed', 'false');
-    expect(container.textContent).toBe('1Skimmer0 / 500');
+    expect(container.textContent).toBe('1Rookie0 / 500');
     expect(container.textContent).not.toMatch(/undefined|NaN|null/);
   });
 
   it('no points prop at all renders the same', () => {
     const { container } = render(<LevelBadge />);
-    expect(container.textContent).toBe('1Skimmer0 / 500');
+    expect(container.textContent).toBe('1Rookie0 / 500');
   });
 
   it('small: the ring and the band, no points line', () => {
     const { container } = render(<LevelBadge points={620} size="sm" />);
-    expect(container.textContent).toBe('2Skimmer');
+    expect(container.textContent).toBe('2Rookie');
     expect(container.querySelector('svg')!.getAttribute('width')).toBe('32');
   });
 
@@ -96,14 +96,14 @@ describe('LevelBadge', () => {
     const points = 500 + 600 + 720 + 860 + 1040;
     expect(levelFor(points).level).toBe(6);
     render(<LevelBadge points={points} />);
-    expect(screen.getByRole('progressbar').getAttribute('aria-label')).toMatch(/^Level 6, Reader\./);
+    expect(screen.getByRole('progressbar').getAttribute('aria-label')).toMatch(/^Level 6, Detective\./);
   });
 
   it('level up: the ring starts where it was and fills to closed on the next frame', () => {
     vi.useFakeTimers();
     try {
       const { container } = render(<LevelBadge points={620} levelUp />);
-      const ring = screen.getByRole('progressbar', { name: 'Level 2, Skimmer. Level reached.' });
+      const ring = screen.getByRole('progressbar', { name: 'Level 2, Rookie. Level reached.' });
       expect(ring).toHaveAttribute('aria-valuenow', '20');
       act(() => {
         vi.advanceTimersByTime(50);

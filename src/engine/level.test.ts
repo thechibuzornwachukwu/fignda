@@ -1,10 +1,10 @@
-import { BANDS, bandOf, gapAt, levelFor } from './level';
+import { RANKS, rankOf, gapAt, levelFor } from './level';
 
 describe('levelFor', () => {
   it('level 1 at 0, level 2 at 500', () => {
-    expect(levelFor(0)).toEqual({ level: 1, into: 0, need: 500, band: 'Skimmer' });
+    expect(levelFor(0)).toEqual({ level: 1, into: 0, need: 500, rank: 'Rookie' });
     expect(levelFor(499)).toMatchObject({ level: 1, into: 499 });
-    expect(levelFor(500)).toEqual({ level: 2, into: 0, need: 600, band: 'Skimmer' });
+    expect(levelFor(500)).toEqual({ level: 2, into: 0, need: 600, rank: 'Rookie' });
   });
 
   it('each gap is about 20% longer, in tidy tens', () => {
@@ -33,11 +33,11 @@ describe('levelFor', () => {
     }
   });
 
-  it('bands of 5 levels, the last one open ended', () => {
-    expect([1, 5, 6, 10, 11, 16, 21, 25, 26, 99].map(bandOf)).toEqual([
-      'Skimmer', 'Skimmer', 'Reader', 'Reader', 'Spotter', 'Sharp eye', 'Hawk eye', 'Hawk eye', 'Hawk eye', 'Hawk eye',
+  it('ranks of 5 levels, the last one open ended', () => {
+    expect([1, 5, 6, 10, 11, 16, 21, 25, 26, 99].map(rankOf)).toEqual([
+      'Rookie', 'Rookie', 'Detective', 'Detective', 'Inspector', 'Chief', 'Chief', 'Chief', 'Chief', 'Chief',
     ]);
-    expect(BANDS).toHaveLength(5);
+    expect(RANKS).toHaveLength(4);
   });
 
   it('treats bad input as 0 points', () => {

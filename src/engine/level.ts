@@ -4,19 +4,19 @@ export const FIRST_GAP = 500;
 const GROWTH = 1.2;
 const TIDY = 10;
 
-/** Names for bands of 5 levels. The last band has no end. */
-export const BANDS = ['Skimmer', 'Reader', 'Spotter', 'Sharp eye', 'Hawk eye'] as const;
-export const LEVELS_PER_BAND = 5;
+/** Ranks, 5 levels each. The last rank has no end. */
+export const RANKS = ['Rookie', 'Detective', 'Inspector', 'Chief'] as const;
+export const LEVELS_PER_RANK = 5;
 
-export type Band = (typeof BANDS)[number];
+export type Rank = (typeof RANKS)[number];
 
 /** Points to climb from `level` to the next: 500, 600, 720, 860, 1040 and so on, to the nearest 10. Worked out from the first gap each time, so rounding never piles up. */
 export function gapAt(level: number): number {
   return Math.round((FIRST_GAP * GROWTH ** (Math.max(1, level) - 1)) / TIDY) * TIDY;
 }
 
-export function bandOf(level: number): Band {
-  return BANDS[Math.min(BANDS.length - 1, Math.floor((Math.max(1, level) - 1) / LEVELS_PER_BAND))]!;
+export function rankOf(level: number): Rank {
+  return RANKS[Math.min(RANKS.length - 1, Math.floor((Math.max(1, level) - 1) / LEVELS_PER_RANK))]!;
 }
 
 export type LevelInfo = {
@@ -25,7 +25,7 @@ export type LevelInfo = {
   into: number;
   /** Points between this level and the next. */
   need: number;
-  band: Band;
+  rank: Rank;
 };
 
 export function levelFor(points: number): LevelInfo {
@@ -35,5 +35,5 @@ export function levelFor(points: number): LevelInfo {
     left -= gapAt(level);
     level++;
   }
-  return { level, into: left, need: gapAt(level), band: bandOf(level) };
+  return { level, into: left, need: gapAt(level), rank: rankOf(level) };
 }
