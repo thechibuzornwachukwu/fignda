@@ -46,8 +46,8 @@ export const LIMITS = {
   nudgesPerHour: 20,
   puzzlesPerHour: 10,
   reportsPerHour: 20,
-  /** Per address, guests too: a share has no player on it. */
-  sharesPerHour: 30,
+  /** Per address, guests too: a count has no player on it. A game is 2 or 3 of these, and a share 1. */
+  countsPerHour: 240,
   /** Guests: every background ask, failed ones included. A failure hands back one of the 5, never one of these. */
   guestGenerateTriesPerHour: 15,
   /** Opening /run. It only ever does work for the one runner that wins the claim. */
@@ -624,20 +624,25 @@ async function plays(req: Request, deps: Deps) {
 }
 
 // ---------------------------------------------------------------------------
-// POST /api/shares
+// POST /api/counts
 // ---------------------------------------------------------------------------
 
-export const ShareBody = z.object({ game: z.string().regex(/^[a-z0-9-]{2,40}$/) }).strict();
+export const COUNT_KINDS = ['start', 'end', 'full', 'share'] as const;
+export const CountBody = z.object({ game: z.string().regex(/^[a-z0-9-]{2,40}$/), kind: z.enum(COUNT_KINDS) }).strict();
+/** A page loaded before `/api/counts` existed still posts a share with no kind. */
+const ShareBody = CountBody.pick({ game: true }).strict();
 
 /**
- * One share of one puzzle, for the sponsor report. A count per puzzle per day and nothing else: guests count too,
- * and the session token is never read, so no player is on it.
+ * One more game started, ended, fully found or shared, for the sponsor report. A count per puzzle per day and
+ * nothing else: guests count too, and the session token is never read, so no player is on it.
  */
-async function countShare(req: Request, deps: Deps) {
-  await limit(deps.db, `share:ip:${clientIp(req)}`, LIMITS.sharesPerHour);
-  const parsed = ShareBody.safeParse(await readJson(req));
+async function countEvent(req: Request, deps: Deps, share = false) {
+  await limit(deps.db, `count:ip:${clientIp(req)}`, LIMITS.countsPerHour);
+  const body = await readJson(req);
+  const parsed = share ? ShareBody.safeParse(body) : CountBody.safeParse(body);
   if (!parsed.success) throw new HttpError(400, 'bad_request');
-  const r = await deps.db.rpc('count_share', { p_game: parsed.data.game });
+  const kind = 'kind' in parsed.data ? parsed.data.kind : 'share';
+  const r = await deps.db.rpc('count_event', { p_game: parsed.data.game, p_kind: kind });
   if (r.error) throw new HttpError(500, 'save_failed');
   if (!r.data) throw new HttpError(404, 'unknown_game');
   return json({ ok: true });
@@ -803,7 +808,8 @@ export async function handle(req: Request, deps: Deps): Promise<Response> {
     else if ((m = url.pathname.match(/^\/api\/owner\/puzzles\/([^/]+)\/(restore|remove)$/)) && req.method === 'POST')
       res = await ownerAct(req, deps, m[1]!, m[2] as 'restore' | 'remove');
     else if (url.pathname === '/api/plays' && req.method === 'POST') res = await plays(req, deps);
-    else if (url.pathname === '/api/shares' && req.method === 'POST') res = await countShare(req, deps);
+    else if (url.pathname === '/api/counts' && req.method === 'POST') res = await countEvent(req, deps);
+    else if (url.pathname === '/api/shares' && req.method === 'POST') res = await countEvent(req, deps, true);
     else if (url.pathname === '/api/puzzles' && req.method === 'POST') res = await makePuzzle(req, deps);
     else if (url.pathname === '/api/push/line' && req.method === 'POST') res = await pushLine(req, deps);
     else if (url.pathname === '/api/invite' && req.method === 'POST') res = await invite(req, deps);

@@ -63,6 +63,11 @@
     "Same letter. One starts there",
     "Still marked. Start at the hand"
   ],
+  "resumed": [
+    "Back where you left it",
+    "Your finds are still here",
+    "Picked up where you stopped"
+  ],
   "tapNext": [
     "Now tap the last letter",
     "Now the last letter"

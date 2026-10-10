@@ -1,6 +1,6 @@
-import { countsById, finishRate, isDay, rangeLine, reportLines, type ReportCounts } from './sponsorReport';
+import { COUNTED_FROM, countsById, finishRate, isDay, rangeLine, reportLines, share, type ReportCounts } from './sponsorReport';
 
-const counts = (over: Partial<ReportCounts> = {}): ReportCounts => ({ players: 0, plays: 0, roomPlays: 0, finished: 0, shares: 0, ...over });
+const counts = (over: Partial<ReportCounts> = {}): ReportCounts => ({ starts: 0, ends: 0, fulls: 0, shares: 0, players: 0, ...over });
 
 describe('isDay', () => {
   it('takes a real date as YYYY-MM-DD and nothing else', () => {
@@ -14,17 +14,12 @@ describe('isDay', () => {
 
 describe('countsById', () => {
   it('reads the database rows, with big counts sent as text', () => {
-    const m = countsById([{ game_id: 'bible', players: 12, plays: '40', room_plays: 4, finished: 9, shares: '7' }]);
-    expect(m.get('bible')).toEqual({ players: 12, plays: 40, roomPlays: 4, finished: 9, shares: 7 });
+    const m = countsById([{ game_id: 'bible', starts: '400', ends: 120, fulls: 9, shares: '7', players: 12 }]);
+    expect(m.get('bible')).toEqual({ starts: 400, ends: 120, fulls: 9, shares: 7, players: 12 });
   });
 
   it('a count that is not one reads as 0, and a row with no id is dropped', () => {
-    const m = countsById([
-      { game_id: 'a', players: -3, plays: 1.5, room_plays: null, finished: 'many', shares: Number.NaN },
-      { players: 5 },
-      null,
-      'row',
-    ]);
+    const m = countsById([{ game_id: 'a', starts: -3, ends: 1.5, fulls: null, shares: 'many', players: Number.NaN }, { starts: 5 }, null, 'row']);
     expect([...m.keys()]).toEqual(['a']);
     expect(m.get('a')).toEqual(counts());
   });
@@ -34,21 +29,21 @@ describe('countsById', () => {
   });
 });
 
-describe('finishRate', () => {
-  it('is the share of plays alone that found every word', () => {
-    expect(finishRate(counts({ plays: 8, finished: 3 }))).toBe(38);
-    expect(finishRate(counts({ plays: 10, roomPlays: 6, finished: 1 }))).toBe(25);
-    expect(finishRate(counts({ plays: 5, finished: 0 }))).toBe(0);
-    expect(finishRate(counts({ plays: 5, finished: 5 }))).toBe(100);
+describe('share and finishRate', () => {
+  it('is the part of the whole, to the nearest 1%', () => {
+    expect(share(3, 8)).toBe(38);
+    expect(share(0, 5)).toBe(0);
+    expect(share(5, 5)).toBe(100);
+    expect(finishRate(counts({ starts: 200, ends: 50 }))).toBe(25);
   });
 
-  it('has nothing to say when nobody played alone', () => {
-    expect(finishRate(counts())).toBeNull();
-    expect(finishRate(counts({ plays: 4, roomPlays: 4 }))).toBeNull();
+  it('has nothing to say about nothing', () => {
+    expect(share(0, 0)).toBeNull();
+    expect(finishRate(counts({ ends: 4 }))).toBeNull();
   });
 
-  it('never passes 100', () => {
-    expect(finishRate(counts({ plays: 3, finished: 9 }))).toBe(100);
+  it('never passes 100, even when a start was not counted', () => {
+    expect(share(9, 3)).toBe(100);
   });
 });
 
@@ -67,33 +62,41 @@ describe('reportLines', () => {
     { id: 'bible', title: 'Books of the Bible', sponsor: 'Chi Farms' },
     { id: 'world', title: 'Around the world' },
   ];
+  const later = { from: '2026-11-01', to: '2026-11-07' };
 
-  it('prints 4 counts per puzzle, in the order given', () => {
-    const lines = reportLines(entries, new Map([['bible', counts({ players: 1200, plays: 1500, roomPlays: 100, finished: 350, shares: 64 })]]), {
-      from: '2026-10-01',
-      to: '2026-10-07',
-    });
+  it('prints the counts per puzzle, in the order given', () => {
+    const lines = reportLines(entries, new Map([['bible', counts({ starts: 2000, ends: 1500, fulls: 300, shares: 64, players: 410 })]]), later);
     expect(lines).toEqual([
       'Gazecraft sponsor report',
-      '1 Oct 2026 to 7 Oct 2026',
+      '1 Nov 2026 to 7 Nov 2026',
       '',
       'Books of the Bible',
       'With Chi Farms',
-      'Players      1,200',
-      'Plays        1,500 (100 in a room)',
-      'Finish rate  25% found every word',
-      'Shares       64',
+      'Games started      2,000',
+      'Played to the end  1,500 (75%)',
+      'Found every word   300 (20% of those)',
+      'Shares             64',
+      'Signed in players  410',
       '',
       'Around the world',
-      'Players      0',
-      'Plays        0',
-      'Finish rate  No plays alone yet',
-      'Shares       0',
+      'Games started      0',
+      'Played to the end  0',
+      'Found every word   0',
+      'Shares             0',
+      'Signed in players  0',
       '',
-      'Players and plays are signed in players only. Guests play without an account and are not counted.',
-      'Finish rate is the share of plays alone that found every word.',
-      'Shares count guests too.',
+      'Games and shares count everyone, guests included. Played to the end means at least 1 word found.',
+      'Signed in players are different accounts with a play the server checked.',
     ]);
+  });
+
+  it('says when counting began, for a range that reaches back before it', () => {
+    const note = /counted from 10 Oct 2026/;
+    expect(reportLines(entries, new Map()).join('\n')).toMatch(note);
+    expect(reportLines(entries, new Map(), { from: '2026-09-01' }).join('\n')).toMatch(note);
+    expect(reportLines(entries, new Map(), { to: '2026-12-01' }).join('\n')).toMatch(note);
+    expect(reportLines(entries, new Map(), { from: COUNTED_FROM }).join('\n')).not.toMatch(note);
+    expect(reportLines(entries, new Map(), later).join('\n')).not.toMatch(note);
   });
 
   it('says so when no puzzle carries a sponsor', () => {

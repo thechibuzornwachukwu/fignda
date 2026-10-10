@@ -59,6 +59,41 @@ test.describe('desktop', () => {
     expect(bridged).toBe('found');
   });
 
+  test('leaving a puzzle keeps the finds and the hints, and "Play again" starts clean', async ({ page }) => {
+    await page.goto('/play/bible');
+    const [a] = await spanOf(page, 'amost');
+    await drag(page, a, a + 3);
+    await expect(page.getByText('1 / 30').first()).toBeVisible();
+    await page.getByRole('button', { name: 'Give me a hint' }).click();
+    await expect(page.getByText('1 hint').first()).toBeVisible();
+
+    // Another page inside the app, then back.
+    await page.getByRole('link', { name: 'All games' }).click();
+    await expect(page).toHaveURL(/\/play$/);
+    await page.goBack();
+    await expect(letter(page, a)).toHaveAttribute('data-state', 'found');
+    await expect(page.getByText('1 / 30').first()).toBeVisible();
+    await expect(page.getByText('1 hint').first()).toBeVisible();
+    await expect(firstRow(page)).toContainText('Amos');
+
+    // The tab closed and opened again.
+    await page.reload();
+    await expect(letter(page, a)).toHaveAttribute('data-state', 'found');
+    await expect(page.getByText('1 / 30').first()).toBeVisible();
+
+    // Another puzzle has its own game.
+    await page.goto('/play/bnote');
+    await expect(page.locator('[data-state="found"]')).toHaveCount(0);
+
+    // A finished game is not kept.
+    await page.goto('/play/bible');
+    await page.getByRole('button', { name: "I'm done" }).click();
+    await expect(page.getByRole('button', { name: 'Play again' })).toBeVisible();
+    await page.reload();
+    await expect(page.getByText('0 / 30').first()).toBeVisible();
+    await expect(page.locator('[data-state="found"]')).toHaveCount(0);
+  });
+
   test('keyboard: Shift+arrows select, Enter checks', async ({ page }) => {
     await page.goto('/play/bible');
     const [a] = await spanOf(page, 'amos');

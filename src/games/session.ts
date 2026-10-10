@@ -1,7 +1,7 @@
 // Play state for one game. Transitions are pure and take the copy picker as a parameter,
 // so feedback lines are picked exactly once per action (never inside a React updater).
 
-import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import * as copyDefault from '../copy';
 import { score } from '../engine/score';
 import { cleanReadOf } from '../engine/skill';
@@ -9,6 +9,7 @@ import { durationMs, scrollToTop } from '../lib/media';
 import { chime } from '../lib/sound';
 import { loadDaily, saveDaily } from './daily';
 import type { Evaluation, GameModule } from './registry';
+import { clearResume, loadResume, returned, saveResume, withoutAway } from './resume';
 
 /** `by`: a teammate's name when the find came from a room. Your own finds have none. */
 export type FoundEntry = { key: string; label: string; span: [number, number]; by?: string };
@@ -31,6 +32,8 @@ export type SavedSession = {
   resultTitle: string | null;
   /** Play log for server verification: selections and hint times, ms since start. */
   log?: PlayLog;
+  /** In storage only: when the player left an unfinished game. The time since then is not on its clock. */
+  leftAt?: number;
 };
 
 export type PlayLog = { events: Array<{ a: number; b: number; t: number }>; hints: number[] };
@@ -172,49 +175,114 @@ type Options<P> = {
   puzzle: P;
   /** Daily number. Persists every change under `gazecraft-daily-N`. */
   dailyN?: number;
+  /** A puzzle played alone that is not the daily: its id. An unfinished game is kept under it and carried on. */
+  resumeId?: string;
   /** Called just before a find is committed (WordList FLIP capture). */
   beforeHit?: (key: string) => void;
   /** Called after your own find, with its span (rooms send it to teammates). */
   onHit?: (a: number, b: number) => void;
+  /** Called once for each new game: a first visit, or "Play again". Never for a game carried on from before. */
+  onStart?: () => void;
   /** Called once, from the pick or the button that ended the game. Never for a finished daily loaded again. */
   onFinish?: (s: Session) => void;
   copy?: Copy;
 };
 
-export function useGameSession<P>({ mod, puzzle, dailyN, beforeHit, onHit, onFinish, copy = copyDefault }: Options<P>) {
+export function useGameSession<P>({ mod, puzzle, dailyN, resumeId: resumeAs, beforeHit, onHit, onStart, onFinish, copy = copyDefault }: Options<P>) {
   const onHitRef = useRef(onHit);
+  const onStartRef = useRef(onStart);
   const onFinishRef = useRef(onFinish);
   useLayoutEffect(() => {
     onHitRef.current = onHit;
+    onStartRef.current = onStart;
     onFinishRef.current = onFinish;
   });
   const daily = dailyN != null;
+  const resumeId = daily ? undefined : resumeAs;
+  /** A game played alone is kept between visits. A room game is not: everyone in it shares one clock. */
+  const kept = daily || resumeId != null;
   const answers = mod.answers(puzzle);
   const total = answers.length;
 
-  const [s, setS] = useState<Session>(() => {
-    if (daily) {
-      const saved = loadDaily(dailyN);
-      if (saved) return sanitize(saved, new Set(answers.map((a) => a.key)));
-    }
-    return newSession(Date.now());
+  // How this visit began: a new game, or one carried on from before (and whether it had anything to show for it).
+  const [opened] = useState((): { s: Session; how: 'new' | 'carried' | 'carried-on' } => {
+    const now = Date.now();
+    const stored = daily ? loadDaily(dailyN) : resumeId != null ? loadResume(resumeId, now) : null;
+    if (!stored) return { s: newSession(now), how: 'new' };
+    const saved = sanitize(returned(stored, now), new Set(answers.map((a) => a.key)));
+    return { s: saved, how: !isFinished(saved) && (saved.found.length > 0 || saved.hints > 0) ? 'carried-on' : 'carried' };
   });
+  const [s, setS] = useState<Session>(opened.s);
+  const began = useRef<'new' | 'carried' | 'carried-on' | null>(opened.how);
 
   const ref = useRef(s);
+  /** Store the game. With `leftAt` when the player is leaving it: the time from then on is time away. */
+  const keep = useCallback(
+    (next: Session, leftAt?: number) => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { msg: _m, ...game } = next;
+      const saved: SavedSession = leftAt == null ? game : { ...game, leftAt };
+      if (dailyN != null) saveDaily(dailyN, saved);
+      else if (resumeId == null) return;
+      // A game that has ended has nothing to carry on: the next visit starts clean.
+      else if (isFinished(next)) clearResume(resumeId);
+      else saveResume(resumeId, saved);
+    },
+    [dailyN, resumeId],
+  );
   const commit = useCallback(
     (next: Session) => {
       if (next === ref.current) return;
       ref.current = next;
       setS(next);
-      if (dailyN != null) {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { msg: _m, ...saved } = next;
-        saveDaily(dailyN, saved);
-      }
+      keep(next);
     },
-    [dailyN],
+    [keep],
   );
 
+  // Once per visit: a new game is counted, and a game carried on says so in one line.
+  useEffect(() => {
+    const how = began.current;
+    began.current = null;
+    if (how === 'new') onStartRef.current?.();
+    else if (how === 'carried-on') commit({ ...ref.current, msg: copy.pick('resumed') });
+    // The player is back on it: the stored copy stops saying they are away.
+    else if (how === 'carried') keep(ref.current);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Time away is not time on the puzzle. Leaving (another page, another app, a locked phone, a closed tab)
+  // keeps the game and stops its clock; coming back starts the clock where it stopped.
+  useEffect(() => {
+    if (!kept) return;
+    let awayAt: number | null = null;
+    const leave = () => {
+      const cur = ref.current;
+      if (awayAt != null || isFinished(cur)) return;
+      awayAt = Date.now();
+      keep(cur, awayAt);
+    };
+    const back = () => {
+      if (awayAt == null) return;
+      const now = Date.now();
+      const cur = ref.current;
+      const next = withoutAway(cur, now - awayAt, now);
+      awayAt = null;
+      // Either way the stored copy must stop saying the player is away.
+      if (next === cur) keep(cur);
+      else commit(next);
+    };
+    const seen = () => (document.visibilityState === 'hidden' ? leave() : back());
+    document.addEventListener('visibilitychange', seen);
+    window.addEventListener('pagehide', leave);
+    window.addEventListener('pageshow', back);
+    return () => {
+      document.removeEventListener('visibilitychange', seen);
+      window.removeEventListener('pagehide', leave);
+      window.removeEventListener('pageshow', back);
+      leave();
+    };
+  }, [kept, keep, commit]);
   const foundSet = useMemo(() => new Set(s.found.map((f) => f.key)), [s.found]);
 
   const pick = (a: number, b: number) => {
@@ -282,6 +350,7 @@ export function useGameSession<P>({ mod, puzzle, dailyN, beforeHit, onHit, onFin
   const replay = () => {
     if (daily) return;
     commit(newSession(Date.now()));
+    onStartRef.current?.();
     window.scrollTo(0, 0);
   };
 

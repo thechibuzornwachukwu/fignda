@@ -32,7 +32,7 @@ Risks: leaked keys, faked scores, AI endpoint abuse, injected text in shared con
 | puzzle_reports | none | Worker only, through `report_puzzle()` |
 | generate_jobs | none; the Worker hands out a job's state by its id | Worker only |
 | daily_candidates (view) | service role only | none |
-| share_counts | none; the owner reads totals through `sponsor_report()` | Worker only, through `count_share()` |
+| puzzle_counts | none; the owner reads totals through `sponsor_report()` | Worker only, through `count_event()` |
 
 - Email lives only in `auth.users`.
 - Handle: unique, 2 to 20, `[a-z0-9._]`, reserved list (admin, gazecraft, fignda, support, root, help).
@@ -78,9 +78,9 @@ Risks: leaked keys, faked scores, AI endpoint abuse, injected text in shared con
 - Restore keeps the old reports but they stop counting toward hiding it again. Remove deletes the puzzle with its plays, thumbs and reports.
 - Daily candidates (`daily_candidates` view, service role only): has a maker, safety passed, not hidden, never reported, 20 different verified players other than the maker, at least 80% "Good one".
 
-## Share counts and the sponsor report
-- `POST /api/shares` with `{ "game": id }`: guests too, 30 per hour per IP. It adds 1 to a count for that puzzle and that UTC day. No user id, address or time of day is stored, and a session token is not read. An unknown puzzle is 404 and counts nothing.
-- The count can be pushed up by anyone, 30 an hour per address. It is a number for a report, never a score, a rank or a reward.
+## Play counts and the sponsor report
+- `POST /api/counts` with `{ "game": id, "kind": "start" | "end" | "full" | "share" }`: guests too, 240 per hour per IP. It adds 1 to a count for that puzzle, that UTC day and that kind. No user id, address or time of day is stored, and a session token is not read. An unknown puzzle is 404, an unknown kind is 400, and neither counts anything. `POST /api/shares` is the same call for a share, kept for pages loaded before the first existed.
+- These are counts from the browser, not replayed plays. Anyone can push one up, 240 an hour per address. They are numbers for a report and never a score, a rank, a board or a reward.
 - `sponsor_report()` returns counts per puzzle and nothing else: no handle, no user id, no row per play. Service role only. Nothing in the Worker or the client calls it; the owner runs it with `npm run sponsor:report`.
 
 ## Push and invites
@@ -133,6 +133,6 @@ Dependabot. `npm audit --audit-level=high`. Lockfile committed.
 - 6th guest generate in an hour returns 429.
 - Two runs of one job make one model call and one puzzle.
 - A third report hides a puzzle at once; a non-owner gets 404 from every owner endpoint.
-- No client can read `share_counts` or call `sponsor_report()` or `count_share()`.
+- No client can read `puzzle_counts` or call `sponsor_report()` or `count_event()`.
 - A puzzle the safety check fails is never saved; an unchecked one never becomes a daily candidate.
 - Zero CSP violations on every route.

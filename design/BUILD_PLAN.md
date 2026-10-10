@@ -75,8 +75,6 @@ Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with 
 
 A long puzzle is played in short passages. Short must not mean thin: every sitting ends with something won, and the whole puzzle stays as the hard one.
 
-- [ ] **Set 2a. Engine only, nothing on screen.** `passages(puzzle)` cuts at sentence ends where no answer runs across the cut, 5 to 9 answers each, a short tail joined to the passage before. Measured: all 25 puzzles cut cleanly into about 55 passages. A puzzle with no clean cut stays whole.
-- [ ] **Set 2b. Save and resume.** Leaving a puzzle keeps the finds, the hints and the clock. The clock counts time on the puzzle, not time away. Useful by itself, before passages exist.
 - [ ] **Set 2c. A passage can be played.** Its own screen, result, stars and clean read. Reached by link only. Passages are never ranked against whole puzzles.
 - [ ] **Set 2d. Passages on the path.** Each passage is a clue, the whole puzzle is the last clue of its case, with its board and scores as they are. A whole-puzzle score from before shows its passages as done. A case shows how many clues are left, never how many minutes. A room plays the whole puzzle. The daily is not cut.
 
@@ -181,4 +179,5 @@ Play with no account, and sponsors get numbers, never people.
 - Machine-written puzzles stop for the day when the free limits run out.
 - The avatar on the waiting screen bobs and does not blink.
 - Stars, shelf counts and personal records are kept in the browser, from 9 Oct 2026 on.
-- The sponsor report counts signed in players only: a guest's play is never stored. A deleted account takes its plays out of the counts. A share count can be pushed up by anyone, 30 an hour per address.
+- An unfinished puzzle is kept in the browser it was played in, not on the account: a second device starts clean. Safari clears a site's stored data after 7 days without a visit, so a guest there can lose a kept game, a run and their stars.
+- The sponsor report's games and shares are counted in the browser from 10 Oct 2026, guests included, and are not checked by replay: anyone can push one up, 240 an hour per address. A deleted account leaves them and comes out of the signed in players.

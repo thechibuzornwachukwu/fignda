@@ -13,7 +13,7 @@ export const GUIDED_KEY = 'gazecraft-guided';
 export const DEMO_KEY = 'gazecraft-demo';
 
 export const loadFlow = (): Flow => parseFlow(storage.getJSON<unknown>(FLOW_KEY));
-export const saveFlow = (flow: Flow): void => storage.setJSON(FLOW_KEY, parseFlow(flow));
+export const saveFlow = (flow: Flow): void => void storage.setJSON(FLOW_KEY, parseFlow(flow));
 
 /** This browser's copy of the look: a guest's answer, or the account's once it has been read. */
 export const loadLook = (): LookChoice | null => parseLook(storage.get(LOOK_KEY));
@@ -24,8 +24,8 @@ export function keepLook(look: LookChoice | null): void {
 
 /** The guided find on the landing demo has been done or skipped. */
 export const guideSeen = (): boolean => storage.get(GUIDED_KEY) === '1';
-export const markGuideSeen = (): void => storage.set(GUIDED_KEY, '1');
-export const markDemoDone = (): void => storage.set(DEMO_KEY, '1');
+export const markGuideSeen = (): void => void storage.set(GUIDED_KEY, '1');
+export const markDemoDone = (): void => void storage.set(DEMO_KEY, '1');
 
 /**
  * Whether this browser has finished anything yet: the demo, a game or a daily. A first time visitor has not.

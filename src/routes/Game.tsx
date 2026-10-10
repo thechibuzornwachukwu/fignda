@@ -15,7 +15,7 @@ import { dayHidLine, playFacts, rareLine, recordLines, skillLines, starsUpLine, 
 import { isCleanRead, scoreOf, secondsOf, useGameSession, type Session } from '../games/session';
 import { starsFor } from '../engine/stars';
 import { dayProfile } from '../engine/variableDay';
-import { countShare, fetchCustomGame, fetchWordStats, mergeGuestDailies, submitPlay } from '../lib/api';
+import { countEvent, fetchCustomGame, fetchWordStats, mergeGuestDailies, submitPlay } from '../lib/api';
 import { rarestFound } from '../lib/wordStats';
 import { useAuth } from '../lib/auth';
 import { useCoarsePointer } from '../lib/media';
@@ -109,8 +109,11 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
     mod,
     puzzle,
     dailyN,
+    // Played alone: leaving keeps the game. A room shares one clock, so it is never kept.
+    resumeId: dailyN == null && !inRoom ? def.id : undefined,
     beforeHit: (k) => listRef.current?.capture(k),
     onHit: (a, b) => roomRef.current?.sendFind(a, b),
+    onStart: () => countEvent(def.id, 'start'),
     onFinish: (fs) => onFinish(fs),
   });
   const { s, foundSet, total, answers, daily, finished } = g;
@@ -227,6 +230,9 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
   const starred = inCatalogue && !inRoom;
   const [end, setEnd] = useState<{ at: number; starsUp: boolean; records: string[] } | null>(null);
   function onFinish(fs: Session) {
+    // Counted for everyone, guests too: a game played to the end is one with at least 1 word found.
+    if (fs.found.length > 0) countEvent(def.id, 'end');
+    if (total > 0 && fs.found.length === total) countEvent(def.id, 'full');
     const mine = fs.found.filter((f) => !f.by);
     const cleanRead = isCleanRead(fs, total);
     const stars = starsFor({ finished: true, found: fs.found.length, total, hints: fs.hints, wrongs: fs.wrongs, byOthers: mine.length !== fs.found.length });
@@ -279,14 +285,14 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
     if (coarse && navigator.share) {
       try {
         await navigator.share({ text });
-        countShare(def.id);
+        countEvent(def.id, 'share');
         return '';
       } catch {
         /* closed the sheet: fall back to copying */
       }
     }
     if (!(await copyText(text))) return 'Could not copy. Use Share.';
-    countShare(def.id);
+    countEvent(def.id, 'share');
     return 'Copied. Paste it in your group.';
   };
 
@@ -489,7 +495,7 @@ function GameScreen({ def, dailyN }: { def: GameDef; dailyN?: number }) {
         <ShareSheet
           open={sharing}
           onClose={() => setSharing(false)}
-          onShared={() => countShare(def.id)}
+          onShared={() => countEvent(def.id, 'share')}
           game={{ ...shareGame(def, puzzle.difficulty, dailyN), vs: auth.profile?.handle, sponsor }}
           result={{
             answers: puzzle.answers.map((a) => {
