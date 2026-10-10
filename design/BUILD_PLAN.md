@@ -157,7 +157,7 @@ Play with no account, and sponsors get numbers, never people.
 
 ## Checks still owed
 
-- [ ] Signed in browser tests since the sign in flash fix. Docker was down on 9 Oct 2026.- [ ] The safety model (Llama Guard) with one real call. Its answer shape is assumed.
+- [ ] The safety model (Llama Guard) with one real call. Its answer shape is assumed.
 - [ ] On real phones: the dock on an iPhone Home Screen app, a room game on 2 phones, a machine-written puzzle through the site, the waiting screen with the phone locked.
 - [ ] Signed in screens on the live site with a real second account.
 - [ ] One real push on Android and iPhone. Needs the reminder keys.
