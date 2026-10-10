@@ -104,12 +104,14 @@ describe('Header', () => {
   it('in the app: app links, account link and theme toggle, no landing anchors', () => {
     at('/play');
     const nav = screen.getByRole('navigation', { name: 'Main' });
-    expect(nav).toHaveTextContent('CasesRanksSquad');
+    // The dock's places, in the dock's order.
+    expect(nav).toHaveTextContent('CasesSquadRanks');
     expect(nav).not.toHaveTextContent('How it works');
     expect(screen.getByRole('link', { name: 'Cases' }).className).toContain('active');
     expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/signin?next=%2Fplay');
     expect(screen.getByRole('button', { name: /Switch to/ })).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Play' })).toBeNull();
+    // The same Play as the dock: it knows what is next. Today's daily, while it is unplayed.
+    expect(screen.getByRole('link', { name: "Play today's daily" })).toHaveAttribute('href', expect.stringMatching(/^\/d\/\d+$/));
   });
 
   it('on the landing page: its own sections and one way in', () => {

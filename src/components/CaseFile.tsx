@@ -5,6 +5,7 @@ import { pick } from '../copy';
 import { culpritFor } from '../games/caseFile';
 import { Avatar } from './Avatar';
 import { Icon } from './Icon';
+import { PartnerNote } from './PartnerNote';
 import styles from './CaseFile.module.css';
 
 type SlotsProps = {
@@ -83,6 +84,8 @@ export function CaseClosed({ id, secret }: { id: string; secret: string }) {
       </div>
       <SecretSlots slots={[...secret]} />
       <p className={styles.confession}>{lines.confession}</p>
+      {/* The partner who worked the case, with a word of its own. */}
+      <PartnerNote moment="closed" size={40} />
       <p className={styles.card}>
         <span className={styles.cardMark}>
           <Icon icon={Eye} size={16} />

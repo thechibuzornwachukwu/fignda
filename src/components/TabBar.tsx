@@ -2,11 +2,8 @@ import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useMemo, useRef, type ReactNode } from 'react';
 import { Check, FolderSearch, Play, Trophy, Users } from 'lucide-react';
 import { guestAvatar } from '../avatar/guest';
-import { dayNo } from '../engine/daily';
-import { nextClueTo } from '../games/caseFile';
-import { loadDaily } from '../games/daily';
-import { isFinished } from '../games/session';
 import { useAuth } from '../lib/auth';
+import { playNext } from '../lib/playNext';
 import { hasTabBar } from '../lib/routes';
 import { useTucked } from '../lib/useTucked';
 import { Avatar } from './Avatar';
@@ -37,24 +34,16 @@ export function TabBar() {
   const starter = useMemo(() => guestAvatar(), []);
   if (!hasTabBar(pathname)) return null;
   const onYou = pathname === '/me' || pathname.startsWith('/u/') || pathname === '/settings' || pathname === '/signin';
-  const n = dayNo();
-  const saved = loadDaily(n);
-  const dailyDone = !!saved && isFinished(saved);
-  // After the daily, the next clue. Nothing left at all: a tick, and the way back to the cases.
-  const clue = dailyDone ? nextClueTo() : null;
-  const play = !dailyDone
-    ? { to: `/d/${n}`, name: "Play today's daily", done: false }
-    : clue
-      ? { to: clue, name: 'Play the next clue', done: false }
-      : { to: '/play', name: 'All played. See your cases', done: true };
+  // Today's daily, then the next clue. Nothing left at all: a tick, and the way back to the cases.
+  const play = playNext();
   return (
     <nav ref={ref} className={[styles.bar, tucked && styles.tucked].filter(Boolean).join(' ')} aria-label="Tabs" data-tucked={tucked || undefined}>
       <Tab to="/play" icon={<Icon icon={FolderSearch} size={20} />} label="Cases" />
       {/* The tab is the player's own character: their design, or a guest's. */}
       <Tab to="/me" icon={profile ? <Avatar handle={profile.handle} size={24} /> : <Avatar parts={starter} size={24} />} label="You" active={onYou} />
-      <Link to={play.to} className={styles.play} data-done={play.done || undefined} data-play={!dailyDone ? 'daily' : clue ? 'clue' : 'done'} aria-label={play.name}>
+      <Link to={play.to} className={styles.play} data-done={play.kind === 'done' || undefined} data-play={play.kind} aria-label={play.name}>
         <span className={styles.disc}>
-          <Icon icon={play.done ? Check : Play} size="em" />
+          <Icon icon={play.kind === 'done' ? Check : Play} size="em" />
         </span>
         <span className={styles.label}>Play</span>
       </Link>

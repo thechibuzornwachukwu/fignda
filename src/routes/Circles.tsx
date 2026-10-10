@@ -5,6 +5,7 @@ import { Avatar } from '../components/Avatar';
 import { Button } from '../components/Button';
 import { Field } from '../components/Field';
 import { Icon } from '../components/Icon';
+import { PartnerNote } from '../components/PartnerNote';
 import { Segmented } from '../components/Segmented';
 import { Skeleton, SkeletonGroup, SkeletonList } from '../components/Skeleton';
 import { dayNo } from '../engine/daily';
@@ -86,7 +87,11 @@ export function Circles() {
               Your circles
             </h2>
             {list === null && <SkeletonList rows={2} stat={false} />}
-            {list?.length === 0 && <p className={board.empty}>You are not in a circle yet. Start one below.</p>}
+            {list?.length === 0 && (
+              <PartnerNote className={board.empty}>
+                <p>You are not in a circle yet. Start one below.</p>
+              </PartnerNote>
+            )}
             {!!list?.length && (
               <ul className={styles.list}>
                 {list.map((c) => (

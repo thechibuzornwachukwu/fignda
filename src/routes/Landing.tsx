@@ -3,6 +3,7 @@ import { Button } from '../components/Button';
 import { GameRow } from '../components/GameRow';
 import { TextLink } from '../components/TextLink';
 import { pick } from '../copy';
+import { nextClueTo } from '../games/caseFile';
 import { getPuzzle, sponsorFor } from '../games/catalog';
 import { today } from '../games/daily';
 import { hasPlayed } from '../lib/firstMinute';
@@ -37,6 +38,8 @@ export function Landing() {
   // Play first (BUILD_PLAN 3b): a first time visitor on a phone opens on the demo sentence, with the pitch under it.
   // Decided once, when the page opens, so finishing the demo does not move the page under the player.
   const [fresh] = useState(() => !hasPlayed());
+  // Play first: a new player lands in a clue, one short sitting. Today's daily is for a player who has been here.
+  const [firstClue] = useState(() => (fresh ? nextClueTo() : null));
   const phone = useMediaQuery('(max-width: 759px)');
   const playFirst = fresh && phone;
   // One h1 on the page: the demo's when it leads, the pitch's otherwise.
@@ -67,7 +70,7 @@ export function Landing() {
               pull them out.
             </p>
             <div className={styles.actions}>
-              <Button to={`/d/${today().n}`}>Play today's daily</Button>
+              {firstClue ? <Button to={firstClue}>Play your first clue</Button> : <Button to={`/d/${today().n}`}>Play today's daily</Button>}
               {!playFirst && (
                 <Button to="/#how" variant="secondary">
                   Try it here

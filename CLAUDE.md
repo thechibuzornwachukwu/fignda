@@ -31,7 +31,7 @@ src/games/       registry: type -> { build, check, Board }
 src/avatar/      player characters: shapes, parts (append only lists), draw, store
 src/components/  Logo Icon Button TextLink FilterTabs GameRow Puzzle Letter WordList
                  ProgressLine BigClock MobileBar ShareSheet ShareCard Segmented Toggle
-                 ThemeToggle Header Footer Dialog Skeleton
+                 ThemeToggle Header Footer Dialog Skeleton PartnerNote
 src/routes/      Landing Games Game SignIn Account
 src/lib/         supabase, api, storage
 worker/          /api/generate /api/plays /api/og
@@ -40,6 +40,7 @@ supabase/        migrations, RLS
 - Engine is pure and unit tested against `data/games.json` `expectedAnswers`.
 - Answer counts come from the engine, never from AI output or hand typing.
 - UI never re-implements matching.
+- An empty or failed list, board or section sits in `<PartnerNote>` (the player's partner beside the line). The line stays; the partner never replaces it.
 - Anything that loads ships with its skeleton (`<Skeleton>`, SPEC section 4). New screen, section or component: add the matching skeleton and its row in the SPEC table. Layout changed: change its skeleton.
 
 ## Do not

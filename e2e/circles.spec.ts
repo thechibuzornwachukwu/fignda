@@ -194,7 +194,7 @@ test('partners: a guest picks one on the first screen, it shows at the end of a 
   // The partner is there when a game ends, in a picture that loads.
   await page.goto('/play/bnote');
   await page.getByRole('button', { name: "I'm done" }).click();
-  const there = page.locator('[aria-labelledby="results-title"] img[data-partner="dog"]');
+  const there = page.locator('[aria-labelledby="results-title"] img[data-partner="dog"]').first();
   await expect(there).toHaveAttribute('data-moment', 'done');
   expect(await there.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0)).toBe(true);
 });

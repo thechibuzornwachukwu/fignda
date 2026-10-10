@@ -39,8 +39,8 @@ export async function finishWelcome(page: Page, name: string, handle: string): P
   await nameField.fill(name);
   await page.getByLabel('Handle').fill(handle);
   await page.getByRole('button', { name: 'Start finding' }).click();
-  // The flow ends on today's daily. The specs start from the games screen.
-  await expect(page).toHaveURL(/\/(d\/\d+|play)$/);
+  // Play first: the flow ends in the next clue (or today's daily). The specs start from the games screen.
+  await expect(page).toHaveURL(/\/(d\/\d+|play(\/[a-z0-9-]+(\/\d+)?)?)$/);
   await page.goto('/play');
 }
 

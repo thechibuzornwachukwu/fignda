@@ -22,6 +22,7 @@ import { loadPartner } from '../lib/partner';
 import { starsFor } from '../engine/stars';
 import { dayProfile } from '../engine/variableDay';
 import { countEvent, fetchCustomGame, fetchDailyPlace, fetchWordStats, mergeGuestDailies, submitPlay } from '../lib/api';
+import { loadFlow } from '../lib/firstMinute';
 import { guestAsk, markRunTold, runTold } from '../lib/guestAsk';
 import { rarestFound } from '../lib/wordStats';
 import { useAuth } from '../lib/auth';
@@ -442,7 +443,10 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
   }, [guestToday, dailyN]);
   const [toldBefore] = useState(runTold);
   const ask = useMemo(() => (guestToday ? guestAsk({ today: true, streak: run.streak, runTold: toldBefore, place }) : null), [guestToday, run.streak, toldBefore, place]);
-  const guestLine = useMemo(() => (ask ? copy.pick(ask.pool, ask.vars) : ''), [ask]);
+  // Play first: the character and the partner are asked after the first result, not before. Once, until it is answered.
+  const [lookAsk] = useState(() => !loadFlow().character);
+  const askLook = !signedIn && auth.enabled && lookAsk;
+  const guestLine = useMemo(() => (askLook ? copy.pick('guestLook') : ask ? copy.pick(ask.pool, ask.vars) : ''), [ask, askLook]);
   useEffect(() => {
     // Said once: the next result goes back to the place.
     if (ask?.run) markRunTold();
@@ -537,6 +541,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
           boardPath={part || !auth.enabled ? undefined : daily ? `/leaderboard?day=${dailyN}` : inRoom && getGameDef(def.id) ? `/leaderboard/${def.id}?board=together` : undefined}
           guest={!signedIn}
           guestLine={guestLine}
+          guestAction={askLook ? 'Choose your look' : undefined}
           streak={streakLine}
           rare={rare}
           caseFile={caseNode}

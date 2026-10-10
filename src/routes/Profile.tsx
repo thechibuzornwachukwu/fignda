@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
 import { Button } from "../components/Button";
 import { PageHeader } from "../components/PageHeader";
+import { PartnerNote } from "../components/PartnerNote";
 import { Skeleton, SkeletonGroup, SkeletonList } from "../components/Skeleton";
 import { TextLink } from "../components/TextLink";
 import { dayNo } from "../engine/daily";
@@ -130,11 +131,13 @@ export function Profile() {
             ? `No player called @${handle}.`
             : "This page did not load."}
         </h2>
-        <p className={styles.muted}>
-          {state.status === "missing"
-            ? "Check the spelling, or find a puzzle instead."
-            : "Try again in a moment, or find a puzzle instead."}
-        </p>
+        <PartnerNote moment="error">
+          <p className={styles.muted}>
+            {state.status === "missing"
+              ? "Check the spelling, or find a puzzle instead."
+              : "Try again in a moment, or find a puzzle instead."}
+          </p>
+        </PartnerNote>
         <div>
           <Button to="/play">Play</Button>
         </div>
@@ -200,11 +203,13 @@ export function Profile() {
 
       {playsFailed ? (
         <section className={styles.fresh} aria-label="Plays">
-          <p className={styles.muted}>
-            {own
-              ? "Your plays did not load. Try again in a moment."
-              : "Their plays did not load. Try again in a moment."}
-          </p>
+          <PartnerNote moment="error">
+            <p className={styles.muted}>
+              {own
+                ? "Your plays did not load. Try again in a moment."
+                : "Their plays did not load. Try again in a moment."}
+            </p>
+          </PartnerNote>
           {badgeList}
         </section>
       ) : plays.length === 0 ? (
@@ -212,11 +217,13 @@ export function Profile() {
           <h2 className={styles.freshTitle}>
             {own ? "Your run starts with one puzzle." : `${name} is new here.`}
           </h2>
-          <p className={styles.muted}>
-            {own
-              ? "Find one word and you are on the board. Points, streaks and your last 14 dailies will show up here as you play."
-              : "No plays yet. Their points and streak will show up here after a first game."}
-          </p>
+          <PartnerNote>
+            <p className={styles.muted}>
+              {own
+                ? "Find one word and you are on the board. Points, streaks and your last 14 dailies will show up here as you play."
+                : "No plays yet. Their points and streak will show up here after a first game."}
+            </p>
+          </PartnerNote>
           <div className={styles.freshActions}>
             {own ? (
               <Button variant="accent" to={`/d/${today}`}>

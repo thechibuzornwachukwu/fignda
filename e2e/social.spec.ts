@@ -125,7 +125,7 @@ test("answers: a past daily lists its words; today's are never shown", async ({ 
   await page.goto(`/d/${today - 1}/answers`);
   await expect(page.getByRole('heading', { name: /^Answers\./ })).toBeVisible();
   expect(await page.getByRole('list', { name: 'Answers' }).getByRole('listitem').count()).toBeGreaterThan(3);
-  await expect(page.getByRole('link', { name: "Play today's daily" })).toHaveAttribute('href', `/d/${today}`);
+  await expect(page.getByRole('main').getByRole('link', { name: "Play today's daily" })).toHaveAttribute('href', `/d/${today}`);
   await audit(page, 'answers');
 
   await page.goto(`/d/${today}/answers`);

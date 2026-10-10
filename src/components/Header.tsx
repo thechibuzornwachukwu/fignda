@@ -4,6 +4,7 @@ import { useTucked } from '../lib/useTucked';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { Bell } from 'lucide-react';
 import { useAuth } from '../lib/auth';
+import { playNext } from '../lib/playNext';
 import { useUnread } from '../lib/useUnread';
 import { Button } from './Button';
 import { Icon } from './Icon';
@@ -21,7 +22,7 @@ function AccountLink() {
   if (profile) {
     const first = profile.name.split(/\s+/)[0];
     return (
-      <Link to={`/u/${profile.handle}`} className={styles.account} aria-label={`${first}, your profile`}>
+      <Link to="/me" className={styles.account} aria-label={`${first}, your profile`}>
         <Avatar handle={profile.handle} size={28} />
         {/* On a phone the face is enough; the name would push the header onto a second row. */}
         <span className={styles.accountName}>{first}</span>
@@ -63,13 +64,15 @@ export function NotificationsLink() {
 
 /**
  * Two headers, by context. The landing page is a pitch: its own sections and one way in.
- * Everywhere else is the app: where to play, who is winning, who is playing.
+ * Everywhere else is the app, on wide screens only (a phone has the dock): the same places in the same order as the
+ * dock, and the same Play, which always knows what is next. Your face leads to You.
  */
 export function Header() {
   const { pathname } = useLocation();
   const landing = pathname === '/';
   const ref = useRef<HTMLElement>(null);
   const tucked = useTucked(ref, pathname);
+  const play = playNext();
 
   return (
     <header ref={ref} className={[styles.header, tucked && styles.tucked].filter(Boolean).join(' ')} data-tucked={tucked || undefined} data-app={hasTabBar(pathname) || undefined}>
@@ -92,11 +95,11 @@ export function Header() {
             <NavLink to="/play" className={navCls}>
               Cases
             </NavLink>
-            <NavLink to="/leaderboard" className={navCls}>
-              Ranks
-            </NavLink>
             <NavLink to="/players" className={navCls}>
               Squad
+            </NavLink>
+            <NavLink to="/leaderboard" className={navCls}>
+              Ranks
             </NavLink>
           </nav>
         )}
@@ -107,10 +110,16 @@ export function Header() {
           </span>
           <NotificationsLink />
           <ThemeToggle />
-          {landing && (
+          {landing ? (
             <Button to="/play" size="sm">
               Play
             </Button>
+          ) : (
+            <span className={styles.appOnly}>
+              <Button to={play.to} size="sm" aria-label={play.name}>
+                Play
+              </Button>
+            </span>
           )}
         </div>
       </div>

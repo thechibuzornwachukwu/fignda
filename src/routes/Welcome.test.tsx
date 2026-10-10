@@ -4,6 +4,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { vi } from 'vitest';
 import { GUEST_AVATAR_KEY } from '../avatar/guest';
+import { nextClueTo } from '../games/caseFile';
 import { today } from '../games/daily';
 import { FLOW_KEY, LOOK_KEY } from '../lib/firstMinute';
 import { Welcome } from './Welcome';
@@ -48,7 +49,8 @@ vi.mock('../lib/api', () => ({
   fetchPoints: async () => null,
 }));
 
-const DAILY = `/d/${today().n}`;
+// Play first: with nothing played, the flow ends in the first clue on the path, never a menu.
+const FIRST = nextClueTo() ?? `/d/${today().n}`;
 
 function Where() {
   const { pathname, search } = useLocation();
@@ -109,7 +111,7 @@ describe('a new guest', () => {
     expect(stored()).toEqual({ character: 'done' });
   });
 
-  it('the outfit question: the agreed words, 3 answers, and one tap ends on the daily', () => {
+  it('the outfit question: the agreed words, 3 answers, and one tap ends in a clue', () => {
     localStorage.setItem(FLOW_KEY, JSON.stringify({ character: 'done', signin: 'skipped' }));
     open();
     expectStep('We believe you should look good.', 'Step 3 of 3');
@@ -120,7 +122,7 @@ describe('a new guest', () => {
     // A full answer, not a skip.
     expect(localStorage.getItem(LOOK_KEY)).toBe('mixed');
     expect(stored()).toEqual({ character: 'done', signin: 'skipped', look: 'done', done: true });
-    expect(where()).toBe(DAILY);
+    expect(where()).toBe(FIRST);
   });
 
   it.each([
@@ -133,14 +135,14 @@ describe('a new guest', () => {
     expect(localStorage.getItem(LOOK_KEY)).toBe(value);
   });
 
-  it('skips everything: 3 taps, nothing kept about them, and the flow ends on the daily, not a menu', () => {
+  it('skips everything: 3 taps, nothing kept about them, and the flow ends in a clue, not a menu', () => {
     open();
     click('Skip');
     expectStep('Sign in to keep it.', 'Step 2 of 4');
     click('Skip');
     expectStep('We believe you should look good.', 'Step 3 of 3');
     click('Skip');
-    expect(where()).toBe(DAILY);
+    expect(where()).toBe(FIRST);
     expect(localStorage.getItem(LOOK_KEY)).toBeNull();
     expect(localStorage.getItem(GUEST_AVATAR_KEY)).toBeNull();
     expect(stored()).toEqual({ character: 'skipped', signin: 'skipped', look: 'skipped', done: true });
@@ -185,7 +187,7 @@ describe('a new guest', () => {
     expect(within(editor).getByRole('button', { name: 'Outfit: Agbada' })).toBeInTheDocument();
   });
 
-  it('sign in not set up: character, the question, the daily. No sign in step and no dead end', () => {
+  it('sign in not set up: character, the question, a clue. No sign in step and no dead end', () => {
     world.enabled = false;
     open();
     expectStep('This is you.', 'Step 1 of 2');
@@ -193,7 +195,7 @@ describe('a new guest', () => {
     click('Skip');
     expectStep('We believe you should look good.', 'Step 2 of 2');
     click('A man');
-    expect(where()).toBe(DAILY);
+    expect(where()).toBe(FIRST);
   });
 });
 
@@ -253,7 +255,7 @@ describe('a new signed in player', () => {
     expect(screen.getByLabelText('Name')).toHaveValue('Chidi');
     expect(screen.getByLabelText('Handle')).toHaveValue('chidi');
     click('Start finding');
-    await waitFor(() => expect(where()).toBe(DAILY));
+    await waitFor(() => expect(where()).toBe(FIRST));
     expect(world.saved).toEqual([{ id: 'u2', name: 'Chidi', handle: 'chidi' }]);
     // Refreshing the profile is what moves the guest character, look and dailies to the account.
     expect(world.refreshed).toBe(1);
@@ -313,7 +315,7 @@ describe('a new signed in player', () => {
     open();
     const said = screen.getByText(/^Skip and you are @reader_[a-z0-9]{4} for now\.$/).textContent!;
     click('Skip');
-    await waitFor(() => expect(where()).toBe(DAILY));
+    await waitFor(() => expect(where()).toBe(FIRST));
     expect(world.saved).toHaveLength(1);
     expect(world.saved[0]!.name).toBe('Reader');
     expect(said).toContain(`@${world.saved[0]!.handle}`);
@@ -325,7 +327,7 @@ describe('a new signed in player', () => {
     world.saveResult = 'failed';
     const first = open();
     click('Skip');
-    await waitFor(() => expect(where()).toBe(DAILY));
+    await waitFor(() => expect(where()).toBe(FIRST));
     expect(world.refreshed).toBe(0);
     first.unmount();
     open();

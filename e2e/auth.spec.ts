@@ -138,8 +138,8 @@ test('handle rules and a taken handle', async ({ page, browser }) => {
   const first = await browser.newPage();
   await signIn(first, `e2e-${uid()}@test.gazecraft.local`);
   await createProfile(first, 'Tolu', taken);
-  // A new player's first minute ends on today's daily.
-  await expect(first).toHaveURL(/\/d\/\d+$/);
+  // Play first: a new player's first minute ends in a clue.
+  await expect(first).toHaveURL(/\/play\/[a-z0-9-]+\/\d+$/);
   await first.close();
 
   await signIn(page, `e2e-${uid()}@test.gazecraft.local`);

@@ -351,5 +351,41 @@
   ],
   "sponsorWith": [
     "With {name}"
+  ],
+  "guestLook": [
+    "That detective is yours. Pick a look and a partner to work the next clue with you.",
+    "Your first result. Now choose who you are, and the partner beside you."
+  ],
+  "sayErrorCat": [
+    "Not this time.",
+    "Something slipped past me."
+  ],
+  "sayErrorDino": [
+    "I nearly had it.",
+    "That one got away from me."
+  ],
+  "sayErrorDog": [
+    "It will come. It always does.",
+    "Nothing came back yet. I am still glad you came."
+  ],
+  "sayErrorRobot": [
+    "404. I am lost.",
+    "0 results came back."
+  ],
+  "sayClosedCat": [
+    "It was there the whole time.",
+    "Closed. Signed with an X."
+  ],
+  "sayClosedDino": [
+    "We got them. I roared, quietly.",
+    "Case closed. I found the long one first."
+  ],
+  "sayClosedDog": [
+    "You closed it. I knew you would.",
+    "Every clue. What a good day."
+  ],
+  "sayClosedRobot": [
+    "1 case closed. I wrote down how you did it.",
+    "Every clue read. 0 left in this case."
   ]
 }

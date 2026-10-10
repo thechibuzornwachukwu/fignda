@@ -3,6 +3,7 @@ import { Link, Navigate, useLocation } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Field } from '../components/Field';
 import { PageHeader } from '../components/PageHeader';
+import { PartnerNote } from '../components/PartnerNote';
 import { Segmented } from '../components/Segmented';
 import { SkeletonList } from '../components/Skeleton';
 import { follow, isFollowing, myCircles, newPlayers, searchPlayers, suggestedPlayers, topPlayers, unfollow, type PlayerRef, type Suggested } from '../lib/api';
@@ -55,8 +56,20 @@ const count = (n: unknown): number => (typeof n === 'number' && Number.isFinite(
 function List({ rows, empty, me, myHandle, check = false }: { rows: Rows; empty: ReactNode; me?: string; myHandle?: string; check?: boolean }) {
   if (rows == null) return <SkeletonList rows={5} avatar={40} sub />;
   // A list that failed says so. It never claims to be empty.
-  if (rows === 'failed') return <p className={styles.muted}>This list did not load. Try again in a moment.</p>;
-  if (rows.length === 0) return <p className={styles.muted}>{empty}</p>;
+  if (rows === 'failed') {
+    return (
+      <PartnerNote moment="error">
+        <p className={styles.muted}>This list did not load. Try again in a moment.</p>
+      </PartnerNote>
+    );
+  }
+  if (rows.length === 0) {
+    return (
+      <PartnerNote>
+        <p className={styles.muted}>{empty}</p>
+      </PartnerNote>
+    );
+  }
   return (
     <ul className={styles.list}>
       {rows.map((p) => (
@@ -161,9 +174,13 @@ function YourCircles({ quiet }: { quiet: boolean }) {
       {list == null ? (
         <SkeletonList rows={2} stat={false} />
       ) : list === 'failed' ? (
-        <p className={styles.muted}>This list did not load. Try again in a moment.</p>
+        <PartnerNote moment="error">
+          <p className={styles.muted}>This list did not load. Try again in a moment.</p>
+        </PartnerNote>
       ) : list.length === 0 ? (
-        <p className={styles.muted}>A circle is a private daily table for your family, class, church or office. Start one and send the link.</p>
+        <PartnerNote>
+          <p className={styles.muted}>A circle is a private daily table for your family, class, church or office. Start one and send the link.</p>
+        </PartnerNote>
       ) : (
         <ul className={circles.list}>
           {list.map((c) => (

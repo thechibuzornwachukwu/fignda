@@ -1,0 +1,46 @@
+/* The partner beside a line: empty states, loads that failed, a closed case (SPEC section 4, Partner moments). */
+.note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.partner {
+  flex: none;
+}
+.body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+.body > p {
+  margin: 0;
+}
+/* What the partner says: a speech bubble, its tail toward the partner. */
+.say {
+  position: relative;
+  align-self: flex-start;
+  padding: var(--space-1h) var(--space-3);
+  border: 1px solid var(--line-3);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--fg);
+  overflow-wrap: anywhere;
+}
+.say::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--space-1) * -1 - 1px);
+  top: 50%;
+  width: var(--space-2);
+  height: var(--space-2);
+  border-left: 1px solid var(--line-3);
+  border-bottom: 1px solid var(--line-3);
+  background: var(--surface);
+  transform: translateY(-50%) rotate(45deg);
+}

@@ -163,7 +163,8 @@ test.describe('desktop', () => {
     await expect(page.locator('[data-state="missed"]').first()).toBeVisible();
     await page.getByRole('button', { name: 'More' }).click();
     await expect(page.getByRole('button', { name: 'Play again' })).toBeVisible();
-    await expect(page.getByText('Playing as a guest.', { exact: false })).toBeVisible();
+    // A first result asks who the player is: the way to their detective and partner.
+    await expect(page.getByRole('link', { name: 'Choose your look' })).toHaveAttribute('href', '/welcome?from=%2Fplay%2Fbnote');
   });
 
   test('what you missed steps through each word where it hides', async ({ page }) => {

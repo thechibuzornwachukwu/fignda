@@ -27,6 +27,8 @@ type Props = {
   guest: boolean;
   /** For a guest, in place of the plain ask: their place today, or where their run lives. */
   guestLine?: string;
+  /** What the guest's link says, in place of "Keep this score": after a first result, the way to their detective and partner. */
+  guestAction?: string;
   /** Your run of dailies, said once after a daily. */
   streak?: string;
   /** "Only 8% found Habakkuk." */
@@ -54,7 +56,7 @@ type Props = {
 /** Lines worth a paragraph: no blanks, none twice. */
 const lines = (l?: readonly string[]) => [...new Set((l ?? []).filter((x) => typeof x === 'string' && x.trim() !== ''))];
 
-export function GameResults({ title, line, score, found, total, secs, canReplay, onReplay, onShare, onText, next, boardPath, guest, guestLine, streak, rare, stars, starsUp, skills, records, day, done, sponsor, caseFile, children }: Props) {
+export function GameResults({ title, line, score, found, total, secs, canReplay, onReplay, onShare, onText, next, boardPath, guest, guestLine, guestAction, streak, rare, stars, starsUp, skills, records, day, done, sponsor, caseFile, children }: Props) {
   const { pathname } = useLocation();
   const [note, setNote] = useState('');
   const [more, setMore] = useState(false);
@@ -176,7 +178,7 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
           </span>
           {/* The first time sign in is offered (SPEC section 6, The first minute). /welcome sends an existing player straight on. */}
           <Link className={styles.signin} to={`/welcome?from=${encodeURIComponent(pathname)}`}>
-            Keep this score
+            {guestAction || 'Keep this score'}
           </Link>
         </div>
       )}

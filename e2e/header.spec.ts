@@ -11,7 +11,7 @@ test.describe('header by context', () => {
     await page.locator('header').getByRole('link', { name: 'Play', exact: true }).click();
     await expect(page).toHaveURL(/\/play$/);
     const nav = page.getByRole('navigation', { name: 'Main' });
-    await expect(nav).toHaveText(/Cases\s*Ranks\s*Squad/);
+    await expect(nav).toHaveText(/Cases\s*Squad\s*Ranks/);
     await expect(page.getByRole('navigation', { name: 'On this page' })).toHaveCount(0);
   });
 });

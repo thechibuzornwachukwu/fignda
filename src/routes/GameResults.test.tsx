@@ -191,6 +191,16 @@ describe('GameResults for a guest', () => {
     expect(screen.getByRole('link', { name: 'Keep this score' })).toBeInTheDocument();
   });
 
+  it('after a first result the link is the way to their detective and partner', () => {
+    render(
+      <MemoryRouter initialEntries={['/play/bible/1']}>
+        <GameResults {...base} guest guestLine="That detective is yours." guestAction="Choose your look" />
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole('link', { name: 'Choose your look' })).toHaveAttribute('href', '/welcome?from=%2Fplay%2Fbible%2F1');
+    expect(screen.queryByRole('link', { name: 'Keep this score' })).toBeNull();
+  });
+
   it('a signed in player is never asked', () => {
     show({ guestLine: 'That score is place 14 of 60 today.' });
     expect(screen.queryByText(/place 14 of 60/)).toBeNull();

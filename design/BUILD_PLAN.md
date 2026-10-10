@@ -38,14 +38,10 @@ Navigation, on a phone: no bar across the top. Each screen is its title, one act
 | Squad `/players` | The people you play with | Follow, or invite | Built in order: friend streaks, circles, top players, suggestions, find |
 | Ranks `/leaderboard` | Where you stand today | None: it is read | Built: one board at a time, your own row pinned in view |
 | Settings | The account | Save | Built: account only. Reached from the gear on You |
-| First minute `/welcome` | Get a new player into a game | Keep this look | Built: character and partner on one screen. To do: start in a game, ask after the first result |
+| First minute `/welcome` | Make a new player someone | Keep this look | Built: a new player lands in a clue, and the character and partner are asked after the first result |
 | Guest wall | Turn a guest into a player | Sign in | Built: after 2 games |
 | Make `/make` | Write a puzzle | Publish | Built. To do: sets 6a to 6g. Reached from the foot of Cases, once unlocked |
 | Notifications | What happened while you were away | Open the thing | Built. Reached from the bell |
-
-To do next, in this order, each small:
-- [ ] **Set 9d. Play first.** A new player lands in a clue. The character and partner are asked after the first result, not before.
-- [ ] **Set 9e. Wide screens.** The same one-job rule for the desktop header: fewer links, the same Play.
 
 ## Revenue
 
@@ -93,7 +89,7 @@ Never for sale: hints, extra tries, time, or anything that touches a score; stre
 
 One set at a time. Each set is small, works on its own and leaves the live game whole. After each set: lint, typecheck, unit tests and the browser tests pass, the work stops, the owner tries it and pushes, and only then does the next set start. A set that turns out too big is split, not rushed.
 
-Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with unit tests, and the UI never re-implements matching. Every line comes from `src/copy` pools. Scores on existing boards do not change. Read `SECURITY.md` before data, auth or Worker work. Motion follows `SPEC.md` section 8 (from <https://github.com/emilkowalski/skills>). Anything that loads ships with its skeleton (`SPEC.md` section 4, Skeletons): a new screen, section or component gets a matching one in the same set, with a row in the table there, and a set that changes a layout changes its skeleton.
+Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with unit tests, and the UI never re-implements matching. Every line comes from `src/copy` pools. Scores on existing boards do not change. Read `SECURITY.md` before data, auth or Worker work. Motion follows `SPEC.md` section 8 (from <https://github.com/emilkowalski/skills>). A list, board or section that can be empty or fail to load says so beside the player's partner (`<PartnerNote>`, `SPEC.md` section 4). Anything that loads ships with its skeleton (`SPEC.md` section 4, Skeletons): a new screen, section or component gets a matching one in the same set, with a row in the table there, and a set that changes a layout changes its skeleton.
 
 ### 1. Sell now
 
@@ -104,13 +100,11 @@ Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with 
 A case is one puzzle: its passages are the clues and the whole puzzle is the last, the unmasking (SPEC section 6, Games). Each clue gives a piece of the case's secret, and the unmasking shows who hid it (SPEC section 9, The secret).
 
 - [ ] **Set 3l. More a partner does.** Still open from the partner idea: each partner giving its own kind of hint at the usual hint cost, and a mark on the unmasking for a squad whose partners differ. Rule to keep: nothing sold may change a score.
-- [ ] **Set 3i. Partner moments still to place:** the error state, a closed case, and what each partner says (bubbles are drawn in `design/brand/elements`).
 
 ### 4. More games
 
 Engine first (`expectedAnswers`, unit tests), then the `Board`, with no change to the shell. Number and shape games are made and checked by the engine, so they never run out. Designs are in `prototype/Gazecraft Future Games.dc.html`.
 
-- [ ] **Set 4a.** A `family` on each registry type (Verbal, Quantitative, Non-verbal). Nothing new on screen.
 - [ ] **Set 4b. Buried sums.** Runs of digits that add up to a target, same drag. In "All games" first.
 - [ ] **Set 4c. The rhythm.** Number clues join the path: word, word, number, word.
 - [ ] **Set 4d. Mirror.** Hidden words that read right to left. It reuses every paragraph.

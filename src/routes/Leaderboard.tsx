@@ -21,6 +21,7 @@ import {
 import { CROWDS, askedCrowd, defaultCrowd, type Crowd } from '../lib/crowd';
 import { sizeOf } from '../lib/unlocks';
 import { PageHeader } from '../components/PageHeader';
+import { PartnerNote } from '../components/PartnerNote';
 import { SkeletonList } from '../components/Skeleton';
 import { Segmented } from '../components/Segmented';
 import { useAuth } from '../lib/auth';
@@ -31,7 +32,13 @@ type Loaded = { rows: BoardRow[]; me: MyRank | null };
 type Load = { status: 'loading' } | { status: 'error' } | ({ status: 'ready' } & Loaded);
 
 function Board({ rows, me, myHandle, empty }: { rows: BoardRow[]; me: MyRank | null; myHandle?: string; empty: ReactNode }) {
-  if (rows.length === 0) return <p className={styles.empty}>{empty}</p>;
+  if (rows.length === 0) {
+    return (
+      <PartnerNote className={styles.empty}>
+        <p>{empty}</p>
+      </PartnerNote>
+    );
+  }
   const meInTop = !!myHandle && rows.some((r) => r.handle === myHandle);
   const row = (r: BoardRow, mine: boolean, apart = false) => (
     <li key={`${r.rank}-${r.handle}`} className={styles.row} data-mine={mine || undefined} data-apart={apart || undefined}>
@@ -183,7 +190,11 @@ export function Leaderboard() {
           </div>
         )}
         {state.status === 'loading' && <SkeletonList rows={8} avatar={28} />}
-        {state.status === 'error' && <p className={styles.empty}>The board did not load. Try again in a moment.</p>}
+        {state.status === 'error' && (
+          <PartnerNote moment="error" className={styles.empty}>
+            <p>The board did not load. Try again in a moment.</p>
+          </PartnerNote>
+        )}
         {state.status === 'ready' && (
           <Board
             rows={state.rows}
@@ -229,7 +240,11 @@ export function Leaderboard() {
 
 function TeamBoard({ rows, myHandle }: { rows: TeamRow[]; myHandle?: string }) {
   if (rows.length === 0) {
-    return <p className={styles.empty}>No teams on this puzzle yet. Open it, choose Play together and send the invite.</p>;
+    return (
+      <PartnerNote className={styles.empty}>
+        <p>No teams on this puzzle yet. Open it, choose Play together and send the invite.</p>
+      </PartnerNote>
+    );
   }
   return (
     <ol className={styles.board} aria-label="Top teams">
@@ -307,7 +322,11 @@ export function GameLeaderboard() {
           />
         </div>
         {state.status === 'loading' && <SkeletonList rows={8} avatar={28} />}
-        {state.status === 'error' && <p className={styles.empty}>The board did not load. Try again in a moment.</p>}
+        {state.status === 'error' && (
+          <PartnerNote moment="error" className={styles.empty}>
+            <p>The board did not load. Try again in a moment.</p>
+          </PartnerNote>
+        )}
         {state.status === 'solo' && (
           <Board rows={state.rows} me={null} myHandle={auth.profile?.handle} empty={<>No verified scores on this puzzle yet.</>} />
         )}

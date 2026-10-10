@@ -4,6 +4,7 @@ import { Check, X } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Field } from '../components/Field';
 import { Icon } from '../components/Icon';
+import { PartnerNote } from '../components/PartnerNote';
 import { SkeletonList } from '../components/Skeleton';
 import { useDelayedWaiting } from '../components/useDelayedWaiting';
 import { Waiting } from '../components/Waiting';
@@ -154,7 +155,9 @@ export function Make() {
         {mine == null ? (
           <SkeletonList rows={3} />
         ) : mine.length === 0 ? (
-          <p className={styles.muted}>Nothing yet. Publish one and send the link to a friend.</p>
+          <PartnerNote>
+            <p className={styles.muted}>Nothing yet. Publish one and send the link to a friend.</p>
+          </PartnerNote>
         ) : (
           <ul className={styles.list}>
             {mine.map((p) => (

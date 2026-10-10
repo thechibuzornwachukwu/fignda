@@ -170,7 +170,10 @@ describe('CasePiece and CaseClosed', () => {
     expect(container.querySelector('[data-culprit="unmasking"]')).not.toBeNull();
     expect(screen.getByRole('heading', { level: 3, name: 'Case closed' })).toBeInTheDocument();
     expect(screen.getByRole('img', { name: `The secret: ${word}.` })).toBeInTheDocument();
-    const [confession, card] = [...container.querySelectorAll('p')].map((p) => p.textContent!);
+    const [confession, said, card] = [...container.querySelectorAll('p')].map((p) => p.textContent!);
+    // The partner who worked the case says one thing of its own, in its own voice. A new browser holds Detective X.
+    expect(POOLS.sayClosedCat).toContain(said);
+    expect(container.querySelector('[data-partner-note="closed"] [data-moment="found"]')).not.toBeNull();
     expect(fills(POOLS.confession, confession!)).toBe(true);
     expect(confession).toContain(culpritFor(id).name);
     expect(confession!.toLowerCase()).toContain(`the ${word.toLowerCase()}`);

@@ -4,6 +4,7 @@ import { Award } from 'lucide-react';
 import { Avatar } from '../components/Avatar';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
+import { PartnerNote } from '../components/PartnerNote';
 import { SkeletonList } from '../components/Skeleton';
 import { fetchNotifications, markNotificationsRead } from '../lib/api';
 import { useAuth } from '../lib/auth';
@@ -48,7 +49,9 @@ export function Notifications() {
         <SkeletonList rows={5} avatar={40} stat={false} />
       ) : rows.length === 0 ? (
         <div className={styles.empty}>
-          <p className={styles.muted}>Nothing yet. Follows, streak asks, room invites and badges will show up here.</p>
+          <PartnerNote>
+            <p className={styles.muted}>Nothing yet. Follows, streak asks, room invites and badges will show up here.</p>
+          </PartnerNote>
           <div>
             <Button to="/players">Find players</Button>
           </div>

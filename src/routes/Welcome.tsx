@@ -10,6 +10,7 @@ import { Partner } from '../components/Partner';
 import { Ring } from '../components/Ring';
 import { TextLink } from '../components/TextLink';
 import { PARTNERS } from '../engine/partners';
+import { nextClueTo } from '../games/caseFile';
 import { today } from '../games/daily';
 import { saveProfile } from '../lib/api';
 import { useAuth } from '../lib/auth';
@@ -33,8 +34,8 @@ export function Welcome() {
   /** The page that sent the player here (the result they want to keep). An existing account goes back to it. */
   const from = safeNext(params.get('from'), '');
   const asked = params.get('next');
-  /** Where a new player ends: the page they asked for, else today's daily. Never a menu. */
-  const end = endOf(asked, `/d/${today().n}`);
+  /** Where a new player ends: the page they asked for, else the result they came from, else the next clue. Never a menu. */
+  const [end] = useState(() => endOf(asked, from || nextClueTo() || `/d/${today().n}`));
 
   const [flow, setFlow] = useState<Flow>(loadFlow);
   const [left, setLeft] = useState<string | null>(null);

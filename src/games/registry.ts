@@ -19,7 +19,14 @@ export type AnswerInfo = { key: string; label: string; length: number };
 
 export type RevealItem = { key: string; label: string; span: Span; parts: RevealPart[] };
 
+/** What a game asks of the player. Words today; numbers and shapes join as their games are built (BUILD_PLAN section 4). */
+export const FAMILIES = ['verbal', 'quantitative', 'nonverbal'] as const;
+export type Family = (typeof FAMILIES)[number];
+export const FAMILY_LABEL: Record<Family, string> = { verbal: 'Verbal', quantitative: 'Quantitative', nonverbal: 'Non-verbal' };
+
 export type GameModule<P> = {
+  /** The family this type belongs to. Nothing on screen reads it yet. */
+  family: Family;
   build(def: GameDef): P;
   /** Letter count and chars for the board. */
   boardProps(p: P): Pick<PuzzleProps, 'chars' | 'letters'>;
@@ -38,6 +45,7 @@ export type GameModule<P> = {
 };
 
 const hiddenWords: GameModule<HiddenWordsPuzzle<GameDef>> = {
+  family: 'verbal',
   build: (def) => buildHiddenWords(def),
   boardProps: (p) => ({ chars: p.chars, letters: p.S.length }),
   answers: (p) => p.answers.map((a) => ({ key: a.key, label: a.label, length: a.key.length })),
@@ -72,3 +80,6 @@ const hiddenWords: GameModule<HiddenWordsPuzzle<GameDef>> = {
 export const registry: Record<GameType, GameModule<HiddenWordsPuzzle<GameDef>>> = {
   'hidden-words': hiddenWords,
 };
+
+/** The family of a game type. */
+export const familyOf = (type: GameType): Family => registry[type].family;
