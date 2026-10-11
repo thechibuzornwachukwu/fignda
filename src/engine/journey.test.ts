@@ -1,6 +1,6 @@
 import gamesFile from '../../data/games.json';
 import { buildHiddenWords } from './hiddenWords';
-import { buildPath, clueId, clueStates, hardness, type CatalogueItem, type Path } from './journey';
+import { buildPath, caseOrder, clueId, clueStates, hardness, type CatalogueItem, type Path } from './journey';
 import { passages } from './passages';
 
 const games = (gamesFile as unknown as { games: CatalogueItem[] }).games;
@@ -14,16 +14,16 @@ describe('buildPath', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('a case is the passages of its puzzle in order, then the whole puzzle', () => {
+  it('a case is the passages of its puzzle in order with a sums clue after every second of 3, then the whole puzzle', () => {
     for (const c of path.cases) {
       const cut = passages(built(c.id)).length;
-      expect(c.clues.map((s) => s.n)).toEqual([...Array.from({ length: cut }, (_, i) => i + 1), 0]);
+      expect(c.clues.map((s) => s.n)).toEqual(caseOrder(cut));
       expect(c.clues.every((s) => s.puzzle === c.id)).toBe(true);
       expect(c.clues[c.clues.length - 1]!.id).toBe(c.id);
       expect(c.clues[0]!.id).toBe(`${c.id}~1`);
     }
-    // 25 puzzles cut into 83 passages: 108 clues.
-    expect(ids).toHaveLength(games.reduce((n, g) => n + passages(buildHiddenWords(g)).length + 1, 0));
+    // No list to read backwards by, so no Mirror clue here.
+    expect(ids).toHaveLength(games.reduce((n, g) => n + caseOrder(passages(buildHiddenWords(g)).length).length, 0));
   });
 
   it('clue ids: a passage under the puzzle and its number, the unmasking under the puzzle alone', () => {
@@ -97,9 +97,9 @@ describe('clueStates', () => {
   });
 
   it('a clue finished out of order shows done and does not move the next', () => {
-    const s = states([ids[3]!]);
+    const s = states([ids[2]!]);
     expect(s.next).toBe(ids[0]);
-    expect(s.clues[3]!.state).toBe('done');
+    expect(s.clues[2]!.state).toBe('done');
   });
 
   it('a puzzle removed from the catalogue takes its case with it and blocks nothing', () => {

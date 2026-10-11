@@ -8,7 +8,7 @@ describe('a passage as a game of its own', () => {
     const cut = passages(getPuzzle(id)!);
     for (let n = 1; n <= cut.length; n++) {
       const p = getPassage(id, n)!;
-      expect(p.part).toEqual({ n, count: cut.length });
+      expect(p.part).toMatchObject({ n, count: cut.length });
       expect(p.def).toMatchObject({ id, title: getGameDef(id)!.title, noun: getGameDef(id)!.noun, category: getGameDef(id)!.category, text: cut[n - 1]!.text });
       expect(buildHiddenWords(p.def).answers.map((a) => a.key).sort()).toEqual([...cut[n - 1]!.answers].sort());
     }

@@ -71,10 +71,10 @@ export function CasePiece({ slots, fresh, piece, say }: { slots: readonly string
 }
 
 /** The unmasking: the mask lifts off, the stamp lands, the secret reads whole, the culprit owns up and the card is found. */
-export function CaseClosed({ id, secret }: { id: string; secret: string }) {
+export function CaseClosed({ id, secret, mixed = 0 }: { id: string; secret: string; /** A squad whose pets all differ: how many (`mixedSquad`). */ mixed?: number }) {
   const lines = useMemo(
-    () => ({ confession: pick('confession', { who: culpritFor(id).name, secret: secret.toLowerCase() }), card: pick('callingCard') }),
-    [id, secret],
+    () => ({ confession: pick('confession', { who: culpritFor(id).name, secret: secret.toLowerCase() }), card: pick('callingCard'), mixed: mixed ? pick('squadMixed', { n: mixed }) : '' }),
+    [id, secret, mixed],
   );
   return (
     <div className={styles.closed} data-case-closed>
@@ -86,6 +86,11 @@ export function CaseClosed({ id, secret }: { id: string; secret: string }) {
       <p className={styles.confession}>{lines.confession}</p>
       {/* The partner who worked the case, with a word of its own. */}
       <PartnerNote moment="closed" size={40} />
+      {lines.mixed && (
+        <p className={styles.line} data-mixed-squad>
+          {lines.mixed}
+        </p>
+      )}
       <p className={styles.card}>
         <span className={styles.cardMark}>
           <Icon icon={Eye} size={16} />

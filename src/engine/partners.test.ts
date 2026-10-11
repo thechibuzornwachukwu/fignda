@@ -17,7 +17,7 @@ describe('the partners', () => {
     for (const p of PARTNERS) {
       for (const moment of Object.keys(MOOD) as Moment[]) {
         const src = partnerSrc(p.id, moment);
-        expect(src).toBe(`/partners/${p.id}-${MOOD[moment]}.svg`);
+        expect(src).toBe(`/pets/${p.id}-${MOOD[moment]}.svg`);
         const file = join(root, 'public', src);
         expect(existsSync(file), src).toBe(true);
         // And one for each bond tier.
@@ -28,7 +28,7 @@ describe('the partners', () => {
       }
     }
     // Agent 404 shows 404 when stumped.
-    expect(readFileSync(join(root, 'public', 'partners', 'robot-stumped.svg'), 'utf8')).toContain('Agent 404');
+    expect(readFileSync(join(root, 'public', 'pets', 'robot-stumped.svg'), 'utf8')).toContain('Agent 404');
   });
 });
 
@@ -90,10 +90,10 @@ describe('the bond', () => {
   });
 
   it('a tier picks its own picture, and never one that does not exist', () => {
-    expect(partnerSrc('cat', 'done', 0)).toBe('/partners/cat-happy.svg');
-    expect(partnerSrc('cat', 'done', 1)).toBe('/partners/cat-happy-1.svg');
-    expect(partnerSrc('dog', 'found', 2)).toBe('/partners/dog-found-2.svg');
-    expect(partnerSrc('dog', 'found', 9)).toBe('/partners/dog-found-2.svg');
+    expect(partnerSrc('cat', 'done', 0)).toBe('/pets/cat-happy.svg');
+    expect(partnerSrc('cat', 'done', 1)).toBe('/pets/cat-happy-1.svg');
+    expect(partnerSrc('dog', 'found', 2)).toBe('/pets/dog-found-2.svg');
+    expect(partnerSrc('dog', 'found', 9)).toBe('/pets/dog-found-2.svg');
   });
 
   it('bonds from the account are made safe', () => {

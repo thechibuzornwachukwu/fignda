@@ -9,9 +9,12 @@ import { buildPath, clueId, clueStates, type Path } from '../engine/journey';
 import { caseSecrets, culpritOf, pieceSlots, revealSecret, squadPieces, type Culprit, type Secret } from '../engine/secret';
 import { loadFinished } from '../lib/shelves';
 import { loadStars } from '../lib/starStore';
-import { games, getPassage } from './catalog';
+import { games, getPassage, MIRROR_WORDS } from './catalog';
 
-/** How many clues a catalogue puzzle's case has: its passages, then the whole puzzle. */
+/**
+ * How many clues of a catalogue puzzle's case give a piece of the secret: its passages, then the whole puzzle.
+ * A sums clue and the Mirror clue give none, so a case's word and pieces are what they were before those joined.
+ */
 export const clueCount = (id: string): number => (getPassage(id, 1)?.part.count ?? 0) + 1;
 
 /** The culprit of a case, and who they turn out to be: a line from the `culpritWho` pool, the same on every device. */
@@ -53,7 +56,7 @@ let path: Path | null = null;
 
 /** Where the next clue on the path is played, for this browser. Null when every case is closed. */
 export function nextClueTo(): string | null {
-  path ??= buildPath(games);
+  path ??= buildPath(games, MIRROR_WORDS);
   const standing = clueStates(path, doneClues());
   const next = standing.clues.find((c) => c.state === 'next');
   return next ? (next.n ? `/play/${next.puzzle}/${next.n}` : `/play/${next.puzzle}`) : null;

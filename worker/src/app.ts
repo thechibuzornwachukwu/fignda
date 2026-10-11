@@ -3,11 +3,16 @@
 import type { SupabaseClient, User } from '@supabase/supabase-js';
 import { z } from 'zod';
 import { dayNo } from '../../src/engine/daily';
+import { EVALUATE } from '../../src/engine/evaluate';
 import { buildHiddenWords } from '../../src/engine/hiddenWords';
+import { caseOrder, clueKind, SUMS_FROM } from '../../src/engine/journey';
 import { checkDraft, crossesWords, MAKE, WORD_RE } from '../../src/engine/make';
+import { buildMirror, mirrorClue } from '../../src/engine/mirror';
 import { passages } from '../../src/engine/passages';
 import { starsFor } from '../../src/engine/stars';
+import { buildSums, sumsClue } from '../../src/engine/sums';
 import pools from '../../data/copy.json';
+import mirrorFile from '../../data/mirrorWords.json';
 import type { AiGenerate } from './ai';
 import { GUEST_KEY_RE, JOB, JOB_COLS, isDead, jobOut, ownerKey, refunds, withHeartbeat, type JobRow, type JobTiming } from './jobs';
 import { PUSH_ENDPOINT, type PushSend } from './push';
@@ -544,6 +549,9 @@ export const PlayBody = z
   })
   .strict();
 
+/** The everyday words Mirror reads by: the same file the client reads. */
+const MIRROR_WORDS: ReadonlySet<string> = new Set(mirrorFile.words.split(' '));
+
 async function plays(req: Request, deps: Deps) {
   const user = await currentUser(deps.db, req);
   if (!user) throw new HttpError(401, 'sign_in_required');
@@ -578,13 +586,20 @@ async function plays(req: Request, deps: Deps) {
   if (expected && puzzle.answers.map((x) => x.key).join() !== expected.join()) throw new HttpError(500, 'daily_mismatch');
 
   if (game.type === 'game' && game.clue != null) {
-    // A clue of a case: one passage, cut by the same engine the client cuts with, replayed as a game of its
-    // own. Alone only, catalogue only. It is kept apart from `plays`, so no board changes.
+    // A clue of a case, made by the same engine the client makes it with and replayed as a game of its own:
+    // a passage, a row of sums or the Mirror clue, by its number. Alone only, catalogue only. It is kept apart
+    // from `plays`, so no board changes.
     if (room) throw new HttpError(400, 'bad_request');
     const cut = g.data.kind === 'curated' ? passages(puzzle) : [];
-    const part = cut.length < 2 ? undefined : cut[game.clue - 1];
-    if (!part) throw new HttpError(404, 'unknown_clue');
-    const c = replay(buildHiddenWords({ text: part.text, dict: g.data.dict as string[] }), log, false);
+    const mirror = cut.length < 2 ? null : mirrorClue(puzzle, MIRROR_WORDS);
+    if (!caseOrder(cut.length, !!mirror).includes(game.clue) || game.clue === 0) throw new HttpError(404, 'unknown_clue');
+    const kind = clueKind(game.clue);
+    const c =
+      kind === 'sums'
+        ? replay(buildSums(sumsClue(`${gameId}~${game.clue}`, game.clue - SUMS_FROM)), log, false, EVALUATE['buried-sums'])
+        : kind === 'mirror'
+          ? replay(buildMirror(mirror!), log, false, EVALUATE.mirror)
+          : replay(buildHiddenWords({ text: cut[game.clue - 1]!.text, dict: g.data.dict as string[] }), log, false);
     if (!c.ok) throw new HttpError(422, c.reason);
     const stars = starsFor({ finished: true, found: c.found, total: c.total, hints: c.hints, wrongs: c.wrongs });
     const kept = await deps.db.rpc('record_clue', { p_user: user.id, p_game: gameId, p_clue: game.clue, p_stars: stars, p_score: c.score });

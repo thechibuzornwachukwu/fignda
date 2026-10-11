@@ -2,12 +2,13 @@ import gamesFile from '../../data/games.json';
 import secretsFile from '../../data/secrets.json';
 import { buildHiddenWords } from './hiddenWords';
 import type { CatalogueItem } from './journey';
-import { buildPath } from './journey';
+import { buildPath, clueKind } from './journey';
 import { caseSecrets, culpritOf, cutSecret, FALLBACK_SECRET, hashOf, PIECE_MAX, pieceSlots, revealSecret, SECRET_MIN, squadPieces, usableWords } from './secret';
 
 const games = (gamesFile as unknown as { games: CatalogueItem[] }).games;
 const things = (secretsFile as { things: string[] }).things;
-const cases = buildPath(games).cases.map((c) => ({ id: c.id, clues: c.clues.length }));
+// A piece per passage and one for the unmasking: a sums clue gives none.
+const cases = buildPath(games).cases.map((c) => ({ id: c.id, clues: c.clues.filter((s) => clueKind(s.n) !== 'sums').length }));
 const secrets = caseSecrets(cases, things);
 const whole = (pieces: ReadonlyArray<{ at: number; text: string }>) =>
   [...pieces].sort((a, b) => a.at - b.at).map((p) => p.text).join('');
@@ -55,7 +56,7 @@ describe('caseSecrets, against the catalogue', () => {
 
   it('a puzzle whose text changes keeps its secret: only the id and the count of clues are read', () => {
     const edited = games.map((g, i) => (i === 0 ? { ...g, text: g.text.replace(/\.$/, '') + '. One more sentence, hiding nothing.' } : g));
-    const again = buildPath(edited).cases.map((c) => ({ id: c.id, clues: c.clues.length }));
+    const again = buildPath(edited).cases.map((c) => ({ id: c.id, clues: c.clues.filter((s) => clueKind(s.n) !== 'sums').length }));
     expect(again.find((c) => c.id === games[0]!.id)!.clues).toBe(cases.find((c) => c.id === games[0]!.id)!.clues);
     expect(caseSecrets(again, things)).toEqual(secrets);
     // And the hidden words play no part at all.

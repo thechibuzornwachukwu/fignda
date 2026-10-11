@@ -16,6 +16,7 @@ import { isCleanRead, scoreOf, secondsOf, useGameSession, type Session } from '.
 import { CaseClosed, CasePiece, SecretSlots } from '../components/CaseFile';
 import { GuestWall } from '../components/GuestWall';
 import { clueId } from '../engine/journey';
+import { HINT_OF, mixedSquad } from '../engine/partners';
 import { caseFile, doneClues } from '../games/caseFile';
 import { guestBlocked, markGuestPlayed, playKey } from '../lib/guestLimit';
 import { loadPartner } from '../lib/partner';
@@ -145,6 +146,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
     // nothing and your finds stay yours; its clock is the team's and runs on.
     resumeId: dailyN != null ? undefined : inRoom ? `room-${roomCode}-${def.id}` : gameKey,
     sharedClock: inRoom,
+    hintKind: () => HINT_OF[loadPartner().current],
     beforeHit: (k) => listRef.current?.capture(k),
     onHit: (a, b) => roomRef.current?.sendFind(a, b),
     onStart: () => countEvent(def.id, 'start'),
@@ -378,7 +380,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
   const squadLine = useMemo(() => (inRoom ? copy.pick('squadSecret') : ''), [inRoom]);
   const caseNode = useMemo(() => {
     if (finished && squadFile) {
-      if (squadFile.closed) return <CaseClosed id={def.id} secret={squadFile.word} />;
+      if (squadFile.closed) return <CaseClosed id={def.id} secret={squadFile.word} mixed={mixedSquad([loadPartner().current, ...peers.filter((p) => p.id !== roomId).map((p) => p.partner)])} />;
       const read = squadFile.slots.filter(Boolean).length;
       return <CasePiece slots={squadFile.slots} fresh={[]} piece="" say={copy.pick('squadShort', { n: read, t: squadFile.slots.length })} />;
     }
@@ -388,7 +390,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
     if (!part) return <CaseClosed id={def.id} secret={file.word} />;
     const piece = file.piece(part.n);
     return <CasePiece slots={file.slots} fresh={piece.slots} piece={piece.text} />;
-  }, [finished, starred, def.id, gameKey, part, squadFile]);
+  }, [finished, starred, def.id, gameKey, part, squadFile, peers, roomId]);
   // Variable days. Before today's daily: what it holds, never how much. After it: today against a usual day.
   const holdsLine = useMemo(
     () => (isToday && !finished ? todayHoldsLine(dayProfile(puzzle), copy.pick) : ''),
@@ -480,7 +482,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
           <span className={styles.metaEnd}>
             <span className={styles.level}>
               {holiday ? `${holiday} · ` : ''}
-              {def.category} · {part ? `Clue ${part.n} of ${part.count + 1}` : puzzle.difficulty}
+              {def.category} · {part ? `Clue ${part.at} of ${part.of}` : puzzle.difficulty}
             </span>
             {auth.enabled && !daily && !part && !inRoom && !finished && (
               <button type="button" className={styles.together} onClick={() => navigate(`?room=${newRoomCode()}`)}>
@@ -537,7 +539,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
           onReplay={g.replay}
           onShare={() => setSharing(true)}
           onText={sendText}
-          next={part && (part.n < part.count ? { to: `/play/${def.id}/${part.n + 1}`, label: 'Next clue' } : { to: `/play/${def.id}`, label: 'The unmasking' })}
+          next={part && (part.next ? { to: `/play/${def.id}/${part.next}`, label: 'Next clue' } : { to: `/play/${def.id}`, label: 'The unmasking' })}
           boardPath={part || !auth.enabled ? undefined : daily ? `/leaderboard?day=${dailyN}` : inRoom && getGameDef(def.id) ? `/leaderboard/${def.id}?board=together` : undefined}
           guest={!signedIn}
           guestLine={guestLine}
@@ -562,9 +564,17 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
       <div className={styles.columns}>
         <div className={styles.main}>
           <p id={instructionId} className={styles.instruction}>
-            {coarse
-              ? 'Swipe across the letters. Or tap the first letter of a word, then the last.'
-              : 'Drag across the letters. Answers can run across spaces and punctuation.'}
+            {def.type === 'buried-sums'
+              ? coarse
+                ? 'Swipe across digits in a row. Or tap the first digit of a run, then the last.'
+                : 'Drag across digits in a row. A run is 2 or more digits that add up to the target.'
+              : def.type === 'mirror'
+                ? coarse
+                  ? 'These words read right to left. Swipe across one, or tap one end, then the other.'
+                  : 'These words read right to left. Drag across one from either end.'
+                : coarse
+                  ? 'Swipe across the letters. Or tap the first letter of a word, then the last.'
+                  : 'Drag across the letters. Answers can run across spaces and punctuation.'}
           </p>
           <Board
             {...mod.boardProps(puzzle)}
@@ -625,7 +635,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
           progress={hideProgress ? null : progress}
           left={leftLine}
           time={<Elapsed startAt={s.startAt} endAt={s.endAt} />}
-          message={s.msg || (coarse ? 'Swipe across letters, or tap first then last' : 'Drag across the letters')}
+          message={s.msg || (def.type === 'buried-sums' ? (coarse ? 'Swipe across digits, or tap first then last' : 'Drag across the digits') : coarse ? 'Swipe across letters, or tap first then last' : 'Drag across the letters')}
           onHint={g.hint}
           onDone={g.finish}
         />

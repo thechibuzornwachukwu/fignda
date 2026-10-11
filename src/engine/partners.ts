@@ -2,6 +2,8 @@
 // The first partner is free. Each further one opens at a threshold of lifetime points, which are never spent:
 // rank never drops for having a second partner.
 
+import type { HintKind } from './hint';
+
 /** The partners in the game, in the order they are offered. Ids are stored: never rename or reorder. */
 export const PARTNERS = [
   { id: 'cat', name: 'Detective X' },
@@ -96,4 +98,16 @@ export function parseBonds(raw: unknown): Partial<Record<PartnerId, number>> {
 }
 
 /** The picture of a partner in a moment, at a bond tier. */
-export const partnerSrc = (id: PartnerId, moment: Moment, tier = 0): string => `/partners/${id}-${MOOD[moment]}${tier > 0 ? `-${Math.min(BOND_AT.length, Math.floor(tier))}` : ''}.svg`;
+/** How each pet chooses the answer its hint marks (`hintAnswer`). Same cost, same mark: one first letter. */
+export const HINT_OF: Record<PartnerId, HintKind> = { cat: 'first', dino: 'longest', dog: 'near', robot: 'shortest' };
+
+/**
+ * A mixed squad: 2 or more players on a case, each with a different pet. The count of pets when it is one,
+ * else 0. A player whose pet is not known breaks it, since nobody can say theirs differs.
+ */
+export function mixedSquad(pets: ReadonlyArray<string | undefined>): number {
+  const known = pets.filter((p): p is PartnerId => PARTNERS.some((x) => x.id === p));
+  return pets.length >= 2 && known.length === pets.length && new Set(known).size === pets.length ? pets.length : 0;
+}
+
+export const partnerSrc = (id: PartnerId, moment: Moment, tier = 0): string => `/pets/${id}-${MOOD[moment]}${tier > 0 ? `-${Math.min(BOND_AT.length, Math.floor(tier))}` : ''}.svg`;

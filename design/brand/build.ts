@@ -23,7 +23,7 @@ const keep = (name: string, svg: string): string => {
 // ------------------------------------------------------------------ What the guide says
 
 /**
- * Who each partner is. Working names, not yet checked for trademarks. Every story follows the tone rule:
+ * Who each pet is. Working names, not yet checked for trademarks. Every story follows the tone rule:
  * mischief, pride or a surprise, never harm, and no promise of a result.
  */
 type Bio = { name: string; meaning: string; role: string; nature: string; story: string; wants: string; quirk: string; weak: string; line: string; never: string; use: string };
@@ -39,7 +39,7 @@ const VOICE: Record<Who, Bio> = {
     weak: 'Hates to be wrong, so when it is not sure it says nothing at all.',
     line: 'It was there the whole time.',
     never: 'I told you so. The eyelid says it.',
-    use: 'The default partner. The icon, emails, anything that speaks for Gazecraft.',
+    use: 'The default pet. The icon, emails, anything that speaks for Gazecraft.',
   },
   dino: {
     name: 'Detective Tobs',
@@ -223,7 +223,7 @@ const html = `<!doctype html>
 <p class="num">Gazecraft brand guide</p>
 ${wordmark('currentColor', 44)}
 <h1>Look closer.</h1>
-<p class="sub">A few minutes of real detective work, in place of scrolling. The brand is a cat that has already worked it out, the partners a player can choose, and the player. Everything here is built from the same parts as the game.</p>
+<p class="sub">A few minutes of real detective work, in place of scrolling. The brand is a cat that has already worked it out, the pets a player can choose, and the player. Everything here is built from the same parts as the game.</p>
 
 <section>
   <p class="num">1</p>
@@ -261,7 +261,7 @@ ${wordmark('currentColor', 44)}
 <section>
   <p class="num">4</p>
   <h2>The cast</h2>
-  <p class="sub">Four partners and the player. The four work a case beside you: a new player picks 1, free, and can switch to another once it is unlocked with points. Detective X leads, and is the logo. Each has tools of its own: the animals hold a magnifying glass and wear a monocle, and Agent 404 scans and zooms.</p>
+  <p class="sub">Four pets and the player. A pet is the player's own and comes along on every case: a new player picks 1, free, and can switch to another once it is unlocked with points. Detective X leads, and is the logo. Each has tools of its own: the animals hold a magnifying glass and wear a monocle, and Agent 404 scans and zooms.</p>
   ${WHO.map(castCard).join('\n')}
   <div class="cast">
     <div class="on cream">${row([you({ back: 3, skin: 4, hair: 33, eyes: 1 }), you({ back: 2, skin: 5, hair: 26, face: 1 }), you({ back: 5, skin: 1, hair: 8, eyes: 1 })].map((s) => fig(s)), 'tight')}</div>
@@ -271,7 +271,7 @@ ${wordmark('currentColor', 44)}
       <p>The player's own avatar, built from parts. It is their face, so the case is theirs.</p>
       <p>The only one with no story written for them. Theirs is the run of cases they close.</p>
       <dl>
-        <dt>Rule</dt><dd class="say">The partner stands beside the player. It never replaces them.</dd>
+        <dt>Rule</dt><dd class="say">The pet stands beside the player. It never replaces them.</dd>
         <dt>Use for</dt><dd>Boards, rooms, profiles. Detective pieces (badge, hat, coat, glass) are earned by rank.</dd>
       </dl>
     </div>
@@ -293,7 +293,7 @@ ${wordmark('currentColor', 44)}
     fig(character({ who: 'cat', hat: true, coat: true, monocle: true, size: 120, back: CREAM }), 'monocle'),
     fig(character({ who: 'cat', hat: true, coat: true, wave: true, size: 120, back: CREAM }), 'hello'),
   ])}
-  <h4>Every partner says hello</h4>
+  <h4>Every pet says hello</h4>
   ${row(WHO.map((who) => fig(character({ who, hat: true, coat: true, wave: true, size: 120, back: CREAM }), VOICE[who].name)))}
   <h4>Each with its own tools</h4>
   ${row(WHO.flatMap((who) => [fig(character({ who, hat: true, coat: true, glass: true, size: 120, back: CREAM }), `${VOICE[who].name}: ${CAST[who].tools.glass}`), fig(character({ who, hat: true, coat: true, monocle: true, size: 120, back: CREAM }), CAST[who].tools.monocle)]))}
@@ -308,7 +308,7 @@ ${wordmark('currentColor', 44)}
     ${WHO.map((who, i) => `<div class="on ${i % 2 ? 'dark' : 'light'}">${keep(`bubble-${who}`, bubble(who, who === 'dog' ? 'happy' : who === 'dino' ? 'stumped' : 'calm', VOICE[who].line, i % 2 === 1))}</div>`).join('')}
   </div>
   <h4>Screen states</h4>
-  <p class="sub">Each state in each character. The screen shows the player's own partner.</p>
+  <p class="sub">Each state in each character. The screen shows the player's own pet.</p>
   ${WHO.map((who) => row(STATES.map(([name, mood, title, line]) => fig(keep(`state-${name}-${who}`, stateCard(who, mood, title, line)), `${name}, ${VOICE[who].name}`)), 'four')).join('')}
   <h4>Case files</h4>
   ${row([

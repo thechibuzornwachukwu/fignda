@@ -3,6 +3,7 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import * as copyDefault from '../copy';
+import type { HintKind } from '../engine/hint';
 import { score } from '../engine/score';
 import { cleanReadOf } from '../engine/skill';
 import { durationMs, scrollToTop } from '../lib/media';
@@ -62,9 +63,9 @@ export const newSession = (now: number): Session => ({
 
 export const isFinished = (s: SavedSession) => s.endAt != null;
 
-type Ctx = { now: number; total: number; daily: boolean; copy: Copy };
+type Ctx = { now: number; total: number; daily: boolean; copy: Copy; /** A number game: a wrong run is told in its own words. */ sums?: boolean };
 
-export function applyPick(s: Session, ev: Evaluation, { now, total, daily, copy }: Ctx): Session {
+export function applyPick(s: Session, ev: Evaluation, { now, total, daily, copy, sums = false }: Ctx): Session {
   if (isFinished(s)) return s;
   switch (ev.kind) {
     case 'hit': {
@@ -95,11 +96,11 @@ export function applyPick(s: Session, ev: Evaluation, { now, total, daily, copy 
       return { ...s, msg: copy.pick('already') };
     case 'close':
       // Near miss: no penalty, streak kept.
-      return { ...s, msg: copy.pick('close') };
+      return { ...s, msg: copy.pick(sums ? 'closeSums' : 'close') };
     case 'wrong':
       return daily
         ? { ...s, streak: 0, misses: s.misses + 1, wrongs: s.wrongs + 1, msg: copy.pick('wrongDaily') }
-        : { ...s, streak: 0, wrongs: s.wrongs + 1, msg: copy.pick('wrong') };
+        : { ...s, streak: 0, wrongs: s.wrongs + 1, msg: copy.pick(sums ? 'wrongSums' : 'wrong') };
     case 'ignore':
       return { ...s, msg: '' };
   }
@@ -121,7 +122,10 @@ export function applyTeamFind(s: Session, ev: Evaluation, o: { now: number; tota
   };
 }
 
-export function applyHint(s: Session, target: { key: string; at: number } | null, copy: Copy): Session {
+/** The line a hint of each kind says. They cost the same and mark the same thing: one first letter. */
+export const HINT_POOL = { first: 'hint', longest: 'hintLongest', shortest: 'hintShortest', near: 'hintNear' } as const;
+
+export function applyHint(s: Session, target: { key: string; at: number } | null, copy: Copy, kind: HintKind = 'first'): Session {
   if (isFinished(s) || !target) return s;
   // The hand is already on this letter. Asking again says so and costs nothing.
   if (s.hintLi === target.at) return { ...s, msg: copy.pick('hintStill') };
@@ -131,7 +135,7 @@ export function applyHint(s: Session, target: { key: string; at: number } | null
     hinted: s.hinted.includes(target.key) ? s.hinted : [...s.hinted, target.key],
     hintLi: target.at,
     streak: 0,
-    msg: copy.pick('hint'),
+    msg: copy.pick(HINT_POOL[kind]),
   };
 }
 
@@ -181,6 +185,8 @@ type Options<P> = {
   resumeId?: string;
   /** A room: everyone in it plays on one clock, in real time, so time away stays on it. */
   sharedClock?: boolean;
+  /** How the player's pet chooses the answer a hint marks. Read when the hint is asked for. */
+  hintKind?: () => HintKind;
   /** Called just before a find is committed (WordList FLIP capture). */
   beforeHit?: (key: string) => void;
   /** Called after your own find, with its span (rooms send it to teammates). */
@@ -192,7 +198,7 @@ type Options<P> = {
   copy?: Copy;
 };
 
-export function useGameSession<P>({ mod, puzzle, dailyN, resumeId: resumeAs, sharedClock = false, beforeHit, onHit, onStart, onFinish, copy = copyDefault }: Options<P>) {
+export function useGameSession<P>({ mod, puzzle, dailyN, resumeId: resumeAs, sharedClock = false, hintKind, beforeHit, onHit, onStart, onFinish, copy = copyDefault }: Options<P>) {
   const onHitRef = useRef(onHit);
   const onStartRef = useRef(onStart);
   const onFinishRef = useRef(onFinish);
@@ -297,7 +303,7 @@ export function useGameSession<P>({ mod, puzzle, dailyN, resumeId: resumeAs, sha
       chime();
     }
     const now = Date.now();
-    const picked = applyPick(cur, ev, { now, total, daily, copy });
+    const picked = applyPick(cur, ev, { now, total, daily, copy, sums: mod.family === 'quantitative' });
     const next = isLogged(ev)
       ? withLog(picked, cur, (l) => ({ ...l, events: [...l.events, { a, b, t: now - cur.startAt }] }))
       : picked;
@@ -336,7 +342,11 @@ export function useGameSession<P>({ mod, puzzle, dailyN, resumeId: resumeAs, sha
   const hint = () => {
     const cur = ref.current;
     const found = new Set(cur.found.map((f) => f.key));
-    const next = applyHint(cur, mod.hint(puzzle, found), copy);
+    const kind = hintKind?.() ?? 'first';
+    // Your own last find. A teammate's is not where you were looking.
+    const mine = cur.found.filter((f) => !f.by);
+    const lastAt = mine.length ? mine[mine.length - 1]!.span[0] : null;
+    const next = applyHint(cur, mod.hint(puzzle, found, kind, lastAt), copy, kind);
     // Only a hint that was charged goes in the play log, so the server counts what the player paid for.
     commit(next.hints === cur.hints ? next : withLog(next, cur, (l) => ({ ...l, hints: [...l.hints, Date.now() - cur.startAt] })));
   };
@@ -349,7 +359,7 @@ export function useGameSession<P>({ mod, puzzle, dailyN, resumeId: resumeAs, sha
     scrollToTop();
   };
 
-  const tapStart = () => commit({ ...ref.current, msg: copy.pick('tapNext') });
+  const tapStart = () => commit({ ...ref.current, msg: copy.pick(mod.family === 'quantitative' ? 'tapNextSums' : 'tapNext') });
   const dragStart = () => {
     if (ref.current.msg) commit({ ...ref.current, msg: '' });
   };

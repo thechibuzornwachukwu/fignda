@@ -115,7 +115,8 @@ test.describe('desktop', () => {
     await expect(next).toBeVisible();
     await expect(page.getByRole('link', { name: 'See the leaderboard' })).toHaveCount(0);
     await next.click();
-    await expect(page).toHaveURL(/\/play\/bible\/3$/);
+    // Word, word, number: the clue after the 2nd passage is a sums clue.
+    await expect(page).toHaveURL(/\/play\/bible\/21$/);
     await expect(page.getByText(/Clue 3 of \d+/)).toBeVisible();
     // The passage just left kept its result. The whole puzzle is another game, untouched.
     await page.goto('/play/bible/2');
@@ -126,8 +127,13 @@ test.describe('desktop', () => {
 
   test('the last sitting leads to the whole puzzle, and a passage that does not exist opens the puzzle', async ({ page }) => {
     await page.goto('/play/bnote/2');
-    await expect(page.getByText('Clue 2 of 3')).toBeVisible();
+    await expect(page.getByText(/Clue 2 of \d+/)).toBeVisible();
     await page.getByRole('button', { name: "I'm done" }).click();
+    // Each clue leads to the next until the last one before the whole puzzle.
+    for (let i = 0; i < 3 && (await page.getByRole('link', { name: 'The unmasking' }).count()) === 0; i++) {
+      await page.getByRole('link', { name: 'Next clue' }).click();
+      await page.getByRole('button', { name: "I'm done" }).click();
+    }
     await page.getByRole('link', { name: 'The unmasking' }).click();
     await expect(page).toHaveURL(/\/play\/bnote$/);
     await page.goto('/play/bnote/9');

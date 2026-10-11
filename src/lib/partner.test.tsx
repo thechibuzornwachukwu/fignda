@@ -115,7 +115,7 @@ describe('<Partner>', () => {
     await choosePartner('dino', false);
     const { container } = render(<Partner moment="loading" size={88} />);
     const img = container.querySelector('img')!;
-    expect(img.getAttribute('src')).toBe('/partners/dino-thinking.svg');
+    expect(img.getAttribute('src')).toBe('/pets/dino-thinking.svg');
     expect(img.getAttribute('alt')).toBe('');
     expect(img.getAttribute('width')).toBe('88');
     expect(screen.queryByRole('img')).toBeNull();
@@ -126,10 +126,10 @@ describe('<Partner>', () => {
     await syncPartner();
     expect(loadPartner().bonds).toEqual({ cat: 3 });
     const mine = render(<Partner moment="done" />);
-    expect(mine.container.querySelector('img')!.getAttribute('src')).toBe('/partners/cat-happy-1.svg');
+    expect(mine.container.querySelector('img')!.getAttribute('src')).toBe('/pets/cat-happy-1.svg');
     mine.unmount();
     const theirs = render(<Partner who="cat" moment="empty" plain />);
-    expect(theirs.container.querySelector('img')!.getAttribute('src')).toBe('/partners/cat-calm.svg');
+    expect(theirs.container.querySelector('img')!.getAttribute('src')).toBe('/pets/cat-calm.svg');
     // Switching partner keeps what was earned with each.
     api.fail = true;
     await choosePartner('cat', true);
@@ -138,6 +138,6 @@ describe('<Partner>', () => {
 
   it('a named partner is drawn whoever the player has', () => {
     const { container } = render(<Partner who="dog" moment="hello" />);
-    expect(container.querySelector('img')!.getAttribute('src')).toBe('/partners/dog-wave.svg');
+    expect(container.querySelector('img')!.getAttribute('src')).toBe('/pets/dog-wave.svg');
   });
 });

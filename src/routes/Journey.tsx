@@ -13,7 +13,7 @@ import { clampStars } from '../components/starsLabel';
 import { pick } from '../copy';
 import { buildPath, clueStates, type CatalogueItem, type ClueState, type Path } from '../engine/journey';
 import { caseFile } from '../games/caseFile';
-import { games, getGameDef, sponsorFor } from '../games/catalog';
+import { games, getGameDef, MIRROR_WORDS, sponsorFor } from '../games/catalog';
 import { useAuth } from '../lib/auth';
 import { PROGRESS_EVENT } from '../lib/progress';
 import { newRoomCode } from '../lib/room';
@@ -50,7 +50,7 @@ const EMPTY: Path = { cases: [] };
 
 function safePath(catalogue: readonly JourneyGame[]): Path {
   try {
-    return buildPath(catalogue);
+    return buildPath(catalogue, MIRROR_WORDS);
   } catch {
     return EMPTY;
   }
@@ -99,7 +99,7 @@ export function Journey({ catalogue = games, path, done, stars, className }: Pro
       const clues = mine.map((s, i) => ({
         id: s.id,
         to: s.n ? `/play/${s.puzzle}/${s.n}` : `/play/${s.puzzle}`,
-        name: s.n ? `Clue ${s.n}` : 'Unmasking',
+        name: s.n ? `Clue ${i + 1}` : 'Unmasking',
         state: s.state,
         stars: s.state === 'done' ? starOf(s.id) : 0,
         big: i === mine.length - 1,
@@ -133,7 +133,7 @@ export function Journey({ catalogue = games, path, done, stars, className }: Pro
       doneCount: walked.length,
       next: standing.next,
       complete: standing.complete,
-      lockedClue: next ? pick('journeyLocked', { title: next.n ? `clue ${next.n}` : 'the unmasking' }) : '',
+      lockedClue: next ? pick('journeyLocked', { title: next.n ? `clue ${standing.clues.filter((s) => s.case === next.case).findIndex((s) => s.id === next.id) + 1}` : 'the unmasking' }) : '',
       lockedCase: next ? pick('journeyLocked', { title: titles.get(next.puzzle) ?? next.puzzle }) : '',
       line: standing.complete ? pick('journeyDone') : total === 0 ? pick('journeyEmpty') : '',
     };

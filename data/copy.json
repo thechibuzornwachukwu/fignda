@@ -38,6 +38,11 @@
     "Not hiding there",
     "Try another stretch"
   ],
+  "wrongSums": [
+    "That run does not add up",
+    "Wrong total. Try another run",
+    "Not the target. Keep adding"
+  ],
   "wrongDaily": [
     "Not that one. 10 off.",
     "Not quite. 10 off.",
@@ -48,6 +53,10 @@
     "Almost. One letter off.",
     "Nearly. Nudge it."
   ],
+  "closeSums": [
+    "One digit off. Check the ends.",
+    "Nearly. One digit more or one less."
+  ],
   "already": [
     "Already found",
     "Got that one",
@@ -57,6 +66,18 @@
     "One starts where the hand points",
     "Look where the hand points",
     "Start at the hand"
+  ],
+  "hintLongest": [
+    "The longest one left starts at the hand",
+    "Start at the hand. It is the longest left"
+  ],
+  "hintShortest": [
+    "The shortest one left starts at the hand",
+    "Start at the hand. It is the shortest left"
+  ],
+  "hintNear": [
+    "One starts close to your last find",
+    "Look near your last find. The hand is on it"
   ],
   "hintStill": [
     "The hand is still on it",
@@ -79,6 +100,10 @@
   "tapNext": [
     "Now tap the last letter",
     "Now the last letter"
+  ],
+  "tapNextSums": [
+    "Now tap the last digit",
+    "Now the last digit"
   ],
   "idle": [
     "Take your time",
@@ -239,6 +264,10 @@
   "squadShort": [
     "The squad read {n} of {t} letters. Find more of the words and the mask comes off.",
     "{n} of {t} letters read. The culprit keeps the mask this time."
+  ],
+  "squadMixed": [
+    "{n} pets on this case, no two the same.",
+    "Every pet in this squad is a different one. {n} of them."
   ],
   "culpritWho": [
     "the baker",

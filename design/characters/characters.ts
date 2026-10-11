@@ -1,4 +1,4 @@
-// The partners: characters built from parts, the way player avatars are.
+// The pets: characters built from parts, the way player avatars are.
 //
 // One call draws any combination:
 //   character({ who: 'cat', mood: 'found', hat: true, coat: true, glass: true, view: 'bust', dark: true })

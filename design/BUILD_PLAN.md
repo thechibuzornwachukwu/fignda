@@ -8,10 +8,10 @@ Seed (after `npm run db:seed:gen`): `npx supabase db query --linked -f supabase/
 ## Direction
 
 - Offer: a few minutes of real detective work, in place of scrolling. Something is hidden in plain sight. Look closer and uncover it.
-- One skill in every game: looking closely. Words today, numbers and shapes next.
+- One skill in every game: looking closely. Words and numbers today, shapes next.
 - A case is a run of clues. A clue is one short sitting. The last clue puts the pieces together and unmasks who hid the secret.
 - A new culprit each case, an ordinary character under a disguise. One unseen figure links the cases: every culprit leaves the same calling card.
-- The player has a pet that comes along on every case: Detective X (the cat, and the logo), Detective Tobs (the dino), Detective Puff (the dog) and Agent 404 (the robot). A player picks 1, free, and unlocks the others with points. They are pets, not partners: something a player owns, dresses and shows off, which is what makes an outfit for one worth buying. Who they are: `design/brand/index.html` (it still says partners).
+- The player has a pet that comes along on every case: Detective X (the cat, and the logo), Detective Tobs (the dino), Detective Puff (the dog) and Agent 404 (the robot). A player picks 1, free, and unlocks the others with points. They are pets, not partners: something a player owns, dresses and shows off, which is what makes an outfit for one worth buying. Who they are: `design/brand/index.html`.
 - Tone: the motive is mischief, pride or a surprise, never harm. No violence, gangs, weapons, romance or fear.
 - For all ages, not a children's product. Accounts from 13. Younger players join on a parent's device or room.
 - A guest gets 2 games, then signs in. The account is where a detective, a pet and a case live.
@@ -102,16 +102,11 @@ Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with 
 A case is one puzzle: its passages are the clues and the whole puzzle is the last, the unmasking (SPEC section 6, Games). Each clue gives a piece of the case's secret, and the unmasking shows who hid it (SPEC section 9, The secret).
 
 - [ ] **Set 3m. Pet outfits.** A pet can wear things: a row of outfits per pet on You, tried on the stage like gear, drawn for all 4 pets in every mood. A few are earned, the rest are bought once Paystack is in. Cosmetic only. Needs the art first.
-- [ ] **Set 3n. The brand guide says pets.** `design/brand` (`build.ts`, `index.html`) and the pictures' names still say partners.
-- [ ] **Set 3l. More a pet does.** Still open from the pet idea: each pet giving its own kind of hint at the usual hint cost, and a mark on the unmasking for a squad whose pets differ. Rule to keep: nothing sold may change a score.
 
 ### 4. More games
 
 Engine first (`expectedAnswers`, unit tests), then the `Board`, with no change to the shell. Number and shape games are made and checked by the engine, so they never run out. Designs are in `prototype/Gazecraft Future Games.dc.html`.
 
-- [ ] **Set 4b. Buried sums.** Runs of digits that add up to a target, same drag. In "All games" first.
-- [ ] **Set 4c. The rhythm.** Number clues join the path: word, word, number, word.
-- [ ] **Set 4d. Mirror.** Hidden words that read right to left. It reuses every paragraph.
 - [ ] **Set 4e. Unmask.** Reveal a phrase letter by letter. It becomes the last clue of a case.
 - [ ] **Set 4f. One shape game.** Odd one out, or Trace. Then the rhythm gains a shape.
 - Later, once those are being played: Liar, Relay, Number series, Bury it.
@@ -194,6 +189,8 @@ Play with no account, and sponsors get numbers, never people.
 - Reminder times follow the saved time zone. The daily changes at midnight UTC.
 - Machine-written puzzles stop for the day when the free limits run out.
 - The avatar on the waiting screen bobs and does not blink.
+- Mirror words are found, not written: they are whatever everyday words a paragraph happens to hold backwards, so they have nothing to do with the puzzle's subject. A case whose text holds fewer than 3 has no Mirror clue.
+- Sums and Mirror clues give no piece of the secret.
 - A following board shows your own row only when it is among its rows: your place among the people you follow is not worked out by the server.
 - Personal records are kept in the browser, from 9 Oct 2026 on. Stars and closed cases are on the account from 10 Oct 2026; a guest's are in the browser until they sign in.
 - A guest's clues move to the account on sign in with their stars but no points: only a clue played signed in is checked and scored. A points badge earned by a clue shows after the next whole puzzle or daily.

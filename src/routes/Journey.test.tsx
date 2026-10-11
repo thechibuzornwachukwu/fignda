@@ -10,13 +10,13 @@ import { setAvatarCode } from '../avatar/store';
 import { POOLS } from '../copy';
 import { buildPath, type Path } from '../engine/journey';
 import { caseFile, secretOf } from '../games/caseFile';
-import { games } from '../games/catalog';
+import { games, MIRROR_WORDS } from '../games/catalog';
 import { Journey, JOURNEY_AT_KEY, type JourneyGame } from './Journey';
 
 const auth = vi.hoisted(() => ({ profile: null as { id: string; name: string; handle: string } | null }));
 vi.mock('../lib/auth', () => ({ useAuth: () => ({ enabled: true, loading: false, profile: auth.profile }) }));
 
-const path = buildPath(games);
+const path = buildPath(games, MIRROR_WORDS);
 const first = path.cases[0]!;
 const second = path.cases[1]!;
 const ids = first.clues.map((s) => s.id);
@@ -105,7 +105,7 @@ describe('Journey', () => {
     expect(doneLink).not.toHaveAttribute('aria-current');
 
     const nextLink = within(clue(container, c)).getByRole('link');
-    expect(nextLink).toHaveAttribute('href', `/play/${long.id}/3`);
+    expect(nextLink).toHaveAttribute('href', `/play/${long.id}/21`);
     expect(nextLink).toHaveAttribute('aria-current', 'step');
     expect(nextLink.textContent).toContain('Clue 3. Next clue.');
     expect(container.querySelectorAll('[aria-current="step"]')).toHaveLength(1);

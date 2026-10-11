@@ -1,7 +1,7 @@
 // Replays a client play log with the shared engine and recomputes the result.
 // The client's own counts and score are never trusted.
 
-import { check, isClose } from '../../src/engine/check';
+import { evalWords, type Evaluate } from '../../src/engine/evaluate';
 import type { Answer } from '../../src/engine/hiddenWords';
 import { score } from '../../src/engine/score';
 
@@ -41,7 +41,8 @@ export type ReplayResult =
 
 const sorted = (xs: number[]) => xs.every((x, i) => i === 0 || x >= xs[i - 1]!);
 
-export function replay(puzzle: { S: string; answers: readonly Answer[] }, log: PlayLog, daily: boolean): ReplayResult {
+/** `evaluate` is the game type's own rule (`EVALUATE`): hidden words unless another is given. */
+export function replay(puzzle: { S: string; answers: readonly Answer[] }, log: PlayLog, daily: boolean, evaluate: Evaluate = evalWords): ReplayResult {
   const { events, hints, finish } = log;
   if (events.length + hints.length > MAX_LOG_EVENTS) return { ok: false, reason: 'log_too_long' };
   if (!sorted(events.map((e) => e.t)) || !sorted(hints)) return { ok: false, reason: 'out_of_order' };
@@ -56,17 +57,15 @@ export function replay(puzzle: { S: string; answers: readonly Answer[] }, log: P
 
   for (const e of events) {
     if (e.a >= n || e.b >= n) return { ok: false, reason: 'index_out_of_range' };
-    const r = check(puzzle, e.a, e.b, found);
+    const r = evaluate(puzzle, e.a, e.b, found);
     if (r.kind === 'already') return { ok: false, reason: 'duplicate_find' };
     if (r.kind === 'hit') {
       if (e.t - lastFind < MIN_FIND_GAP_MS) return { ok: false, reason: 'too_fast' };
       lastFind = e.t;
-      found.add(r.answer.key);
-      finds.push({ k: r.answer.key, t: e.t });
-    } else if (r.kind === 'wrong') {
-      const unfound = puzzle.answers.filter((x) => !found.has(x.key)).map((x) => x.key);
-      if (!isClose(r.str, unfound)) wrongs++;
-    }
+      found.add(r.key);
+      finds.push({ k: r.key, t: e.t });
+      // A near miss is not a wrong pick.
+    } else if (r.kind === 'wrong') wrongs++;
   }
 
   const total = puzzle.answers.length;

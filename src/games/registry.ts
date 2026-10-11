@@ -3,17 +3,15 @@
 
 import type { ComponentType } from 'react';
 import { Puzzle, type PuzzleProps, type Span } from '../components/Puzzle';
-import { check, isClose } from '../engine/check';
+import { EVALUATE, type Evaluate, type Evaluation } from '../engine/evaluate';
 import { buildHiddenWords, norm, type HiddenWordsPuzzle } from '../engine/hiddenWords';
+import { hintAnswer, type HintKind } from '../engine/hint';
+import { buildMirror } from '../engine/mirror';
 import { revealParts, type RevealPart } from '../engine/reveal';
+import { buildSums } from '../engine/sums';
 import type { GameDef, GameType } from './catalog';
 
-export type Evaluation =
-  | { kind: 'hit'; key: string; label: string; span: Span }
-  | { kind: 'already' }
-  | { kind: 'close' }
-  | { kind: 'wrong' }
-  | { kind: 'ignore' };
+export type { Evaluation };
 
 export type AnswerInfo = { key: string; label: string; length: number };
 
@@ -25,7 +23,7 @@ export type Family = (typeof FAMILIES)[number];
 export const FAMILY_LABEL: Record<Family, string> = { verbal: 'Verbal', quantitative: 'Quantitative', nonverbal: 'Non-verbal' };
 
 export type GameModule<P> = {
-  /** The family this type belongs to. Nothing on screen reads it yet. */
+  /** The family this type belongs to. It sets the rhythm of a case (word, word, number, word) and the lines a wrong pick gets. */
   family: Family;
   build(def: GameDef): P;
   /** Letter count and chars for the board. */
@@ -33,8 +31,11 @@ export type GameModule<P> = {
   answers(p: P): readonly AnswerInfo[];
   /** Evaluate a finished selection. Matching lives in the engine, never in UI. */
   check(p: P, a: number, b: number, found: ReadonlySet<string>): Evaluation;
-  /** Earliest unfound answer and the letter to mark. */
-  hint(p: P, found: ReadonlySet<string>): { key: string; at: number } | null;
+  /**
+   * The unfound answer a hint marks, and the letter to mark: where the answer starts as it is read. `kind` is
+   * the pet's way of choosing (`hintAnswer`), `lastAt` where the player's last find began.
+   */
+  hint(p: P, found: ReadonlySet<string>, kind?: HintKind, lastAt?: number | null): { key: string; at: number } | null;
   /** Spans to shade for unfound answers after finish. */
   missed(p: P, found: ReadonlySet<string>): Span[];
   /** After finish: each unfound answer and the words it hides in, in reading order. */
@@ -44,41 +45,51 @@ export type GameModule<P> = {
   Board: ComponentType<PuzzleProps>;
 };
 
-const hiddenWords: GameModule<HiddenWordsPuzzle<GameDef>> = {
-  family: 'verbal',
-  build: (def) => buildHiddenWords(def),
+type Built = HiddenWordsPuzzle<GameDef>;
+
+type Rules = {
+  family: Family;
+  build: (def: GameDef) => Built;
+  evaluate: Evaluate;
+  /** Read right to left: an answer starts at the end of its span. */
+  backwards?: boolean;
+  listOrder: (p: Built) => (key: string) => number;
+};
+
+/** Every type so far is a stream of letters or digits with answers at spans, so they share all but these rules. */
+const spans = (o: Rules): GameModule<Built> => ({
+  family: o.family,
+  build: o.build,
   boardProps: (p) => ({ chars: p.chars, letters: p.S.length }),
-  answers: (p) => p.answers.map((a) => ({ key: a.key, label: a.label, length: a.key.length })),
-  check(p, a, b, found) {
-    const r = check(p, a, b, found);
-    if (r.kind === 'hit') {
-      const [x, y] = a <= b ? [a, b] : [b, a];
-      return { kind: 'hit', key: r.answer.key, label: r.answer.label, span: [x, y] };
-    }
-    if (r.kind === 'wrong') {
-      const unfound = p.answers.filter((x) => !found.has(x.key)).map((x) => x.key);
-      return isClose(r.str, unfound) ? { kind: 'close' } : { kind: 'wrong' };
-    }
-    return { kind: r.kind };
-  },
-  hint(p, found) {
-    const next = p.answers.find((a) => !found.has(a.key));
-    return next ? { key: next.key, at: next.spans[0]![0] } : null;
+  answers: (p) => p.answers.map((a) => ({ key: a.key, label: a.label, length: a.spans[0]![1] - a.spans[0]![0] + 1 })),
+  check: (p, a, b, found) => o.evaluate(p, a, b, found),
+  hint(p, found, kind, lastAt) {
+    const next = hintAnswer(p.answers, found, kind, lastAt);
+    return next ? { key: next.key, at: next.spans[0]![o.backwards ? 1 : 0] } : null;
   },
   missed: (p, found) => p.answers.filter((a) => !found.has(a.key)).map((a) => a.spans[0]!),
   reveal: (p, found) =>
     p.answers
       .filter((a) => !found.has(a.key))
       .map((a) => ({ key: a.key, label: a.label, span: a.spans[0]!, parts: revealParts(p.chars, a.spans[0]!) })),
-  listOrder(p) {
-    const order = p.dict.map(norm);
-    return (key) => order.indexOf(key);
-  },
+  listOrder: o.listOrder,
   Board: Puzzle,
-};
+});
 
-export const registry: Record<GameType, GameModule<HiddenWordsPuzzle<GameDef>>> = {
-  'hidden-words': hiddenWords,
+const byPlace = (p: Built) => (key: string) => p.answers.findIndex((a) => a.key === key);
+
+export const registry: Record<GameType, GameModule<Built>> = {
+  'hidden-words': spans({
+    family: 'verbal',
+    build: (def) => buildHiddenWords(def),
+    evaluate: EVALUATE['hidden-words'],
+    listOrder(p) {
+      const order = p.dict.map(norm);
+      return (key) => order.indexOf(key);
+    },
+  }),
+  mirror: spans({ family: 'verbal', build: (def) => buildMirror(def), evaluate: EVALUATE.mirror, backwards: true, listOrder: byPlace }),
+  'buried-sums': spans({ family: 'quantitative', build: (def) => buildSums(def), evaluate: EVALUATE['buried-sums'], listOrder: byPlace }),
 };
 
 /** The family of a game type. */

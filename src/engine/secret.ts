@@ -39,7 +39,7 @@ export function hashOf(s: string): number {
 }
 
 /** A small seeded generator (mulberry32): numbers from 0 up to 1. */
-function seeded(seed: number): () => number {
+export function seeded(seed: number): () => number {
   let a = seed >>> 0;
   return () => {
     a = (a + 0x6d2b79f5) >>> 0;
