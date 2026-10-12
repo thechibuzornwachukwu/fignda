@@ -46,6 +46,8 @@ export type Suspect = {
   /** The role, as the game names a culprit: "the caretaker". One of the `culpritWho` lines. */
   who: string;
   name: string;
+  /** How they are drawn. We wrote them, so we say: a "Mr" is never drawn as a woman. */
+  look: 'feminine' | 'masculine';
   /** Why they are on the board. */
   line: string;
   /** Where they say they were. A suspect may lie, and a step may show it. */
@@ -146,6 +148,7 @@ export function checkChapter(raw: unknown, roles: readonly string[]): string[] {
   for (const s of suspects) {
     if (!roles.includes(s.who)) out.push(`${s.who} is not a character the game can draw`);
     if (!text(s.name) || !text(s.line) || !text(s.says)) out.push(`${s.who} needs a name, a line and a word on where they were`);
+    if (s.look !== 'feminine' && s.look !== 'masculine') out.push(`${s.who} needs a look: feminine or masculine`);
     if (text(s.name).length > NAME_MAX) out.push(`${s.name} is longer than ${NAME_MAX} letters`);
   }
   // Nobody new turns up at the end.

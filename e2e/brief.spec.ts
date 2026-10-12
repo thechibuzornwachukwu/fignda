@@ -15,7 +15,7 @@ async function crowd(page: Page, n: number) {
     row.style.setProperty('--rows-of', String(count <= 3 ? count : count === 4 ? 2 : 3));
     for (const face of row.querySelectorAll('[data-face]')) {
       const [name, role] = face.querySelectorAll<HTMLElement>('[title]');
-      name!.textContent = 'Oluwaseyi.';
+      name!.textContent = 'Alexandria';
       role!.textContent = 'Neighbour from 2 doors down';
     }
   }, n);

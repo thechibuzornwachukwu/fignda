@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react';
 import { Clock, Eye, Image, Map, Search, type LucideIcon } from 'lucide-react';
-import { avatarFor } from '../avatar/draw';
+import { characterFor } from '../avatar/draw';
 import { roleLabel, type Chapter, type Pin, type PinKind } from '../engine/chapter';
 import { Avatar } from './Avatar';
 import { Icon } from './Icon';
@@ -55,7 +55,7 @@ export function CaseBoard({ chapter, solved = 0, cleared = [], className }: Prop
             return (
               <li key={s.who} className={styles.face} data-face data-cleared={out || undefined}>
                 <span className={styles.portrait}>
-                  <Avatar parts={avatarFor(`${chapter.id}~${s.who}`)} size={56} />
+                  <Avatar parts={characterFor(`${chapter.id}~${s.who}`, s.look)} size={56} />
                 </span>
                 <span className={styles.name} title={s.name}>
                   {s.name}

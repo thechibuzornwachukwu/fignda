@@ -3,6 +3,7 @@ import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { POOLS } from '../copy';
 import { roleLabel, type Chapter } from '../engine/chapter';
+import { characterFor, PARTS } from '../avatar/draw';
 import { getChapter } from '../games/chapters';
 import { Brief } from '../routes/Brief';
 import { CaseBoard } from './CaseBoard';
@@ -12,7 +13,7 @@ const spoon = (): Chapter => structuredClone(getChapter('the-long-spoon')!);
 /** The long spoon with n suspects, the longest name a chapter may give and the longest role the game has. */
 const crowd = (n: number): Chapter => {
   const c = spoon();
-  const more = { who: 'the neighbour from 2 doors down', name: 'Oluwaseyi.', line: 'Lives close by.', says: 'I was asleep.' };
+  const more = { who: 'the neighbour from 2 doors down', name: 'Alexandria', look: 'feminine' as const, line: 'Lives close by.', says: 'I was asleep.' };
   c.suspects = [...c.suspects, more].slice(0, n);
   return c;
 };
@@ -61,6 +62,13 @@ describe('CaseBoard', () => {
     expect(container.querySelector('[data-case-board]')).toHaveAccessibleName(/2 finds\./);
   });
 
+  it('draws a suspect the way the chapter says they present', () => {
+    const hair = PARTS.find((p) => p.key === 'hair')!;
+    for (const seed of ['a', 'the-long-spoon~the caretaker', 'x~the baker', 'zz', 'q9'])
+      for (const look of ['feminine', 'masculine'] as const) expect(hair.looks[characterFor(seed, look).hair]).toBe(look);
+    expect(characterFor('a', 'masculine')).toEqual(characterFor('a', 'masculine'));
+  });
+
   it('names a role as the words under a face', () => {
     expect(roleLabel('the stall owner')).toBe('Stall owner');
     expect(roleLabel('the neighbour from 2 doors down')).toBe('Neighbour from 2 doors down');
@@ -81,7 +89,7 @@ describe('Brief', () => {
     const { container } = open('/case/the-long-spoon');
     expect(screen.getByRole('heading', { level: 1, name: 'The long spoon' })).toBeInTheDocument();
     expect(container.querySelector('[data-case-board]')).toBeInTheDocument();
-    expect(screen.getByText(/Tonight at 6 is the 20th jollof final/)).toBeInTheDocument();
+    expect(screen.getByText(/Tonight at 6 is the 20th cook-off final/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Cases' })).toHaveAttribute('href', '/play');
     expect(POOLS.briefSoon).toContain(container.querySelector('[data-brief] > p')!.textContent);
   });

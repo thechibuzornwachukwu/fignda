@@ -164,6 +164,20 @@ export function avatarFor(seed: string): Avatar {
   };
 }
 
+/**
+ * A character we wrote, from a seed: a suspect in a chapter. A starter is neutral because a hash must never decide
+ * how a player presents. Here we decide, so the hair is one usually worn with that look.
+ */
+export function characterFor(seed: string, look: Look): Avatar {
+  const base = avatarFor(seed);
+  const part = PARTS.find((x) => x.key === 'hair')!;
+  const hairs = suiting('hair', look).filter((i) => part.looks[i] === look && !HAIR_STYLES[i]!.headwear);
+  if (hairs.length === 0) return base;
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = (Math.imul(h, 31) + seed.charCodeAt(i)) >>> 0;
+  return { ...base, hair: hairs[h % hairs.length]! };
+}
+
 /** The window onto the drawing. Wider than the 96 box the face is laid out in, so the chest shows. */
 export const VIEW_BOX = '-7 -2 110 110';
 

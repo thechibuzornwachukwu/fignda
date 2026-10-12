@@ -33,7 +33,7 @@ describe('checkChapter', () => {
   // The long spoon cut down or grown to n suspects: the culprit and the first n - 1 others, each still cleared once.
   const withSuspects = (n: number): Chapter => {
     const c = spoon();
-    const extra = { who: 'the drummer', name: 'Kunle', line: 'Plays at every final.', says: 'I was at practice.' };
+    const extra = { who: 'the drummer', name: 'Ben', look: 'masculine' as const, line: 'Plays at every final.', says: 'I was at practice.' };
     const others = [...c.suspects.filter((s) => s.who !== c.culprit), extra].slice(0, n - 1);
     c.suspects = [...others, c.suspects.find((s) => s.who === c.culprit)!];
     const open = c.steps.slice(0, -1);
@@ -58,14 +58,14 @@ describe('checkChapter', () => {
   it('no board of 0 or of 6', () => {
     expect(checkChapter({ ...spoon(), suspects: [] }, roles)).toContain('1 to 5 suspects are needed');
     const c = withSuspects(5);
-    c.suspects.push({ who: 'the coach', name: 'Ife', line: 'Picks the team.', says: 'I was on the pitch.' });
+    c.suspects.push({ who: 'the coach', name: 'Ivy', look: 'feminine', line: 'Picks the team.', says: 'I was on the pitch.' });
     expect(checkChapter(c, roles)).toContain('1 to 5 suspects are needed');
   });
 
   it('a name fits under a face', () => {
     const c = spoon();
-    c.suspects[0]!.name = 'Oluwadamilare';
-    expect(checkChapter(c, roles)).toContain(`Oluwadamilare is longer than ${NAME_MAX} letters`);
+    c.suspects[0]!.name = 'Maximiliana';
+    expect(checkChapter(c, roles)).toContain(`Maximiliana is longer than ${NAME_MAX} letters`);
   });
 
   it('the opening board is the chapter\'s own, and every solved step pins something to it', () => {
@@ -80,7 +80,7 @@ describe('checkChapter', () => {
     delete e.steps[1]!.pin;
     expect(checkChapter(e, roles)).toContain('step 2: a pin of 26 letters at most is needed');
     const g = spoon();
-    g.steps[1]!.pin = 'Tayo was at the hall';
+    g.steps[1]!.pin = 'Theo was at the hall';
     expect(checkChapter(g, roles)).toContain('step 2: it names the culprit');
   });
 
@@ -106,6 +106,12 @@ describe('checkChapter', () => {
 
   it('a blotter is stored back to front', () => {
     expect(spoon().steps[0]!.text!.startsWith('.neetfif enin')).toBe(true);
+  });
+
+  it('a suspect says how they are drawn', () => {
+    const c = spoon();
+    delete (c.suspects[2] as { look?: string }).look;
+    expect(checkChapter(c, roles)).toContain('the caretaker needs a look: feminine or masculine');
   });
 
   it('nobody new turns up at the end', () => {
@@ -144,7 +150,7 @@ describe('checkChapter', () => {
 
   it('nothing names the culprit before the line-up', () => {
     const c = spoon();
-    c.steps[3]!.lead = 'Ask Tayo about his lamps.';
+    c.steps[3]!.lead = 'Ask Theo about his lamps.';
     expect(checkChapter(c, roles)).toContain('step 4: it names the culprit');
   });
 
