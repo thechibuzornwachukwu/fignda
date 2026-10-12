@@ -1,0 +1,84 @@
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import pools from '../../data/copy.json';
+import games from '../../data/games.json';
+import { checkChapter, type Chapter } from './chapter';
+
+const DIR = 'data/chapters';
+const files = readdirSync(DIR).filter((f) => f.endsWith('.json'));
+const read = (f: string) => JSON.parse(readFileSync(join(DIR, f), 'utf8')) as Chapter;
+const roles = pools.culpritWho;
+const caseIds = ((Array.isArray(games) ? games : (games as { games: unknown }).games) as { id: string }[]).map((g) => g.id);
+const spoon =(): Chapter => read('the-long-spoon.json');
+
+describe('written chapters', () => {
+  it.each(files)('%s is a fair fight', (f) => {
+    expect(checkChapter(read(f), roles)).toEqual([]);
+  });
+
+  it.each(files)('%s is named as its file and told on a case we have', (f) => {
+    const c = read(f);
+    expect(`${c.id}.json`).toBe(f);
+    expect(caseIds).toContain(c.case);
+  });
+});
+
+describe('checkChapter', () => {
+  it('anything that is not a chapter is one problem', () => {
+    expect(checkChapter(null, roles)).toEqual(['not a chapter']);
+    expect(checkChapter('x', roles)).toEqual(['not a chapter']);
+    expect(checkChapter({}, roles).length).toBeGreaterThan(3);
+  });
+
+  it('nobody new turns up at the end', () => {
+    expect(checkChapter({ ...spoon(), culprit: 'the drummer' }, roles)).toContain('the culprit is not one of the suspects');
+  });
+
+  it('a suspect is a character the game can draw', () => {
+    const c = spoon();
+    c.suspects[0]!.who = 'the pilot';
+    expect(checkChapter(c, roles)).toContain('the pilot is not a character the game can draw');
+  });
+
+  it('every suspect but the culprit is cleared once', () => {
+    const c = spoon();
+    delete c.steps[1]!.clears;
+    expect(checkChapter(c, roles)).toContain('the stall owner is cleared 0 times, not once');
+    const d = spoon();
+    d.steps[0]!.clears = 'the photographer';
+    expect(checkChapter(d, roles)).toContain('the culprit is cleared');
+  });
+
+  it('means, motive and chance are each given once', () => {
+    const c = spoon();
+    delete c.steps[0]!.gives;
+    expect(checkChapter(c, roles)).toContain('chance is given 0 times, not once');
+  });
+
+  it('a step leads to the next place', () => {
+    const c = spoon();
+    c.steps[2]!.to = 'The market';
+    expect(checkChapter(c, roles)).toContain("step 3: its lead does not go to the next step's place");
+    const d = spoon();
+    d.steps[2]!.lead = '';
+    expect(checkChapter(d, roles)).toContain('step 3: no lead');
+  });
+
+  it('nothing names the culprit before the line-up', () => {
+    const c = spoon();
+    c.steps[3]!.lead = 'Ask Tayo about his lamps.';
+    expect(checkChapter(c, roles)).toContain('step 4: it names the culprit');
+  });
+
+  it('the line-up is last, and only last', () => {
+    const c = spoon();
+    c.steps[5]!.method = 'unmask';
+    expect(checkChapter(c, roles)).toContain('step 6: the line-up is the last step, and only the last');
+  });
+
+  it('the copy rules hold', () => {
+    const c = spoon();
+    c.ending.after = 'Case closed!';
+    expect(checkChapter(c, roles).join(' ')).toMatch(/exclamation/);
+  });
+});

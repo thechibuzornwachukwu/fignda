@@ -111,7 +111,6 @@ Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with 
 
 Build in this order. Each set is one chapter-sized step and leaves the 25 live cases playable: a case with no written chapter keeps today's flow.
 
-- [ ] **Set 1b. A chapter is written down.** One file per chapter: its shape, the item, the place, 4 suspects, and its steps in order, each with a place, a method, the fact it leaves and where that leads. One chapter in full first: The missing shekere, a "who did it".
 - [ ] **Set 1c. The brief and the case board.** A case opens on its board, laid out from the chapter's own data, so every case opens differently. The same board is on the case card, gains a pin after each step, and is the line-up and the ending.
 - [ ] **Set 1d. Every step ends on a lead.** A step's result says what was learned and where to go next: it clears a suspect, or gives means, motive or chance. A step's screen is the way back, the marks, a title and the board. No line above the title.
 - [ ] **Set 1e. Hidden words are an intercepted message.** The text is something the suspect sent to a partner, never a witness talking. Each one is filed under the Open Eye, and the file grows across cases.
