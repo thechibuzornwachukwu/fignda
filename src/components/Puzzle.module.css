@@ -47,3 +47,152 @@
   pointer-events: none;
   box-shadow: 0 6px 20px var(--scrim);
 }
+
+/* The sums board (SPEC section 9, Buried sums): digits as tiles, the target and a running total above them. */
+.tiles {
+  composes: board;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+}
+/* Spaces between digits are not drawn: the gap does that. */
+.tiles > span:not([data-li]):not(.total) {
+  display: none;
+}
+.tiles > [data-li] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--sums-tile);
+  height: var(--sums-tile-h);
+  padding: 0;
+  border: 1px solid var(--line-3);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: 0 var(--ledge) 0 var(--line-3);
+  color: var(--fg);
+  font-size: 26px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    background-color var(--dur-letter) var(--ease-std),
+    color var(--dur-letter) var(--ease-std);
+}
+.tiles > [data-li][data-state='selecting'] {
+  border-color: var(--sel);
+  background: var(--sel);
+  color: var(--sel-fg);
+  transform: translateY(calc(var(--space-1) * -1));
+}
+.tiles > [data-li][data-state='found'] {
+  border-color: var(--on-accent);
+  background: var(--accent);
+  box-shadow: 0 var(--ledge) 0 var(--on-accent);
+  color: var(--on-accent);
+  animation: tile-in var(--dur-slow) var(--ease-out);
+}
+.tiles > [data-li][data-state='missed'] {
+  border-style: dashed;
+  background: var(--miss);
+  box-shadow: none;
+}
+.tiles > [data-li][data-hint] {
+  background: var(--hint-bg);
+  box-shadow: 0 0 0 2px var(--fg);
+}
+@keyframes tile-in {
+  from {
+    transform: scale(1.18);
+  }
+}
+.total {
+  flex: 0 0 100%;
+  display: flex;
+  align-items: stretch;
+  gap: var(--space-4);
+  margin-bottom: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line-3);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  font-family: var(--font);
+}
+.target {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: var(--space-0h);
+  padding-right: var(--space-4);
+  border-right: 1px solid var(--line-3);
+}
+.targetLabel {
+  color: var(--subtle);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.targetNumber {
+  color: var(--fg);
+  font-size: 36px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.sum {
+  flex: 1 1 0;
+  min-width: 0;
+  display: grid;
+  align-content: center;
+  gap: var(--space-2);
+}
+.sumText {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 18px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.total[data-total='under'] .sumText,
+.total[data-total='exact'] .sumText {
+  color: var(--fg);
+}
+.meter {
+  display: block;
+  height: var(--space-2);
+  overflow: hidden;
+  border-radius: var(--radius-pill);
+  background: var(--miss);
+}
+.meterFill {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--fg);
+  transform-origin: left center;
+  transition:
+    transform var(--dur-base) var(--ease-out),
+    background-color var(--dur-base) var(--ease-std);
+}
+.total[data-total='exact'] .meterFill {
+  background: var(--accent-ink);
+}
+/* Past the target: the meter is full and hatched, so it reads as too much without a colour for wrong. */
+.total[data-total='over'] .meterFill {
+  background: repeating-linear-gradient(135deg, var(--subtle) 0 var(--space-1), transparent var(--space-1) var(--space-2));
+}
+@media (prefers-reduced-motion: reduce) {
+  .tiles > [data-li][data-state='found'] {
+    animation: none;
+  }
+  .tiles > [data-li][data-state='selecting'] {
+    transform: none;
+  }
+}

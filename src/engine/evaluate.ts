@@ -4,6 +4,7 @@
 import { check, isClose } from './check';
 import type { Answer } from './hiddenWords';
 import { reversed } from './mirror';
+import { ALPHABET } from './unmask';
 
 export type Evaluation =
   | { kind: 'hit'; key: string; label: string; span: [number, number] }
@@ -46,4 +47,12 @@ export const evalSums: Evaluate = (p, a, b, found) => {
   return near ? { kind: 'close' } : { kind: 'wrong' };
 };
 
-export const EVALUATE = { 'hidden-words': evalWords, mirror: evalMirror, 'buried-sums': evalSums } as const;
+/** Unmask: one letter of the alphabet at a time. It is in the name, or it is a try gone. */
+export const evalUnmask: Evaluate = (p, a, b, found) => {
+  if (a !== b || a < 0 || a >= ALPHABET.length) return { kind: 'ignore' };
+  const hit = p.answers.find((k) => k.spans[0]![0] === a);
+  if (!hit) return { kind: 'wrong' };
+  return found.has(hit.key) ? { kind: 'already' } : { kind: 'hit', key: hit.key, label: hit.label, span: [a, a] };
+};
+
+export const EVALUATE = { 'hidden-words': evalWords, mirror: evalMirror, 'buried-sums': evalSums, unmask: evalUnmask } as const;

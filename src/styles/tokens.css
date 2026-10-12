@@ -123,6 +123,15 @@
   --dur-star-step: 140ms;   /* Each star starts this long after the last */
   --dur-unmask: 420ms;      /* A culprit's mask lifting off. Once per closed case */
   --dur-stamp: 280ms;       /* The Case closed stamp landing, after the mask */
+  --dur-shake: 360ms;       /* The culprit shaking at a wrong letter. Once per wrong letter */
+  --dur-reveal: 520ms;      /* The unmasked culprit swelling and settling, in the popup */
+  --dur-burst: 900ms;       /* One piece of paper flying out. Once per closed case or 3 star clue */
+  --dur-burst-step: 12ms;   /* Each piece starts this long after the last */
+  --burst-delay: 0ms;       /* How long the paper waits. The unmasking holds it until the mask is off */
+  --burst-reach: 150px;     /* How far the paper flies */
+  /* The sums board and the unmasking, SPEC sections 6 and 9. */
+  --sums-tile: 44px; --sums-tile-h: 52px;
+  --unmask-slot: 26px; --unmask-slot-h: 38px; --unmask-keys: 520px;
 }
 @media (prefers-reduced-motion: reduce) {
   :root {
@@ -130,6 +139,7 @@
     --dur-letter: 0ms; --dur-clock: 0ms; --dur-flip: 0ms; --dur-flip-lead: 0ms;
     --dur-bob: 0ms; --dur-bounce: 0ms; --dur-bounce-step: 0ms; --dur-skeleton: 0ms;
     --dur-hop: 0ms; --dur-star: 0ms; --dur-star-step: 0ms; --dur-unmask: 0ms; --dur-stamp: 0ms;
+    --dur-shake: 0ms; --dur-reveal: 0ms; --dur-burst: 0ms; --dur-burst-step: 0ms;
   }
 }
 html, body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); -webkit-font-smoothing: antialiased; }

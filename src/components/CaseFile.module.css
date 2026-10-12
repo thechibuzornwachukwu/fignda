@@ -138,6 +138,36 @@
   transform: rotate(-4deg);
 }
 
+/* The unmasking in the popup: centred, the culprit large, the paper flying as the mask lifts. */
+.spot {
+  position: relative;
+  display: inline-flex;
+}
+.paper {
+  --burst-delay: calc(var(--dur-slower) + var(--dur-unmask));
+}
+.closed[data-grand] {
+  align-items: center;
+  width: 100%;
+  margin-top: 0;
+  text-align: center;
+}
+.closed[data-grand] .scene {
+  flex-direction: column;
+  justify-content: center;
+}
+.closed[data-grand] .spot {
+  animation: reveal var(--dur-reveal) var(--ease-out) calc(var(--dur-slower) + var(--dur-unmask)) backwards;
+}
+@keyframes reveal {
+  from {
+    transform: scale(0.86);
+  }
+  60% {
+    transform: scale(1.08);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .slot[data-fresh],
   .stamp {
@@ -147,5 +177,8 @@
   .culprit[data-culprit='unmasking'] .mask {
     animation: none;
     opacity: 0;
+  }
+  .closed[data-grand] .spot {
+    animation: none;
   }
 }

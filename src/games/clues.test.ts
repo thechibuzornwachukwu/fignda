@@ -1,16 +1,18 @@
-import { buildPath, caseOrder, clueKind, MIRROR_N, SUMS_FROM } from '../engine/journey';
+import { buildPath, caseOrder, clueKind, MIRROR_N, SUMS_FROM, UNMASK_N } from '../engine/journey';
 import { HINT_OF, mixedSquad, PARTNERS } from '../engine/partners';
-import { secretOf } from './caseFile';
-import { games, getPassage, getPuzzle, MIRROR_WORDS } from './catalog';
+import { ALPHABET, UNMASK_TRIES, unmaskName, unmaskSlots, withinTries } from '../engine/unmask';
+import { caseFile, secretOf } from './caseFile';
+import { culpritName, games, getPassage, getPuzzle, MIRROR_WORDS } from './catalog';
 import { familyOf, registry } from './registry';
 
 describe('the rhythm of a case', () => {
   it('is word, word, number, word, then Mirror, then the unmasking', () => {
     expect(caseOrder(1)).toEqual([0]);
-    expect(caseOrder(2)).toEqual([1, 2, 21, 0]);
-    expect(caseOrder(3, true)).toEqual([1, 2, 21, 3, 31, 0]);
-    expect(caseOrder(6)).toEqual([1, 2, 21, 3, 4, 5, 22, 6, 0]);
-    expect([0, 1, 19, 21, 29, 31].map(clueKind)).toEqual(['unmask', 'words', 'words', 'sums', 'sums', 'mirror']);
+    expect(caseOrder(2)).toEqual([1, 2, 21, 40]);
+    expect(caseOrder(3, true)).toEqual([1, 2, 21, 3, 31, 40]);
+    expect(caseOrder(6)).toEqual([1, 2, 21, 3, 4, 5, 22, 6, 40]);
+    expect([0, 1, 19, 21, 29, 31, 40].map(clueKind)).toEqual(['whole', 'words', 'words', 'sums', 'sums', 'mirror', 'unmask']);
+    expect(familyOf('unmask')).toBe('verbal');
     expect(familyOf('buried-sums')).toBe('quantitative');
     expect(familyOf('mirror')).toBe('verbal');
   });
@@ -28,9 +30,8 @@ describe('the rhythm of a case', () => {
       expect(Math.max(...ns)).toBeLessThanOrEqual(40);
       expect(cut).toBeLessThan(SUMS_FROM - 1);
       ns.forEach((n, i) => {
-        if (n === 0) return;
         const clue = getPassage(c.id, n)!;
-        expect(clue.part).toEqual({ n, count: cut, at: i + 1, of: ns.length, next: ns[i + 1] });
+        expect(clue.part).toEqual({ n, count: cut, at: i + 1, of: ns.length, next: ns[i + 1] ?? 0 });
         const built = registry[clue.def.type].build(clue.def);
         expect(built.answers.length, `${c.id}~${n}`).toBeGreaterThanOrEqual(3);
         if (clueKind(n) === 'sums') sums++;
@@ -80,8 +81,9 @@ describe('edges', () => {
     const long = caseOrder(40, true);
     expect(long.filter((n) => clueKind(n) === 'words')).toHaveLength(19);
     expect(new Set(long).size).toBe(long.length);
-    expect(Math.max(...long)).toBe(MIRROR_N);
-    expect(long.at(-1)).toBe(0);
+    expect(long.filter((n) => n !== UNMASK_N).at(-1)).toBe(MIRROR_N);
+    expect(Math.max(...long)).toBe(UNMASK_N);
+    expect(long.at(-1)).toBe(UNMASK_N);
     expect(clueKind(30)).toBe('sums');
     expect(clueKind(20)).toBe('words');
   });
@@ -109,5 +111,61 @@ describe('edges', () => {
   it('a hint has nothing to mark on an empty board, and a squad of nobody is not mixed', () => {
     expect(mixedSquad([])).toBe(0);
     expect(mixedSquad([undefined, undefined])).toBe(0);
+  });
+});
+
+describe('the unmasking', () => {
+  const board = (text: string) => registry.unmask.build({ id: 'x', type: 'unmask', category: 'c', title: 't', noun: 'letters', difficulty: 'Easy', expectedAnswers: [], dict: [], text });
+  const at = (ch: string) => ALPHABET.indexOf(ch);
+  const none = new Set<string>();
+
+  it('the name to spell is who the culprit is, without "the"', () => {
+    expect(unmaskName('the choir leader')).toBe('CHOIR LEADER');
+    expect(unmaskName('  The neighbour from 2 doors down ')).toBe('NEIGHBOUR FROM 2 DOORS DOWN');
+    for (const g of games) {
+      const clue = getPassage(g.id, UNMASK_N);
+      if (!clue) continue;
+      expect(clue.def.text).toBe(unmaskName(culpritName(g.id)));
+      expect(clue.def.text).toMatch(/^[A-Z0-9 ]{3,}$/);
+      expect(clue.part.next).toBe(0);
+    }
+  });
+
+  it('an answer is each letter of the name, once, and a pick is one letter of the alphabet', () => {
+    const p = board('BUS DRIVER');
+    expect(p.answers.map((a) => a.key).join('')).toBe('bdeirsuv');
+    expect(registry.unmask.check(p, at('r'), at('r'), none)).toEqual({ kind: 'hit', key: 'r', label: 'R', span: [17, 17] });
+    expect(registry.unmask.check(p, at('r'), at('r'), new Set(['r'])).kind).toBe('already');
+    expect(registry.unmask.check(p, at('z'), at('z'), none).kind).toBe('wrong');
+    // A drag across 2 letters, or a place past Z, is no pick.
+    expect(registry.unmask.check(p, 0, 1, none).kind).toBe('ignore');
+    expect(registry.unmask.check(p, 26, 26, none).kind).toBe('ignore');
+    expect(registry.unmask.hint(p, none)).toBeNull();
+    expect(registry.unmask.tries).toBe(UNMASK_TRIES);
+  });
+
+  it('shows the name as it stands: found letters, blanks, and anything that is not a letter', () => {
+    expect(unmaskSlots('BUS 2 GO', new Set(['b', 'o']))).toEqual(['B', '', '', ' ', '2', ' ', '', 'O']);
+    expect(unmaskSlots('', none)).toEqual([]);
+  });
+
+  it('picks after the last try do not count', () => {
+    const p = board('BAKER');
+    const wrong = [...'zxqjvw'].map((ch) => ({ a: at(ch), b: at(ch) }));
+    const right = [...'baker'].map((ch) => ({ a: at(ch), b: at(ch) }));
+    expect(withinTries(p, [...right, ...wrong])).toHaveLength(11);
+    expect(withinTries(p, [...wrong, ...right])).toHaveLength(6);
+    expect(withinTries(p, [...wrong.slice(0, 5), ...right, wrong[5]!, ...wrong])).toHaveLength(11);
+    expect(withinTries(p, [])).toEqual([]);
+  });
+
+  it('closes the case: the last piece of the secret comes with it, as it does with the whole puzzle', () => {
+    const id = games.find((g) => getPassage(g.id, UNMASK_N))!.id;
+    const count = getPassage(id, 1)!.part.count;
+    const passages = Array.from({ length: count }, (_, i) => `${id}~${i + 1}`);
+    expect(caseFile(id, new Set(passages))!.closed).toBe(false);
+    expect(caseFile(id, new Set([...passages, `${id}~${UNMASK_N}`]))!.closed).toBe(true);
+    expect(caseFile(id, new Set([id]))!.closed).toBe(true);
+    expect(caseFile(id, new Set(passages))!.piece(UNMASK_N).text).not.toBe('');
   });
 });

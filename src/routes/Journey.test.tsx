@@ -132,16 +132,17 @@ describe('Journey', () => {
     expect(later.querySelector('[data-case-lock]')!.textContent).toBe(`Locked. Finish ${titleOf(first.id)} to open this.`);
   });
 
-  it('the last clue of a case is the whole puzzle: the big one, and says so', () => {
+  it('the last clue of a case is the unmasking: the big one, and says so', () => {
+    const last = `${first.id}~40`;
     const { container } = show();
     const big = [...container.querySelectorAll('[data-big]')].map((el) => el.getAttribute('data-clue'));
-    expect(big).toEqual([first.id]);
-    expect(clue(container, first.id).textContent).toContain('Unmasking. Locked. The last clue of the case.');
+    expect(big).toEqual([last]);
+    expect(clue(container, last).textContent).toContain('Unmasking. Locked. The last clue of the case.');
     expect(clue(container, ids[0]!).textContent).not.toContain('last clue');
 
     const there = show({ done: ids.slice(0, -1) });
-    const link = within(clue(there.container, first.id)).getByRole('link');
-    expect(link).toHaveAttribute('href', `/play/${first.id}`);
+    const link = within(clue(there.container, last)).getByRole('link');
+    expect(link).toHaveAttribute('href', `/play/${first.id}/40`);
     expect(link.textContent).toContain('Unmasking. Next clue. The last clue of the case. Play.');
   });
 
@@ -244,8 +245,8 @@ describe('Journey', () => {
   });
 
   it('a case just closed: the avatar drops onto the next case, and the closed one pops its stars', () => {
-    localStorage.setItem(JOURNEY_AT_KEY, first.id);
-    const { container } = show({ done: ids, stars: { [first.id]: 3 } });
+    localStorage.setItem(JOURNEY_AT_KEY, `${first.id}~40`);
+    const { container } = show({ done: ids, stars: { [`${first.id}~40`]: 3 } });
     expect(clue(container, second.clues[0]!.id).querySelector('[data-hop]')!.getAttribute('data-hop')).toBe('drop');
     expect(box(container, first.id).querySelector('[data-stars]')!.hasAttribute('data-pop')).toBe(true);
   });

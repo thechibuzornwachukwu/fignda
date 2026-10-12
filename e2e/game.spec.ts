@@ -111,7 +111,8 @@ test.describe('desktop', () => {
     await expect(page.getByRole('button', { name: 'Play together' })).toHaveCount(0);
 
     await page.getByRole('button', { name: "I'm done" }).click();
-    const next = page.getByRole('link', { name: 'Next clue' });
+    // The finish opens a popup with the way on.
+    const next = page.locator('[data-clue-done]').getByRole('link', { name: 'Next clue' });
     await expect(next).toBeVisible();
     await expect(page.getByRole('link', { name: 'See the leaderboard' })).toHaveCount(0);
     await next.click();
@@ -130,12 +131,13 @@ test.describe('desktop', () => {
     await expect(page.getByText(/Clue 2 of \d+/)).toBeVisible();
     await page.getByRole('button', { name: "I'm done" }).click();
     // Each clue leads to the next until the last one before the whole puzzle.
-    for (let i = 0; i < 3 && (await page.getByRole('link', { name: 'The unmasking' }).count()) === 0; i++) {
-      await page.getByRole('link', { name: 'Next clue' }).click();
+    const pop = page.locator('[data-clue-done]');
+    for (let i = 0; i < 3 && (await pop.getByRole('link', { name: 'The unmasking' }).count()) === 0; i++) {
+      await pop.getByRole('link', { name: 'Next clue' }).click();
       await page.getByRole('button', { name: "I'm done" }).click();
     }
-    await page.getByRole('link', { name: 'The unmasking' }).click();
-    await expect(page).toHaveURL(/\/play\/bnote$/);
+    await pop.getByRole('link', { name: 'The unmasking' }).click();
+    await expect(page).toHaveURL(/\/play\/bnote\/40$/);
     await page.goto('/play/bnote/9');
     await expect(page).toHaveURL(/\/play\/bnote$/);
     await page.goto('/play/no-such-game/1');

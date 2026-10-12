@@ -241,6 +241,32 @@ describe('case badges', () => {
     expect(await badges(u)).not.toContain('cases_10');
   });
 
+  it('a checked unmasking closes a case: it counts with whole puzzles, once each, and the pet beside the player is remembered', async () => {
+    const u = await makeUser('unmask');
+    const bonds = async () => ((await u.client.rpc('my_partner')).data as Array<{ bonds: Record<string, number> }> | null)?.[0]?.bonds;
+    await u.client.rpc('choose_partner', { p_who: 'dog' });
+    // The unmasking is clue 40. A passage, a sums clue and the Mirror clue close nothing.
+    for (const n of [1, 21, 31]) await record(u, 'bnote', n, 3, 400);
+    expect(await badges(u)).not.toContain('cases_1');
+    await record(u, 'bnote', 40, 2, 500);
+    expect(await badges(u)).toContain('cases_1');
+    expect(await bonds()).toEqual({ dog: 1 });
+    // Played again, or closed again by the whole puzzle: still 1 case.
+    await record(u, 'bnote', 40, 3, 900);
+    await play(u, 'bnote');
+    expect((await badges(u)).filter((c) => c === 'cases_1')).toHaveLength(1);
+    expect(await bonds()).toEqual({ dog: 1 });
+    // 3 more by unmasking and 1 by a whole puzzle make 5.
+    for (const g of ['science', 'ai', 'history']) await record(u, g, 40, 1, 100);
+    expect(await badges(u)).not.toContain('cases_5');
+    await play(u, 'general');
+    expect(await badges(u)).toContain('cases_5');
+    expect(await bonds()).toEqual({ dog: 5 });
+    // The path gets it back as the clue it is.
+    const mine = ((await u.client.rpc('my_progress')).data ?? []) as Array<{ clue_id: string; stars: number }>;
+    expect(mine).toContainEqual({ clue_id: 'bnote~40', stars: 3 });
+  });
+
   it('a daily, an unchecked play, a clue and moved guest progress close no case', async () => {
     const u = await makeUser('badge');
     await play(u, 'ai', { verified: false, source: 'guest_merge' });

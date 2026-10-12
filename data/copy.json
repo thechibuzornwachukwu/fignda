@@ -43,6 +43,11 @@
     "Wrong total. Try another run",
     "Not the target. Keep adding"
   ],
+  "wrongUnmask": [
+    "Not in the name. A try gone",
+    "No. That letter is not there",
+    "Wrong letter. One try fewer"
+  ],
   "wrongDaily": [
     "Not that one. 10 off.",
     "Not quite. 10 off.",
@@ -306,6 +311,14 @@
     "{c}: case closed.",
     "Every clue in {c}, found.",
     "Case closed: {c}."
+  ],
+  "unmaskOut": [
+    "Out of tries. The mask comes off anyway.",
+    "No tries left. Here is who it was."
+  ],
+  "unmaskNext": [
+    "Next case",
+    "On to the next case"
   ],
   "starsOf": [
     "{n} of 3 stars"

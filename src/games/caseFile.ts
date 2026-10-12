@@ -5,14 +5,14 @@ import secretsFile from '../../data/secrets.json';
 import { DISGUISE_STYLES } from '../avatar/parts/disguises';
 import { clampStars } from '../components/starsLabel';
 import { POOLS } from '../copy';
-import { buildPath, clueId, clueStates, type Path } from '../engine/journey';
+import { buildPath, clueId, clueStates, UNMASK_N, type Path } from '../engine/journey';
 import { caseSecrets, culpritOf, pieceSlots, revealSecret, squadPieces, type Culprit, type Secret } from '../engine/secret';
 import { loadFinished } from '../lib/shelves';
 import { loadStars } from '../lib/starStore';
 import { games, getPassage, MIRROR_WORDS } from './catalog';
 
 /**
- * How many clues of a catalogue puzzle's case give a piece of the secret: its passages, then the whole puzzle.
+ * How many clues of a catalogue puzzle's case give a piece of the secret: its passages, then the unmasking.
  * A sums clue and the Mirror clue give none, so a case's word and pieces are what they were before those joined.
  */
 export const clueCount = (id: string): number => (getPassage(id, 1)?.part.count ?? 0) + 1;
@@ -48,7 +48,7 @@ export type CaseFile = {
   slots: string[];
   /** Every clue done: the word reads whole. */
   closed: boolean;
-  /** The piece clue `n` gives (0 is the unmasking): its letters, and the slots they fill. */
+  /** The piece clue `n` gives: its letters, and the slots they fill. The unmasking, or the whole puzzle, gives the last. */
   piece: (n: number) => { text: string; slots: number[] };
 };
 
@@ -76,7 +76,7 @@ export function caseFile(id: string, done: ReadonlySet<string>, squad?: Squad): 
   const last = secret.pieces.length - 1;
   const shared = squad ? squadPieces(last, squad.found, squad.total) : 0;
   const have = secret.pieces.map(
-    (_, i) => done.has(id) || done.has(clueId(id, i === last ? 0 : i + 1)) || (i === last ? !!squad?.finished : i < shared),
+    (_, i) => done.has(id) || done.has(clueId(id, UNMASK_N)) || done.has(clueId(id, i + 1)) || (i === last ? !!squad?.finished : i < shared),
   );
   const slots = revealSecret(secret, have);
   return {
@@ -84,7 +84,7 @@ export function caseFile(id: string, done: ReadonlySet<string>, squad?: Squad): 
     slots,
     closed: have.every(Boolean),
     piece: (n) => {
-      const p = secret.pieces[n > 0 ? n - 1 : last];
+      const p = secret.pieces[n > 0 && n !== UNMASK_N ? n - 1 : last];
       return p ? { text: p.text, slots: pieceSlots(p) } : { text: '', slots: [] };
     },
   };

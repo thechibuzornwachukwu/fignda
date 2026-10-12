@@ -66,7 +66,8 @@ test.describe('the journey', () => {
     // Clue 1: its result shows the piece it gave.
     await journey(page).getByRole('link').click();
     await page.getByRole('button', { name: "I'm done" }).click();
-    const piece = page.locator('[data-case-piece]');
+    // The popup at the finish shows the piece, and so does the result under it.
+    const piece = page.locator('[data-clue-done] [data-case-piece]');
     await expect(piece.locator('[data-slot="on"]').first()).toBeVisible();
     await expect(piece).toContainText(/piece/);
     const held = await piece.locator('[data-slot="on"]').count();

@@ -14,12 +14,12 @@ describe('buildPath', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('a case is the passages of its puzzle in order with a sums clue after every second of 3, then the whole puzzle', () => {
+  it('a case is the passages of its puzzle in order with a sums clue after every second of 3, then the unmasking', () => {
     for (const c of path.cases) {
       const cut = passages(built(c.id)).length;
       expect(c.clues.map((s) => s.n)).toEqual(caseOrder(cut));
       expect(c.clues.every((s) => s.puzzle === c.id)).toBe(true);
-      expect(c.clues[c.clues.length - 1]!.id).toBe(c.id);
+      expect(c.clues[c.clues.length - 1]!.id).toBe(`${c.id}~40`);
       expect(c.clues[0]!.id).toBe(`${c.id}~1`);
     }
     // No list to read backwards by, so no Mirror clue here.
@@ -91,7 +91,7 @@ describe('clueStates', () => {
 
   it('every passage done is not the case: the unmasking is still to play', () => {
     const s = states(first.clues.slice(0, -1).map((c) => c.id));
-    expect(s.next).toBe(first.id);
+    expect(s.next).toBe(`${first.id}~40`);
     expect(s.left[0]).toBe(1);
     expect(s.casesDone[0]).toBe(false);
   });

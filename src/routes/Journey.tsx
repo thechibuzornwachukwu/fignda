@@ -11,7 +11,7 @@ import { Ring } from '../components/Ring';
 import { Stars } from '../components/Stars';
 import { clampStars } from '../components/starsLabel';
 import { pick } from '../copy';
-import { buildPath, clueStates, type CatalogueItem, type ClueState, type Path } from '../engine/journey';
+import { buildPath, clueId, clueKind, clueStates, UNMASK_N, type CatalogueItem, type ClueState, type Path } from '../engine/journey';
 import { caseFile } from '../games/caseFile';
 import { games, getGameDef, MIRROR_WORDS, sponsorFor } from '../games/catalog';
 import { useAuth } from '../lib/auth';
@@ -99,7 +99,7 @@ export function Journey({ catalogue = games, path, done, stars, className }: Pro
       const clues = mine.map((s, i) => ({
         id: s.id,
         to: s.n ? `/play/${s.puzzle}/${s.n}` : `/play/${s.puzzle}`,
-        name: s.n ? `Clue ${i + 1}` : 'Unmasking',
+        name: clueKind(s.n) === 'words' || clueKind(s.n) === 'sums' || clueKind(s.n) === 'mirror' ? `Clue ${i + 1}` : 'Unmasking',
         state: s.state,
         stars: s.state === 'done' ? starOf(s.id) : 0,
         big: i === mine.length - 1,
@@ -112,7 +112,8 @@ export function Journey({ catalogue = games, path, done, stars, className }: Pro
         title,
         clues,
         state,
-        stars: state === 'done' ? starOf(c.id) : 0,
+        // A case is closed by its unmasking, or by the whole puzzle: the better of the 2.
+        stars: state === 'done' ? (Math.max(starOf(c.id), starOf(clueId(c.id, UNMASK_N))) as 0 | 1 | 2 | 3) : 0,
         count: state === 'done' ? '' : pick(left === 1 ? 'clueLeft' : 'cluesLeft', { n: left }),
         line: state === 'done' ? pick('caseDone', { c: title }) : '',
         sponsor: (() => {
@@ -133,7 +134,7 @@ export function Journey({ catalogue = games, path, done, stars, className }: Pro
       doneCount: walked.length,
       next: standing.next,
       complete: standing.complete,
-      lockedClue: next ? pick('journeyLocked', { title: next.n ? `clue ${standing.clues.filter((s) => s.case === next.case).findIndex((s) => s.id === next.id) + 1}` : 'the unmasking' }) : '',
+      lockedClue: next ? pick('journeyLocked', { title: next.n && clueKind(next.n) !== 'unmask' ? `clue ${standing.clues.filter((s) => s.case === next.case).findIndex((s) => s.id === next.id) + 1}` : 'the unmasking' }) : '',
       lockedCase: next ? pick('journeyLocked', { title: titles.get(next.puzzle) ?? next.puzzle }) : '',
       line: standing.complete ? pick('journeyDone') : total === 0 ? pick('journeyEmpty') : '',
     };
@@ -165,7 +166,7 @@ export function Journey({ catalogue = games, path, done, stars, className }: Pro
                 </h3>
                 {c.state !== 'done' && <p className={styles.caseCount}>{c.count}</p>}
                 {c.sponsor && <p className={styles.caseCount} data-case-sponsor>{c.sponsor}</p>}
-                {c.stars > 0 && <Stars value={c.stars} pop={c.id === cameFrom} />}
+                {c.stars > 0 && <Stars value={c.stars} pop={c.id === cameFrom || clueId(c.id, UNMASK_N) === cameFrom} />}
               </div>
               {c.state === 'done' && (
                 <p className={styles.badge} data-case-badge>

@@ -32,6 +32,14 @@ export type PuzzleProps = {
   label?: string;
   /** `hero` is the larger landing demo type. */
   size?: 'game' | 'hero';
+  /** `tiles`: each letter or digit is a tile and the spaces between are not drawn. The sums board. */
+  variant?: 'text' | 'tiles';
+  /** Sums: what a run must add up to. Shown above the tiles with a running total of the selection. */
+  target?: number;
+  /** For a board that is not this one (`UnmaskBoard`): the text as written, every index picked so far, and the case. */
+  text?: string;
+  picked?: readonly number[];
+  caseId?: string;
 };
 
 type Sel = { a: number; b: number };
@@ -81,6 +89,8 @@ export function Puzzle({
   describedBy,
   label = 'Puzzle text',
   size = 'game',
+  variant = 'text',
+  target,
 }: PuzzleProps) {
   const boardRef = useRef<HTMLDivElement>(null);
   useEffect(armSound, []);
@@ -463,7 +473,7 @@ export function Puzzle({
   return (
     <div
       ref={boardRef}
-      className={size === 'hero' ? styles.hero : styles.board}
+      className={variant === 'tiles' ? styles.tiles : size === 'hero' ? styles.hero : styles.board}
       tabIndex={disabled ? -1 : 0}
       aria-label={label}
       aria-describedby={describedBy}
@@ -472,6 +482,7 @@ export function Puzzle({
       onKeyDown={onKeyDown}
       onFocus={() => caret < 0 && setCaret(0)}
     >
+      {variant === 'tiles' && target != null && <RunningTotal target={target} picked={sel ? stream.slice(Math.min(sel.a, sel.b), Math.max(sel.a, sel.b) + 1) : ''} />}
       {chars.map((c, i) => (
         <Letter
           key={i}
@@ -492,9 +503,35 @@ export function Puzzle({
             top: Math.max(bubble.y - BUBBLE_LIFT, 8),
           }}
         >
-          {stream.slice(Math.min(sel.a, sel.b), Math.max(sel.a, sel.b) + 1).toUpperCase()}
+          {variant === 'tiles'
+            ? `= ${[...stream.slice(Math.min(sel.a, sel.b), Math.max(sel.a, sel.b) + 1)].reduce((n, d) => n + (Number(d) || 0), 0)}`
+            : stream.slice(Math.min(sel.a, sel.b), Math.max(sel.a, sel.b) + 1).toUpperCase()}
         </span>
       )}
     </div>
+  );
+}
+
+/**
+ * Above the sums tiles: the target, and the selection as a sum that fills a meter toward it. Numbers only.
+ * `picked` is the digits under the selection, in order.
+ */
+function RunningTotal({ target, picked }: { target: number; picked: string }) {
+  const digits = [...picked].map(Number).filter((n) => Number.isFinite(n));
+  const sum = digits.reduce((n, d) => n + d, 0);
+  const state = digits.length === 0 ? 'idle' : sum === target && digits.length > 1 ? 'exact' : sum > target ? 'over' : 'under';
+  return (
+    <span className={styles.total} data-total={state} aria-hidden="true">
+      <span className={styles.target}>
+        <span className={styles.targetLabel}>Target</span>
+        <span className={styles.targetNumber}>{target}</span>
+      </span>
+      <span className={styles.sum}>
+        <span className={styles.sumText}>{digits.length ? `${digits.join(' + ')} = ${sum}` : `0 of ${target}`}</span>
+        <span className={styles.meter}>
+          <span className={styles.meterFill} style={{ transform: `scaleX(${Math.min(1, target ? sum / target : 0)})` }} />
+        </span>
+      </span>
+    </span>
   );
 }

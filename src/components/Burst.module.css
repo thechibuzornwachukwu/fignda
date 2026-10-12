@@ -1,0 +1,51 @@
+/* SPEC section 8, Burst. */
+.burst {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+.bit {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--space-2);
+  height: var(--space-3);
+  margin: calc(var(--space-3) / -2) 0 0 calc(var(--space-2) / -2);
+  border-radius: var(--radius-xs);
+  background: var(--accent);
+  opacity: 0;
+  transform: rotate(var(--turn)) translateY(0) scale(0.8);
+  animation: fly var(--dur-burst) var(--ease-out) calc(var(--burst-delay) + var(--i) * var(--dur-burst-step)) both;
+}
+.bit:nth-child(3n + 1) {
+  background: var(--ink-display);
+}
+.bit:nth-child(3n + 2) {
+  background: var(--line-3);
+  border-radius: var(--radius-pill);
+  height: var(--space-2);
+}
+@keyframes fly {
+  0% {
+    opacity: 0;
+    transform: rotate(var(--turn)) translateY(0) scale(0.8);
+  }
+  12% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: rotate(var(--turn)) translateY(calc(var(--burst-reach) * var(--reach) * -1)) rotate(140deg) scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .burst {
+    display: none;
+  }
+}

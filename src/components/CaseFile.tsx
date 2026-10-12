@@ -4,6 +4,7 @@ import { avatarFor, drawDisguise, shapeProps, VIEW_BOX } from '../avatar/draw';
 import { pick } from '../copy';
 import { culpritFor } from '../games/caseFile';
 import { Avatar } from './Avatar';
+import { Burst } from './Burst';
 import { Icon } from './Icon';
 import { PartnerNote } from './PartnerNote';
 import styles from './CaseFile.module.css';
@@ -38,19 +39,23 @@ type CulpritProps = {
   size?: number;
   /** `masked` while the case is open, `unmasking` the moment it closes (the mask lifts off once), `unmasked` after. */
   state: 'masked' | 'unmasking' | 'unmasked';
+  /** While masked: how far the disguise has come off, 0 to 1. Pieces of it go one at a time, and the last stays on until the unmasking. */
+  off?: number;
   className?: string;
 };
 
 /** The culprit of a case: an ordinary avatar with a disguise drawn on top in a layer of its own. Decorative. */
-export function Culprit({ id, size = 48, state, className }: CulpritProps) {
+export function Culprit({ id, size = 48, state, off = 0, className }: CulpritProps) {
   const who = useMemo(() => culpritFor(id), [id]);
   const parts = useMemo(() => avatarFor(who.seed), [who.seed]);
-  const mask = useMemo(() => drawDisguise(parts, who.disguise), [parts, who.disguise]);
+  const whole = useMemo(() => drawDisguise(parts, who.disguise), [parts, who.disguise]);
+  const share = Math.min(1, Math.max(0, off));
+  const mask = state === 'masked' && share > 0 ? whole.slice(0, Math.max(1, whole.length - Math.floor(share * (whole.length - 1)))) : whole;
   return (
     <span className={[styles.culprit, className].filter(Boolean).join(' ')} style={{ width: size, height: size }} data-culprit={state}>
       <Avatar parts={parts} size={size} />
       {state !== 'unmasked' && (
-        <svg className={styles.mask} width={size} height={size} viewBox={VIEW_BOX} preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
+        <svg className={styles.mask} style={state === 'masked' && share > 0 ? { opacity: 1 - share * 0.4 } : undefined} width={size} height={size} viewBox={VIEW_BOX} preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false">
           {mask.map((s, i) => createElement(s.tag, { key: i, ...shapeProps(s.attrs) }))}
         </svg>
       )}
@@ -71,15 +76,18 @@ export function CasePiece({ slots, fresh, piece, say }: { slots: readonly string
 }
 
 /** The unmasking: the mask lifts off, the stamp lands, the secret reads whole, the culprit owns up and the card is found. */
-export function CaseClosed({ id, secret, mixed = 0 }: { id: string; secret: string; /** A squad whose pets all differ: how many (`mixedSquad`). */ mixed?: number }) {
+export function CaseClosed({ id, secret, mixed = 0, grand = false }: { id: string; secret: string; /** A squad whose pets all differ: how many (`mixedSquad`). */ mixed?: number; /** The moment itself, in the popup: the culprit large and centred, with a burst of paper as the mask comes off. */ grand?: boolean }) {
   const lines = useMemo(
     () => ({ confession: pick('confession', { who: culpritFor(id).name, secret: secret.toLowerCase() }), card: pick('callingCard'), mixed: mixed ? pick('squadMixed', { n: mixed }) : '' }),
     [id, secret, mixed],
   );
   return (
-    <div className={styles.closed} data-case-closed>
+    <div className={styles.closed} data-case-closed data-grand={grand || undefined}>
       <div className={styles.scene}>
-        <Culprit id={id} size={72} state="unmasking" />
+        <span className={styles.spot}>
+          {grand && <Burst className={styles.paper} />}
+          <Culprit id={id} size={grand ? 120 : 72} state="unmasking" />
+        </span>
         <h3 className={styles.stamp}>Case closed</h3>
       </div>
       <SecretSlots slots={[...secret]} />

@@ -3,6 +3,7 @@
 import { EVALUATE } from '../../src/engine/evaluate';
 import { buildMirror, mirrorClue } from '../../src/engine/mirror';
 import { buildSums, sumsClue } from '../../src/engine/sums';
+import { ALPHABET, buildUnmask, withinTries } from '../../src/engine/unmask';
 import { getPassage, getPuzzle, MIRROR_WORDS } from '../../src/games/catalog';
 import { replay, type PlayEvent } from '../src/replay';
 
@@ -59,5 +60,29 @@ describe('a Mirror clue on the server', () => {
   it('the hidden-words rule does not take a word that reads right to left', () => {
     const r = replay(mirror, log(picks(mirror)), false);
     expect(r).toMatchObject({ ok: true, found: 0 });
+  });
+});
+
+describe('the unmasking on the server', () => {
+  const seen = getPassage('bnote', 40)!.def;
+  const name = buildUnmask({ text: seen.text, dict: [] });
+  const tap = (word: string, from = 1): PlayEvent[] => [...word].map((ch, i) => ({ a: ALPHABET.indexOf(ch), b: ALPHABET.indexOf(ch), t: (from + i) * 1000 }));
+  const run = (events: PlayEvent[]) => replay(name, log(withinTries(name, events)), false, EVALUATE.unmask);
+
+  it('the name spelled with no wrong letter is a clean read', () => {
+    const letters = name.answers.map((a) => a.key).join('');
+    expect(run(tap(letters))).toMatchObject({ ok: true, found: letters.length, total: letters.length, wrongs: 0, clean: true });
+  });
+
+  it('a wrong letter is a wrong pick, and nothing after the 6th counts', () => {
+    const letters = name.answers.map((a) => a.key).join('');
+    const wrong = [...ALPHABET].filter((ch) => !letters.includes(ch)).slice(0, 6).join('');
+    expect(run([...tap(wrong[0]!), ...tap(letters, 2)])).toMatchObject({ ok: true, found: letters.length, wrongs: 1, clean: false });
+    expect(run([...tap(wrong), ...tap(letters, 10)])).toMatchObject({ ok: true, found: 0, wrongs: 6 });
+  });
+
+  it('the same letter sent twice is refused', () => {
+    const first = name.answers[0]!.key;
+    expect(run([...tap(first), ...tap(first, 3)])).toEqual({ ok: false, reason: 'duplicate_find' });
   });
 });

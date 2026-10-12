@@ -19,7 +19,7 @@ test('the rhythm: after 2 word clues comes a sums clue, played with the same tap
   await page.goto('/play/bnote/2');
   await expect(page.getByText(/Clue 2 of \d+/)).toBeVisible();
   await page.getByRole('button', { name: "I'm done" }).click();
-  await page.getByRole('link', { name: 'Next clue' }).click();
+  await page.locator('[data-clue-done]').getByRole('link', { name: 'Next clue' }).click();
   await expect(page).toHaveURL(/\/play\/bnote\/21$/);
   await expect(page.getByText(/Clue 3 of \d+/)).toBeVisible();
 
@@ -52,7 +52,7 @@ test('the rhythm: after 2 word clues comes a sums clue, played with the same tap
   }
   // All 3 found ends the clue. It gives stars and leads on.
   await expect(page.locator('[aria-labelledby="results-title"]')).toBeVisible();
-  await expect(page.getByRole('link', { name: /Next clue|The unmasking/ })).toBeVisible();
+  await expect(page.locator('[data-clue-done]').getByRole('link', { name: /Next clue|The unmasking/ })).toBeVisible();
   await expect(page.locator('[data-case-closed]')).toHaveCount(0);
 });
 
@@ -75,7 +75,7 @@ test('a Mirror clue: words that read right to left, found from either end', asyn
   expect(found, 'words found by reading right to left').toBeGreaterThan(0);
   await page.getByRole('button', { name: "I'm done" }).click();
   await expect(page.locator('[aria-labelledby="results-title"]')).toBeVisible();
-  await expect(page.getByRole('link', { name: 'The unmasking' })).toBeVisible();
+  await expect(page.locator('[data-clue-done]').getByRole('link', { name: 'The unmasking' })).toBeVisible();
 });
 
 /** Every run on a sums board that reaches the target. */
@@ -96,8 +96,8 @@ async function runsOn(page: Page): Promise<Array<[number, number]>> {
 
 test.describe('edges', () => {
   test('a clue number the case does not have opens the whole puzzle', async ({ page }) => {
-    // bnote has 2 passages: one sums clue (21), so no 22, and nothing at 20, 30, 40 or 99.
-    for (const n of ['22', '20', '30', '40', '99', '3']) {
+    // bnote has 2 passages: one sums clue (21), so no 22, and nothing at 20, 30, 39, 41 or 99.
+    for (const n of ['22', '20', '30', '39', '41', '99', '3']) {
       await page.goto(`/play/bnote/${n}`);
       await expect(page, n).toHaveURL(/\/play\/bnote$/);
     }
@@ -213,3 +213,122 @@ for (const [name, width, height] of [
     });
   });
 }
+
+test.describe('the unmasking', () => {
+  // The culprit of a case is the same on every device: for bnote it is the usher.
+  test('spelling the name by tapping keys closes the case, with a popup that shows who it was', async ({ page }) => {
+    await page.goto('/play/bnote/40');
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Who is behind the mask?');
+    await expect(page.getByText('6 tries left')).toBeVisible();
+    await expect(page.locator('[data-unmask] [data-slot]')).toHaveCount(5);
+    // No word list, no hint, no way to give up: only the keys.
+    await expect(page.getByRole('button', { name: 'Give me a hint' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: "I'm done" })).toHaveCount(0);
+
+    await page.locator('[data-key="z"]').click();
+    await expect(page.getByText('5 tries left')).toBeVisible();
+    await expect(page.locator('[data-key="z"]')).toBeDisabled();
+    for (const ch of 'ushe') await page.locator(`[data-key="${ch}"]`).click();
+    await expect(page.locator('[data-unmask] [data-slot][data-filled]')).toHaveCount(4);
+    await page.locator('[data-key="r"]').click();
+
+    const pop = page.locator('[data-clue-done]');
+    await expect(pop).toBeVisible();
+    await expect(pop.locator('[data-case-closed]')).toContainText('Case closed');
+    await expect(pop.locator('[data-case-closed]')).toContainText('the usher');
+    await expect(pop).toContainText('5 of 5 letters, 1 wrong');
+    await expect(pop.locator('[data-stars]')).toHaveAttribute('data-stars', '2');
+    await expect(pop.getByRole('link')).toHaveText(/next case/i);
+    // Closing the popup leaves the full result, and the path has the case closed.
+    await pop.getByRole('button', { name: 'See the result' }).click();
+    await expect(pop).toBeHidden();
+    await expect(page.locator('[aria-labelledby="results-title"]')).toBeVisible();
+    await page.goto('/play');
+    await expect(page.locator('[data-case="bnote"]')).toHaveAttribute('data-state', 'done');
+  });
+
+  test('typed on a keyboard, with no wrong letter, it is 3 stars', async ({ page }) => {
+    await page.goto('/play/bnote/40');
+    await page.locator('[data-key]').first().waitFor();
+    await page.keyboard.type('usher', { delay: 220 });
+    const pop = page.locator('[data-clue-done]');
+    await expect(pop.locator('[data-stars]')).toHaveAttribute('data-stars', '3');
+    await expect(pop).toContainText('5 of 5 letters, 0 wrong');
+  });
+
+  test('6 wrong letters end it, and the mask comes off anyway', async ({ page }) => {
+    await page.goto('/play/bnote/40');
+    for (const ch of 'zqxjvw') await page.locator(`[data-key="${ch}"]`).click();
+    const pop = page.locator('[data-clue-done]');
+    await expect(pop).toBeVisible();
+    await expect(pop.locator('[data-case-closed]')).toContainText('the usher');
+    await expect(pop).toContainText('0 of 5 letters, 6 wrong');
+    await expect(pop.locator('[data-stars]')).toHaveAttribute('data-stars', '1');
+    // The keys are done with. A reload shows the result, not a new game and not a second popup.
+    await pop.getByRole('button', { name: 'See the result' }).click();
+    await expect(page.locator('[data-key="a"]')).toBeDisabled();
+    await page.reload();
+    await expect(page.locator('[aria-labelledby="results-title"]')).toBeVisible();
+    await expect(page.locator('[data-clue-done]')).toBeHidden();
+  });
+
+  test('left half way, it comes back with the letters and the tries as they were', async ({ page }) => {
+    await page.goto('/play/bnote/40');
+    for (const ch of 'uzq') await page.locator(`[data-key="${ch}"]`).click();
+    await page.reload();
+    await expect(page.getByText('4 tries left')).toBeVisible();
+    await expect(page.locator('[data-key="u"]')).toHaveAttribute('data-state', 'hit');
+    await expect(page.locator('[data-key="z"]')).toHaveAttribute('data-state', 'miss');
+    await expect(page.locator('[data-unmask] [data-slot][data-filled]')).toHaveCount(1);
+  });
+
+  for (const [name, width, height] of [
+    ['phone 360', 360, 640],
+    ['tablet 768', 768, 1024],
+  ] as const) {
+    test(`${name}: the keys and the name fit, and the popup fits`, async ({ browser }, info) => {
+      const page = await (await browser.newContext({ viewport: { width, height }, hasTouch: true })).newPage();
+      await page.goto('/play/nigeria/40');
+      await page.locator('[data-key]').first().waitFor();
+      const fits = () => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+      expect(await fits()).toBeLessThanOrEqual(0);
+      const keys = await page.locator('[data-key]').evaluateAll((els) => els.map((el) => el.getBoundingClientRect()).filter((r) => r.left < 0 || r.right > window.innerWidth || r.width < 24).length);
+      expect(keys).toBe(0);
+      await page.screenshot({ path: info.outputPath('unmask.png') });
+      for (const ch of 'zqxjvw') {
+        const k = page.locator(`[data-key="${ch}"]`);
+        if (await k.isEnabled()) await k.tap();
+      }
+      for (const ch of 'etaoinshrdlucmfywgpbk') {
+        if (await page.locator('[data-clue-done]').isVisible()) break;
+        const k = page.locator(`[data-key="${ch}"]`);
+        if (await k.isEnabled()) await k.tap();
+      }
+      const pop = page.locator('[data-clue-done]');
+      await expect(pop).toBeVisible();
+      const box = (await pop.boundingBox())!;
+      expect(box.x).toBeGreaterThanOrEqual(0);
+      expect(box.x + box.width).toBeLessThanOrEqual(width);
+      await page.waitForTimeout(1600);
+      await page.screenshot({ path: info.outputPath('unmasked.png') });
+    });
+  }
+});
+
+test('a clue done opens a popup once: stars, the count, and the way on', async ({ page }) => {
+  await page.goto('/play/bnote/1');
+  await page.locator('[data-li]').first().waitFor();
+  await page.getByRole('button', { name: "I'm done" }).click();
+  const pop = page.locator('[data-clue-done]');
+  await expect(pop).toBeVisible();
+  await expect(pop).toContainText(/0 of \d found/);
+  await expect(pop.locator('[data-stars]')).toHaveAttribute('data-stars', '1');
+  // Less than 3 stars: no paper.
+  await expect(pop.locator('[data-burst]')).toHaveCount(0);
+  await pop.getByRole('link', { name: 'Next clue' }).click();
+  await expect(page).toHaveURL(/\/play\/bnote\/2$/);
+  // The result opened again has no popup.
+  await page.goto('/play/bnote/1');
+  await expect(page.locator('[aria-labelledby="results-title"]')).toBeVisible();
+  await expect(page.locator('[data-clue-done]')).toBeHidden();
+});

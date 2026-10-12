@@ -211,11 +211,11 @@ describe('CaseFile styles', () => {
 
   it('only transform and opacity move, nothing grows from scale 0, and it all stops under reduced motion', () => {
     const frames = css.match(/@keyframes[\s\S]*?\n\}/g) ?? [];
-    expect(frames).toHaveLength(3);
+    expect(frames).toHaveLength(4);
     for (const f of frames) for (const prop of f.match(/[a-z-]+(?=\s*:)/g) ?? []) expect(['transform', 'opacity']).toContain(prop);
     expect(css).not.toMatch(/scale\(0(\.[0-7]\d*)?\)/);
     const reduced = css.slice(css.indexOf('prefers-reduced-motion: reduce'));
-    expect(reduced.match(/animation:\s*none/g)).toHaveLength(2);
+    expect(reduced.match(/animation:\s*none/g)).toHaveLength(3);
     expect(reduced).toMatch(/\.mask\s*\{[^}]*opacity:\s*0/);
   });
 

@@ -33,7 +33,8 @@ Navigation, on a phone: no bar across the top. Each screen is its title, one act
 | Play (dock) | Start the next thing | Today's daily, then the next clue | Built |
 | Cases `/play` | Show where you are in the case | The next clue on the path | Built: daily card, then the path. Closed cases fold into one row |
 | Puzzle, clue | Find the words | Done | Built |
-| Result | Say what happened and lead on | Next clue, or Share | Built: one line and 2 buttons, the rest behind "More" |
+| Result | Say what happened and lead on | Next clue, or Share | Built: a popup at the finish of a clue, then one line and 2 buttons, the rest behind "More" |
+| Unmasking | Name the culprit | Pick a letter | Built: the last clue of a case. 6 tries, then the mask comes off either way |
 | You `/me` | Who you are: detective, pet, gear | Select, or Wear | Built. Holds the week, badges and records. `/u/HANDLE` is only what others see |
 | Squad `/players` | The people you play with | Follow, or invite | Built in order: friend streaks, circles, top players, suggestions, find |
 | Ranks `/leaderboard` | Where you stand today | None: it is read | Built: one board at a time, your own row pinned in view |
@@ -99,7 +100,7 @@ Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with 
 
 ### 3. Cases
 
-A case is one puzzle: its passages are the clues and the whole puzzle is the last, the unmasking (SPEC section 6, Games). Each clue gives a piece of the case's secret, and the unmasking shows who hid it (SPEC section 9, The secret).
+A case is one puzzle: its passages are the clues, with a sums clue and a Mirror clue among them, and the last is the unmasking, where the player spells out who the culprit is (SPEC section 6, The unmasking). Each clue gives a piece of the case's secret, and the unmasking shows who hid it (SPEC section 9, The secret).
 
 - [ ] **Set 3m. Pet outfits.** A pet can wear things: a row of outfits per pet on You, tried on the stage like gear, drawn for all 4 pets in every mood. A few are earned, the rest are bought once Paystack is in. Cosmetic only. Needs the art first.
 
@@ -107,7 +108,6 @@ A case is one puzzle: its passages are the clues and the whole puzzle is the las
 
 Engine first (`expectedAnswers`, unit tests), then the `Board`, with no change to the shell. Number and shape games are made and checked by the engine, so they never run out. Designs are in `prototype/Gazecraft Future Games.dc.html`.
 
-- [ ] **Set 4e. Unmask.** Reveal a phrase letter by letter. It becomes the last clue of a case.
 - [ ] **Set 4f. One shape game.** Odd one out, or Trace. Then the rhythm gains a shape.
 - Later, once those are being played: Liar, Relay, Number series, Bury it.
 
@@ -191,6 +191,8 @@ Play with no account, and sponsors get numbers, never people.
 - The avatar on the waiting screen bobs and does not blink.
 - Mirror words are found, not written: they are whatever everyday words a paragraph happens to hold backwards, so they have nothing to do with the puzzle's subject. A case whose text holds fewer than 3 has no Mirror clue.
 - Sums and Mirror clues give no piece of the secret.
+- There are 14 culprits (`culpritWho`), so a player who closes many cases learns the names. The list cannot simply grow: a case finds its culprit by position in it, so adding one changes who the culprit of old cases is.
+- A clue's popup shows in this browser at the finish only. A clue finished on another device shows its result with no popup.
 - A following board shows your own row only when it is among its rows: your place among the people you follow is not worked out by the server.
 - Personal records are kept in the browser, from 9 Oct 2026 on. Stars and closed cases are on the account from 10 Oct 2026; a guest's are in the browser until they sign in.
 - A guest's clues move to the account on sign in with their stars but no points: only a clue played signed in is checked and scored. A points badge earned by a clue shows after the next whole puzzle or daily.
