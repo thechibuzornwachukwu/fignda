@@ -1,4 +1,4 @@
-/** Puzzle screens: they carry their own bottom bar and an All games link. */
+/** Puzzle screens: they carry their own bottom bar and a Cases link. */
 export const isPuzzle = (p: string) => /^\/(play\/[^/]+(\/\d+)?|d\/\d+|p\/[^/]+)\/?$/.test(p);
 
 /** The first minute: one question per screen, and no way out but Skip. */

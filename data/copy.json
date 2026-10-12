@@ -216,7 +216,7 @@
   ],
   "cleanRead": [
     "A clean read. No tip-offs, no wrong picks.",
-    "Clean read. Nothing hinted, nothing wrong."
+    "Clean read. No tip-off, nothing wrong."
   ],
   "readPast": [
     "Your picks ran across {n} of these.",
