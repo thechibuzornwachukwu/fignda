@@ -24,7 +24,7 @@ export const NEEDS: Readonly<Record<Feature, { of: keyof History; n: number }>> 
   boards: { of: 'finished', n: 1 },
   badges: { of: 'verified', n: 1 },
   points: { of: 'verified', n: 1 },
-  circles: { of: 'dailies', n: 3 },
+  circles: { of: 'dailies', n: 1 },
   friendStreaks: { of: 'dailies', n: 3 },
   make: { of: 'plays', n: 5 },
 };

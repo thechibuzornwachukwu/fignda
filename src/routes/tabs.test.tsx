@@ -355,7 +355,7 @@ describe('Players', () => {
     expect(await within(region).findByText(/A streak you share with a friend/)).toBeInTheDocument();
   });
 
-  it('circles wait for the third daily, unless the link asks for them', async () => {
+  it('circles wait for the first daily, unless the link asks for them', async () => {
     world.me = ADA;
     const first = open('/players');
     await screen.findByRole('heading', { level: 2, name: 'Top players' });

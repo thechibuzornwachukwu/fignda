@@ -290,7 +290,8 @@ An entry point appears when the player has done what it scores. The rules hide l
 |---|---|---|
 | boards | 1 finished game | "See the board" under the week on Games |
 | points, badges | 1 verified play | Points and Badges on a profile, the Points list on Players |
-| circles, friend streaks | 3 dailies | Circles and Friend streaks on Players |
+| circles | 1 daily | Circles on Players |
+| friend streaks | 3 dailies | Friend streaks on Players |
 | make | 5 plays | "Make a puzzle" in the Games header, any topic under the list |
 
 - First visit: the daily card and the games list, nothing else.
@@ -337,7 +338,7 @@ A stage, the way a runner game shows its characters: who you are is the front of
 - On the path, closed cases fold into one row, "3 cases closed" with an Award icon, which opens to show them. So the case being worked is never under a pile of finished ones. With every case closed the row starts open. "Play together" is on the open case only.
 - You: the week (`<Week>`) is under the rows. The way to edit the character is a round 44 pencil on the corner of the avatar on the stage, named "Edit character". Under the avatar: the name and the LevelBadge. Under the pet: its name and "Your pet".
 - Squad holds every person. In order: friend streaks, Circles, top players, people to follow (left out when there is nobody to suggest), then "Find a player by handle". Searching shows the results alone.
-- Circles on Squad (`#circles`), signed in: h2 "Circles" with a secondary "Start a circle" to `/circles`, then each circle as a row (its name, "3 players") to `/c/CODE`, where that circle's board is. In no circle: one line saying what a circle is. Offered after the third daily; a player already in one sees it whatever the count says. `/circles` leads back to Squad.
+- Circles on Squad (`#circles`), signed in: h2 "Circles" with a secondary "Start a circle" to `/circles`, then each circle as a row (its name, "3 players") to `/c/CODE`, where that circle's board is. In no circle: one line saying what a circle is. Offered after the first daily; a player already in one sees it whatever the count says. `/circles` leads back to Squad.
 - Ranks is one board at a time, and no circles: today's board for Everyone or Following (Segmented, signed in; `?board=following|everyone`; it opens on Following when you follow anyone). An old `?board=circle` link opens on your crowd. No header action.
 - Your row on a board is pinned in view: it carries the "You" chip on `--surface-2` and sticks to the top or the foot of the screen while the board scrolls past, clear of the dock on a phone. Outside the top of the board it is added as the last row, set apart by a dashed rule, over "You are #41 of 60."
 - `/u/HANDLE` is the public page only, your own too: PageHeader "Player", earned badges, no records and no badges to aim for. Your own still counts your plays that are not verified yet, marked "Unverified", so nothing of yours goes missing. On your own, the one action is "Back to You" to `/me`.
