@@ -280,6 +280,14 @@
     "Filed under the Open Eye. One more message that never arrived unread.",
     "Filed under the Open Eye. Whoever it was for knows less today."
   ],
+  "briefSoon": [
+    "The first step opens soon. The board is ready for it.",
+    "The steps of this case open soon. Read the board while it is quiet."
+  ],
+  "briefMissing": [
+    "That case is not on file. The ones that are sit on the path.",
+    "Nothing is filed under that name. The path has every open case."
+  ],
   "caseOpen": [
     "Something was hidden here. Each clue gives up a piece of its name.",
     "A secret in {n} pieces. Each clue gives up one.",

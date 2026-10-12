@@ -359,6 +359,14 @@ One passage of a catalogue puzzle, played as a game of its own: a clue of its ca
 - A number that is not a passage, or a puzzle that is not cut, opens the whole puzzle. A puzzle that is not ours opens the games list. No dock, as on any puzzle.
 - The result shows the piece this clue gave (`<CasePiece>`): the secret's slots with the new letters popping in, and one `pieceFound` line ("A piece of the secret: OP."). A clue with no letters to give shows the slots and no line.
 
+**Brief `/case/:id`** (a written chapter, `design/stories`)
+A case opens on its board. Until the steps of a chapter can be played the brief is reached by its link only: nothing on the path leads to it, and it has no main action yet.
+- Top to bottom: the way back "Cases", the chapter's title (`gameTitle`), the case board, the brief as 1 line each (`body`, `--muted`), then a `briefSoon` line. A case that is not written: the pet, large and centred, "No such case", a `briefMissing` line and "Back to cases". Chapters are bundled with the game, so nothing loads and there is no skeleton.
+- The case board (`<CaseBoard>`) is a pinboard, the same in both themes because it is a thing: cork `--board` with a `--board-edge` frame, paper `--paper`, photos `--photo`, ink `--paper-ink`, pins `--pin`. What is on it comes from the chapter's `board`, in its order, so no 2 cases open alike. A pin leans by `--board-tilt`, one way then the other.
+  - `item`, `map`, `photo`, `alibi`: a picture (an icon at 20 until photos are in) over its words. `note`: a title (`label`) over its lines in mono. `left`: a dark card with the open eye, named "Left behind: ..." for a screen reader. `faces`: the suspects in 1 row.
+  - A suspect is a photo `--face-max` wide at most: an avatar at 56 drawn from the chapter and the role, the name (14/800), the role without "the" (`caption`, `--paper-muted`). 1 to 3 suspects share 1 row. On a phone 4 sit 2 by 2 and 5 sit 3 and 2, so a role is read whole. From 560 wide all sit in 1 row. A name or a role is 1 line and is cut with an ellipsis, never wrapped and never widening the board, and the whole of it is the title. Cleared: the photo greys and "Cleared" is taped across it.
+  - The scrawl, both lines as 1, italic in `--board-ink`. Then what was found: the `pin` of each step solved, as slips of paper, in order. The board is named "The case board. ITEM. 4 suspects. 2 finds."
+
 **The unmasking `/play/:id/40`** (the last clue of a case)
 The player spells out who the culprit is, a letter at a time. It replaces the whole puzzle as the last clue. The whole puzzle is still played in a room, from a link and from a challenge, and played alone it closes its case as before.
 - The top is 2 things: "Cases" at the left and the tries left at the right, as 6 pips (`--fg` while held, a hollow ring once spent, named "4 tries left"). No category, no clue count, no sound button. Then the title "Who is behind the mask?" and the board.

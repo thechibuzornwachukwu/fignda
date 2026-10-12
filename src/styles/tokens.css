@@ -82,6 +82,9 @@
   --stage-ring: rgba(20, 20, 22, 0.14); --stage-ink: #141416; --stage-chip: rgba(255, 255, 255, 0.7);
   --stage-ring-dark: rgba(255, 255, 255, 0.18); --stage-ink-dark: #f4f4f5; --stage-chip-dark: rgba(255, 255, 255, 0.12);
   --swatch-tick: #ffffff; /* with mix-blend-mode: difference it reads on any swatch */
+  /* The case board: cork, paper and photos. A thing, so it is the same in both themes. */
+  --board: #2b241d; --board-edge: #4a3a2a; --board-ink: #e8dfd0; --paper: #f3ead9; --photo: #fbfaf6; --paper-ink: #1b1b1f; --paper-muted: #5c5c64; --pin: #c2462f;
+  --board-tilt: 2deg; --pin-dot: 12px; --face-max: 104px; /* How far a pin leans, the pin's head, and the widest a suspect's photo runs */
   --z-header: 15; /* Above the mobile bar, below the selection bubble */
 
   /* Added in M3. Values from SPEC sections 3, 4 and 8 and the prototype. */

@@ -36,6 +36,12 @@ export type Board = {
   scrawl?: string[];
 };
 
+/** "the stall owner" as the words under a face: "Stall owner". */
+export const roleLabel = (who: string): string => {
+  const role = who.replace(/^the\s+/i, '');
+  return role.charAt(0).toUpperCase() + role.slice(1);
+};
+
 export type Suspect = {
   /** The role, as the game names a culprit: "the caretaker". One of the `culpritWho` lines. */
   who: string;

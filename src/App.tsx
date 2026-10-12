@@ -6,6 +6,7 @@ import { TabBar } from './components/TabBar';
 import { useDelayedWaiting } from './components/useDelayedWaiting';
 import { Waiting } from './components/Waiting';
 import { hasTabBar, isPuzzle } from './lib/routes';
+import { Brief } from './routes/Brief';
 import { Landing } from './routes/Landing';
 import { OpenByCode } from './routes/OpenByCode';
 import { prefersReducedMotion } from './lib/media';
@@ -82,6 +83,7 @@ export function App() {
         <Route path="play" element={<Games />} />
         <Route path="play/:id" element={<GameById />} />
         <Route path="play/:id/:n" element={<PassageById />} />
+        <Route path="case/:id" element={<Brief />} />
         <Route path="d/:n" element={<DailyGame />} />
         <Route path="d/:n/answers" element={<Answers />} />
         <Route
