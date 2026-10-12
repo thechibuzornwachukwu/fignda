@@ -354,7 +354,7 @@ export function SignIn() {
               <Link to="/privacy" className={styles.inline}>
                 Privacy
               </Link>
-              .
+              . Accounts are for players aged 13 and over.
             </p>
           </div>
         }

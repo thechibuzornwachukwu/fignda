@@ -412,7 +412,7 @@ Fixed bottom bar (`--bg`, top 1px `--line-2`, pad 12 16 + safe area): Ring, coun
 Preview (max 300) + controls: Result / Puzzle, frame 1:1 · 4:5 · 9:16, text Excerpt / Full puzzle, Show my finds toggle ("Off. Nothing is spoiled." / on stamps "Contains answers" / daily "Locked for daily puzzles until tomorrow"). Actions "Share image(s)", "Copy link". Defaults Result, 4:5, Excerpt, off.
 
 **Sign in `/signin`, `/account`** [Gazecraft Sign In]
-Google + email OTP → 6 digit code (auto submit, resend after 30s) → a new account goes to `/welcome` (above) for its character, the outfit question and its name (@handle autofilled from name until edited) → return to `next`, or today's daily when there is none. An account with a profile goes straight to `next`. Account: initial avatar, name, handle, email, dailies played, streak, Sign out, Delete account (confirm).
+The lead ends "Accounts are for players aged 13 and over." The privacy page says the same, and lists every company that receives data under "Who receives data". Google + email OTP → 6 digit code (auto submit, resend after 30s) → a new account goes to `/welcome` (above) for its character, the outfit question and its name (@handle autofilled from name until edited) → return to `next`, or today's daily when there is none. An account with a profile goes straight to `next`. Account: initial avatar, name, handle, email, dailies played, streak, Sign out, Delete account (confirm).
 
 ## 7. Share cards
 - 1080 wide. 1:1 1080 pad 80 · 4:5 1350 pad 88 · 9:16 1920 pad 240 96 260.

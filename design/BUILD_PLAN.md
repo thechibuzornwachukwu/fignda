@@ -167,15 +167,14 @@ Play with no account, and sponsors get numbers, never people.
 - [ ] How long play logs, jobs, reports and notifications are kept, written into `SECURITY.md` and deleted by the hourly job.
 - [ ] Find data kept as counts per word and per puzzle. A deleted account leaves the counts and takes the plays.
 - [ ] Private boards: a data agreement with the school or company, and an organiser who sees only its own members.
-- [ ] Age 13 stated at sign up. EU players under 16 checked before any marketing there.
-- [ ] The privacy page lists every company that receives data and where the database sits.
+- [ ] EU players under 16 checked before any marketing there.
 
 ### 9. Smaller
 
 - [ ] Read the packs against `PUZZLE_STANDARD.md` and fix the worst. `giveaways` flags bible, bnote, broad, nigeria, bpeople, world, afrobeats, eagles.
 - [ ] Pick dailies from the `daily_candidates` view. Nothing reads it yet.
 - [ ] Usage per feature per week from the database. Under 2% of weekly players after a month moves behind "More".
-- [ ] A circle offered after the third daily. "Days this month" on the profile.
+- [ ] "Days this month" on the profile.
 - [ ] A public list of player-made puzzles.
 - [ ] Reminders by email, once SMTP is set.
 - [ ] `e2e/onboarding.spec.ts`, and a count of new visitors who finish a puzzle and then sign in.

@@ -21,6 +21,7 @@ export function Privacy() {
         <p>We keep:</p>
         <ul className={styles.list}>
           <li>Your email address, to send sign in codes. Only you see it.</li>
+          <li>Accounts are for players aged 13 and over. We do not ask for a date of birth.</li>
           <li>The name and handle you choose. They show on cards you share and next to verified scores.</li>
           <li>Your plays: which puzzle, what you found, tip-offs, time and score. We use them for your streak.</li>
           <li>Custom puzzles you create and cards you share.</li>
@@ -76,6 +77,21 @@ export function Privacy() {
       </section>
 
       <section className={styles.section}>
+        <h2 className={styles.h2}>Who receives data</h2>
+        <p>These companies and no others:</p>
+        <ul className={styles.list}>
+          <li>Supabase: your account, your plays and everything else listed above. It also sends the sign in code to your email.</li>
+          <li>Cloudflare: every request to the site and its API. A puzzle you make is also read there by a safety model before it gets a link.</li>
+          <li>Google: your sign in, only if you choose "Continue with Google". We get your email address and name back.</li>
+          <li>OpenRouter, Google and Groq: the topic you type for a puzzle, and nothing about you.</li>
+          <li>
+            The company behind your browser (Google, Apple or Mozilla): a reminder, only if you turn reminders on. It carries the
+            notification to your device.
+          </li>
+        </ul>
+      </section>
+
+      <section className={styles.section}>
         <h2 className={styles.h2}>Deleting everything</h2>
         <p>
           Delete your account from <Link to="/settings">Settings</Link>. It removes your profile, plays,
@@ -84,7 +100,7 @@ export function Privacy() {
         </p>
       </section>
 
-      <p className={styles.updated}>Updated 9 Oct 2026.</p>
+      <p className={styles.updated}>Updated 12 Oct 2026.</p>
     </article>
   );
 }
