@@ -174,7 +174,6 @@ Play with no account, and sponsors get numbers, never people.
 - [ ] Read the packs against `PUZZLE_STANDARD.md` and fix the worst. `giveaways` flags bible, bnote, broad, nigeria, bpeople, world, afrobeats, eagles.
 - [ ] Pick dailies from the `daily_candidates` view. Nothing reads it yet.
 - [ ] Usage per feature per week from the database. Under 2% of weekly players after a month moves behind "More".
-- [ ] "Days this month" on the profile.
 - [ ] A public list of player-made puzzles.
 - [ ] Reminders by email, once SMTP is set.
 - [ ] `e2e/onboarding.spec.ts`, and a count of new visitors who finish a puzzle and then sign in.
