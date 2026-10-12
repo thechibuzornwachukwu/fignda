@@ -7,6 +7,7 @@ Seed (after `npm run db:seed:gen`): `npx supabase db query --linked -f supabase/
 
 ## Direction
 
+- This is a detective game. It began as a word game, and hidden words is now 1 method among several, never the game. Anything that is a word hunt for its own sake gets a reason from a case, moves to practice, or goes (section 4).
 - Offer: a few minutes of real detective work, in place of scrolling. Something is hidden in plain sight. Look closer and uncover it.
 - One skill in every game: looking closely. Each method is a way of looking: at words, numbers, pictures, a room, a torn page.
 - A case is worked the way a detective works one: a brief, the scene, then steps that each end on a lead to the next, then the line-up. A step is one short sitting. The reasons are in `INSIGHTS.html` section 11, and the screens are in the prototype canvas "Gazecraft case storyline" (<https://claude.ai/artifact/Rif6VsH8K4MdDTBXSHSSF4>).
@@ -18,7 +19,9 @@ Seed (after `npm run db:seed:gen`): `npx supabase db query --linked -f supabase/
 - The lead is given, the clearing is earned. Finishing a step always gives its lead, so the trail never stops and nobody is locked out. Clearing a suspect needs 2 stars or more, and a step can be played again to earn it. Why: feeling able is what brings players back, more than rank does (`INSIGHTS.html`, principle 6), and nothing may lock a player out.
 - Backup is not a second currency. Every case comes with 1 favour. It is not earned, not saved, not carried to the next case and never sold. A tip-off costs what a hint costs, and calling a friend in is free. Why: one currency was a rule learned from games whose economy nobody could explain, and each extra thing to count costs more attention than it returns (`INSIGHTS.html`, principle 3).
 - The Open Eye stays masked. Every 5 cases closed gives 1 fact about it, and no case ever names it. Why: an answer that is always one step off holds people more than one that is handed over (`INSIGHTS.html`, principle 4).
-- Chapters are written by us. All 25 cases frame the paragraphs they have as things found at the scene. The first 3 cases a new player meets get new scenes written for them.
+- Chapters are written by us, one file each in `data/chapters`, and `checkChapter` (`src/engine/chapter.ts`) refuses one that is not a fair fight. The first is The long spoon. A pack with no chapter is not a case: it is practice (section 4).
+- A chapter is plotted backward from the culprit's evening: what they needed, what they touched, what they tried to destroy, what they forgot. Every clue is a thing somebody kept for their own reasons, and every clue is used. A suspect may lie, for a reason of their own that a record then shows. The motive is human and nobody judges it: the ending says what was found, what the culprit says and what is still undecided. Why: the stories people call machine-made are tidy, run on 1 track, explain their own point and never let a choice be hard, and the mysteries readers throw down have a culprit with no reason, a clue kept back or an answer reached by luck (`INSIGHTS.html` section 11, Knox's rules, and the reading of 12 Oct 2026).
+- The daily is a quick case: 1 sitting, the same for everybody, 1 try, on the same board. It is a message to the Open Eye, intercepted that day. Its engine, its answers and its scores do not change.
 - Chapters differ. A chapter takes 1 of 5 shapes (who did it, prove it, what is it really, where is it, nothing was taken) and draws 5 or 6 methods to suit it.
 - Pictures are mixed by what they are for. Things a player examines are real photos: the item in the brief, the 4 pictures, a close-up of evidence. People are always drawn: suspects, the culprit, pets, the player. No photo of a real person, ever. A room that is searched is drawn, because every out-of-place thing in it is put there by hand.
 - Photos are free to use and say so. Public domain and CC0 first, then CC BY and CC BY-SA with the credit they ask for. Each photo is stored with its source, its author and its licence, and the game has a credits page. No recognisable person, logo or brand name in any of them. Wikimedia Commons first for home subjects.
@@ -84,6 +87,9 @@ Never for sale: hints, extra tries, time, or anything that touches a score; stre
 - [ ] Set up Google sign in in Supabase. A 6 digit email code is the hardest step for a new player, and one tap removes it. Likely worth more than any change to guest mode.
 - [ ] Decide: the name (suggested: keep Gazecraft, detective theme inside it. Free as .com and .game on 9 Oct 2026, registry check only: gazecraft, keensleuth, sleuthtrail, cluestop, plainsleuth, loupequest).
 - [ ] Decide: do the pets keep "Detective" and "Agent" in their names now that they are pets, and is the cat in the logo the player's pet or its own character.
+- [ ] Decide: what is sold to a church, a school or a wedding now. The price list sells a puzzle on the buyer's subject, which is a word hunt. It can stay that (sold as a drill, or a message hidden for the guests) or become a short case written for them, which costs more to make.
+- [ ] Decide: the 25 packs, one by one (set 4d). Suggested: chapters for the first 3 on the path and the 4 Naija packs, practice for the rest, and retire what reads badly.
+- [ ] Read The long spoon (`data/chapters/the-long-spoon.json`) and say what is wrong with it before 1c is built on it. It is told on Market day (`fruits`): confirm or move it.
 - [ ] Read every photo before it ships. In a first search of Wikimedia Commons, 2 of 7 photos had to be thrown out after a look: a guitar shown from the back, and beads with no string in the shot. The licence was fine on both. Somebody has to look.
 - [ ] Prices for the models above. None is set. Pets open at 3,000, 9,000 and 20,000 points for now (`PARTNER_POINTS` and `partner_slots`): confirm or change.
 - [ ] The robot is named Agent 404. A trademark search on that name has not been run.
@@ -109,15 +115,16 @@ Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with 
 
 ### 1. The case, worked like a detective (next)
 
-Build in this order. Each set is one chapter-sized step and leaves the 25 live cases playable: a case with no written chapter keeps today's flow.
+Build in this order. The aim of 1c to 1g is one thing: The long spoon played from its brief to its ending, by a new player, on a phone. Each set leaves the live game whole: a case with no written chapter keeps today's flow until section 4 moves it.
 
 - [ ] **Set 1c. The brief and the case board.** A case opens on its board, laid out from the chapter's own data, so every case opens differently. The same board is on the case card, gains a pin after each step, and is the line-up and the ending.
 - [ ] **Set 1d. Every step ends on a lead.** A step's result says what was learned and where to go next: it clears a suspect, or gives means, motive or chance. A step's screen is the way back, the marks, a title and the board. No line above the title.
-- [ ] **Set 1e. Hidden words are an intercepted message.** The text is something the suspect sent to a partner, never a witness talking. Each one is filed under the Open Eye, and the file grows across cases.
-- [ ] **Set 1f. The line-up.** The last step of a "who did it": name who is left, with means, motive and chance shown. 2 tries, then the mask comes off. "Spell the name" stays as a method for other shapes.
-- [ ] **Set 1g. Call for backup.** On any step: a tip-off from the pet, a friend called into the step, or the case's 1 favour.
-- [ ] **Set 1i. New methods,** one a set, engine first, in this order: spot what is off (a drawn scene), the torn page, 4 pictures and 1 word (real photos, with the photo store and the credits page it needs), invisible ink, rub the pad, ink not word, what stood here. No clock on any of them. The rest are on the canvas sheet. "Bigger tag" is left out: nothing in a real case asks for it.
-- [ ] **Set 1j. The other 4 shapes,** one written chapter each.
+- [ ] **Set 1e. The evidence is written.** The texts of The long spoon's steps: the blotter, the ribbon and the notice, each written so the engine finds in it the words its fact needs, and the till roll and the gate book as rows the sums engine makes. The notice is a message to the Open Eye, never a witness talking. Each such message is filed under the Open Eye, and the file grows across cases. Answer counts come from the engine.
+- [ ] **Set 1f. The line-up.** The last step of a "who did it": name who is left, with means, motive and chance shown. 2 tries, then the mask comes off. Then the ending: what was found, the confession and what is still undecided. "Spell the name" stays as a method for other shapes.
+- [ ] **Set 1g. A new player lands in The long spoon.** The first minute opens its brief, not a pack. Then it is played by 5 people who have never seen the game, and what stops them is fixed before a second chapter is written.
+- [ ] **Set 1h. Call for backup.** On any step: a tip-off from the pet, a friend called into the step, or the case's 1 favour.
+- [ ] **Set 1i. New methods,** one a set, engine first, in this order: spot what is off (a drawn scene), the torn page, 4 pictures and 1 word (real photos, with the photo store and the credits page it needs), invisible ink, rub the pad, ink not word, what stood here. No clock on any of them. The rest are on the canvas sheet. "Bigger tag" is left out: nothing in a real case asks for it. The long spoon uses 3 methods because 3 are built. Each new one is first used in a chapter, never shipped by itself.
+- [ ] **Set 1j. The other 4 shapes,** one written chapter each, each plotted backward and passed by `checkChapter`, which learns each shape's ending as it comes.
 - Later, once those are being played: Liar, Relay, Number series, Bury it.
 
 ### 2. Sell now
@@ -128,6 +135,18 @@ Build in this order. Each set is one chapter-sized step and leaves the 25 live c
 
 - [ ] **Set 3m. Pet outfits.** A pet can wear things: a row of outfits per pet on You, tried on the stage like gear, drawn for all 4 pets in every mood. A few are earned, the rest are bought once Paystack is in. Cosmetic only. Needs the art first.
 
+### 4. From a word game to a detective game
+
+The path, the daily, Make and the words on screen were built for a word game. This section moves each one. Nothing a player earned is lost: stars, scores, records and badges stay as they are.
+
+- [ ] **Set 4a. The daily is a quick case.** Framing only: "Today's intercept", a 1 line brief above it (who the message was meant for and where it was found) and a 1 line fact on the result. Same text, same answers, same score, same board, 1 try. Each day's fact is filed under the Open Eye.
+- [ ] **Set 4b. The words on screen.** Every "puzzle", "game", "word game" and "find N words" a player reads is checked against the direction: the landing, the first minute, share text, reminders, the SEO pages. A case is a case, a sitting is a step, and a pack is practice. The search pages keep the words people search for until the numbers say what brings players in.
+- [ ] **Set 4c. Practice.** A shelf off the path for packs with no chapter, named as what they are in the story: drills the Open Eye sets its pupils. A drill has no culprit, no secret and no unmasking, so the 14 culprits stop repeating. It keeps its stars and its room.
+- [ ] **Set 4d. The 25 packs are sorted,** one at a time: rewritten as a chapter, moved to practice, or retired. The 3 a new player meets first and the 4 Naija packs get chapters first. The read against `PUZZLE_STANDARD.md` happens here (`giveaways` flags bible, bnote, broad, nigeria, bpeople, world, afrobeats, eagles). A pack that reads badly is rewritten or retired, never just moved.
+- [ ] **Set 4e. The path is chapters.** Once 3 chapters are played, the path shows chapters only and practice is reached from its shelf. Sums and Mirror clues stop being added to a pack by rule: a method is in a case because its chapter put it there.
+- [ ] **Set 4f. A week is a small case.** Later, and only if 4a holds players: the 7 intercepts of a week come from 1 sender, and Sunday's result says what the week was about. The daily board and the run do not change.
+- [ ] **Set 4g. The daily uses other methods,** one at a time, each only after the server can make and check it as it does hidden words.
+
 ### 5. Holiday cases
 
 - [ ] **Set 5a. The case archive.** A place for cases that are not on the path. Empty until 5b.
@@ -137,7 +156,7 @@ Build in this order. Each set is one chapter-sized step and leaves the 25 live c
 
 ### 6. Make, one feature
 
-"Any topic" goes away. It is Make with the system making the choices the player did not make. Engine and server parts exist: `hideForMe`, `topicIcon`, `giveaway`, `safetyCheck`, the job endpoints.
+In the story, Make is a player writing a message that hides words in plain sight, as the Open Eye teaches: a drill for their circle, filed with practice (set 4c). It is never called a case, because it has no suspects and no evidence. "Any topic" goes away. It is Make with the system making the choices the player did not make. Engine and server parts exist: `hideForMe`, `topicIcon`, `giveaway`, `safetyCheck`, the job endpoints.
 
 - [ ] **Set 6a. The background wait.** The any-topic box uses the job (`startGenerate`, `runGenerateJob`, `getGenerateJob`), keeps the job id in the browser and picks the wait up on return.
 - [ ] **Set 6b. Topic icons** on every puzzle: lucide through `<Icon>` from `data/topicIcons.json`, 12 of our own for home subjects in `src/components/icons/`, one default. `--muted`, never lime.
@@ -172,7 +191,6 @@ Play with no account, and sponsors get numbers, never people.
 
 ### 9. Smaller
 
-- [ ] Read the packs against `PUZZLE_STANDARD.md` and fix the worst. `giveaways` flags bible, bnote, broad, nigeria, bpeople, world, afrobeats, eagles.
 - [ ] Pick dailies from the `daily_candidates` view. Nothing reads it yet.
 - [ ] Usage per feature per week from the database. Under 2% of weekly players after a month moves behind "More".
 - [ ] A public list of player-made puzzles.
@@ -206,6 +224,7 @@ Play with no account, and sponsors get numbers, never people.
 - The avatar on the waiting screen bobs and does not blink.
 - Mirror words are found, not written: they are whatever everyday words a paragraph happens to hold backwards, so they have nothing to do with the puzzle's subject. A case whose text holds fewer than 3 has no Mirror clue.
 - Sums and Mirror clues give no piece of the secret.
+- A written chapter's suspects are drawn from the 14 culprits (`culpritWho`), so chapters share faces until more are drawn.
 - There are 14 culprits (`culpritWho`), so a player who closes many cases learns the names. The list cannot simply grow: a case finds its culprit by position in it, so adding one changes who the culprit of old cases is.
 - A clue's popup shows in this browser at the finish only. A clue finished on another device shows its result with no popup.
 - A following board shows your own row only when it is among its rows: your place among the people you follow is not worked out by the server.
