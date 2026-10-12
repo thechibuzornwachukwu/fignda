@@ -5,6 +5,7 @@
 
 import { buildHiddenWords, norm } from './hiddenWords';
 import { buildMirror } from './mirror';
+import { sumsClue } from './sums';
 
 export const SHAPES = ['who-did-it', 'prove-it', 'what-is-it-really', 'where-is-it', 'nothing-was-taken'] as const;
 export type Shape = (typeof SHAPES)[number];
@@ -210,4 +211,25 @@ export function checkChapter(raw: unknown, roles: readonly string[]): string[] {
     if (l.length > LINE_MAX) out.push(`longer than ${LINE_MAX}: ${l}`);
   }
   return out;
+}
+
+/** What a step is played on: the engine that grades it, and the text and words it grades. */
+export type StepPuzzle = { type: 'hidden-words' | 'mirror' | 'buried-sums'; text: string; dict: string[] };
+
+/**
+ * The puzzle of step `n` of a chapter, counted from 1. A hidden-words or a blotter step is its written evidence.
+ * A sums step is a row the sums engine makes from the chapter's id and the step's number, so it is the same on
+ * every device, and a chapter's 2nd sums step is longer than its 1st. Null for a step that is not played on a
+ * board of letters or digits (the line-up), or one whose evidence is not written yet.
+ */
+export function stepPuzzle(chapter: Pick<Chapter, 'id' | 'steps'>, n: number): StepPuzzle | null {
+  const step = chapter.steps[n - 1];
+  if (!step) return null;
+  if (step.method === 'buried-sums') {
+    const earlier = chapter.steps.slice(0, n - 1).filter((s) => s.method === 'buried-sums').length;
+    const made = sumsClue(`${chapter.id}~${n}`, earlier);
+    return { type: 'buried-sums', text: made.text, dict: [...made.dict] };
+  }
+  if ((step.method === 'hidden-words' || step.method === 'mirror') && step.text && step.words?.length) return { type: step.method, text: step.text, dict: step.words.map(norm) };
+  return null;
 }

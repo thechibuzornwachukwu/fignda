@@ -2,7 +2,10 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import pools from '../../data/copy.json';
 import games from '../../data/games.json';
-import { checkChapter, NAME_MAX, type Chapter } from './chapter';
+import { checkChapter, NAME_MAX, stepPuzzle, type Chapter } from './chapter';
+import { buildHiddenWords } from './hiddenWords';
+import { buildMirror } from './mirror';
+import { buildSums } from './sums';
 
 const DIR = 'design/stories';
 const files = readdirSync(DIR).filter((f) => f.endsWith('.json'));
@@ -164,5 +167,34 @@ describe('checkChapter', () => {
     const c = spoon();
     c.ending.after = 'Case closed!';
     expect(checkChapter(c, roles).join(' ')).toMatch(/exclamation/);
+  });
+});
+
+describe('stepPuzzle', () => {
+  it('a written step is played on its own evidence', () => {
+    const c = spoon();
+    expect(stepPuzzle(c, 1)).toMatchObject({ type: 'mirror', dict: ['seven', 'forty', 'lights', 'nine'] });
+    expect(buildMirror(stepPuzzle(c, 1)!).answers.map((a) => a.key).sort()).toEqual(['forty', 'lights', 'nine', 'seven']);
+    expect(buildHiddenWords(stepPuzzle(c, 5)!).answers.map((a) => a.key).sort()).toEqual(['before', 'burn', 'goes', 'name']);
+  });
+
+  it('a sums step is a row the engine makes, the same every time, and the 2nd is longer than the 1st', () => {
+    const c = spoon();
+    const first = stepPuzzle(c, 2)!;
+    const second = stepPuzzle(c, 4)!;
+    expect(first.type).toBe('buried-sums');
+    expect(stepPuzzle(c, 2)).toEqual(first);
+    expect(buildSums(first).answers.length).toBeGreaterThan(0);
+    expect(second.text.length).toBeGreaterThan(first.text.length);
+    expect(second.text).not.toBe(first.text);
+  });
+
+  it('the line-up, a step that is not there and unwritten evidence have no board', () => {
+    const c = spoon();
+    expect(stepPuzzle(c, 6)).toBeNull();
+    expect(stepPuzzle(c, 0)).toBeNull();
+    expect(stepPuzzle(c, 9)).toBeNull();
+    delete c.steps[2]!.text;
+    expect(stepPuzzle(c, 3)).toBeNull();
   });
 });
