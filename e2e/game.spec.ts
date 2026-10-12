@@ -303,7 +303,7 @@ test.describe('touch', () => {
     await page.goto('/play/bible');
     const bar = page.locator('[data-mobile-bar]');
     await expect(bar).toBeVisible();
-    await expect(bar.getByRole('button', { name: 'Hint' })).toBeVisible();
+    await expect(bar.getByRole('button', { name: 'Tip-off' })).toBeVisible();
     await expect(bar.getByRole('button', { name: 'Done' })).toBeVisible();
     const box = (await bar.boundingBox())!;
     expect(Math.round(box.y + box.height)).toBe(740);

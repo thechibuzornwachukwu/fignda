@@ -266,6 +266,20 @@
   "reasonUnmask": [
     "A smudged signature. Some letters are still clear."
   ],
+  "interceptBrief": [
+    "Today's intercept. Pinned up at a bus stop, and meant for the Open Eye.",
+    "Today's intercept. Folded into a library book, and meant for the Open Eye.",
+    "Today's intercept. Chalked on a market wall, and meant for the Open Eye.",
+    "Today's intercept. Left under a windscreen wiper, and meant for the Open Eye.",
+    "Today's intercept. Read out as a radio notice, and meant for the Open Eye.",
+    "Today's intercept. Printed in the small ads, and meant for the Open Eye.",
+    "Today's intercept. Slipped into a parish bulletin, and meant for the Open Eye."
+  ],
+  "interceptFact": [
+    "Filed under the Open Eye. This one was read before it got there.",
+    "Filed under the Open Eye. One more message that never arrived unread.",
+    "Filed under the Open Eye. Whoever it was for knows less today."
+  ],
   "caseOpen": [
     "Something was hidden here. Each clue gives up a piece of its name.",
     "A secret in {n} pieces. Each clue gives up one.",

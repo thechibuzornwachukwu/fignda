@@ -3,6 +3,9 @@
 // the brief, evidence clears suspects one at a time, nothing names the culprit before the end, and every step
 // ends on a lead to the next place. Pure. It reads no file and draws nothing.
 
+import { buildHiddenWords, norm } from './hiddenWords';
+import { buildMirror } from './mirror';
+
 export const SHAPES = ['who-did-it', 'prove-it', 'what-is-it-really', 'where-is-it', 'nothing-was-taken'] as const;
 export type Shape = (typeof SHAPES)[number];
 
@@ -48,6 +51,13 @@ export type Step = {
   method: Method;
   /** The real thing in the detective's hands, and why it exists. */
   thing: string;
+  /**
+   * The evidence itself, on a hidden-words or a blotter step: the text the player searches. A blotter's text is
+   * stored as the blotter holds it, back to front.
+   */
+  text?: string;
+  /** The words hidden in `text`. The engine must find every one, and nothing else. */
+  words?: string[];
   /** What the step leaves behind once it is done. */
   fact: string;
   /** The fact as a few words, pinned to the board when the step is solved. Every step but the last has one. */
@@ -143,6 +153,17 @@ export function checkChapter(raw: unknown, roles: readonly string[]): string[] {
     const at = `step ${i + 1}`;
     if (!METHODS.includes(s.method)) out.push(`${at}: unknown method`);
     if (!text(s.place) || !text(s.thing) || !text(s.fact)) out.push(`${at}: a place, a thing and a fact are needed`);
+    // Written evidence is checked by the engine that will grade it: every word is there, and no other.
+    if (s.text != null || s.words != null) {
+      const words = Array.isArray(s.words) ? s.words.map(norm) : [];
+      if (s.method !== 'hidden-words' && s.method !== 'mirror') out.push(`${at}: only a hidden-words or a blotter step has a text`);
+      else if (!text(s.text) || words.length === 0) out.push(`${at}: a text needs its words`);
+      else {
+        const found = (s.method === 'mirror' ? buildMirror : buildHiddenWords)({ text: s.text!, dict: words }).answers.map((a) => a.key);
+        for (const w of words) if (!found.includes(w)) out.push(`${at}: the engine does not find ${w}`);
+        if (culprit && (has(s.text!, culprit.who) || has(s.text!, culprit.name))) out.push(`${at}: it names the culprit`);
+      }
+    }
     if (c.shape === 'who-did-it' && (s.method === 'line-up') !== last) out.push(`${at}: the line-up is the last step, and only the last`);
     if (last) {
       if (s.lead || s.to || s.clears || s.gives) out.push(`${at}: the last step leads nowhere and clears nobody`);

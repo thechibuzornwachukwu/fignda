@@ -90,6 +90,24 @@ describe('checkChapter', () => {
     expect(checkChapter(c, roles)).toEqual([]);
   });
 
+  it('written evidence holds its words, as the engine reads them', () => {
+    const c = spoon();
+    expect(c.steps.filter((s) => s.text).map((s) => s.words!.length)).toEqual([4, 4, 4]);
+    c.steps[4]!.words = ['goes', 'name', 'burn', 'spoon'];
+    expect(checkChapter(c, roles)).toContain('step 5: the engine does not find spoon');
+    const d = spoon();
+    d.steps[1]!.text = 'A till roll is numbers.';
+    d.steps[1]!.words = ['roll'];
+    expect(checkChapter(d, roles)).toContain('step 2: only a hidden-words or a blotter step has a text');
+    const e = spoon();
+    delete e.steps[2]!.words;
+    expect(checkChapter(e, roles)).toContain('step 3: a text needs its words');
+  });
+
+  it('a blotter is stored back to front', () => {
+    expect(spoon().steps[0]!.text!.startsWith('.neetfif enin')).toBe(true);
+  });
+
   it('nobody new turns up at the end', () => {
     expect(checkChapter({ ...spoon(), culprit: 'the drummer' }, roles)).toContain('the culprit is not one of the suspects');
   });

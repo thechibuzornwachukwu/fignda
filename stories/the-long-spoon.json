@@ -38,7 +38,7 @@
       }
     ],
     "scrawl": [
-      "4 near the hall.",
+      "4 were near.",
       "1 of them."
     ]
   },
@@ -74,6 +74,13 @@
       "place": "The store room",
       "method": "mirror",
       "thing": "The key book. Last night's page is torn across, and the blotter under it kept the wet ink back to front.",
+      "text": ".neetfif enin ta kcaB .sthgil eht rof ytrof xis ta tuo ,neves yeK",
+      "words": [
+        "seven",
+        "forty",
+        "lights",
+        "nine"
+      ],
       "fact": "Key 7 went out at 6.40 pm \"for the lights\" and came back at 9.15 pm. The name was signed in pencil, on the torn half. Pencil does not blot.",
       "pin": "Key 7 out, 6.40 to 9.15",
       "gives": "chance",
@@ -94,6 +101,13 @@
       "place": "The bakery",
       "method": "hidden-words",
       "thing": "The invoice typewriter. Its ribbon kept every key Emeka struck last night, in a row, with no spaces.",
+      "text": "TOTHECOMMITTEEBURNNONAMEONTHESPOONUNTILEVERYVOTEGETSAFRESHCOUNTORITIS2011AGAIN",
+      "words": [
+        "name",
+        "spoon",
+        "vote",
+        "count"
+      ],
       "fact": "It is a petition: burn no name until last year's votes are counted again. The committee secretary signed for it at her door at 7 pm, 40 minutes from the hall.",
       "pin": "Petition, signed at 7 pm",
       "clears": "the baker",
@@ -115,6 +129,13 @@
       "place": "The hall notice board",
       "method": "hidden-words",
       "thing": "A notice nobody remembers pinning up: a room to let, oddly worded. It is a message passed in plain sight, to the Open Eye.",
+      "text": "Room to let. Last let 2 years ago. Estate road, quiet. The light is on a meter. A tub, urn and stove are included. Ask Phoebe for entry.",
+      "words": [
+        "goes",
+        "name",
+        "burn",
+        "before"
+      ],
       "fact": "Read the way the Open Eye teaches, it says: \"Her name goes back before the 20th is burned. I have stood at 9 finals with my back to the crowd.\" It is signed \"her son\".",
       "pin": "Her name goes back",
       "gives": "motive",
