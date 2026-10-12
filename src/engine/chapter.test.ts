@@ -4,7 +4,7 @@ import pools from '../../data/copy.json';
 import games from '../../data/games.json';
 import { checkChapter, NAME_MAX, type Chapter } from './chapter';
 
-const DIR = 'data/chapters';
+const DIR = 'stories';
 const files = readdirSync(DIR).filter((f) => f.endsWith('.json'));
 const read = (f: string) => JSON.parse(readFileSync(join(DIR, f), 'utf8')) as Chapter;
 const roles = pools.culpritWho;
@@ -66,6 +66,28 @@ describe('checkChapter', () => {
     const c = spoon();
     c.suspects[0]!.name = 'Oluwadamilare';
     expect(checkChapter(c, roles)).toContain(`Oluwadamilare is longer than ${NAME_MAX} letters`);
+  });
+
+  it('the opening board is the chapter\'s own, and every solved step pins something to it', () => {
+    const c = spoon();
+    expect(c.board.pins.map((p) => p.kind)).toEqual(['item', 'note', 'left', 'faces']);
+    c.board.pins = [];
+    expect(checkChapter(c, roles)).toContain('the opening board holds 1 to 5 pins');
+    const d = spoon();
+    d.board.pins[0] = { kind: 'item' };
+    expect(checkChapter(d, roles)).toContain('a item pin needs its words');
+    const e = spoon();
+    delete e.steps[1]!.pin;
+    expect(checkChapter(e, roles)).toContain('step 2: a pin of 26 letters at most is needed');
+    const g = spoon();
+    g.steps[1]!.pin = 'Tayo was at the hall';
+    expect(checkChapter(g, roles)).toContain('step 2: it names the culprit');
+  });
+
+  it('a board can open with no faces at all, on a map or a photo', () => {
+    const c = spoon();
+    c.board = { pins: [{ kind: 'map', label: 'The market, by row' }] };
+    expect(checkChapter(c, roles)).toEqual([]);
   });
 
   it('nobody new turns up at the end', () => {

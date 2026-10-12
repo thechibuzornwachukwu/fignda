@@ -36,6 +36,7 @@ src/components/  Logo Icon Button TextLink FilterTabs GameRow Puzzle Letter Word
                  ThemeToggle Header Footer Dialog Skeleton PartnerNote
 src/routes/      Landing Games Game SignIn Account
 src/lib/         supabase, api, storage
+stories/         one file a chapter, checked by src/engine/chapter.ts
 worker/          /api/generate /api/plays /api/og
 supabase/        migrations, RLS
 ```

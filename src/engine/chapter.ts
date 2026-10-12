@@ -1,5 +1,5 @@
 // A written chapter (SPEC section 9, Chapters): a case worked the way a detective works one. One file a chapter
-// in `data/chapters`. This is its shape and the rules a chapter must keep to be a fair fight: everybody is met in
+// in `stories/`. This is its shape and the rules a chapter must keep to be a fair fight: everybody is met in
 // the brief, evidence clears suspects one at a time, nothing names the culprit before the end, and every step
 // ends on a lead to the next place. Pure. It reads no file and draws nothing.
 
@@ -12,6 +12,26 @@ export type Method = (typeof METHODS)[number];
 
 export const PROOFS = ['means', 'motive', 'chance'] as const;
 export type Proof = (typeof PROOFS)[number];
+
+/** What can be pinned to a case board when it opens. `faces` is the suspects, however many there are. */
+export const PIN_KINDS = ['item', 'note', 'left', 'faces', 'map', 'photo', 'alibi'] as const;
+export type PinKind = (typeof PIN_KINDS)[number];
+
+export type Pin = {
+  kind: PinKind;
+  /** The words under a picture. Every kind but a note and the faces has one. */
+  label?: string;
+  /** A note has a title and a few short lines. */
+  title?: string;
+  lines?: string[];
+};
+
+/** The board as it opens on the brief: nearly empty, and different in every case. */
+export type Board = {
+  pins: Pin[];
+  /** Up to 2 short lines written on the board by hand: "4 near the hall.", "1 of them." */
+  scrawl?: string[];
+};
 
 export type Suspect = {
   /** The role, as the game names a culprit: "the caretaker". One of the `culpritWho` lines. */
@@ -30,6 +50,8 @@ export type Step = {
   thing: string;
   /** What the step leaves behind once it is done. */
   fact: string;
+  /** The fact as a few words, pinned to the board when the step is solved. Every step but the last has one. */
+  pin?: string;
   /** The suspect this fact rules out. */
   clears?: string;
   /** Which of the 3 this fact answers. */
@@ -49,6 +71,7 @@ export type Chapter = {
   item: { name: string; line: string };
   place: string;
   brief: string[];
+  board: Board;
   suspects: Suspect[];
   culprit: string;
   steps: Step[];
@@ -60,6 +83,10 @@ export const SUSPECTS_MIN = 1;
 export const SUSPECTS_MAX = 5;
 /** A name sits under a face on the board, on 1 line, 5 across on a phone. */
 export const NAME_MAX = 10;
+/** An opening board is nearly empty. */
+export const PINS_MAX = 5;
+/** A pin is a few words on a scrap of paper. */
+export const PIN_MAX = 26;
 export const STEPS_MIN = 5;
 export const STEPS_MAX = 7;
 /** A line is read on a phone, in one look. */
@@ -84,6 +111,18 @@ export function checkChapter(raw: unknown, roles: readonly string[]): string[] {
   if (!SHAPES.includes(c.shape as Shape)) out.push('unknown shape');
   if (!text(c.item?.name) || !text(c.item?.line)) out.push('the item needs a name and a line');
   if (!Array.isArray(c.brief) || c.brief.length === 0) out.push('no brief');
+
+  // The opening board: what is pinned on it comes from the chapter, so no 2 cases open alike.
+  const opening = Array.isArray(c.board?.pins) ? c.board.pins : [];
+  if (opening.length === 0 || opening.length > PINS_MAX) out.push(`the opening board holds 1 to ${PINS_MAX} pins`);
+  for (const p of opening) {
+    if (!PIN_KINDS.includes(p.kind)) out.push('unknown kind of pin');
+    else if (p.kind === 'note' ? !text(p.title) || !Array.isArray(p.lines) || p.lines.length === 0 : p.kind !== 'faces' && !text(p.label)) out.push(`a ${p.kind} pin needs its words`);
+    if ([text(p.label), text(p.title), ...(Array.isArray(p.lines) ? p.lines.map(text) : [])].some((l) => l.length > PIN_MAX)) out.push(`a ${p.kind} pin is longer than ${PIN_MAX}`);
+  }
+  if (opening.filter((p) => p.kind === 'faces').length > 1) out.push('the faces are pinned once');
+  const scrawl = Array.isArray(c.board?.scrawl) ? c.board.scrawl : [];
+  if (scrawl.length > 2 || scrawl.some((l) => text(l).length > PIN_MAX)) out.push(`the scrawl is 2 lines at most, ${PIN_MAX} letters each`);
 
   if (suspects.length < SUSPECTS_MIN || suspects.length > SUSPECTS_MAX) out.push(`${SUSPECTS_MIN} to ${SUSPECTS_MAX} suspects are needed`);
   if (c.shape === 'who-did-it' && suspects.length === 1) out.push('a "who did it" needs 2 suspects or more');
@@ -111,12 +150,13 @@ export function checkChapter(raw: unknown, roles: readonly string[]): string[] {
     }
     // Every step ends on a lead, and the lead is to the next place.
     if (!text(s.lead)) out.push(`${at}: no lead`);
+    if (!text(s.pin) || text(s.pin).length > PIN_MAX) out.push(`${at}: a pin of ${PIN_MAX} letters at most is needed`);
     if (text(s.to) !== text(steps[i + 1]!.place)) out.push(`${at}: its lead does not go to the next step's place`);
     if (s.clears) cleared.push(s.clears);
     if (s.gives) given.push(s.gives);
     if (s.gives && !PROOFS.includes(s.gives)) out.push(`${at}: gives is means, motive or chance`);
     // Evidence clears. It never points at anybody until the end.
-    if (culprit && [s.thing, s.fact, text(s.lead)].some((l) => has(l, culprit.who) || has(l, culprit.name))) out.push(`${at}: it names the culprit`);
+    if (culprit && [s.thing, s.fact, text(s.lead), text(s.pin)].some((l) => has(l, culprit.who) || has(l, culprit.name))) out.push(`${at}: it names the culprit`);
   });
 
   for (const s of suspects) {

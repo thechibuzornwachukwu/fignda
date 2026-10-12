@@ -14,6 +14,34 @@
     "A card was left on the hooks: one open eye. The room smells faintly of burnt wood.",
     "4 people were near the hall last night. Each has said where they were."
   ],
+  "board": {
+    "pins": [
+      {
+        "kind": "item",
+        "label": "the Long Spoon"
+      },
+      {
+        "kind": "note",
+        "title": "Hall store room",
+        "lines": [
+          "Cabinet locked.",
+          "Empty at 7 am.",
+          "Smells of burnt wood."
+        ]
+      },
+      {
+        "kind": "left",
+        "label": "A card with one open eye"
+      },
+      {
+        "kind": "faces"
+      }
+    ],
+    "scrawl": [
+      "4 near the hall.",
+      "1 of them."
+    ]
+  },
   "suspects": [
     {
       "who": "the stall owner",
@@ -47,6 +75,7 @@
       "method": "mirror",
       "thing": "The key book. Last night's page is torn across, and the blotter under it kept the wet ink back to front.",
       "fact": "Key 7 went out at 6.40 pm \"for the lights\" and came back at 9.15 pm. The name was signed in pencil, on the torn half. Pencil does not blot.",
+      "pin": "Key 7 out, 6.40 to 9.15",
       "gives": "chance",
       "lead": "Somebody had the store room for 2 hours and 35 minutes. Bisi has the most to lose tonight, and she says she was home by 7. Her till roll can say.",
       "to": "Bisi's night stall"
@@ -56,6 +85,7 @@
       "method": "buried-sums",
       "thing": "The till roll from last night. Every sale is on it, with its time.",
       "fact": "She sold a plate every few minutes from 6.30 pm to 9.30 pm, 20 minutes' drive from the hall. She said home because the night stall has no permit.",
+      "pin": "Till roll: across town",
       "clears": "the stall owner",
       "lead": "Bisi has something to give back. Yesterday Emeka told her whole queue that nobody would lift the spoon this year.",
       "to": "The bakery"
@@ -65,6 +95,7 @@
       "method": "hidden-words",
       "thing": "The invoice typewriter. Its ribbon kept every key Emeka struck last night, in a row, with no spaces.",
       "fact": "It is a petition: burn no name until last year's votes are counted again. The committee secretary signed for it at her door at 7 pm, 40 minutes from the hall.",
+      "pin": "Petition, signed at 7 pm",
       "clears": "the baker",
       "lead": "One line of it stops you: \"Count it right, or this is 2011 again.\" In 2011 a name was planed off the spoon. Mr Etim held the plane.",
       "to": "The caretaker's desk"
@@ -74,6 +105,7 @@
       "method": "buried-sums",
       "thing": "The gate book. On Friday nights the yard is a car park, and Mr Etim writes every car in.",
       "fact": "He wrote in 31 cars between 6 pm and 10 pm and never left the gate. The cabinet key hangs with key 7, for the extension reels on the bottom shelf. Whoever took 7 had both.",
+      "pin": "Cabinet key hangs with 7",
       "clears": "the caretaker",
       "gives": "means",
       "lead": "Pressed in the back of the book is a curl of iroko with burned letters: R. OGUNLEYE. \"They said she bought her stew base. Nobody proved it.\" And a notice went up on the hall board overnight.",
@@ -84,6 +116,7 @@
       "method": "hidden-words",
       "thing": "A notice nobody remembers pinning up: a room to let, oddly worded. It is a message passed in plain sight, to the Open Eye.",
       "fact": "Read the way the Open Eye teaches, it says: \"Her name goes back before the 20th is burned. I have stood at 9 finals with my back to the crowd.\" It is signed \"her son\".",
+      "pin": "Her name goes back",
       "gives": "motive",
       "lead": "A key, a reel and 2 hours. A mother's name. 9 finals. They fit 1 of the 4.",
       "to": "The line-up"
