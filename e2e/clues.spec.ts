@@ -17,11 +17,11 @@ const tap = async (page: Page, a: number, b: number) => {
 
 test('the rhythm: after 2 word clues comes a sums clue, played with the same taps', async ({ page }) => {
   await page.goto('/play/bnote/2');
-  await expect(page.getByText(/Clue 2 of \d+/)).toBeVisible();
+  await expect(page.getByRole('list', { name: /clue 2 of \d+/ })).toBeVisible();
   await page.getByRole('button', { name: "I'm done" }).click();
   await page.locator('[data-clue-done]').getByRole('link', { name: 'Next clue' }).click();
   await expect(page).toHaveURL(/\/play\/bnote\/21$/);
-  await expect(page.getByText(/Clue 3 of \d+/)).toBeVisible();
+  await expect(page.getByRole('list', { name: /clue 3 of \d+/ })).toBeVisible();
 
   const title = (await page.getByRole('heading', { level: 1 }).textContent()) ?? '';
   expect(title).toMatch(/^Find 3 runs that add up to 1[0-7]$/);
@@ -412,4 +412,63 @@ test('a clue done opens a popup once: stars, the count, and the way on', async (
   await page.goto('/play/bnote/1');
   await expect(page.locator('[aria-labelledby="results-title"]')).toBeVisible();
   await expect(page.locator('[data-clue-done]')).toBeHidden();
+});
+
+test.describe('the top of a clue', () => {
+  test('the case is a row of marks: done, this one and those to come, with the unmasking last', async ({ page }) => {
+    await page.goto('/play/bible/1');
+    const marks = page.locator('[data-trail] li');
+    await marks.first().waitFor({ state: 'attached' });
+    const count = await marks.count();
+    expect(count).toBeGreaterThanOrEqual(6);
+    await expect(page.getByRole('list', { name: new RegExp(`Bible, clue 1 of ${count}$`) })).toBeVisible();
+    await expect(marks.first()).toHaveAttribute('data-state', 'here');
+    await expect(marks.nth(1)).toHaveAttribute('data-state', 'todo');
+    await expect(marks.nth(2)).toHaveAttribute('data-kind', 'sums');
+    await expect(marks.last()).toHaveAttribute('data-kind', 'unmask');
+    // A clue with stars shows as done on the next one.
+    await page.evaluate(() => localStorage.setItem('gazecraft-stars', JSON.stringify({ 'bible~1': 2 })));
+    await page.goto('/play/bible/2');
+    await expect(page.locator('[data-trail] li').first()).toHaveAttribute('data-state', 'done');
+    await expect(page.locator('[data-trail] li').nth(1)).toHaveAttribute('data-state', 'here');
+    // The unmasking shows the tries there, not the marks.
+    await page.goto('/play/bible/40');
+    await expect(page.locator('[data-tries]')).toBeVisible();
+    await expect(page.locator('[data-trail]')).toHaveCount(0);
+  });
+
+  test('the pet stands beside the line it says, and changes with what happens', async ({ page }) => {
+    await page.goto('/play/bnote/21');
+    await page.locator('[data-li]').first().waitFor();
+    const pet = page.locator('img[src^="/pets/"]:visible').first();
+    await expect(pet).toHaveAttribute('src', /cat-calm/);
+    await page.getByRole('button', { name: 'Give me a hint' }).click();
+    await expect(pet).toHaveAttribute('src', /cat-thinking/);
+    const runs = await runsOn(page);
+    await tap(page, runs[0]![0], runs[0]![1]);
+    await expect(pet).toHaveAttribute('src', /cat-found/);
+    const [a, b] = runs[1]!;
+    await tap(page, a, b + 3 < 18 ? b + 3 : a - 3);
+    await expect(pet).toHaveAttribute('src', /cat-stumped/);
+  });
+
+  for (const [name, width, height] of [
+    ['phone 320', 320, 568],
+    ['tablet 768', 768, 1024],
+  ] as const) {
+    test(`${name}: the marks of the longest case fit beside the way back`, async ({ browser }) => {
+      const context = await browser.newContext({ viewport: { width, height }, hasTouch: true });
+      const page = await context.newPage();
+      await page.goto('/play/bible/5');
+      await page.locator('[data-trail]').waitFor();
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
+      const trail = (await page.locator('[data-trail]').boundingBox())!;
+      const back = (await page.getByRole('link', { name: 'Cases' }).boundingBox())!;
+      expect(trail.x).toBeGreaterThanOrEqual(back.x + back.width);
+      expect(trail.x + trail.width).toBeLessThanOrEqual(width);
+      // One row.
+      expect(trail.height).toBeLessThanOrEqual(24);
+      await context.close();
+    });
+  }
 });

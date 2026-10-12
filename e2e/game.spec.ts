@@ -103,7 +103,7 @@ test.describe('desktop', () => {
 
   test('a sitting: one passage of a puzzle, played alone, with the next one a tap away', async ({ page }) => {
     await page.goto('/play/bible/2');
-    await expect(page.getByText(/Clue 2 of \d+/)).toBeVisible();
+    await expect(page.getByRole('list', { name: /clue 2 of \d+/ })).toBeVisible();
     const title = await page.getByRole('heading', { level: 1 }).textContent();
     expect(title).toMatch(/^Find [3-6] books of the Bible$/);
     // It is a few sentences, not the whole paragraph.
@@ -118,7 +118,7 @@ test.describe('desktop', () => {
     await next.click();
     // Word, word, number: the clue after the 2nd passage is a sums clue.
     await expect(page).toHaveURL(/\/play\/bible\/21$/);
-    await expect(page.getByText(/Clue 3 of \d+/)).toBeVisible();
+    await expect(page.getByRole('list', { name: /clue 3 of \d+/ })).toBeVisible();
     // The passage just left kept its result. The whole puzzle is another game, untouched.
     await page.goto('/play/bible/2');
     await expect(page.getByRole('link', { name: 'Next clue' })).toBeVisible();
@@ -128,7 +128,7 @@ test.describe('desktop', () => {
 
   test('the last sitting leads to the whole puzzle, and a passage that does not exist opens the puzzle', async ({ page }) => {
     await page.goto('/play/bnote/2');
-    await expect(page.getByText(/Clue 2 of \d+/)).toBeVisible();
+    await expect(page.getByRole('list', { name: /clue 2 of \d+/ })).toBeVisible();
     await page.getByRole('button', { name: "I'm done" }).click();
     // Each clue leads to the next until the last one before the whole puzzle.
     const pop = page.locator('[data-clue-done]');

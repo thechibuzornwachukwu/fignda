@@ -106,6 +106,12 @@ export function getPassage(id: string, n: number): { def: GameDef; part: Part } 
   return Number.isInteger(n) ? list.get(n) : undefined;
 }
 
+/** The clue numbers of a catalogue puzzle's case, in the order they are played. Empty when it is not cut. */
+export function caseClues(id: string): number[] {
+  getPassage(id, 1);
+  return [...(parts.get(id)?.entries() ?? [])].sort((x, y) => x[1].part.at - y[1].part.at).map(([n]) => n);
+}
+
 const built = new Map<string, HiddenWordsPuzzle<GameDef>>();
 
 /** Built puzzle, memoised. */

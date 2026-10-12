@@ -8,7 +8,7 @@ import { Ring } from '../components/Ring';
 import { TextLink } from '../components/TextLink';
 import { WordList, type WordListHandle, type WordRow } from '../components/WordList';
 import { dayNo } from '../engine/daily';
-import { culpritName, dailyPool, getGameDef, getPassage, getPuzzle, sponsorFor, type GameDef, type Part } from '../games/catalog';
+import { caseClues, culpritName, dailyPool, getGameDef, getPassage, getPuzzle, sponsorFor, type GameDef, type Part } from '../games/catalog';
 import { dailyInfo, dailyLabel } from '../games/daily';
 import { registry } from '../games/registry';
 import { dayHidLine, playFacts, rareLine, recordLines, skillLines, starsUpLine, todayHoldsLine } from '../games/resultLines';
@@ -18,6 +18,7 @@ import { GuestWall } from '../components/GuestWall';
 import { clueId, clueKind } from '../engine/journey';
 import { UNMASK_TRIES } from '../engine/unmask';
 import { ClueDone } from '../components/ClueDone';
+import { Partner } from '../components/Partner';
 import { HINT_OF, mixedSquad } from '../engine/partners';
 import { caseFile, doneClues, nextClueTo } from '../games/caseFile';
 import { guestBlocked, markGuestPlayed, playKey } from '../lib/guestLimit';
@@ -258,6 +259,20 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
 
   const foundCount = s.found.length;
   const triesLeft = Math.max(0, UNMASK_TRIES - s.wrongs);
+  // The clues of this case, for the row of marks at the top. Read once a visit: it does not change mid clue.
+  const trail = useMemo(() => {
+    if (!part) return [];
+    const done = doneClues();
+    return caseClues(def.id).map((n) => ({ n, kind: clueKind(n), state: n === part.n ? 'here' : done.has(clueId(def.id, n)) || done.has(def.id) ? 'done' : 'todo' }));
+  }, [def.id, part]);
+  // The pet plays along: glad at a find, thrown by a wrong pick, thinking after a hint, calm until then.
+  const tally = `${s.found.length}/${s.wrongs}/${s.hints}`;
+  const [seen, setSeen] = useState({ tally, found: s.found.length, wrongs: s.wrongs, hints: s.hints, mood: 'empty' as 'empty' | 'found' | 'error' | 'loading' });
+  if (seen.tally !== tally) {
+    const mood = s.found.length > seen.found ? 'found' : s.wrongs > seen.wrongs ? 'error' : s.hints > seen.hints ? 'loading' : 'empty';
+    setSeen({ tally, found: s.found.length, wrongs: s.wrongs, hints: s.hints, mood });
+  }
+  const pet = finished ? null : <Partner moment={seen.mood} size={32} className={styles.pet} />;
   const count = daily && !finished ? `${foundCount} found` : `${foundCount} / ${total}`;
   const progress = total ? foundCount / total : 0;
   // A daily hides its count. With 3 or fewer left, and at least 1 found, it says how many and the ring shows the gap.
@@ -520,10 +535,20 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
                 ))}
               </span>
             ) : (
-              <span className={styles.level}>
-                {holiday ? `${holiday} · ` : ''}
-                {def.category} · {part ? `Clue ${part.at} of ${part.of}` : puzzle.difficulty}
-              </span>
+              part ? (
+                // A case as a row of marks, one a clue: done, this one, and those to come. A sums clue is square
+                // and the unmasking is the big one at the end, so the row reads as the case it is.
+                <ol className={styles.trail} aria-label={`${def.category}, clue ${part.at} of ${part.of}`} data-trail>
+                  {trail.map((c) => (
+                    <li key={c.n} className={styles.mark} data-kind={c.kind} data-state={c.state} aria-hidden="true" />
+                  ))}
+                </ol>
+              ) : (
+                <span className={styles.level}>
+                  {holiday ? `${holiday} · ` : ''}
+                  {def.category} · {puzzle.difficulty}
+                </span>
+              )
             )}
             {auth.enabled && !daily && !part && !inRoom && !finished && (
               <button type="button" className={styles.together} onClick={() => navigate(`?room=${newRoomCode()}`)}>
@@ -640,8 +665,9 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
               <TextLink onClick={g.hint}>Give me a hint</TextLink>
               {/* The unmasking has no giving up: it ends when the name is spelled or the tries are gone. */}
               {!unmask && <TextLink onClick={g.finish}>I'm done</TextLink>}
-              <span className={styles.msg} aria-hidden="true">
-                {s.msg}
+              <span className={styles.says} aria-hidden="true">
+                {pet}
+                <span className={styles.msg}>{s.msg}</span>
               </span>
             </div>
           )}
@@ -699,6 +725,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
           left={leftLine}
           time={<Elapsed startAt={s.startAt} endAt={s.endAt} />}
           message={s.msg || (def.type === 'buried-sums' ? (coarse ? 'Swipe across digits, or tap first then last' : 'Drag across the digits') : coarse ? 'Swipe across letters, or tap first then last' : 'Drag across the letters')}
+          pet={pet}
           onHint={g.hint}
           onDone={g.finish}
         />
