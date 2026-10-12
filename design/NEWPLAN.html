@@ -97,7 +97,7 @@
 <body>
 <main>
 
-<p class="num">Gazecraft, new plan, 11 Oct 2026</p>
+<p class="num">Gazecraft, new plan, 12 Oct 2026</p>
 <h1>Every sitting is a clue. Every chapter is a case.</h1>
 <p class="lead">One page for what we build, what we sell, what we refuse, and what nobody can copy. Detail and order of work stay in <code>BUILD_PLAN.md</code>. Behaviour stays in <code>SPEC.md</code>.</p>
 
@@ -125,24 +125,17 @@
 <!-- 2 -->
 <section>
   <p class="num">2. Game flow</p>
-  <h2>One case, start to finish</h2>
-  <p class="sub">A case is a run of clues. Each clue is one short sitting and gives one piece of the secret. The last clue puts the pieces together.</p>
-  <ul class="path" aria-label="A case: 5 clues then the unmasking">
-    <li class="stop w">Word clue</li><li class="dash"></li>
-    <li class="stop w">Word clue</li><li class="dash"></li>
-    <li class="stop">Number clue</li><li class="dash"></li>
-    <li class="stop w">Word clue</li><li class="dash"></li>
-    <li class="stop">Shape clue</li><li class="dash"></li>
-    <li class="stop big">Unmask. Case closed</li>
-  </ul>
-  <p class="legend">Rhythm is fixed, not random: word, word, number, word, shape. Word and number clues are in every case <span class="tag live">Live</span>, with a Mirror clue where the text hides one. Shape clues join when that game is built. The last clue is the unmasking: the player names the culprit.</p>
-  <ol class="flow" style="margin-top:22px">
-    <li><div class="node"><b>Open the case</b><span>One line: what was hidden, and a masked culprit</span></div></li>
-    <li><div class="node"><b>Sitting</b><span>5 to 9 finds, saved if you leave, breaks cost nothing</span></div></li>
-    <li><div class="node"><b>Piece earned</b><span>Stars, a record, the case ring moves</span></div></li>
-    <li><div class="node key"><b>The secret</b><span>Built by the engine from what you found</span></div></li>
-    <li><div class="node win"><b>Unmasked</b><span>The culprit explains. Rank and outfit earned</span></div></li>
+  <h2>One case, worked the way a detective works one</h2>
+  <p class="sub">Each step is one short sitting, ends on a fact, and that fact says where to go next. Evidence clears suspects. It never points at one until the end.</p>
+  <ol class="flow">
+    <li><div class="node"><b>The brief</b><span>What is missing, and the 4 people who could have</span></div></li>
+    <li><div class="node"><b>The scene</b><span>What is out of place</span></div></li>
+    <li><div class="node"><b>A message, intercepted</b><span>Hidden words <span class="tag live">Live</span></span></div></li>
+    <li><div class="node"><b>The records</b><span>Matching numbers <span class="tag live">Live</span></span></div></li>
+    <li><div class="node key"><b>What they tore up</b><span>A receipt, a letter, a transfer slip</span></div></li>
+    <li><div class="node win"><b>The line-up</b><span>Name who is left</span></div></li>
   </ol>
+  <p class="legend">That is a "who did it". A chapter can also be a "prove it", a "what is it really", a "where is it" or a "nothing was taken", each with its own steps and ending. Today every case is word clues, a number clue, a Mirror clue and spelling the culprit's name <span class="tag live">Live</span>.</p>
 </section>
 
 <!-- 3 -->
@@ -171,21 +164,16 @@
 
 <!-- 4 -->
 <section>
-  <p class="num">4. The games</p>
-  <h2>One skill, three families</h2>
-  <p class="sub">Number and shape games are made and checked by the engine, so they never run out. Word games need a written paragraph.</p>
+  <p class="num">4. The methods</p>
+  <h2>One skill, many ways of looking. Each has a physical reason</h2>
+  <p class="sub">A detective never plays a game. Each method is a real thing somebody left, kept or tried to destroy, and the play is what you would do with it in your hands. None has a clock. All 22 are on the prototype canvas.</p>
   <div class="scroll"><table>
-    <thead><tr><th>Family</th><th>Game</th><th>How it plays</th><th>State</th></tr></thead>
+    <thead><tr><th>Reads</th><th>Methods</th><th>State</th></tr></thead>
     <tbody>
-      <tr><th rowspan="5">Verbal</th><td><b>Hidden words</b></td><td>Words hidden across spaces in a paragraph</td><td><span class="tag live">Live</span></td></tr>
-      <tr><td><b>Mirror</b></td><td>Hidden words that read right to left</td><td><span class="tag live">Live</span></td></tr>
-      <tr><td><b>Liar</b></td><td>5 listed, 4 hidden. Call the one that is not there</td><td><span class="tag">Later</span></td></tr>
-      <tr><td><b>Relay</b></td><td>The last letter of a find starts the next</td><td><span class="tag">Later</span></td></tr>
-      <tr><td><b>Unmask</b></td><td>Spell out who the culprit is, a letter at a time, with 6 tries. The last clue of a case</td><td><span class="tag live">Live</span></td></tr>
-      <tr><th rowspan="2">Quantitative</th><td><b>Buried sums</b></td><td>Runs of digits that add up to a target</td><td><span class="tag live">Live</span></td></tr>
-      <tr><td><b>Number series</b></td><td>One number breaks the rule. Spot it</td><td><span class="tag">Later</span></td></tr>
-      <tr><th rowspan="2">Non-verbal</th><td><b>Odd one out</b></td><td>A row of shapes, one differs by a detail</td><td><span class="tag next">Next</span></td></tr>
-      <tr><td><b>Trace</b></td><td>Shapes buried in a grid, with decoys</td><td><span class="tag">Later</span></td></tr>
+      <tr><th>Messages and papers</th><td><b>Hidden words</b> (a coded notice, a typewriter ribbon), <b>the blotter</b> (read backwards), <b>spell the name</b> (a smudged signature). Then the torn page, invisible ink, rub the pad, match the hand</td><td><span class="tag live">3 live</span></td></tr>
+      <tr><th>Records and numbers</th><td><b>Matching numbers</b> (a key log, a till roll). Then the marked notes, the books that do not balance, put it in order</td><td><span class="tag live">1 live</span></td></tr>
+      <tr><th>Traces</th><td>Spot what is off, what stood here, match the print, match the sole, before and after, the thing from the wrong year, ink not word</td><td><span class="tag next">Next</span></td></tr>
+      <tr><th>People</th><td>4 pictures and 1 word, the line-up, 2 statements that disagree, the description</td><td><span class="tag next">Next</span></td></tr>
     </tbody>
   </table></div>
 </section>
@@ -343,9 +331,9 @@
   <p class="num">10. Order of work</p>
   <h2>What to build, in this order</h2>
   <ol class="order">
+    <li><b>The case, worked like a detective.</b> The share card that names nobody, one chapter written in full, the brief and the suspect board, leads, the line-up, backup, then the new methods and the other 4 shapes.</li>
     <li><b>Sell now.</b> The pitch and price list. Then ask 20 people.</li>
     <li><b>Pet outfits.</b> Things a pet can wear. Needs the art first.</li>
-    <li><b>One shape game.</b> Odd one out or Trace.</li>
     <li><b>Holiday cases.</b> Each with its own theme. The archive ships with the first.</li>
     <li><b>Make takes over any-topic.</b> One box, a preview, player-owned puzzles feeding the library.</li>
     <li><b>Server rewards.</b> Rest days, skill badges, crowns, then leagues.</li>

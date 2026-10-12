@@ -8,9 +8,19 @@ Seed (after `npm run db:seed:gen`): `npx supabase db query --linked -f supabase/
 ## Direction
 
 - Offer: a few minutes of real detective work, in place of scrolling. Something is hidden in plain sight. Look closer and uncover it.
-- One skill in every game: looking closely. Words and numbers today, shapes next.
-- A case is a run of clues. A clue is one short sitting. The last clue puts the pieces together and unmasks who hid the secret.
-- A new culprit each case, an ordinary character under a disguise. One unseen figure links the cases: every culprit leaves the same calling card.
+- One skill in every game: looking closely. Each method is a way of looking: at words, numbers, pictures, a room, a torn page.
+- A case is worked the way a detective works one: a brief, the scene, then steps that each end on a lead to the next, then the line-up. A step is one short sitting. The reasons are in `INSIGHTS.html` section 11, and the screens are in the prototype canvas "Gazecraft case storyline" (<https://claude.ai/artifact/Rif6VsH8K4MdDTBXSHSSF4>).
+- Nobody leaves clues on purpose. A clue is a trace left by accident, a record somebody else kept, a message meant for somebody else, or something the suspect tried to destroy.
+- Every method has a physical reason. A detective never plays a game: each method is a real thing somebody left, kept or tried to destroy (a blotter that kept a note back to front, a page written in lemon juice, a torn receipt), and the play is what you would do with it in your hands. A method with no such reason is left out. The full list, 22 of them, is the sheet "Every method has a physical reason" on the prototype canvas.
+- Evidence clears suspects. Every suspect is met in the brief and nobody new turns up at the end.
+- The lead is given, the clearing is earned. Finishing a step always gives its lead, so the trail never stops and nobody is locked out. Clearing a suspect needs 2 stars or more, and a step can be played again to earn it. Why: feeling able is what brings players back, more than rank does (`INSIGHTS.html`, principle 6), and nothing may lock a player out.
+- Backup is not a second currency. Every case comes with 1 favour. It is not earned, not saved, not carried to the next case and never sold. A tip-off costs what a hint costs, and calling a friend in is free. Why: one currency was a rule learned from games whose economy nobody could explain, and each extra thing to count costs more attention than it returns (`INSIGHTS.html`, principle 3).
+- The Open Eye stays masked. Every 5 cases closed gives 1 fact about it, and no case ever names it. Why: an answer that is always one step off holds people more than one that is handed over (`INSIGHTS.html`, principle 4).
+- Chapters are written by us. All 25 cases frame the paragraphs they have as things found at the scene. The first 3 cases a new player meets get new scenes written for them.
+- Chapters differ. A chapter takes 1 of 5 shapes (who did it, prove it, what is it really, where is it, nothing was taken) and draws 5 or 6 methods to suit it.
+- Pictures are mixed by what they are for. Things a player examines are real photos: the item in the brief, the 4 pictures, a close-up of evidence. People are always drawn: suspects, the culprit, pets, the player. No photo of a real person, ever. A room that is searched is drawn, because every out-of-place thing in it is put there by hand.
+- Photos are free to use and say so. Public domain and CC0 first, then CC BY and CC BY-SA with the credit they ask for. Each photo is stored with its source, its author and its licence, and the game has a credits page. No recognisable person, logo or brand name in any of them. Wikimedia Commons first for home subjects.
+- A new culprit each case, an ordinary character under a disguise. One unseen figure links the cases, the Open Eye: every culprit leaves its card, and it teaches people to pass messages in plain sight. That is why words are hidden at all. A case's hidden-words step is a message to the Open Eye, intercepted.
 - The player has a pet that comes along on every case: Detective X (the cat, and the logo), Detective Tobs (the dino), Detective Puff (the dog) and Agent 404 (the robot). A player picks 1, free, and unlocks the others with points. They are pets, not partners: something a player owns, dresses and shows off, which is what makes an outfit for one worth buying. Who they are: `design/brand/index.html`.
 - Tone: the motive is mischief, pride or a surprise, never harm. No violence, gangs, weapons, romance or fear.
 - For all ages, not a children's product. Accounts from 13. Younger players join on a parent's device or room.
@@ -72,6 +82,7 @@ Never for sale: hints, extra tries, time, or anything that touches a score; stre
 - [ ] Set up Google sign in in Supabase. A 6 digit email code is the hardest step for a new player, and one tap removes it. Likely worth more than any change to guest mode.
 - [ ] Decide: the name (suggested: keep Gazecraft, detective theme inside it. Free as .com and .game on 9 Oct 2026, registry check only: gazecraft, keensleuth, sleuthtrail, cluestop, plainsleuth, loupequest).
 - [ ] Decide: do the pets keep "Detective" and "Agent" in their names now that they are pets, and is the cat in the logo the player's pet or its own character.
+- [ ] Read every photo before it ships. In a first search of Wikimedia Commons, 2 of 7 photos had to be thrown out after a look: a guitar shown from the back, and beads with no string in the shot. The licence was fine on both. Somebody has to look.
 - [ ] Prices for the models above. None is set. Pets open at 3,000, 9,000 and 20,000 points for now (`PARTNER_POINTS` and `partner_slots`): confirm or change.
 - [ ] The robot is named Agent 404. A trademark search on that name has not been run.
 - [ ] A list of 20 people to ask first: brands, schools, churches, event planners.
@@ -94,22 +105,29 @@ One set at a time. Each set is small, works on its own and leaves the live game 
 
 Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with unit tests, and the UI never re-implements matching. Every line comes from `src/copy` pools. Scores on existing boards do not change. Read `SECURITY.md` before data, auth or Worker work. Motion follows `SPEC.md` section 8 (from <https://github.com/emilkowalski/skills>). A list, board or section that can be empty or fail to load says so with the player's pet (`<PartnerNote>`, `SPEC.md` section 4): large and centred when the empty state is the screen, small beside the line inside a busy one, one pet a screen. Anything that loads ships with its skeleton (`SPEC.md` section 4, Skeletons): a new screen, section or component gets a matching one in the same set, with a row in the table there, and a set that changes a layout changes its skeleton.
 
-### 1. Sell now
+### 1. The case, worked like a detective (next)
 
-- [ ] **Set 1c.** A one page pitch with the price list.
+Build in this order. Each set is one chapter-sized step and leaves the 25 live cases playable: a case with no written chapter keeps today's flow.
 
-### 3. Cases
+- [ ] **Set 1a. The share card names nobody.** A case's culprit is the same for every player, and the live card prints "Unmasked: the caretaker". It says what was done and leaves the name out. Do this first.
+- [ ] **Set 1b. A chapter is written down.** One file per chapter: its shape, the item, the place, 4 suspects, and its steps in order, each with a place, a method, the fact it leaves and where that leads. One chapter in full first: The missing shekere, a "who did it".
+- [ ] **Set 1c. The brief and the suspect board.** A case opens on what is missing and who could have. The board is on the case card and at the line-up.
+- [ ] **Set 1d. Every step ends on a lead.** A step's result says what was learned and where to go next: it clears a suspect, or gives means, motive or chance. A step's screen is the way back, the marks, a title and the board. No line above the title.
+- [ ] **Set 1e. Hidden words are an intercepted message.** The text is something the suspect sent to a partner, never a witness talking. Each one is filed under the Open Eye, and the file grows across cases.
+- [ ] **Set 1f. The line-up.** The last step of a "who did it": name who is left, with means, motive and chance shown. 2 tries, then the mask comes off. "Spell the name" stays as a method for other shapes.
+- [ ] **Set 1g. Call for backup.** On any step: a tip-off from the pet (the hint, renamed in the copy pools), a friend called into the step, or the case's 1 favour.
+- [ ] **Set 1h. The methods already built get their reasons.** Hidden words is a coded notice or a typewriter ribbon. Reading backwards is a blotter. Spelling the name is a smudged signature. Matching numbers is a key log or a till roll. Copy and framing only: the engines do not change.
+- [ ] **Set 1i. New methods,** one a set, engine first, in this order: spot what is off (a drawn scene), the torn page, 4 pictures and 1 word (real photos, with the photo store and the credits page it needs), invisible ink, rub the pad, ink not word, what stood here. No clock on any of them. The rest are on the canvas sheet. "Bigger tag" is left out: nothing in a real case asks for it.
+- [ ] **Set 1j. The other 4 shapes,** one written chapter each.
+- Later, once those are being played: Liar, Relay, Number series, Bury it.
 
-A case is one puzzle: its passages are the clues, with a sums clue and a Mirror clue among them, and the last is the unmasking, where the player spells out who the culprit is (SPEC section 6, The unmasking). Each clue gives a piece of the case's secret, and the unmasking shows who hid it (SPEC section 9, The secret).
+### 2. Sell now
+
+- [ ] **Set 2a.** A one page pitch with the price list.
+
+### 3. Pets
 
 - [ ] **Set 3m. Pet outfits.** A pet can wear things: a row of outfits per pet on You, tried on the stage like gear, drawn for all 4 pets in every mood. A few are earned, the rest are bought once Paystack is in. Cosmetic only. Needs the art first.
-
-### 4. More games
-
-Engine first (`expectedAnswers`, unit tests), then the `Board`, with no change to the shell. Number and shape games are made and checked by the engine, so they never run out. Designs are in `prototype/Gazecraft Future Games.dc.html`.
-
-- [ ] **Set 4f. One shape game.** Odd one out, or Trace. Then the rhythm gains a shape.
-- Later, once those are being played: Liar, Relay, Number series, Bury it.
 
 ### 5. Holiday cases
 
