@@ -290,8 +290,7 @@ An entry point appears when the player has done what it scores. The rules hide l
 |---|---|---|
 | boards | 1 finished game | "See the board" under the week on Games |
 | points, badges | 1 verified play | Points and Badges on a profile, the Points list on Players |
-| circles | 1 daily | Circles on Players |
-| friend streaks | 3 dailies | Friend streaks on Players |
+| circles, friend streaks | 1 daily | Circles and Friend streaks on Players |
 | make | 5 plays | "Make a puzzle" in the Games header, any topic under the list |
 
 - First visit: the daily card and the games list, nothing else.

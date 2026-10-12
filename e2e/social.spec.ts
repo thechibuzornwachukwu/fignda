@@ -29,7 +29,7 @@ test('a new player sees a welcome, not a wall of zeros', async ({ page, browser 
 
 test('friend streak: a link starts it in one tap, and either side can end it', async ({ page, browser }) => {
   await newPlayer(page, 'Ada');
-  // A new player has not unlocked friend streaks yet (3 dailies). The direct link always works.
+  // A new player has not unlocked friend streaks yet (1 daily). The direct link always works.
   await page.goto('/players');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Squad');
   await expect(page.getByRole('region', { name: 'Friend streaks' })).toHaveCount(0);

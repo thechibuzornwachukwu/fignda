@@ -257,10 +257,10 @@ export function Players() {
     <div className={styles.page}>
       <PageHeader title="Squad" />
 
-      {/* Friend streaks appear after the third daily. A player already in one, or asked into one, sees it at once. */}
+      {/* Friend streaks appear after the first daily. A player already in one, or asked into one, sees it at once. */}
       {!searching && me && <FriendStreaks quiet={!open.friendStreaks && !asked} />}
 
-      {/* Circles are offered after the first daily. A player already in one sees them whatever the count says. */}
+      {/* Circles are offered after the first daily too. A player already in one sees them whatever the count says. */}
       {!searching && me && <YourCircles quiet={!open.circles && !askedCircles} />}
 
       {!searching && <TopPlayers points={open.points} />}

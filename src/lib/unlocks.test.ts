@@ -23,11 +23,12 @@ describe('unlocks', () => {
     expect(u.points).toBe(true);
   });
 
-  it('circles appear after the first daily, friend streaks after the third', () => {
+  it('circles and friend streaks appear after the first daily', () => {
     expect(unlocks(none).circles).toBe(false);
-    expect(unlocks({ ...none, dailies: 1 }).circles).toBe(true);
-    expect(unlocks({ ...none, dailies: 2 }).friendStreaks).toBe(false);
-    expect(unlocks({ ...none, dailies: 3 }).friendStreaks).toBe(true);
+    expect(unlocks(none).friendStreaks).toBe(false);
+    const u = unlocks({ ...none, dailies: 1 });
+    expect(u.circles).toBe(true);
+    expect(u.friendStreaks).toBe(true);
   });
 
   it('Make a puzzle appears after 5 plays', () => {
@@ -37,7 +38,7 @@ describe('unlocks', () => {
 
   it('a single play unlocks only what 1 play scores', () => {
     const u = unlocks({ finished: 1, verified: 1, dailies: 1, plays: 1 });
-    expect(unlockedList(u)).toEqual(['boards', 'badges', 'points', 'circles']);
+    expect(unlockedList(u)).toEqual(['boards', 'badges', 'points', 'circles', 'friendStreaks']);
   });
 
   it('a returning player with history sees everything', () => {
