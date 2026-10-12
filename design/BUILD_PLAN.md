@@ -177,7 +177,7 @@ Play with no account, and sponsors get numbers, never people.
 - [ ] Usage per feature per week from the database. Under 2% of weekly players after a month moves behind "More".
 - [ ] A circle offered after the third daily. "Days this month" on the profile.
 - [ ] A public list of player-made puzzles.
-- [ ] "Gazecraft" in page titles. Reminders by email, once SMTP is set.
+- [ ] Reminders by email, once SMTP is set.
 - [ ] `e2e/onboarding.spec.ts`, and a count of new visitors who finish a puzzle and then sign in.
 
 ## Checks still owed
