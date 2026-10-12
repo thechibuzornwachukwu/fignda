@@ -52,13 +52,13 @@ test('demo completes by drag and links to the hard puzzle', async ({ page }) => 
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Find 26 Nigerian names');
 });
 
-test('hint cycles Give me a hint, Show it, Play again', async ({ page }) => {
+test('hint cycles Ask for a tip-off, Show it, Play again', async ({ page }) => {
   await page.goto('/');
   const S = await letters(page);
-  const hint = page.locator('#how').getByRole('button', { name: /Give me a hint|Show it|Play again/ });
+  const hint = page.locator('#how').getByRole('button', { name: /Ask for a tip-off|Show it|Play again/ });
 
   for (const w of DEMO) {
-    await expect(hint).toHaveText('Give me a hint');
+    await expect(hint).toHaveText('Ask for a tip-off');
     await hint.click();
     await expect(page.locator(`[data-li="${S.indexOf(w)}"]`)).toHaveAttribute('data-hint', 'true');
     await expect(hint).toHaveText('Show it');

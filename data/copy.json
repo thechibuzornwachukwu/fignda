@@ -215,7 +215,7 @@
     "Day 1 of a new run. Your best is {n}. Go and beat it."
   ],
   "cleanRead": [
-    "A clean read. No hints, no wrong picks.",
+    "A clean read. No tip-offs, no wrong picks.",
     "Clean read. Nothing hinted, nothing wrong."
   ],
   "readPast": [
@@ -251,6 +251,20 @@
   ],
   "journeyEmpty": [
     "No cases on the path yet. Every puzzle is in All games."
+  ],
+  "reasonWords": [
+    "A coded notice. The words hide in plain sight.",
+    "A typewriter ribbon. It kept every key struck and no spaces."
+  ],
+  "reasonMirror": [
+    "A blotter. It kept the note back to front."
+  ],
+  "reasonSums": [
+    "A key log. Some entries add up to the target.",
+    "A till roll. Some sales add up to the target."
+  ],
+  "reasonUnmask": [
+    "A smudged signature. Some letters are still clear."
   ],
   "caseOpen": [
     "Something was hidden here. Each clue gives up a piece of its name.",
@@ -356,8 +370,8 @@
     "{n} of 3 stars. Your best on this one."
   ],
   "skillNoHint": [
-    "Every word, and no hints.",
-    "All found with no hints."
+    "Every word, and no tip-offs.",
+    "All found with no tip-offs."
   ],
   "skillDeep": [
     "{w} ran across {n} words. You followed it.",

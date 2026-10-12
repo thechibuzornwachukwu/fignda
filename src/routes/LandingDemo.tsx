@@ -187,7 +187,7 @@ export function LandingDemo({ guide = false }: { guide?: boolean }) {
           {guiding && <GuideHand stage={stage} first={lead[0]} last={lead[1]} />}
         </div>
         <div className={styles.actions}>
-          <TextLink onClick={onHint}>{done ? 'Play again' : showing ? 'Show it' : 'Give me a hint'}</TextLink>
+          <TextLink onClick={onHint}>{done ? 'Play again' : showing ? 'Show it' : 'Ask for a tip-off'}</TextLink>
           {guiding && <TextLink onClick={endGuide}>Skip the guide</TextLink>}
           <span className={styles.msg} role="status">
             {s.msg}

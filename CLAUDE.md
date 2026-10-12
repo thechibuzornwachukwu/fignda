@@ -20,6 +20,7 @@ Design: `/design`. Read `SPEC.md` before UI work, `SECURITY.md` before data, aut
 
 ## Copy
 - The cat, the dino, the dog and the robot are the player's pets. On screen say "pet", never "partner". Code keeps `partner`.
+- The pet's help is a "tip-off" on screen, never a "hint". Code keeps `hint`.
 - No em dashes. No exclamation marks. Short sentences. Digits for numbers.
 - Feedback lines come only from `src/copy` pools (`data/copy.json`) via `pick` / `onFound`. Never inline them.
 

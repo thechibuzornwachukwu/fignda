@@ -136,17 +136,17 @@ test.describe('edges', () => {
   test('a hint on a sums clue marks the first digit of a run, and on a Mirror clue the right end of a word', async ({ page }) => {
     await page.goto('/play/bnote/21');
     const runs = await runsOn(page);
-    await page.getByRole('button', { name: 'Give me a hint' }).click();
+    await page.getByRole('button', { name: 'Ask for a tip-off' }).click();
     // A new player's pet is Detective X: the earliest run.
     await expect(page.locator(`[data-li="${runs[0]![0]}"]`)).toHaveAttribute('data-hint', 'true');
-    await expect(page.getByText('1 hint')).toBeVisible();
+    await expect(page.getByText('1 tip-off')).toBeVisible();
     // Asked again with the hand still there: no second charge.
-    await page.getByRole('button', { name: 'Give me a hint' }).click();
-    await expect(page.getByText('1 hint')).toBeVisible();
+    await page.getByRole('button', { name: 'Ask for a tip-off' }).click();
+    await expect(page.getByText('1 tip-off')).toBeVisible();
 
     await page.goto('/play/bible/31');
     await stream(page);
-    await page.getByRole('button', { name: 'Give me a hint' }).click();
+    await page.getByRole('button', { name: 'Ask for a tip-off' }).click();
     const at = Number(await page.locator('[data-hint="true"]').getAttribute('data-li'));
     // Tapping the hinted letter and one 3 to the left is a word of 4 that starts at the hand, or a longer one does.
     const S = (await stream(page)).toLowerCase();
@@ -166,7 +166,7 @@ test.describe('edges', () => {
       }, pet);
       await page.goto('/play/bnote/21');
       const runs = await runsOn(page);
-      await page.getByRole('button', { name: 'Give me a hint' }).click();
+      await page.getByRole('button', { name: 'Ask for a tip-off' }).click();
       await expect(page.locator('[data-hint="true"]'), pet).toHaveAttribute('data-li', String(pick(runs)[0]));
     }
   });
@@ -242,17 +242,17 @@ test.describe('the unmasking', () => {
     expect(bank).not.toContain('u');
     // No word list and no giving up. There is a hint.
     await expect(page.getByRole('button', { name: "I'm done" })).toHaveCount(0);
-    await expect(page.getByRole('button', { name: 'Give me a hint' })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Ask for a tip-off' })).toBeVisible();
   });
 
   test('a hint rings a key that is in the name, and asked again it costs nothing more', async ({ page }) => {
     await page.goto('/play/bnote/40');
-    await page.getByRole('button', { name: 'Give me a hint' }).click();
+    await page.getByRole('button', { name: 'Ask for a tip-off' }).click();
     const ringed = page.locator('[data-key][data-hint]');
     await expect(ringed).toHaveCount(1);
     const ch = (await ringed.getAttribute('data-key'))!;
     expect('sher').toContain(ch);
-    await page.getByRole('button', { name: 'Give me a hint' }).click();
+    await page.getByRole('button', { name: 'Ask for a tip-off' }).click();
     await expect(page.locator('[data-key][data-hint]')).toHaveAttribute('data-key', ch);
     // Picking it clears the ring, and a hinted game is not 3 stars.
     await ringed.click();
@@ -442,7 +442,7 @@ test.describe('the top of a clue', () => {
     await page.locator('[data-li]').first().waitFor();
     const pet = page.locator('img[src^="/pets/"]:visible').first();
     await expect(pet).toHaveAttribute('src', /cat-calm/);
-    await page.getByRole('button', { name: 'Give me a hint' }).click();
+    await page.getByRole('button', { name: 'Ask for a tip-off' }).click();
     await expect(pet).toHaveAttribute('src', /cat-thinking/);
     const runs = await runsOn(page);
     await tap(page, runs[0]![0], runs[0]![1]);

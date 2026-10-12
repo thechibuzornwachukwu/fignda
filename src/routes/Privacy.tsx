@@ -22,7 +22,7 @@ export function Privacy() {
         <ul className={styles.list}>
           <li>Your email address, to send sign in codes. Only you see it.</li>
           <li>The name and handle you choose. They show on cards you share and next to verified scores.</li>
-          <li>Your plays: which puzzle, what you found, hints, time and score. We use them for your streak.</li>
+          <li>Your plays: which puzzle, what you found, tip-offs, time and score. We use them for your streak.</li>
           <li>Custom puzzles you create and cards you share.</li>
           <li>The character you design. It is saved as a short code of your choices, never a photo, and shows next to your name.</li>
           <li>

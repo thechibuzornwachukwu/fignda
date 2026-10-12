@@ -8,7 +8,7 @@ import { Ring } from '../components/Ring';
 import { TextLink } from '../components/TextLink';
 import { WordList, type WordListHandle, type WordRow } from '../components/WordList';
 import { dayNo } from '../engine/daily';
-import { caseClues, culpritName, dailyPool, getGameDef, getPassage, getPuzzle, sponsorFor, type GameDef, type Part } from '../games/catalog';
+import { caseClues, dailyPool, getGameDef, getPassage, getPuzzle, sponsorFor, type GameDef, type Part } from '../games/catalog';
 import { dailyInfo, dailyLabel } from '../games/daily';
 import { registry } from '../games/registry';
 import { dayHidLine, playFacts, rareLine, recordLines, skillLines, starsUpLine, todayHoldsLine } from '../games/resultLines';
@@ -337,18 +337,18 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
     return foundRows.concat(rest);
   }, [answers, s.found, daily, finished, mod, puzzle, foundSet]);
 
-  // A closed case is shared as what it is: who was unmasked, in which case, with how many stars. Never a count of letters.
+  // A closed case is shared as what was done: which case, with how many stars. Never the culprit's name (it is the same
+  // for every player) and never a count of letters.
   const achievement = useMemo(() => {
     if (!unmask || !finished) return undefined;
-    const who = culpritName(def.id);
     const earned = starsFor({ finished: true, found: s.found.length, total, hints: s.hints, wrongs: s.wrongs });
     const base = shareUrl(`/play/${def.id}/1`);
     return {
       kicker: `Case closed · ${def.category}`,
-      title: `Unmasked: ${who}`,
+      title: 'Culprit unmasked',
       line: `${def.title} · ${earned} of 3 stars`,
       cta: 'Can you close it?',
-      text: `Gazecraft · Case closed: ${def.title}\nI unmasked ${who}. ${earned} of 3 stars.\nCan you close it? ${base}`,
+      text: `Gazecraft · Case closed: ${def.title}\nI unmasked the culprit. ${earned} of 3 stars.\nCan you close it? ${base}`,
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [unmask, finished, def.id, s.startAt]);
@@ -438,6 +438,12 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
     return { to: `/play/${def.id}/${part.next}`, label: clueKind(part.next) === 'unmask' ? 'The unmasking' : 'Next clue' };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [part, finished, unmask, def.id, s.startAt]);
+  // On a case, a method is a real thing somebody left behind. One reason a clue, the same on every visit.
+  const reason = useMemo(() => {
+    if (!part) return '';
+    const pool = copy.POOLS[unmask ? 'reasonUnmask' : def.type === 'buried-sums' ? 'reasonSums' : def.type === 'mirror' ? 'reasonMirror' : 'reasonWords'];
+    return `${pool[part.n % pool.length]} `;
+  }, [part, unmask, def.type]);
   // Variable days. Before today's daily: what it holds, never how much. After it: today against a usual day.
   const holdsLine = useMemo(
     () => (isToday && !finished ? todayHoldsLine(dayProfile(puzzle), copy.pick) : ''),
@@ -589,7 +595,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
             <span className={styles.count}>{count}</span>
           </span>
           {leftLine && <span className={styles.left}>{leftLine}</span>}
-          <span>{s.hints === 1 ? '1 hint' : `${s.hints} hints`}</span>
+          <span>{s.hints === 1 ? '1 tip-off' : `${s.hints} tip-offs`}</span>
         </div>
       </div>}
 
@@ -633,6 +639,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
         <div className={styles.main}>
           {/* The unmasking explains itself: its line is kept for screen readers only. */}
           <p id={instructionId} className={unmask ? styles.sr : styles.instruction}>
+            {reason}
             {unmask
               ? 'Read the line under the culprit, then pick the missing letters. A wrong one costs a try, and you have 6.'
               : def.type === 'buried-sums'
@@ -662,7 +669,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
           />
           {!finished && (
             <div className={styles.actions}>
-              <TextLink onClick={g.hint}>Give me a hint</TextLink>
+              <TextLink onClick={g.hint}>Ask for a tip-off</TextLink>
               {/* The unmasking has no giving up: it ends when the name is spelled or the tries are gone. */}
               {!unmask && <TextLink onClick={g.finish}>I'm done</TextLink>}
               <span className={styles.says} aria-hidden="true">

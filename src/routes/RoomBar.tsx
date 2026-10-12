@@ -16,7 +16,7 @@ type Props = { code: string; peers: Peer[]; path: string; status: RoomStatus; me
 const isPartner = (x: unknown): x is PartnerId => PARTNERS.some((p) => p.id === x);
 
 const line = (r: Row) =>
-  [`${r.finds ?? 0} ${r.finds === 1 ? 'word' : 'words'}`, r.finds ? `${r.pace ?? 0}s a word` : '', `${r.hints ?? 0} ${r.hints === 1 ? 'hint' : 'hints'}`]
+  [`${r.finds ?? 0} ${r.finds === 1 ? 'word' : 'words'}`, r.finds ? `${r.pace ?? 0}s a word` : '', `${r.hints ?? 0} ${r.hints === 1 ? 'tip-off' : 'tip-offs'}`]
     .filter(Boolean)
     .join(' · ');
 
@@ -77,7 +77,7 @@ export function RoomBar({ code, peers, path, status, me, you, gameId }: Props) {
             Waiting for a friend. Send the invite.
           </span>
         )}
-        <span className={styles.note}>Room {code}. Most words wins, then time per word, then fewest hints. Signed in teams go on the Together board.</span>
+        <span className={styles.note}>Room {code}. Most words wins, then time per word, then fewest tip-offs. Signed in teams go on the Together board.</span>
       </div>
       <div className={styles.actions}>
         <Button variant="secondary" size="sm" onClick={invite}>

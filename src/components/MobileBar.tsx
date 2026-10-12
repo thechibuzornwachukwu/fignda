@@ -34,7 +34,7 @@ export function MobileBar({ count, progress, left, time, message, pet, onHint, o
           {message}
         </span>
         <Button variant="secondary" size="touch" onClick={onHint}>
-          Hint
+          Tip-off
         </Button>
         <Button variant="primary" size="touch" onClick={onDone}>
           Done

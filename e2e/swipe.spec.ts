@@ -192,7 +192,7 @@ test.describe('mouse', () => {
 
   test('a hint lights up the whole letter', async ({ page }) => {
     await page.goto('/play/bible');
-    await page.getByRole('button', { name: 'Give me a hint' }).click();
+    await page.getByRole('button', { name: 'Ask for a tip-off' }).click();
     const hinted = page.locator('[data-hint]');
     await expect(hinted).toHaveCount(1);
     const bg = await hinted.evaluate((el) => getComputedStyle(el).backgroundColor);

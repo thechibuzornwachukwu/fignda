@@ -109,14 +109,12 @@ Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with 
 
 Build in this order. Each set is one chapter-sized step and leaves the 25 live cases playable: a case with no written chapter keeps today's flow.
 
-- [ ] **Set 1a. The share card names nobody.** A case's culprit is the same for every player, and the live card prints "Unmasked: the caretaker". It says what was done and leaves the name out. Do this first.
 - [ ] **Set 1b. A chapter is written down.** One file per chapter: its shape, the item, the place, 4 suspects, and its steps in order, each with a place, a method, the fact it leaves and where that leads. One chapter in full first: The missing shekere, a "who did it".
 - [ ] **Set 1c. The brief and the suspect board.** A case opens on what is missing and who could have. The board is on the case card and at the line-up.
 - [ ] **Set 1d. Every step ends on a lead.** A step's result says what was learned and where to go next: it clears a suspect, or gives means, motive or chance. A step's screen is the way back, the marks, a title and the board. No line above the title.
 - [ ] **Set 1e. Hidden words are an intercepted message.** The text is something the suspect sent to a partner, never a witness talking. Each one is filed under the Open Eye, and the file grows across cases.
 - [ ] **Set 1f. The line-up.** The last step of a "who did it": name who is left, with means, motive and chance shown. 2 tries, then the mask comes off. "Spell the name" stays as a method for other shapes.
-- [ ] **Set 1g. Call for backup.** On any step: a tip-off from the pet (the hint, renamed in the copy pools), a friend called into the step, or the case's 1 favour.
-- [ ] **Set 1h. The methods already built get their reasons.** Hidden words is a coded notice or a typewriter ribbon. Reading backwards is a blotter. Spelling the name is a smudged signature. Matching numbers is a key log or a till roll. Copy and framing only: the engines do not change.
+- [ ] **Set 1g. Call for backup.** On any step: a tip-off from the pet, a friend called into the step, or the case's 1 favour.
 - [ ] **Set 1i. New methods,** one a set, engine first, in this order: spot what is off (a drawn scene), the torn page, 4 pictures and 1 word (real photos, with the photo store and the credits page it needs), invisible ink, rub the pad, ink not word, what stood here. No clock on any of them. The rest are on the canvas sheet. "Bigger tag" is left out: nothing in a real case asks for it.
 - [ ] **Set 1j. The other 4 shapes,** one written chapter each.
 - Later, once those are being played: Liar, Relay, Number series, Bury it.

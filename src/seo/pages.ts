@@ -79,7 +79,7 @@ export const FAQ: Array<[string, string]> = [
   ['Do I need an account?', 'No. You can play as a guest. Sign in to keep your streak, get on the leaderboard and follow other players.'],
   [
     'How is the score counted?',
-    '100 points per word found, minus 25 for each hint. Finding every word adds a time bonus. On the daily, wrong picks cost 10.',
+    '100 points per word found, minus 25 for each tip-off. Finding every word adds a time bonus. On the daily, wrong picks cost 10.',
   ],
 ];
 

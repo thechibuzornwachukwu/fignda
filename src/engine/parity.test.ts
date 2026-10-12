@@ -151,7 +151,8 @@ describe.skipIf(!has)('parity with design/reference', () => {
             const mine = resultCard(o);
             const t = ref.cards.resultCard!(o) as Record<string, unknown> & { cells: Array<{ w: string; bg: string }> };
             expect({ score: mine.score, badge: mine.badge, found: mine.found, time: mine.time, hints: mine.hints, cta: mine.cta, name: mine.name, handle: mine.handle }).toEqual({
-              score: t.score, badge: t.badge, found: t.found, time: t.time, hints: t.hints, cta: t.cta, name: t.name, handle: t.handle,
+              // The prototype says "hint". On screen it is a tip-off now: the count is the same, only the word differs.
+              score: t.score, badge: t.badge, found: t.found, time: t.time, hints: String(t.hints).replace('hint', 'tip-off'), cta: t.cta, name: t.name, handle: t.handle,
             });
             expect(mine.cells.map((c) => c.width + 'px')).toEqual(t.cells.map((c) => c.w));
             expect(mine.cells.map((c) => c.kind)).toEqual(

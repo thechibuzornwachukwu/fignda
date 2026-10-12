@@ -127,7 +127,7 @@ describe('resultCard', () => {
 
   it('perfect run', () => {
     const c = resultCard({ ratio: '4:5', answers: answers.map((a) => ({ ...a, found: true })), secs: 100 });
-    expect(c).toMatchObject({ badge: 'Perfect', found: '2/2 found', score: '700', hints: 'No hints', time: '1:40', name: 'Guest player' });
+    expect(c).toMatchObject({ badge: 'Perfect', found: '2/2 found', score: '700', hints: 'No tip-offs', time: '1:40', name: 'Guest player' });
     expect(c.cells.map((x) => x.kind)).toEqual(['found', 'found']);
   });
 
@@ -145,7 +145,7 @@ describe('resultCard', () => {
     });
     expect(c.found).toBe('1 found');
     expect(c.cells).toEqual([{ width: 4 * 9 + 16, kind: 'hint' }]);
-    expect(c.hints).toBe('1 hint');
+    expect(c.hints).toBe('1 tip-off');
   });
 });
 

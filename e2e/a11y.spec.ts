@@ -23,7 +23,7 @@ for (const scheme of ['dark', 'light'] as const) {
 
     test('game after a find, a hint and results, then the share sheet', async ({ page }) => {
       await page.goto('/play/bnote');
-      await page.getByRole('button', { name: 'Give me a hint' }).click();
+      await page.getByRole('button', { name: 'Ask for a tip-off' }).click();
       await audit(page, 'playing');
       await page.getByRole('button', { name: "I'm done" }).click();
       await audit(page, 'results');

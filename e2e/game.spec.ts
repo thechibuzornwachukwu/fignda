@@ -64,8 +64,8 @@ test.describe('desktop', () => {
     const [a] = await spanOf(page, 'amost');
     await drag(page, a, a + 3);
     await expect(page.getByText('1 / 30').first()).toBeVisible();
-    await page.getByRole('button', { name: 'Give me a hint' }).click();
-    await expect(page.getByText('1 hint').first()).toBeVisible();
+    await page.getByRole('button', { name: 'Ask for a tip-off' }).click();
+    await expect(page.getByText('1 tip-off').first()).toBeVisible();
 
     // Another page inside the app, then back.
     await page.getByRole('link', { name: 'Cases' }).last().click();
@@ -73,7 +73,7 @@ test.describe('desktop', () => {
     await page.goBack();
     await expect(letter(page, a)).toHaveAttribute('data-state', 'found');
     await expect(page.getByText('1 / 30').first()).toBeVisible();
-    await expect(page.getByText('1 hint').first()).toBeVisible();
+    await expect(page.getByText('1 tip-off').first()).toBeVisible();
     await expect(firstRow(page)).toContainText('Amos');
 
     // The tab closed and opened again.
@@ -158,9 +158,9 @@ test.describe('desktop', () => {
   test('hint marks the first letter of the earliest unfound answer', async ({ page }) => {
     await page.goto('/play/bible');
     const [a] = await spanOf(page, 'amos');
-    await page.getByRole('button', { name: 'Give me a hint' }).click();
+    await page.getByRole('button', { name: 'Ask for a tip-off' }).click();
     await expect(letter(page, a)).toHaveAttribute('data-hint', 'true');
-    await expect(page.getByText('1 hint')).toBeVisible();
+    await expect(page.getByText('1 tip-off')).toBeVisible();
   });
 
   test("I'm done shows results and shades misses", async ({ page }) => {
@@ -222,7 +222,7 @@ test.describe('desktop', () => {
     await page.getByRole('button', { name: 'More' }).click();
     await expect(page.getByText(/clean read/i)).toHaveCount(0);
     // Every word with no hint is still said, and it is 2 stars, not 3.
-    await expect(page.getByText(/no hints\.$/)).toBeVisible();
+    await expect(page.getByText(/no tip-offs\.$/)).toBeVisible();
     await expect(page.getByRole('img', { name: '2 of 3 stars' })).toBeVisible();
   });
 

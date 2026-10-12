@@ -140,7 +140,7 @@ export function resultCard(o: ResultCardInput) {
     badge: perfect ? ('Perfect' as const) : fcount === 0 ? ('Gave up' as const) : ('' as const),
     found: o.hideCount ? fcount + ' found' : fcount + '/' + total + ' found',
     time: formatTime(o.secs),
-    hints: hints === 0 ? 'No hints' : hints === 1 ? '1 hint' : hints + ' hints',
+    hints: hints === 0 ? 'No tip-offs' : hints === 1 ? '1 tip-off' : hints + ' tip-offs',
     cells,
     name: b.guest ? 'Guest player' : o.name!.trim(),
     handle: b.guest ? 'Not signed in' : (o.handle ?? ''),
