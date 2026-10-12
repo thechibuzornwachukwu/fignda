@@ -8,7 +8,7 @@ import { Ring } from '../components/Ring';
 import { TextLink } from '../components/TextLink';
 import { WordList, type WordListHandle, type WordRow } from '../components/WordList';
 import { dayNo } from '../engine/daily';
-import { dailyPool, getGameDef, getPassage, getPuzzle, sponsorFor, type GameDef, type Part } from '../games/catalog';
+import { culpritName, dailyPool, getGameDef, getPassage, getPuzzle, sponsorFor, type GameDef, type Part } from '../games/catalog';
 import { dailyInfo, dailyLabel } from '../games/daily';
 import { registry } from '../games/registry';
 import { dayHidLine, playFacts, rareLine, recordLines, skillLines, starsUpLine, todayHoldsLine } from '../games/resultLines';
@@ -31,7 +31,6 @@ import { rarestFound } from '../lib/wordStats';
 import { useAuth } from '../lib/auth';
 import { useCoarsePointer } from '../lib/media';
 import { ShareSheet, type ShareGame } from '../components/ShareSheet';
-import { SoundToggle } from '../components/SoundToggle';
 import { dailyDate } from '../games/daily';
 import { copyText, sharePath, shareUrl } from '../lib/share';
 import { readPast } from '../engine/reveal';
@@ -258,6 +257,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
   }, [part, finished, signedIn, inRoom, roomCode, s.endAt, s.startAt, s.log, s.sent, daily, dailyN, def.id]);
 
   const foundCount = s.found.length;
+  const triesLeft = Math.max(0, UNMASK_TRIES - s.wrongs);
   const count = daily && !finished ? `${foundCount} found` : `${foundCount} / ${total}`;
   const progress = total ? foundCount / total : 0;
   // A daily hides its count. With 3 or fewer left, and at least 1 found, it says how many and the ring shows the gap.
@@ -322,11 +322,26 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
     return foundRows.concat(rest);
   }, [answers, s.found, daily, finished, mod, puzzle, foundSet]);
 
+  // A closed case is shared as what it is: who was unmasked, in which case, with how many stars. Never a count of letters.
+  const achievement = useMemo(() => {
+    if (!unmask || !finished) return undefined;
+    const who = culpritName(def.id);
+    const earned = starsFor({ finished: true, found: s.found.length, total, hints: s.hints, wrongs: s.wrongs });
+    const base = shareUrl(`/play/${def.id}/1`);
+    return {
+      kicker: `Case closed · ${def.category}`,
+      title: `Unmasked: ${who}`,
+      line: `${def.title} · ${earned} of 3 stars`,
+      cta: 'Can you close it?',
+      text: `Gazecraft · Case closed: ${def.title}\nI unmasked ${who}. ${earned} of 3 stars.\nCan you close it? ${base}`,
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [unmask, finished, def.id, s.startAt]);
   // The text result: paste it in a chat. Phones open the share sheet (WhatsApp is one tap), desktops copy.
   const sendText = async (): Promise<string> => {
     const secs = secondsOf(s, s.endAt ?? Date.now());
     const base = shareGame(def, puzzle.difficulty, dailyN, part).path;
-    const text = shareText({
+    const text = achievement?.text ?? shareText({
       title: def.title,
       daily: dailyN,
       found: s.found.length,
@@ -497,20 +512,28 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
             Cases
           </Link>
           <span className={styles.metaEnd}>
-            <span className={styles.level}>
-              {holiday ? `${holiday} · ` : ''}
-              {def.category} · {part ? `Clue ${part.at} of ${part.of}` : puzzle.difficulty}
-            </span>
+            {/* The unmasking keeps its top bare: the way back, and the tries left. */}
+            {unmask ? (
+              <span className={styles.tries} role="img" aria-label={triesLeft === 1 ? '1 try left' : `${triesLeft} tries left`} data-tries={triesLeft}>
+                {Array.from({ length: UNMASK_TRIES }, (_, i) => (
+                  <span key={i} className={styles.pip} data-spent={i >= triesLeft || undefined} />
+                ))}
+              </span>
+            ) : (
+              <span className={styles.level}>
+                {holiday ? `${holiday} · ` : ''}
+                {def.category} · {part ? `Clue ${part.at} of ${part.of}` : puzzle.difficulty}
+              </span>
+            )}
             {auth.enabled && !daily && !part && !inRoom && !finished && (
               <button type="button" className={styles.together} onClick={() => navigate(`?room=${newRoomCode()}`)}>
                 <Icon icon={UsersRound} size={16} />
                 Play together
               </button>
             )}
-            <SoundToggle />
           </span>
         </div>
-        <div className={styles.titleRow}>
+        <div className={unmask && finished ? styles.sr : styles.titleRow}>
           <h1 className={styles.title}>{unmask ? 'Who is behind the mask?' : daily ? `Find the hidden ${def.noun}` : `Find ${total} ${def.noun}`}</h1>
           <BigClock startAt={s.startAt} endAt={s.endAt} />
         </div>
@@ -533,16 +556,17 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
         />
       )}
 
-      <div className={styles.progress}>
+      {/* The unmasking shows its progress in the name itself and its tries at the top. */}
+      {!unmask && <div className={styles.progress}>
         <div className={styles.stats}>
           <span className={styles.tally}>
             {!hideProgress && <Ring value={progress} label="Found" />}
             <span className={styles.count}>{count}</span>
           </span>
           {leftLine && <span className={styles.left}>{leftLine}</span>}
-          <span>{unmask ? (UNMASK_TRIES - s.wrongs === 1 ? '1 try left' : `${Math.max(0, UNMASK_TRIES - s.wrongs)} tries left`) : s.hints === 1 ? '1 hint' : `${s.hints} hints`}</span>
+          <span>{s.hints === 1 ? '1 hint' : `${s.hints} hints`}</span>
         </div>
-      </div>
+      </div>}
 
       {finished && (
         <GameResults
@@ -557,6 +581,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
           onShare={() => setSharing(true)}
           onText={sendText}
           next={onward}
+          plain={unmask}
           boardPath={part || !auth.enabled ? undefined : daily ? `/leaderboard?day=${dailyN}` : inRoom && getGameDef(def.id) ? `/leaderboard/${def.id}?board=together` : undefined}
           guest={!signedIn}
           guestLine={guestLine}
@@ -578,11 +603,13 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
         </GameResults>
       )}
 
-      <div className={styles.columns}>
+      {/* A finished unmasking leaves only the reveal: the keys have nothing more to say. */}
+      {!(unmask && finished) && <div className={styles.columns}>
         <div className={styles.main}>
-          <p id={instructionId} className={styles.instruction}>
+          {/* The unmasking explains itself: its line is kept for screen readers only. */}
+          <p id={instructionId} className={unmask ? styles.sr : styles.instruction}>
             {unmask
-              ? 'Pick a letter. A right one goes into the name. A wrong one costs a try, and you have 6.'
+              ? 'Read the line under the culprit, then pick the missing letters. A wrong one costs a try, and you have 6.'
               : def.type === 'buried-sums'
               ? coarse
                 ? 'Swipe across digits in a row. Or tap the first digit of a run, then the last.'
@@ -608,10 +635,11 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
             picked={unmask ? (s.log?.events ?? []).filter((e) => e.a === e.b).map((e) => e.a) : undefined}
             caseId={def.id}
           />
-          {!finished && !unmask && (
+          {!finished && (
             <div className={styles.actions}>
               <TextLink onClick={g.hint}>Give me a hint</TextLink>
-              <TextLink onClick={g.finish}>I'm done</TextLink>
+              {/* The unmasking has no giving up: it ends when the name is spelled or the tries are gone. */}
+              {!unmask && <TextLink onClick={g.finish}>I'm done</TextLink>}
               <span className={styles.msg} aria-hidden="true">
                 {s.msg}
               </span>
@@ -629,14 +657,14 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
           rows={rows}
           moreHiding={daily && !finished}
         />}
-      </div>
+      </div>}
 
       {finished && (
         <ShareSheet
           open={sharing}
           onClose={() => setSharing(false)}
           onShared={() => countEvent(def.id, 'share')}
-          game={{ ...shareGame(def, puzzle.difficulty, dailyN, part), vs: part ? undefined : auth.profile?.handle, sponsor }}
+          game={{ ...shareGame(def, puzzle.difficulty, dailyN, part), vs: part ? undefined : auth.profile?.handle, sponsor, achievement }}
           result={{
             answers: puzzle.answers.map((a) => {
               const f = s.found.find((x) => x.key === a.key);

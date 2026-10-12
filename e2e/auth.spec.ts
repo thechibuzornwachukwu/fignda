@@ -64,7 +64,9 @@ test('email code sign in, profile page, settings, sign out', async ({ page }) =>
   await createProfile(page, 'Ada Obi', handle);
 
   await expect(page).toHaveURL(/\/play\/bible$/);
-  await expect(page.getByRole('link', { name: /Ada/ }).first()).toBeVisible();
+  // A puzzle has the whole screen: no top bar, so no link to the player there.
+  await expect(page.locator('header')).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Cases' })).toBeVisible();
 
   // Old /account links open your public profile.
   await page.goto('/account');

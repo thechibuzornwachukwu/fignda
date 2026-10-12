@@ -11,7 +11,7 @@ import { buildMirror, mirrorClue } from '../../src/engine/mirror';
 import { passages } from '../../src/engine/passages';
 import { starsFor } from '../../src/engine/stars';
 import { buildSums, sumsClue } from '../../src/engine/sums';
-import { buildUnmask, unmaskName, withinTries } from '../../src/engine/unmask';
+import { buildUnmask, unmaskClue, withinTries } from '../../src/engine/unmask';
 import { culpritOf } from '../../src/engine/secret';
 import { DISGUISE_STYLES } from '../../src/avatar/parts/disguises';
 import pools from '../../data/copy.json';
@@ -599,7 +599,7 @@ async function plays(req: Request, deps: Deps) {
     const kind = clueKind(game.clue);
     // The unmasking: the culprit's name, worked out here from the case as the client works it out. Picks after
     // the last try are not counted.
-    const name = kind === 'unmask' ? buildUnmask({ text: unmaskName(pools.culpritWho[culpritOf(gameId, DISGUISE_STYLES.length, pools.culpritWho.length).who] ?? ''), dict: [] }) : null;
+    const name = kind === 'unmask' ? buildUnmask(unmaskClue(pools.culpritWho[culpritOf(gameId, DISGUISE_STYLES.length, pools.culpritWho.length).who] ?? '', gameId)) : null;
     const c = name
       ? replay(name, { ...log, events: withinTries(name, log.events) }, false, EVALUATE.unmask)
       : kind === 'sums'

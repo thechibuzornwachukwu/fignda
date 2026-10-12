@@ -11,7 +11,7 @@ import { caseOrder, clueKind, SUMS_FROM } from '../engine/journey';
 import { mirrorClue } from '../engine/mirror';
 import { culpritOf } from '../engine/secret';
 import { sumsClue, sumsTarget } from '../engine/sums';
-import { unmaskName } from '../engine/unmask';
+import { unmaskClue } from '../engine/unmask';
 import { passages } from '../engine/passages';
 import { sponsorOf, type Sponsor } from '../engine/sponsor';
 
@@ -96,7 +96,8 @@ export function getPassage(id: string, n: number): { def: GameDef; part: Part } 
         const made = sumsClue(`${id}~${k}`, k - SUMS_FROM);
         list!.set(k, { def: { ...def, type: 'buried-sums', noun: `runs that add up to ${sumsTarget(made)}`, text: made.text, dict: [...made.dict], expectedAnswers: [] }, part });
       } else if (kind === 'unmask') {
-        list!.set(k, { def: { ...def, type: 'unmask', noun: 'letters', text: unmaskName(culpritName(id)), dict: [], expectedAnswers: [] }, part });
+        const made = unmaskClue(culpritName(id), id);
+        list!.set(k, { def: { ...def, type: 'unmask', noun: 'letters', text: made.text, dict: [...made.dict], expectedAnswers: [] }, part });
       } else if (mirror) {
         list!.set(k, { def: { ...def, type: 'mirror', noun: 'words that read right to left', text: mirror.text, dict: [...mirror.dict], expectedAnswers: [] }, part });
       }

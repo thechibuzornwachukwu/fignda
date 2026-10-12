@@ -48,19 +48,17 @@ test('a find ticks per letter and chimes', async ({ page }) => {
   expect(await tones(page)).toBeGreaterThanOrEqual(5);
 });
 
-test('mute on the puzzle silences the board and is remembered', async ({ page }) => {
+test('sound is turned off in Settings, not on the puzzle, and a muted board stays silent', async ({ page }) => {
   await page.goto('/play/bible');
-  const sound = page.getByRole('button', { name: 'Sound' });
-  await expect(sound).toHaveAttribute('aria-pressed', 'true');
+  // The puzzle carries no sound button.
+  await expect(page.getByRole('button', { name: 'Sound' })).toHaveCount(0);
   await drag(page, 0, 3);
   expect(await tones(page)).toBeGreaterThan(0);
 
-  await sound.click();
-  await expect(sound).toHaveAttribute('aria-pressed', 'false');
+  // Off, as the Sounds switch in Settings stores it.
+  await page.evaluate(() => localStorage.setItem('gazecraft-sound', 'off'));
+  await page.reload();
   const before = await tones(page);
   await drag(page, 5, 9);
   expect(await tones(page)).toBe(before);
-
-  await page.reload();
-  await expect(page.getByRole('button', { name: 'Sound' })).toHaveAttribute('aria-pressed', 'false');
 });

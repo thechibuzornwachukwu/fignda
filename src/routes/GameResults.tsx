@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowRight, ChevronDown, ChevronUp } from 'lucide-react';
+import { ArrowRight, ChevronDown, ChevronUp, Share2 } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
 import { Partner } from '../components/Partner';
@@ -22,6 +22,8 @@ type Props = {
   onText: () => Promise<string>;
   /** A sitting: where the next one is. It leads the actions and takes the accent from Share. */
   next?: { to: string; label: string };
+  /** The unmasking: the reveal is the result. No pet beside the title (the reveal has one) and no line under it. */
+  plain?: boolean;
   /** Where this game's board lives, if it has one. */
   boardPath?: string;
   guest: boolean;
@@ -56,7 +58,7 @@ type Props = {
 /** Lines worth a paragraph: no blanks, none twice. */
 const lines = (l?: readonly string[]) => [...new Set((l ?? []).filter((x) => typeof x === 'string' && x.trim() !== ''))];
 
-export function GameResults({ title, line, score, found, total, secs, canReplay, onReplay, onShare, onText, next, boardPath, guest, guestLine, guestAction, streak, rare, stars, starsUp, skills, records, day, done, sponsor, caseFile, children }: Props) {
+export function GameResults({ plain = false, title, line, score, found, total, secs, canReplay, onReplay, onShare, onText, next, boardPath, guest, guestLine, guestAction, streak, rare, stars, starsUp, skills, records, day, done, sponsor, caseFile, children }: Props) {
   const { pathname } = useLocation();
   const [note, setNote] = useState('');
   const [more, setMore] = useState(false);
@@ -66,12 +68,12 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
       <div className={styles.head}>
         <div className={styles.titleRow}>
           {/* The partner at the end of a game: pleased, and more so when every word was found. */}
-          <Partner moment={total > 0 && found === total ? 'found' : 'done'} size={56} />
+          {!plain && <Partner moment={total > 0 && found === total ? 'found' : 'done'} size={56} />}
           <h2 id="results-title" className={styles.title}>
             {title}
           </h2>
         </div>
-        <p className={styles.line}>{line}</p>
+        {!plain && line && <p className={styles.line}>{line}</p>}
         {earned > 0 && (
           <p className={styles.stars}>
             <Stars value={earned} size={20} pop={!!starsUp} />
@@ -101,8 +103,9 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
               {next.label}
               <Icon icon={ArrowRight} size={16} />
             </Button>
-            <Button variant="secondary" onClick={onShare}>
-              Share
+            {/* Beside the way on, sharing is an icon: one thing to read, one thing to tap. */}
+            <Button variant="secondary" onClick={onShare} aria-label="Share" title="Share">
+              <Icon icon={Share2} size={18} />
             </Button>
           </>
         ) : (

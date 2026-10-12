@@ -290,6 +290,22 @@
     "the art teacher",
     "the neighbour from 2 doors down"
   ],
+  "culpritHint": [
+    "Up before dawn, with flour on both sleeves.",
+    "Counts everyone in before the first note.",
+    "Carries a tape measure and a mouth full of pins.",
+    "Knows every stop on the route by heart.",
+    "Asks for quiet, and knows where every book lives.",
+    "Soil under the nails and a watering can close by.",
+    "Keeps time with 2 sticks.",
+    "Holds the keys to every door in the building.",
+    "Asks everybody to hold still and smile.",
+    "Shows people to their seats.",
+    "Sells from a table at the market.",
+    "Blows a whistle and picks the team.",
+    "Paint on the apron, chalk on both hands.",
+    "Lives close by. Very close by."
+  ],
   "confession": [
     "It was {who}. \"I hid the {secret}. It was meant to be a surprise.\"",
     "Under the disguise: {who}. \"The {secret} was with me all along. I wanted to see who would notice.\"",

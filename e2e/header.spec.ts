@@ -34,10 +34,18 @@ test.describe('quick return on a phone', () => {
   });
 
   test('the top bar is one row where it shows, and is left out on app screens, signed out', async ({ page }) => {
-    for (const path of ['/', '/play/bible']) {
+    for (const path of ['/']) {
       await page.goto(path);
       const box = (await page.locator('header[data-tucked], header').first().boundingBox())!;
       expect(box.height, path).toBeLessThanOrEqual(66);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth), path).toBeLessThanOrEqual(0);
+    }
+    // A puzzle has the whole screen: no bar at all, and its own way back.
+    for (const path of ['/play/bible', '/play/bible/2', '/play/bible/21', '/play/bible/40']) {
+      await page.goto(path);
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
+      await expect(page.locator('header')).toHaveCount(0);
+      await expect(page.getByRole('link', { name: 'Cases' })).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth), path).toBeLessThanOrEqual(0);
     }
     // App screens: the dock is the navigation, so there is no bar above the title.

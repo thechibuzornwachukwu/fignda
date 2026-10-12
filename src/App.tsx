@@ -5,7 +5,7 @@ import { Footer } from './components/Footer';
 import { TabBar } from './components/TabBar';
 import { useDelayedWaiting } from './components/useDelayedWaiting';
 import { Waiting } from './components/Waiting';
-import { hasTabBar } from './lib/routes';
+import { hasTabBar, isPuzzle } from './lib/routes';
 import { Landing } from './routes/Landing';
 import { OpenByCode } from './routes/OpenByCode';
 import { prefersReducedMotion } from './lib/media';
@@ -60,7 +60,8 @@ function Layout() {
 
   return (
     <>
-      <Header />
+      {/* A puzzle has the whole screen: its own back link is the way out. */}
+      {!isPuzzle(pathname) && <Header />}
       <main className={[pathname === '/' ? styles.bleed : styles.main, hasTabBar(pathname) && styles.tabbed].filter(Boolean).join(' ')}>
         {/* Keyed by page: a link is a transition, and a transition keeps the old page up and never shows a fallback. */}
         <Suspense key={pathname} fallback={<SlowLoad />}>

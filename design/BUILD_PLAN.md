@@ -34,7 +34,7 @@ Navigation, on a phone: no bar across the top. Each screen is its title, one act
 | Cases `/play` | Show where you are in the case | The next clue on the path | Built: daily card, then the path. Closed cases fold into one row |
 | Puzzle, clue | Find the words | Done | Built |
 | Result | Say what happened and lead on | Next clue, or Share | Built: a popup at the finish of a clue, then one line and 2 buttons, the rest behind "More" |
-| Unmasking | Name the culprit | Pick a letter | Built: the last clue of a case. 6 tries, then the mask comes off either way |
+| Unmasking | Name the culprit | Pick a letter | Built: the last clue of a case, made to be won. A line about the culprit, first letters given, a bank of letters, a hint. 6 tries, then the mask comes off either way |
 | You `/me` | Who you are: detective, pet, gear | Select, or Wear | Built. Holds the week, badges and records. `/u/HANDLE` is only what others see |
 | Squad `/players` | The people you play with | Follow, or invite | Built in order: friend streaks, circles, top players, suggestions, find |
 | Ranks `/leaderboard` | Where you stand today | None: it is read | Built: one board at a time, your own row pinned in view |

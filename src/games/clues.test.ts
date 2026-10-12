@@ -1,6 +1,7 @@
 import { buildPath, caseOrder, clueKind, MIRROR_N, SUMS_FROM, UNMASK_N } from '../engine/journey';
 import { HINT_OF, mixedSquad, PARTNERS } from '../engine/partners';
-import { ALPHABET, UNMASK_TRIES, unmaskName, unmaskSlots, withinTries } from '../engine/unmask';
+import { POOLS } from '../copy';
+import { ALPHABET, bankOf, givenOf, UNMASK_DECOYS, UNMASK_TRIES, unmaskClue, unmaskGiven, unmaskName, unmaskSlots, withinTries } from '../engine/unmask';
 import { caseFile, secretOf } from './caseFile';
 import { culpritName, games, getPassage, getPuzzle, MIRROR_WORDS } from './catalog';
 import { familyOf, registry } from './registry';
@@ -140,11 +141,46 @@ describe('the unmasking', () => {
     // A drag across 2 letters, or a place past Z, is no pick.
     expect(registry.unmask.check(p, 0, 1, none).kind).toBe('ignore');
     expect(registry.unmask.check(p, 26, 26, none).kind).toBe('ignore');
-    expect(registry.unmask.hint(p, none)).toBeNull();
+    // A hint points at a letter that is in the name.
+    expect(registry.unmask.hint(p, none)).toEqual({ key: 'b', at: 1 });
+    expect(registry.unmask.hint(p, new Set(p.answers.map((a) => a.key)))).toBeNull();
     expect(registry.unmask.tries).toBe(UNMASK_TRIES);
   });
 
+  it('it is made to be won: the first letter of each word is given, and the bank is the missing letters and 6 that are not in the name', () => {
+    expect(unmaskGiven('BUS DRIVER')).toBe('bd');
+    // 7 would be left to find, so the letter the name uses most is given too.
+    expect(unmaskGiven('CHOIR LEADER')).toBe('cel');
+    expect(unmaskGiven('')).toBe('');
+    expect(POOLS.culpritHint).toHaveLength(POOLS.culpritWho.length);
+    for (const who of POOLS.culpritWho) {
+      const clue = unmaskClue(who, 'bible');
+      expect(clue).toEqual(unmaskClue(who, 'bible'));
+      const name = clue.text.toLowerCase();
+      const given = givenOf(clue);
+      const bank = [...bankOf(clue)];
+      const built = registry.unmask.build({ id: 'x', type: 'unmask', category: 'c', title: 't', noun: 'letters', difficulty: 'Easy', expectedAnswers: [], text: clue.text, dict: [...clue.dict] });
+      const wanted = built.answers.map((a) => a.key);
+      // Every letter still to find is in the bank, no given letter is, and nothing is there twice.
+      for (const ch of wanted) expect(bank, `${who}: ${ch}`).toContain(ch);
+      for (const ch of given) expect(bank).not.toContain(ch);
+      expect(new Set(bank).size).toBe(bank.length);
+      expect(bank.filter((ch) => !name.includes(ch))).toHaveLength(UNMASK_DECOYS);
+      expect(bank.join('')).toBe([...bank].sort().join(''));
+      // Something is left to find, and it is short work: 6 letters at most.
+      expect(wanted.length, who).toBeGreaterThanOrEqual(2);
+      expect(wanted.length, who).toBeLessThanOrEqual(6);
+      // Every word opens with its letter.
+      const slots = unmaskSlots(clue.text, new Set(), given);
+      clue.text.split(' ').reduce((at, w) => (/[A-Z]/.test(w[0]!) && expect(slots[at]).toBe(w[0]), at + w.length + 1), 0);
+    }
+    // Only picking every letter that is not in the name uses all the tries.
+    expect(UNMASK_DECOYS).toBe(UNMASK_TRIES);
+    expect(unmaskClue('the baker', 'bible').dict).not.toEqual(unmaskClue('the baker', 'lagos').dict);
+  });
+
   it('shows the name as it stands: found letters, blanks, and anything that is not a letter', () => {
+    expect(unmaskSlots('BUS GO', new Set(['o']), 'bg')).toEqual(['B', '', '', ' ', 'G', 'O']);
     expect(unmaskSlots('BUS 2 GO', new Set(['b', 'o']))).toEqual(['B', '', '', ' ', '2', ' ', '', 'O']);
     expect(unmaskSlots('', none)).toEqual([]);
   });

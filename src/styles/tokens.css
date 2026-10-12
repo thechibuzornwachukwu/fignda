@@ -131,7 +131,7 @@
   --burst-reach: 150px;     /* How far the paper flies */
   /* The sums board and the unmasking, SPEC sections 6 and 9. */
   --sums-tile: 44px; --sums-tile-h: 52px;
-  --unmask-slot: 26px; --unmask-slot-h: 38px; --unmask-keys: 520px;
+  --unmask-slot: 26px; --unmask-slot-h: 38px; --unmask-keys: 400px; --unmask-key: 52px;
 }
 @media (prefers-reduced-motion: reduce) {
   :root {

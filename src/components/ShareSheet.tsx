@@ -30,6 +30,12 @@ export type ShareGame = {
   vs?: string;
   /** A sponsored puzzle: "With NAME" and the sponsor's site name. */
   sponsor?: { line: string; host?: string };
+  /**
+   * What the player just did, when it is more than a count: a case closed. The card leads with it (`kicker`,
+   * `title`), says `line` where the count goes, and the text that goes with the card is `text`.
+   * There is no puzzle card then: the name on it would give the culprit away.
+   */
+  achievement?: { kicker: string; title: string; line: string; cta: string; text: string };
 };
 
 export type ShareResult = {
@@ -79,7 +85,7 @@ export function ShareSheet({ open, onClose, game, result, player, onShared }: Pr
       answers: result.answers,
       secs: result.secs,
       theme: (document.documentElement.getAttribute('data-theme') as 'dark' | 'light') ?? 'dark',
-      kicker: daily ? `Daily #${game.daily!.n}` : `${game.category} · ${game.difficulty}`,
+      kicker: game.achievement?.kicker ?? (daily ? `Daily #${game.daily!.n}` : `${game.category} · ${game.difficulty}`),
       date: daily ? game.daily!.date : new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }),
       url: shareUrlLabel(game.path),
       name: player.name,
@@ -90,7 +96,7 @@ export function ShareSheet({ open, onClose, game, result, player, onShared }: Pr
       sponsorHost: game.sponsor?.host,
     };
     return kind === 'result'
-      ? [resultCard({ ...base, title: game.title, score: result.score, hints: result.hints })]
+      ? [{ ...resultCard({ ...base, title: game.achievement?.title ?? game.title, score: result.score, hints: result.hints }), ...(game.achievement ? { found: game.achievement.line, cta: game.achievement.cta, badge: '' as const } : {}) }]
       : puzzleCards({ ...base, text: game.text, mode, show: showOn, noun: game.noun, budgetScale });
   }, [kind, ratio, mode, showOn, budgetScale, result, game, player, daily, previewW]);
 
@@ -108,7 +114,9 @@ export function ShareSheet({ open, onClose, game, result, player, onShared }: Pr
   // The card prints the plain path; the link carries the challenge.
   const link = shareUrl(game.vs ? `${game.path}?vs=${encodeURIComponent(game.vs)}` : game.path);
   const text =
-    kind === 'result'
+    game.achievement
+      ? game.achievement.text
+      : kind === 'result'
       ? `Gazecraft · ${game.title}\n${daily ? `${found} found` : `${found}/${total}`} · ${formatTime(result.secs)} · ${result.score.toLocaleString('en-US')}\nCan you beat it?`
       : `${daily ? `How many ${game.noun} can you find?` : `Can you find ${total} ${game.noun}?`} Gazecraft`;
 
@@ -182,7 +190,7 @@ export function ShareSheet({ open, onClose, game, result, player, onShared }: Pr
               Close
             </button>
           </div>
-          <Segmented
+          {!game.achievement && <Segmented
             label="Card"
             hideLabel
             options={[
@@ -191,7 +199,7 @@ export function ShareSheet({ open, onClose, game, result, player, onShared }: Pr
             ]}
             value={kind}
             onChange={(v) => reset(() => setKind(v))}
-          />
+          />}
           <Segmented
             label="Frame"
             options={[

@@ -40,6 +40,9 @@ export type PuzzleProps = {
   text?: string;
   picked?: readonly number[];
   caseId?: string;
+  /** The unmasking: the letters given at the start, and the letters to pick from. */
+  given?: string;
+  bank?: string;
 };
 
 type Sel = { a: number; b: number };

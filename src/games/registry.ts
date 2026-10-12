@@ -9,7 +9,7 @@ import { hintAnswer, type HintKind } from '../engine/hint';
 import { buildMirror } from '../engine/mirror';
 import { revealParts, type RevealPart } from '../engine/reveal';
 import { buildSums, sumsTarget } from '../engine/sums';
-import { buildUnmask, UNMASK_TRIES } from '../engine/unmask';
+import { bankOf, buildUnmask, givenOf, UNMASK_TRIES } from '../engine/unmask';
 import { UnmaskBoard } from '../components/UnmaskBoard';
 import type { GameDef, GameType } from './catalog';
 
@@ -29,7 +29,7 @@ export type GameModule<P> = {
   family: Family;
   build(def: GameDef): P;
   /** Letter count and chars for the board. */
-  boardProps(p: P): Pick<PuzzleProps, 'chars' | 'letters'> & Partial<Pick<PuzzleProps, 'variant' | 'target' | 'text'>>;
+  boardProps(p: P): Pick<PuzzleProps, 'chars' | 'letters'> & Partial<Pick<PuzzleProps, 'variant' | 'target' | 'text' | 'given' | 'bank'>>;
   /** Wrong picks allowed. The game ends on the last one. None: wrong picks never end a game. */
   tries?: number;
   answers(p: P): readonly AnswerInfo[];
@@ -100,10 +100,9 @@ export const registry: Record<GameType, GameModule<Built>> = {
   },
   unmask: {
     ...spans({ family: 'verbal', build: (def) => buildUnmask(def), evaluate: EVALUATE.unmask, listOrder: byPlace }),
-    boardProps: (p) => ({ chars: p.chars, letters: p.S.length, text: p.text }),
+    boardProps: (p) => ({ chars: p.chars, letters: p.S.length, text: p.text, given: givenOf(p), bank: bankOf(p) }),
     tries: UNMASK_TRIES,
-    // No hint, and nothing to step through after: the name is told when the mask comes off.
-    hint: () => null,
+    // Nothing to step through after: the name is told when the mask comes off. A hint points at a key.
     missed: () => [],
     reveal: () => [],
     Board: UnmaskBoard,

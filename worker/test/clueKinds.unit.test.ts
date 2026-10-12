@@ -3,8 +3,8 @@
 import { EVALUATE } from '../../src/engine/evaluate';
 import { buildMirror, mirrorClue } from '../../src/engine/mirror';
 import { buildSums, sumsClue } from '../../src/engine/sums';
-import { ALPHABET, buildUnmask, withinTries } from '../../src/engine/unmask';
-import { getPassage, getPuzzle, MIRROR_WORDS } from '../../src/games/catalog';
+import { ALPHABET, buildUnmask, unmaskClue, withinTries } from '../../src/engine/unmask';
+import { culpritName, getPassage, getPuzzle, MIRROR_WORDS } from '../../src/games/catalog';
 import { replay, type PlayEvent } from '../src/replay';
 
 type Board = { answers: ReadonlyArray<{ spans: Array<[number, number]> }> };
@@ -65,7 +65,11 @@ describe('a Mirror clue on the server', () => {
 
 describe('the unmasking on the server', () => {
   const seen = getPassage('bnote', 40)!.def;
-  const name = buildUnmask({ text: seen.text, dict: [] });
+  const name = buildUnmask({ text: seen.text, dict: seen.dict });
+
+  it('is the clue the player saw: the same name, given letters and bank', () => {
+    expect(unmaskClue(culpritName('bnote'), 'bnote')).toEqual({ text: seen.text, dict: seen.dict });
+  });
   const tap = (word: string, from = 1): PlayEvent[] => [...word].map((ch, i) => ({ a: ALPHABET.indexOf(ch), b: ALPHABET.indexOf(ch), t: (from + i) * 1000 }));
   const run = (events: PlayEvent[]) => replay(name, log(withinTries(name, events)), false, EVALUATE.unmask);
 
