@@ -4,7 +4,7 @@ import pools from '../../data/copy.json';
 import games from '../../data/games.json';
 import { checkChapter, NAME_MAX, type Chapter } from './chapter';
 
-const DIR = 'stories';
+const DIR = 'design/stories';
 const files = readdirSync(DIR).filter((f) => f.endsWith('.json'));
 const read = (f: string) => JSON.parse(readFileSync(join(DIR, f), 'utf8')) as Chapter;
 const roles = pools.culpritWho;

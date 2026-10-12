@@ -183,13 +183,13 @@
     "{name} is in. Find them together."
   ],
   "remind": [
-    "Today's puzzle is up. One try.",
+    "Today's intercept is in. One try.",
     "New words are hiding. Come find them.",
-    "Today's daily is waiting for you."
+    "A message for the Open Eye was caught today. Read it first."
   ],
   "remindStreak": [
-    "{n} days so far. Today's puzzle is up.",
-    "Today's puzzle is ready. You are on {n} days.",
+    "{n} days so far. Today's intercept is in.",
+    "Today's intercept is in. You are on {n} days.",
     "{n} days so far. Today is next."
   ],
   "remindFriend": [
@@ -197,7 +197,7 @@
     "{name} found theirs. Go find yours."
   ],
   "streakKeep": [
-    "{n} days so far. Today's puzzle is ready.",
+    "{n} days so far. Today's intercept is ready.",
     "You are on {n} days. Today's is up."
   ],
   "streakDay": [
@@ -225,7 +225,7 @@
   "doneToday": [
     "That is today done. See you tomorrow.",
     "Done for today. The next one lands at midnight.",
-    "Today's puzzle is finished. Go and enjoy your day."
+    "Today's intercept is filed. Go and enjoy your day."
   ],
   "leftCount": [
     "{n} left"
@@ -250,7 +250,7 @@
     "The whole path, walked. Any case can be played again."
   ],
   "journeyEmpty": [
-    "No cases on the path yet. Every puzzle is in All games."
+    "No cases on the path yet. Today's intercept is open."
   ],
   "reasonWords": [
     "A coded notice. The words hide in plain sight.",

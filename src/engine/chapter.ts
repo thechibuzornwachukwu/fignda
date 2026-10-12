@@ -1,5 +1,5 @@
 // A written chapter (SPEC section 9, Chapters): a case worked the way a detective works one. One file a chapter
-// in `stories/`. This is its shape and the rules a chapter must keep to be a fair fight: everybody is met in
+// in `design/stories/`. This is its shape and the rules a chapter must keep to be a fair fight: everybody is met in
 // the brief, evidence clears suspects one at a time, nothing names the culprit before the end, and every step
 // ends on a lead to the next place. Pure. It reads no file and draws nothing.
 
