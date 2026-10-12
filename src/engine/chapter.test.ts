@@ -2,14 +2,14 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import pools from '../../data/copy.json';
 import games from '../../data/games.json';
-import { checkChapter, type Chapter } from './chapter';
+import { checkChapter, NAME_MAX, type Chapter } from './chapter';
 
 const DIR = 'data/chapters';
 const files = readdirSync(DIR).filter((f) => f.endsWith('.json'));
 const read = (f: string) => JSON.parse(readFileSync(join(DIR, f), 'utf8')) as Chapter;
 const roles = pools.culpritWho;
 const caseIds = ((Array.isArray(games) ? games : (games as { games: unknown }).games) as { id: string }[]).map((g) => g.id);
-const spoon =(): Chapter => read('the-long-spoon.json');
+const spoon = (): Chapter => read('the-long-spoon.json');
 
 describe('written chapters', () => {
   it.each(files)('%s is a fair fight', (f) => {
@@ -28,6 +28,44 @@ describe('checkChapter', () => {
     expect(checkChapter(null, roles)).toEqual(['not a chapter']);
     expect(checkChapter('x', roles)).toEqual(['not a chapter']);
     expect(checkChapter({}, roles).length).toBeGreaterThan(3);
+  });
+
+  // The long spoon cut down or grown to n suspects: the culprit and the first n - 1 others, each still cleared once.
+  const withSuspects = (n: number): Chapter => {
+    const c = spoon();
+    const extra = { who: 'the drummer', name: 'Kunle', line: 'Plays at every final.', says: 'I was at practice.' };
+    const others = [...c.suspects.filter((s) => s.who !== c.culprit), extra].slice(0, n - 1);
+    c.suspects = [...others, c.suspects.find((s) => s.who === c.culprit)!];
+    const open = c.steps.slice(0, -1);
+    open.forEach((s) => delete s.clears);
+    others.forEach((s, i) => (open[i]!.clears = s.who));
+    return c;
+  };
+
+  it.each([2, 3, 4, 5])('a board of %i suspects is a chapter', (n) => {
+    const c = withSuspects(n);
+    expect(c.suspects).toHaveLength(n);
+    expect(checkChapter(c, roles)).toEqual([]);
+  });
+
+  it('a board of 1 is a chapter in any shape but a "who did it"', () => {
+    expect(checkChapter(withSuspects(1), roles)).toEqual(['a "who did it" needs 2 suspects or more']);
+    const c = { ...withSuspects(1), shape: 'prove-it' as const };
+    c.steps[c.steps.length - 1]!.method = 'unmask';
+    expect(checkChapter(c, roles)).toEqual([]);
+  });
+
+  it('no board of 0 or of 6', () => {
+    expect(checkChapter({ ...spoon(), suspects: [] }, roles)).toContain('1 to 5 suspects are needed');
+    const c = withSuspects(5);
+    c.suspects.push({ who: 'the coach', name: 'Ife', line: 'Picks the team.', says: 'I was on the pitch.' });
+    expect(checkChapter(c, roles)).toContain('1 to 5 suspects are needed');
+  });
+
+  it('a name fits under a face', () => {
+    const c = spoon();
+    c.suspects[0]!.name = 'Oluwadamilare';
+    expect(checkChapter(c, roles)).toContain(`Oluwadamilare is longer than ${NAME_MAX} letters`);
   });
 
   it('nobody new turns up at the end', () => {

@@ -55,7 +55,11 @@ export type Chapter = {
   ending: { found: string; confession: string; after: string };
 };
 
-export const SUSPECTS = 4;
+/** A board holds 1 to 5 suspects. A "who did it" needs somebody to rule out, so 2 at least. */
+export const SUSPECTS_MIN = 1;
+export const SUSPECTS_MAX = 5;
+/** A name sits under a face on the board, on 1 line, 5 across on a phone. */
+export const NAME_MAX = 10;
 export const STEPS_MIN = 5;
 export const STEPS_MAX = 7;
 /** A line is read on a phone, in one look. */
@@ -81,11 +85,13 @@ export function checkChapter(raw: unknown, roles: readonly string[]): string[] {
   if (!text(c.item?.name) || !text(c.item?.line)) out.push('the item needs a name and a line');
   if (!Array.isArray(c.brief) || c.brief.length === 0) out.push('no brief');
 
-  if (suspects.length !== SUSPECTS) out.push(`${SUSPECTS} suspects are needed`);
+  if (suspects.length < SUSPECTS_MIN || suspects.length > SUSPECTS_MAX) out.push(`${SUSPECTS_MIN} to ${SUSPECTS_MAX} suspects are needed`);
+  if (c.shape === 'who-did-it' && suspects.length === 1) out.push('a "who did it" needs 2 suspects or more');
   if (new Set(suspects.map((s) => s.who)).size !== suspects.length) out.push('2 suspects share a role');
   for (const s of suspects) {
     if (!roles.includes(s.who)) out.push(`${s.who} is not a character the game can draw`);
     if (!text(s.name) || !text(s.line) || !text(s.says)) out.push(`${s.who} needs a name, a line and a word on where they were`);
+    if (text(s.name).length > NAME_MAX) out.push(`${s.name} is longer than ${NAME_MAX} letters`);
   }
   // Nobody new turns up at the end.
   if (!culprit) out.push('the culprit is not one of the suspects');
