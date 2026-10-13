@@ -24,7 +24,7 @@ Seed (after `npm run db:seed:gen`): `npx supabase db query --linked -f supabase/
 - A story is for players anywhere. Names, food, money and places in a chapter are ones a player in Lagos, London or Lima reads without a footnote, and a cast is mixed. Home ground is its own thing: the Naija packs and Pidgin are offered as that, by name, never as the default voice of the game.
 - No dailies. Nothing in the game leads to a daily any more: the Play button, the landing page and the first minute lead to a case. The daily, its card, its board, the run and the reminders that stand on it go in set 4a.
 - What brings a player back is the calendar. After the first cases, the cases down the line are written for a season, a celebration or a holiday, and open on their date for everybody.
-- A seasonal chapter dresses the path. Halloween: pumpkins and a bat. Christmas: snow, gift boxes, a manger. A season arrives slowly: snow starts faintly on 1 December and thickens toward the day. Dress is drawn, never a photo, never over a board being read, and off under reduced motion.
+- A seasonal chapter dresses the path, and a season arrives slowly: its dress starts faint on a set date and thickens toward the day, then clears the day after it ends. Snow starts faintly on 1 December. The seasons and what each one brings are the table in section 5. Dress is drawn, never a photo, never over a board being read, and off under reduced motion.
 - Chapters differ. A chapter takes 1 of 5 shapes (who did it, prove it, what is it really, where is it, nothing was taken) and draws 5 or 6 methods to suit it.
 - Pictures are mixed by what they are for. Things a player examines are real photos: the item in the brief, the 4 pictures, a close-up of evidence. People are always drawn: suspects, the culprit, pets, the player. No photo of a real person, ever. A room that is searched is drawn, because every out-of-place thing in it is put there by hand.
 - Photos are free to use and say so. Public domain and CC0 first, then CC BY and CC BY-SA with the credit they ask for. Each photo is stored with its source, its author and its licence, and the game has a credits page. No recognisable person, logo or brand name in any of them. Wikimedia Commons first for home subjects.
@@ -107,7 +107,8 @@ Never for sale: hints, extra tries, time, or anything that touches a score; stre
 - [ ] Reminder keys: `npm run push:keys`, the public key and `VAPID_SUBJECT` in `worker/wrangler.toml`, `npx wrangler secret put VAPID_PRIVATE_KEY --config worker/wrangler.toml`, `npm run deploy:api`.
 - [ ] Groq key, optional: `npx wrangler secret put GROQ_API_KEY --config worker/wrangler.toml` and `worker/.dev.vars`.
 - [ ] Read: the look tags on hairstyles (`src/avatar/parts/hair.ts`), the 4 Naija packs in `data/games.json`, the 7 terms in `worker/src/blocklistLocal.ts`, and 10 machine-written puzzles from the live site.
-- [ ] Eid dates and a puzzle for `data/holidays.json`.
+- [ ] The dates of the moving seasons for the year ahead, for `data/holidays.json`: Lunar New Year, Easter, Ramadan and Eid, Diwali.
+- [ ] Decide: which seasons a player sees by default. Suggested: the ones the whole world shares the weather or the date for (New Year, spring, summer, harvest, December snow), and the rest by where the player is or what they choose.
 - Still under the old name until the domain exists: fignda.pages.dev, the Cloudflare projects `fignda` and `fignda-api`, the local Supabase project id, the database functions `fignda_day_no` and `fignda_score`.
 
 ## To build, in sets
@@ -153,8 +154,27 @@ These replace the daily as the reason to come back. A case here is a written cha
 
 - [ ] **Set 5a. The case archive.** A place for cases that are not on the path. Empty until 5b.
 - [ ] **Set 5b. One holiday case.** It opens on the date for everyone, beside the path, 3 to 5 clues, and never blocks the player's own case. After the date it moves to the archive and its outfit piece and badge can still be earned.
-- [ ] **Set 5c. Seasonal dress** for the path, the dock and avatars, from `data/holidays.json`, each season with its own things: Halloween has pumpkins and a bat, Christmas has snow, gift boxes and a manger. A season has a ramp: its dress starts faint on a set date (snow from 1 December) and thickens toward the day, then clears the day after it ends. Drawn, never over a board, off under reduced motion.
-- [ ] **Set 5d. The rest of the calendar,** one case at a time: Christmas week, New Year, Easter, Eid, Independence Day, Children's Day, Halloween, Valentine's.
+- [ ] **Set 5c. Seasonal dress** for the path, the dock and avatars, from `data/holidays.json`. One season at a time, each with its own things, a ramp and an end. Drawn, never over a board, off under reduced motion. The first to build is the one whose date comes next.
+
+| Season | When | On the path | How it arrives |
+|---|---|---|---|
+| New Year | 31 Dec to 2 Jan | Paper streamers, a clock at 5 to 12, sparklers | Streamers from 29 Dec. The clock strikes on the night |
+| Lunar New Year | Its date, and the 2 weeks after | Red lanterns, paper cuttings, red envelopes | 1 lantern a day until the path is lit |
+| Valentine's | 14 Feb | Paper hearts, sealed envelopes, a ribbon. Cards between friends: no romance in a case | Envelopes from 10 Feb |
+| Spring | March and April | Blossom on the branches, a kite, puddles | Buds first, then blossom, then petals on the ground |
+| Easter | Its weekend | Painted eggs half hidden beside the path, lilies, a basket | 1 more egg a day through the week before |
+| Ramadan and Eid | The month, then Eid | A crescent that fills night by night, lanterns, dates on a plate | The moon is the ramp. Lanterns are all lit on Eid |
+| Children's Day | Its date where the player is | Balloons, chalk drawings on the path, a paper crown | The day only |
+| Summer | June to August | Bunting, an ice cream cart, long shadows | Bunting first, then the cart |
+| Harvest | Late September to November | Falling leaves, baskets of corn and yams, a scarecrow | A few leaves, then drifts of them |
+| Diwali | Its 5 days | Clay lamps along the path, rangoli underfoot, marigolds | 1 more row of lamps each evening |
+| Halloween | 31 Oct | Pumpkins, a bat, paper ghosts on a string, sweets. Playful, never frightening | 1 pumpkin from 25 Oct, a patch by the day |
+| Christmas | December | Snow, gift boxes, a manger, a wreath, lights on a string | Snow starts faintly on 1 Dec and thickens. Gifts from 18 Dec. The manger on the 24th |
+
+- A season with a moving date (Lunar New Year, Easter, Ramadan and Eid, Diwali) takes its dates from `data/holidays.json`, set a year ahead by the owner, never worked out in the browser.
+- A season that belongs to one country or one faith is offered, never forced: it shows where the player is or where they chose, and Settings can turn dress off. Somebody who does not keep Christmas still gets snow in December and no manger.
+- Nothing in a season is for sale or timed out: a case opened in its season can be finished after it, and moves to the archive (set 5a).
+- [ ] **Set 5d. The rest of the calendar,** one case at a time, each with its dress from the table above, in the order their dates come. A national day (Independence Day and others) is written only where there are players to play it.
 
 ### 6. Make, one feature
 This is somewhat redundant though, given the game has changed to Detective type "Cases"
