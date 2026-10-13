@@ -11,7 +11,7 @@ export const SHAPES = ['who-did-it', 'prove-it', 'what-is-it-really', 'where-is-
 export type Shape = (typeof SHAPES)[number];
 
 /** The methods a step can use today. A new method joins this list in the set that builds its engine. */
-export const METHODS = ['hidden-words', 'mirror', 'buried-sums', 'unmask', 'line-up'] as const;
+export const METHODS = ['hidden-words', 'mirror', 'buried-sums', 'unmask', 'line-up', 'accounts'] as const;
 export type Method = (typeof METHODS)[number];
 
 export const PROOFS = ['means', 'motive', 'chance'] as const;
@@ -55,6 +55,15 @@ export type Suspect = {
   says: string;
 };
 
+/**
+ * Which account fits (set 1i-d): 1 of 3 tellings of the same night. Exactly 1 stands. Each of the others is
+ * struck out by the fact of a step already done, counted from 1, so nothing is weighed that was not found first.
+ */
+export type Account = { text: string; stands?: boolean; struckBy?: number };
+
+/** How many accounts are weighed. 3: enough that 1 is not simply the other one's opposite. */
+export const ACCOUNTS = 3;
+
 export type Step = {
   place: string;
   method: Method;
@@ -67,6 +76,8 @@ export type Step = {
   text?: string;
   /** The words hidden in `text`. The engine must find every one, and nothing else. */
   words?: string[];
+  /** The accounts weighed, on a "which account fits" step. */
+  accounts?: Account[];
   /** What the step leaves behind once it is done. */
   fact: string;
   /** The fact as a few words, pinned to the board when the step is solved. Every step but the last has one. */
@@ -83,8 +94,11 @@ export type Step = {
 
 export type Chapter = {
   id: string;
-  /** The catalogue case this chapter is told on. */
-  case: string;
+  /** The casebook it belongs to, and its place in it, counted from 1. */
+  casebook?: string;
+  number?: number;
+  /** Written and checked, but not yet open to players: a method it uses has no screen yet. */
+  draft?: boolean;
   shape: Shape;
   title: string;
   item: { name: string; line: string };
@@ -126,7 +140,7 @@ export function checkChapter(raw: unknown, roles: readonly string[]): string[] {
   const steps = Array.isArray(c.steps) ? c.steps : [];
   const culprit = suspects.find((s) => s.who === c.culprit);
 
-  if (!text(c.id) || !text(c.case) || !text(c.title) || !text(c.place)) out.push('id, case, title and place are needed');
+  if (!text(c.id) || !text(c.title) || !text(c.place)) out.push('id, title and place are needed');
   if (!SHAPES.includes(c.shape as Shape)) out.push('unknown shape');
   if (!text(c.item?.name) || !text(c.item?.line)) out.push('the item needs a name and a line');
   if (!Array.isArray(c.brief) || c.brief.length === 0) out.push('no brief');
@@ -163,6 +177,17 @@ export function checkChapter(raw: unknown, roles: readonly string[]): string[] {
     const at = `step ${i + 1}`;
     if (!METHODS.includes(s.method)) out.push(`${at}: unknown method`);
     if (!text(s.place) || !text(s.thing) || !text(s.fact)) out.push(`${at}: a place, a thing and a fact are needed`);
+    if (s.method === 'accounts' || s.accounts != null) {
+      const list = Array.isArray(s.accounts) ? s.accounts : [];
+      if (s.method !== 'accounts') out.push(`${at}: only a "which account fits" step has accounts`);
+      else if (list.length !== ACCOUNTS || list.some((a) => !text(a.text))) out.push(`${at}: ${ACCOUNTS} accounts are needed, each in words`);
+      else {
+        if (list.filter((a) => a.stands).length !== 1) out.push(`${at}: exactly 1 account stands`);
+        // An account is struck out by something already found, never by something still to come.
+        for (const a of list) if (!a.stands && !(Number.isInteger(a.struckBy) && a.struckBy! >= 1 && a.struckBy! <= i)) out.push(`${at}: an account that falls is struck by a step before this one`);
+        if (list.some((a) => text(a.text).length > LINE_MAX || /[\u2014!]/.test(a.text))) out.push(`${at}: an account breaks the copy rules`);
+      }
+    }
     // Written evidence is checked by the engine that will grade it: every word is there, and no other.
     if (s.text != null || s.words != null) {
       const words = Array.isArray(s.words) ? s.words.map(norm) : [];
@@ -263,3 +288,12 @@ export const LINEUP_TRIES = 2;
 
 /** Stars for a line-up: 3 for the right name at once, 2 after 1 wrong name, 1 when the tries ran out. */
 export const lineupStars = (wrong: number): 1 | 2 | 3 => (wrong <= 0 ? 3 : wrong < LINEUP_TRIES ? 2 : 1);
+
+/** Which account a player should be left with, counted from 0. -1 for a step that weighs none. */
+export const accountThatStands = (step: Pick<Step, 'accounts'> | undefined): number => (step?.accounts ?? []).findIndex((a) => a.stands);
+
+/**
+ * Stars for a "which account fits" step: 3 for the right account at once, 2 after 1 wrong pick, 1 after 2. With
+ * 3 accounts the third pick cannot be wrong, so nobody is locked out.
+ */
+export const accountStars = (wrong: number): 1 | 2 | 3 => (wrong <= 0 ? 3 : wrong === 1 ? 2 : 1);

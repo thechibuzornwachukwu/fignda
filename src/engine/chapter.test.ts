@@ -1,8 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import pools from '../../data/copy.json';
-import games from '../../data/games.json';
-import { chapterProgress, checkChapter, LINEUP_TRIES, lineupStars, NAME_MAX, stepPuzzle, type Chapter } from './chapter';
+import { accountStars, accountThatStands, chapterProgress, checkChapter, LINEUP_TRIES, lineupStars, NAME_MAX, stepPuzzle, type Chapter } from './chapter';
 import { buildHiddenWords } from './hiddenWords';
 import { buildMirror } from './mirror';
 import { buildSums } from './sums';
@@ -11,7 +10,6 @@ const DIR = 'design/stories';
 const files = readdirSync(DIR).filter((f) => f.endsWith('.json'));
 const read = (f: string) => JSON.parse(readFileSync(join(DIR, f), 'utf8')) as Chapter;
 const roles = pools.culpritWho;
-const caseIds = ((Array.isArray(games) ? games : (games as { games: unknown }).games) as { id: string }[]).map((g) => g.id);
 const spoon = (): Chapter => read('the-long-spoon.json');
 
 describe('written chapters', () => {
@@ -19,10 +17,16 @@ describe('written chapters', () => {
     expect(checkChapter(read(f), roles)).toEqual([]);
   });
 
-  it.each(files)('%s is named as its file and told on a case we have', (f) => {
+  it.each(files)('%s is named as its file, and has its place in a casebook', (f) => {
     const c = read(f);
     expect(`${c.id}.json`).toBe(f);
-    expect(caseIds).toContain(c.case);
+    expect(c.casebook).toBe('lantern-row');
+    expect(Number.isInteger(c.number) && c.number! >= 1).toBe(true);
+  });
+
+  it('no 2 chapters share a place in a casebook', () => {
+    const places = files.map((f) => `${read(f).casebook}#${read(f).number}`);
+    expect(new Set(places).size).toBe(places.length);
   });
 });
 
@@ -219,5 +223,51 @@ describe('lineupStars', () => {
   it('3 at once, 2 after a wrong name, 1 when the tries ran out', () => {
     expect([0, 1, 2, 5].map(lineupStars)).toEqual([3, 2, 1, 1]);
     expect(LINEUP_TRIES).toBe(2);
+  });
+});
+
+describe('which account fits', () => {
+  const box = (): Chapter => read('the-open-box.json');
+
+  it('The open box weighs 3 accounts in its last step, and 1 stands', () => {
+    const c = box();
+    const last = c.steps[c.steps.length - 1]!;
+    expect(last.method).toBe('accounts');
+    expect(last.accounts).toHaveLength(3);
+    expect(accountThatStands(last)).toBe(2);
+    expect(accountThatStands(c.steps[0])).toBe(-1);
+    // It has no board of letters or digits.
+    expect(stepPuzzle(c, c.steps.length)).toBeNull();
+  });
+
+  it('an account falls to something already found, never to something still to come', () => {
+    const c = box();
+    c.steps[5]!.accounts![0]!.struckBy = 6;
+    expect(checkChapter(c, roles)).toContain('step 6: an account that falls is struck by a step before this one');
+    const d = box();
+    delete d.steps[5]!.accounts![1]!.struckBy;
+    expect(checkChapter(d, roles)).toContain('step 6: an account that falls is struck by a step before this one');
+  });
+
+  it('exactly 1 account stands, there are 3, and only this method has them', () => {
+    const c = box();
+    c.steps[5]!.accounts![0]!.stands = true;
+    expect(checkChapter(c, roles)).toContain('step 6: exactly 1 account stands');
+    const d = box();
+    d.steps[5]!.accounts!.pop();
+    expect(checkChapter(d, roles)).toContain('step 6: 3 accounts are needed, each in words');
+    const e = box();
+    e.steps[0]!.accounts = e.steps[5]!.accounts;
+    expect(checkChapter(e, roles)).toContain('step 1: only a "which account fits" step has accounts');
+  });
+
+  it('3 stars at once, 2 after a wrong pick, 1 after 2', () => {
+    expect([0, 1, 2, 3].map(accountStars)).toEqual([3, 2, 1, 1]);
+  });
+
+  it('a draft is written and checked, and not open to players', async () => {
+    const { chapters } = await import('../games/chapters');
+    expect(box().draft).toBe(true);
+    expect(chapters.map((c) => c.id)).toEqual(['the-long-spoon']);
   });
 });

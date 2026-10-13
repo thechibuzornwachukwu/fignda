@@ -1,6 +1,6 @@
 // A step of a written chapter, checked on the server from the play log alone, and the line-up from the chapter.
 
-import { readdirSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { stepPuzzle, type Chapter } from '../../src/engine/chapter';
 import { buildHiddenWords } from '../../src/engine/hiddenWords';
 import { buildMirror } from '../../src/engine/mirror';
@@ -17,7 +17,10 @@ const none = log([]);
 
 describe('the chapters the Worker is built with', () => {
   it('are every file in design/stories', () => {
-    const files = readdirSync('design/stories').filter((f) => f.endsWith('.json')).map((f) => f.replace(/\.json$/, ''));
+    // A draft is not open to players, so the Worker does not take plays of it.
+    const files = readdirSync('design/stories')
+      .filter((f) => f.endsWith('.json') && !(JSON.parse(readFileSync(`design/stories/${f}`, 'utf8')) as { draft?: boolean }).draft)
+      .map((f) => f.replace(/\.json$/, ''));
     expect(Object.keys(CHAPTERS).sort()).toEqual(files.sort());
   });
 });

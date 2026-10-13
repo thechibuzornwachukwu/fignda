@@ -5,6 +5,9 @@ import type { Chapter } from '../engine/chapter';
 
 const files = import.meta.glob<Chapter>('../../design/stories/*.json', { eager: true, import: 'default' });
 
-export const chapters: readonly Chapter[] = Object.values(files);
+const all: readonly Chapter[] = Object.values(files);
+
+/** The chapters a player can open, in the order of their casebook. A draft is written and not yet open. */
+export const chapters: readonly Chapter[] = all.filter((c) => !c.draft).sort((a, b) => (a.number ?? 0) - (b.number ?? 0));
 
 export const getChapter = (id: string): Chapter | undefined => chapters.find((c) => c.id === id);

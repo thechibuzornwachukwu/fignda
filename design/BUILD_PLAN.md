@@ -88,7 +88,7 @@ Casebook 1: Lantern Row. The premise of each case is 1 line and is where its wri
 | # | Case | Shape | Suspects | New method | Premise | The loose end it leaves |
 |---|---|---|---|---|---|---|
 | 1 | The long spoon (written) | Who did it | 4 | The line-up | The prize spoon is gone from a locked cabinet the night before the 20th final | The committee must vote on whether the 19th name stays |
-| 2 | The open box | Nothing was taken | 2 | Which account fits | The morning after the vote the ballot box is found unsealed, with every vote in it | 1 card in the box is not a vote: it has an open eye on it |
+| 2 | The open box (written, a draft) | Nothing was taken | 2 | Which account fits | The morning after the vote the ballot box is found unsealed, with every vote in it | 1 card in the box is not a vote: it has an open eye on it |
 | 3 | The early bus | Prove it | 1 | Could it be done | The last bus left 9 minutes early on the night of the final. The driver says the hall clock was fast | Somebody showed him the clock can be set from outside |
 | 4 | The year that is missing | Where is it | 3 | Walk it back, the trail | The hall's minute book for 2011 is gone from its shelf in the library | It is found with the page uncut. Reading it waits for case 8 |
 | | Interlude | | | | A message to the Open Eye, found in the returned book | |
@@ -99,7 +99,7 @@ Casebook 1: Lantern Row. The premise of each case is 1 line and is where its wri
 | 8 | Who carries the cards | Who did it | 5 | None: every method so far | 7 cases, 7 cards with an open eye. 1 person on Lantern Row has been handing them out | The page from 2011 is read. The Open Eye itself is not named |
 
 Suspects run 4, 2, 1, 3, 4, 2, 1, 5, so no 2 neighbours match, and the shapes run through all 5 before any repeats twice.
-What this asks of the build, in order: cases 2, 3 and 4 are written, each with its new method (sets 1i-d and 1i-b). Cold cases, because a fast player needs them the day the casebook opens. Then the path shows the casebook and the packs move to practice (sets 4e and 4c), which is the day it becomes the game. Then interludes (set 1e) and cases 5 to 8.
+What this asks of the build, in order: case 2 is written and passes `checkChapter` (`design/stories/the-open-box.json`), marked `draft` so no player reaches it. Next is the screen for its last step, "Which account fits" (3 accounts, tap the one that stands, and each of the others shows the pin that strikes it out), the Worker's check of that step, and the ending of a case that is not a "who did it". Then the draft mark comes off. Then cases 3 and 4, each with its new method (sets 1i-d and 1i-b). Cold cases, because a fast player needs them the day the casebook opens. Then the path shows the casebook and the packs move to practice (sets 4e and 4c), which is the day it becomes the game. Then interludes (set 1e) and cases 5 to 8.
 
 ## Screens: one job each
 
