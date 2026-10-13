@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import pools from '../../data/copy.json';
 import games from '../../data/games.json';
-import { checkChapter, NAME_MAX, stepPuzzle, type Chapter } from './chapter';
+import { chapterProgress, checkChapter, NAME_MAX, stepPuzzle, type Chapter } from './chapter';
 import { buildHiddenWords } from './hiddenWords';
 import { buildMirror } from './mirror';
 import { buildSums } from './sums';
@@ -196,5 +196,21 @@ describe('stepPuzzle', () => {
     expect(stepPuzzle(c, 9)).toBeNull();
     delete c.steps[2]!.text;
     expect(stepPuzzle(c, 3)).toBeNull();
+  });
+});
+
+describe('chapterProgress', () => {
+  it('steps open in order, and a gap stops the count', () => {
+    const c = spoon();
+    expect(chapterProgress(c, {})).toEqual({ solved: 0, cleared: [], given: [] });
+    expect(chapterProgress(c, { 1: 1 })).toEqual({ solved: 1, cleared: [], given: ['chance'] });
+    expect(chapterProgress(c, { 1: 3, 3: 3 }).solved).toBe(1);
+  });
+
+  it('the lead is given, the clearing is earned with 2 stars', () => {
+    const c = spoon();
+    expect(chapterProgress(c, { 1: 1, 2: 1 })).toEqual({ solved: 2, cleared: [], given: ['chance'] });
+    expect(chapterProgress(c, { 1: 1, 2: 2 }).cleared).toEqual(['the stall owner']);
+    expect(chapterProgress(c, { 1: 3, 2: 3, 3: 2, 4: 3, 5: 1 })).toEqual({ solved: 5, cleared: ['the stall owner', 'the baker', 'the caretaker'], given: ['chance', 'means', 'motive'] });
   });
 });

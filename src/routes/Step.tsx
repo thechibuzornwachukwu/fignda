@@ -1,0 +1,173 @@
+import { useId, useMemo, useState } from 'react';
+import { Navigate, useParams } from 'react-router-dom';
+import { Button } from '../components/Button';
+import { CaseBoard } from '../components/CaseBoard';
+import { PartnerNote } from '../components/PartnerNote';
+import { Stars } from '../components/Stars';
+import { StepResult } from '../components/StepResult';
+import { TextLink } from '../components/TextLink';
+import { pick } from '../copy';
+import { chapterProgress, CLEAR_STARS, roleLabel, stepPuzzle, type Chapter, type StepPuzzle } from '../engine/chapter';
+import { starsFor } from '../engine/stars';
+import { sumsTarget } from '../engine/sums';
+import { getChapter } from '../games/chapters';
+import { registry } from '../games/registry';
+import { useGameSession, type Session } from '../games/session';
+import { loadChapterStars, recordChapterStars } from '../lib/chapterStore';
+import styles from './Step.module.css';
+
+/** "The bakery" after "Go to": "the bakery". A name keeps its capital: "Rosa's night stall". */
+const toPlace = (place: string): string => (/^The /.test(place) ? `the ${place.slice(4)}` : place);
+
+/** The marks at the top right: one a step, a records step square, the last one largest. */
+function Marks({ chapter, at, solved }: { chapter: Chapter; at: number; solved: number }) {
+  return (
+    <ol className={styles.marks} aria-label={`${chapter.title}, step ${at} of ${chapter.steps.length}`} data-marks>
+      {chapter.steps.map((s, i) => (
+        <li
+          key={i}
+          className={styles.mark}
+          data-kind={i === chapter.steps.length - 1 ? 'last' : s.method === 'buried-sums' ? 'sums' : 'words'}
+          data-state={i + 1 === at ? 'here' : i < solved ? 'done' : 'ahead'}
+          aria-hidden="true"
+        />
+      ))}
+    </ol>
+  );
+}
+
+/**
+ * /case/:id/:n. One step of a written chapter, played on the board its method has. It ends on what was learned
+ * and where that leads. Steps open in order, and a finished one can be played again.
+ */
+export function Step() {
+  const { id = '', n = '' } = useParams();
+  const chapter = getChapter(id);
+  const at = Number(n);
+  const step = chapter && Number.isInteger(at) ? chapter.steps[at - 1] : undefined;
+  const locked = useMemo(() => pick('stepLocked'), []);
+  const soon = useMemo(() => pick('lineupSoon'), []);
+  if (!chapter) return <Navigate to="/play" replace />;
+  if (!step) return <Navigate to={`/case/${chapter.id}`} replace />;
+
+  const progress = chapterProgress(chapter, loadChapterStars(chapter.id));
+  if (at > progress.solved + 1)
+    return (
+      <div className={styles.screen} data-step="locked">
+        <PartnerNote moment="empty" layout="screen" title="Not yet">
+          <p>{locked}</p>
+          <TextLink to={`/case/${chapter.id}`}>Back to the board</TextLink>
+        </PartnerNote>
+      </div>
+    );
+
+  const def = stepPuzzle(chapter, at);
+  if (!def)
+    return (
+      <div className={styles.screen} data-step="soon">
+        <div className={styles.top}>
+          <TextLink to={`/case/${chapter.id}`}>The board</TextLink>
+          <Marks chapter={chapter} at={at} solved={progress.solved} />
+        </div>
+        <h1 className={styles.title}>{step.place}</h1>
+        <CaseBoard chapter={chapter} solved={progress.solved} cleared={progress.cleared} />
+        <p className={styles.line}>{soon}</p>
+      </div>
+    );
+
+  return <Play key={`${chapter.id}~${at}`} chapter={chapter} at={at} def={def} solved={progress.solved} />;
+}
+
+function Play({ chapter, at, def, solved }: { chapter: Chapter; at: number; def: StepPuzzle; solved: number }) {
+  const step = chapter.steps[at - 1]!;
+  const name = `${chapter.id}~${at}`;
+  const mod = registry[def.type];
+  const puzzle = useMemo(
+    () => mod.build({ id: name, type: def.type, category: chapter.title, title: step.place, noun: 'words', difficulty: 'Easy', expectedAnswers: [], dict: def.dict, text: def.text }),
+    [mod, name, def, chapter.title, step.place],
+  );
+  const total = mod.answers(puzzle).length;
+  const [best, setBest] = useState<number>(() => loadChapterStars(chapter.id)[at] ?? 0);
+  const g = useGameSession({
+    mod,
+    puzzle,
+    resumeId: name,
+    onFinish: (s: Session) => setBest(recordChapterStars(chapter.id, at, starsFor({ finished: true, found: s.found.length, total, hints: s.hints, wrongs: s.wrongs }))),
+  });
+  const instructionId = useId();
+  const finished = g.finished;
+  const found = useMemo(() => g.s.found.map((f) => f.span), [g.s.found]);
+  const missed = useMemo(() => (finished ? mod.missed(puzzle, g.foundSet) : []), [finished, mod, puzzle, g.foundSet]);
+  const suspect = chapter.suspects.find((s) => s.who === step.clears);
+  const notCleared = useMemo(() => pick('stepNotCleared', { who: suspect ? roleLabel(suspect.who) : '' }), [suspect]);
+  const find =
+    def.type === 'buried-sums'
+      ? `Find ${total} runs that add up to ${sumsTarget(def)}.`
+      : def.type === 'mirror'
+        ? `Find ${total} words. They read right to left.`
+        : `Find ${total} hidden words.`;
+  const last = at + 1 === chapter.steps.length;
+
+  return (
+    <div className={styles.screen} data-step={at} data-finished={finished || undefined}>
+      <div className={styles.top}>
+        <TextLink to={`/case/${chapter.id}`}>The board</TextLink>
+        <Marks chapter={chapter} at={at} solved={Math.max(solved, finished ? at : 0)} />
+      </div>
+      <h1 className={styles.title}>{step.place}</h1>
+
+      {finished ? (
+        <div className={styles.end} data-step-end>
+          <Stars value={best as 0 | 1 | 2 | 3} size={20} />
+          <StepResult chapter={chapter} at={at} stars={best} />
+          {suspect && best < CLEAR_STARS && (
+            <p className={styles.line} data-not-cleared>
+              {notCleared}
+            </p>
+          )}
+          {step.lead && (
+            <p className={styles.lead} data-lead>
+              {step.lead}
+            </p>
+          )}
+          <div className={styles.actions}>
+            <Button variant="accent" to={`/case/${chapter.id}/${at + 1}`}>
+              {last ? 'To the line-up' : `Go to ${toPlace(step.to ?? '')}`}
+            </Button>
+            <TextLink onClick={g.replay}>Play it again</TextLink>
+          </div>
+        </div>
+      ) : (
+        <p id={instructionId} className={styles.thing}>
+          {step.thing} {find}
+        </p>
+      )}
+
+      <mod.Board
+        {...mod.boardProps(puzzle)}
+        found={found}
+        missed={missed}
+        hintLi={g.s.hintLi}
+        disabled={finished}
+        onPick={g.pick}
+        onTapStart={g.tapStart}
+        onDragStart={g.dragStart}
+        describedBy={finished ? undefined : instructionId}
+        label={step.place}
+      />
+
+      {!finished && (
+        <div className={styles.actions}>
+          <TextLink onClick={g.hint}>Ask for a tip-off</TextLink>
+          <TextLink onClick={g.finish}>I'm done</TextLink>
+          <span className={styles.count}>
+            {g.s.found.length} of {total}
+          </span>
+        </div>
+      )}
+      <p className={styles.msg} aria-live="polite" role="status">
+        {g.s.msg}
+      </p>
+    </div>
+  );
+}

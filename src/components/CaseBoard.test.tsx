@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { POOLS } from '../copy';
 import { roleLabel, type Chapter } from '../engine/chapter';
 import { characterFor, PARTS } from '../avatar/draw';
 import { getChapter } from '../games/chapters';
@@ -91,7 +90,7 @@ describe('Brief', () => {
     expect(container.querySelector('[data-case-board]')).toBeInTheDocument();
     expect(screen.getByText(/Tonight at 6 is the 20th cook-off final/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Cases' })).toHaveAttribute('href', '/play');
-    expect(POOLS.briefSoon).toContain(container.querySelector('[data-brief] > p')!.textContent);
+    expect(screen.getByRole('link', { name: 'Go to the store room' })).toHaveAttribute('href', '/case/the-long-spoon/1');
   });
 
   it('a case that is not written says so, with the way back', () => {

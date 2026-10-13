@@ -280,9 +280,17 @@
     "Filed under the Open Eye. One more message that never arrived unread.",
     "Filed under the Open Eye. Whoever it was for knows less today."
   ],
-  "briefSoon": [
-    "The first step opens soon. The board is ready for it.",
-    "The steps of this case open soon. Read the board while it is quiet."
+  "stepLocked": [
+    "That step opens when the one before it is done.",
+    "One step at a time. The one before this is still open."
+  ],
+  "stepNotCleared": [
+    "{who} is not cleared yet. 2 stars or more does it. Play it again when you like.",
+    "Not enough to clear {who}. 2 stars or more does it."
+  ],
+  "lineupSoon": [
+    "The line-up opens soon. Everything you found is on the board.",
+    "The line-up is not open yet. The board has all you found."
   ],
   "briefMissing": [
     "That case is not on file. The ones that are sit on the path.",

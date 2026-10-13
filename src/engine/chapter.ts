@@ -233,3 +233,27 @@ export function stepPuzzle(chapter: Pick<Chapter, 'id' | 'steps'>, n: number): S
   if ((step.method === 'hidden-words' || step.method === 'mirror') && step.text && step.words?.length) return { type: step.method, text: step.text, dict: step.words.map(norm) };
   return null;
 }
+
+/** The lead is given, the clearing is earned: a suspect is ruled out by a step finished with this many stars. */
+export const CLEAR_STARS = 2;
+
+export type Progress = {
+  /** Steps finished, in order from the first. The next one is the step that is open. */
+  solved: number;
+  /** Suspects ruled out so far, by role. */
+  cleared: string[];
+  /** Which of means, motive and chance the finished steps gave. */
+  given: Proof[];
+};
+
+/** Where a player stands, from their best stars on each step (counted from 1). Steps open in order. */
+export function chapterProgress(chapter: Pick<Chapter, 'steps'>, stars: Readonly<Record<number, number>>): Progress {
+  let solved = 0;
+  while (solved < chapter.steps.length && (stars[solved + 1] ?? 0) > 0) solved++;
+  const done = chapter.steps.slice(0, solved);
+  return {
+    solved,
+    cleared: done.flatMap((s, i) => (s.clears && (stars[i + 1] ?? 0) >= CLEAR_STARS ? [s.clears] : [])),
+    given: done.flatMap((s) => (s.gives ? [s.gives] : [])),
+  };
+}

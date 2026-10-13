@@ -24,8 +24,3 @@
   list-style: none;
   color: var(--muted);
 }
-.soon {
-  composes: small from '../styles/type.module.css';
-  margin: 0;
-  color: var(--subtle);
-}
