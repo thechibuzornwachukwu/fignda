@@ -45,6 +45,7 @@ import { RatePuzzle } from './RatePuzzle';
 import { recordPlay } from '../lib/records';
 import { markFinished } from '../lib/shelves';
 import { record as recordSound } from '../lib/sound';
+import { markPlayedToday } from '../lib/playDays';
 import { recordStars } from '../lib/starStore';
 import { streakPool } from '../lib/streak';
 import { useStreak } from '../lib/useStreak';
@@ -296,6 +297,8 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
   function onFinish(fs: Session) {
     // A guest's games are counted: 2, then they are asked to sign in.
     if (!signedIn) markGuestPlayed(playKey(def.id, dailyN, part?.n));
+    // The run counts a day on which a clue was finished.
+    if (dailyN == null) markPlayedToday();
     // Counted for everyone, guests too: a game played to the end is one with at least 1 word found.
     if (fs.found.length > 0) countEvent(def.id, 'end');
     if (total > 0 && fs.found.length === total) countEvent(def.id, 'full');

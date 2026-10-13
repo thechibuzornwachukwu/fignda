@@ -80,8 +80,8 @@ export function Answers() {
       </ol>
 
       <div className={styles.actions}>
-        <Button variant="accent" to={`/d/${today}`}>
-          Play today's daily
+        <Button variant="accent" to="/play">
+          Open a case
         </Button>
         <Button variant="secondary" to={`/leaderboard?day=${num}`}>
           See who led that day

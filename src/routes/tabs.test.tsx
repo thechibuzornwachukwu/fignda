@@ -109,10 +109,11 @@ const title = () => screen.getByRole('heading', { level: 1 }).textContent;
 beforeEach(() => emptyWorld());
 
 describe('Games', () => {
-  it('a first visit shows the crew, the daily and the path, and no list of games', async () => {
+  it('a first visit shows the crew, the case that is open and the path, and no daily and no list of games', async () => {
     open('/play');
     expect(title()).toBe('Cases');
-    expect(screen.getByRole('link', { name: /Daily #\d+/ })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: /Daily #\d+/ })).toBeNull();
+    expect(screen.getByRole('link', { name: 'Open the brief' })).toHaveAttribute('href', '/case/the-long-spoon');
     expect(within(screen.getByRole('region', { name: 'Your path' })).getAllByRole('link').length).toBeGreaterThan(0);
     expect(screen.queryByRole('region', { name: 'All games' })).toBeNull();
     expect(screen.getByRole('link', { name: /Change your detective, pet and gear/ })).toHaveAttribute('href', '/me');
@@ -131,14 +132,15 @@ describe('Games', () => {
     localStorage.setItem(`gazecraft-daily-${dayNo()}`, 'null');
     open('/play');
     expect(screen.queryByRole('link', { name: 'Make a puzzle' })).toBeNull();
-    expect(screen.getByText('Play today')).toBeInTheDocument();
+    expect(screen.queryByText('Play today')).toBeNull();
+    expect(screen.getByRole('region', { name: 'Your path' })).toBeInTheDocument();
     expectNoHoles();
   });
 
-  it('a saved daily with no list of finds says 0, never undefined', () => {
+  it('a daily played before leaves no card on Cases', () => {
     localStorage.setItem(`gazecraft-daily-${dayNo()}`, JSON.stringify({ endAt: 5, startAt: 1 }));
     open('/play');
-    expect(screen.getByText('Done for today. You found 0. New puzzle at midnight.')).toBeInTheDocument();
+    expect(screen.queryByText(/Done for today/)).toBeNull();
     expectNoHoles();
   });
 
@@ -177,14 +179,14 @@ describe('Games', () => {
     expect(await screen.findByRole('link', { name: 'Make a puzzle' })).toBeInTheDocument();
   });
 
-  it('a signed in player whose plays do not load still gets the daily and the list', async () => {
+  it('a signed in player whose plays do not load still gets the path', async () => {
     world.me = ADA;
     world.api.fetchOwnPlays = fail;
     world.api.fetchDailyDays = fail;
     world.api.myGameInvites = fail;
     open('/play');
     await Promise.resolve();
-    expect(screen.getByRole('link', { name: /Daily #\d+/ })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Your path' })).toBeInTheDocument();
     expectNoHoles();
   });
 });
@@ -301,7 +303,7 @@ describe('Players', () => {
     open('/players');
     expect(title()).toBe('Squad');
     expect(await screen.findByText('Nobody else has joined yet. Invite a friend and they will show up here.')).toBeInTheDocument();
-    expect(await screen.findByText("No streaks yet. Play today's daily to start one.")).toBeInTheDocument();
+    expect(await screen.findByText("No streaks yet. Finish a step or a clue today to start one.")).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/signin?next=%2Fplayers');
     expect(screen.queryByRole('region', { name: 'Friend streaks' })).toBeNull();
     // Points wait for a first verified play.
@@ -419,7 +421,7 @@ describe('A player\'s page', () => {
     world.api.fetchProfileByHandle = ok(profile);
     open('/u/ada');
     expect(await screen.findByRole('heading', { name: 'Your run starts with one puzzle.' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: "Play today's daily" })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Open a case' })).toHaveAttribute('href', '/play');
     expect(screen.queryByText('Points')).toBeNull();
     expect(screen.queryByRole('heading', { name: 'Badges' })).toBeNull();
     expect(screen.getByText('Nobody yet. Share your profile to get followers.')).toBeInTheDocument();

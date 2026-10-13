@@ -240,8 +240,10 @@ test.describe('desktop', () => {
   });
 
   test('daily hides the count and shows only found rows', async ({ page }) => {
+    // Nothing on Cases leads to a daily any more. Its own address still opens it.
     await page.goto('/play');
-    await page.getByRole('link', { name: /Daily #\d+/ }).click();
+    await expect(page.getByRole('link', { name: /Daily #\d+/ })).toHaveCount(0);
+    await page.goto(`/d/${Math.floor((Date.now() - Date.UTC(2026, 0, 1)) / 864e5) + 1}`);
     await expect(page).toHaveURL(/\/d\/\d+$/);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText(/^Find the hidden /);
     await expect(page.getByText('0 found').first()).toBeVisible();

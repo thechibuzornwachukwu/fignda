@@ -1,7 +1,6 @@
 // Notifications and badges: what each one says and where it leads. The rows come from the database
 // (written by triggers, never by a client); this file only turns them into words.
 
-import { dayNo } from '../engine/daily';
 
 export type NoteKind = 'follow' | 'streak_ask' | 'streak_start' | 'room_invite' | 'nudge' | 'badge';
 
@@ -48,7 +47,7 @@ export function describe(n: Note, now = Date.now()): { text: string; to: string 
     case 'streak_start':
       return { text: `Your streak with ${who} has started.`, to: '/players#friend-streaks' };
     case 'nudge':
-      return { text: `${who} has played today and nudged you.`, to: `/d/${dayNo(new Date(now))}` };
+      return { text: `${who} has played today and nudged you.`, to: '/play' };
     case 'room_invite': {
       const fresh = now - new Date(n.created_at).getTime() < ROOM_MINUTES * 60_000;
       const base = n.data.game ? gamePath(n.data.game) : '/play';

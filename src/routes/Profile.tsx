@@ -225,8 +225,8 @@ export function Profile() {
             </p>
             <div className={styles.freshActions}>
               {own ? (
-                <Button variant="accent" to={`/d/${today}`}>
-                  Play today's daily
+                <Button variant="accent" to="/play">
+                  Open a case
                 </Button>
               ) : (
                 <Button variant="secondary" to="/play">
@@ -329,7 +329,7 @@ export function Profile() {
                   ? "Nothing yet. "
                   : `@${profile.handle} has no verified plays yet. `}
                 <Link to="/play" className={styles.inline}>
-                  {own ? "Play today's daily" : "Find a puzzle"}
+                  {own ? "Open a case" : "Find a case"}
                 </Link>
                 .
               </p>

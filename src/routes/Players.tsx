@@ -85,7 +85,7 @@ const TOPS = ['streak', 'perfect', 'new', 'points'] as const;
 type Top = (typeof TOPS)[number];
 const TOP_LABEL: Record<Top, string> = { streak: 'Streaks', perfect: 'Perfect', new: 'New', points: 'Points' };
 const TOP_EMPTY: Record<Top, string> = {
-  streak: "No streaks yet. Play today's daily to start one.",
+  streak: "No streaks yet. Finish a step or a clue today to start one.",
   perfect: 'Nobody has found every word yet.',
   new: 'No new players this week.',
   points: 'No points yet. Every word you find adds to yours.',

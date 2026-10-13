@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { dayNo } from '../engine/daily';
 import { fetchDailyDays, localDailies } from './api';
 import { useAuth } from './auth';
+import { loadPlayDays } from './playDays';
 import { longestRun } from './profileStats';
 import { dailyStats } from './streak';
 import { daysThisMonth, weekParts, type DayState } from './week';
@@ -10,7 +11,7 @@ export type Streak = {
   streak: number;
   best: number;
   playedToday: boolean;
-  /** Dailies ever played. 0 means there is nothing to show yet. */
+  /** Days on which something was finished: a step, a clue, or a daily from before. 0 means there is nothing to show yet. */
   played: number;
   /** The last 7 UTC days, oldest first. */
   week: DayState[];
@@ -19,7 +20,8 @@ export type Streak = {
 };
 
 /**
- * The player's own run of dailies: what is finished in this browser, plus their stored plays when signed in.
+ * The player's own run: the days they finished a step of a case or a clue in this browser, and the dailies they
+ * played before the daily went, from this browser and from their stored plays when signed in.
  * `tick` changes when a daily has just been finished here, so the count includes it.
  */
 export function useStreak(tick: unknown = 0): Streak {
@@ -40,7 +42,7 @@ export function useStreak(tick: unknown = 0): Streak {
 
   return useMemo(() => {
     const today = dayNo();
-    const days = new Set([...localDailies(400).map((d) => d.day_no), ...(signedIn ? server : [])]);
+    const days = new Set([...localDailies(400).map((d) => d.day_no), ...loadPlayDays(), ...(signedIn ? server : [])]);
     const { streak, played } = dailyStats(days, today);
     return {
       streak,

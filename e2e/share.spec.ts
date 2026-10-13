@@ -56,8 +56,7 @@ test.describe('export', () => {
 });
 
 test('daily locks finds', async ({ page }) => {
-  await page.goto('/play');
-  await page.getByRole('link', { name: /Daily #\d+/ }).click();
+  await page.goto(`/d/${Math.floor((Date.now() - Date.UTC(2026, 0, 1)) / 864e5) + 1}`);
   await page.getByRole('button', { name: "I'm done" }).click();
   await page.getByRole('button', { name: 'Share' }).click();
   const sheet = page.getByRole('dialog', { name: 'Share' });

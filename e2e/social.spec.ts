@@ -15,7 +15,7 @@ test('a new player sees a welcome, not a wall of zeros', async ({ page, browser 
   await page.goto(`/u/${me}`);
   const fresh = page.getByRole('region', { name: 'New player' });
   await expect(fresh.getByRole('heading', { name: 'Your run starts with one puzzle.' })).toBeVisible();
-  await expect(fresh.getByRole('link', { name: "Play today's daily" })).toBeVisible();
+  await expect(fresh.getByRole('link', { name: 'Open a case' })).toBeVisible();
   await expect(page.getByText('Best streak')).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'Last 14 dailies' })).toHaveCount(0);
   await audit(page, 'new profile');
@@ -125,7 +125,7 @@ test("answers: a past daily lists its words; today's are never shown", async ({ 
   await page.goto(`/d/${today - 1}/answers`);
   await expect(page.getByRole('heading', { name: /^Answers\./ })).toBeVisible();
   expect(await page.getByRole('list', { name: 'Answers' }).getByRole('listitem').count()).toBeGreaterThan(3);
-  await expect(page.getByRole('main').getByRole('link', { name: "Play today's daily" })).toHaveAttribute('href', `/d/${today}`);
+  await expect(page.getByRole('main').getByRole('link', { name: 'Open a case' })).toHaveAttribute('href', '/play');
   await audit(page, 'answers');
 
   await page.goto(`/d/${today}/answers`);

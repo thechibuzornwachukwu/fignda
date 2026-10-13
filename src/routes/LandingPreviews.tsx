@@ -185,14 +185,13 @@ function CharactersPreview() {
 
 /** What there is to do once you can find a word. */
 export function Features() {
-  const t = today();
   return (
     <ul className={styles.features}>
       <li className={styles.wide}>
         <DailyPreview />
-        <h3 className={styles.h3}>A new one every day</h3>
-        <p className={styles.body}>One puzzle, one try, the same for everyone. Play each day and your run grows.</p>
-        <TextLink to={`/d/${t.n}`}>Play today's daily</TextLink>
+        <h3 className={styles.h3}>A case to work</h3>
+        <p className={styles.body}>A brief, a board and steps that each end on a lead. Work a step a day and your run grows.</p>
+        <TextLink to="/play">See the cases</TextLink>
       </li>
       <li className={styles.narrow}>
         <TogetherPreview />

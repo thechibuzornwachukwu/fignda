@@ -6,56 +6,16 @@ import { Avatar } from '../components/Avatar';
 import { Partner } from '../components/Partner';
 import { PageHeader } from '../components/PageHeader';
 import { Ring } from '../components/Ring';
-import { buttonClass } from '../components/buttonClass';
-import { getPuzzle, sponsorFor } from '../games/catalog';
 import { pick } from '../copy';
-import { dayProfile } from '../engine/variableDay';
-import { todayHoldsLine } from '../games/resultLines';
-import { loadDaily, today } from '../games/daily';
 import { openCase } from '../lib/firstCase';
 import { useStreak, type Streak } from '../lib/useStreak';
 import { TextLink } from '../components/TextLink';
 import { useAuth } from '../lib/auth';
-import { sizeOf } from '../lib/unlocks';
 import { keepUnlocked, useUnlocks } from '../lib/useUnlocks';
 import { CustomTopic } from './CustomTopic';
 import { GameInvites } from './GameInvites';
 import { Journey } from './Journey';
 import styles from './Games.module.css';
-
-function DailyCard({ streak }: { streak: number }) {
-  const t = today();
-  const saved = loadDaily(t.n);
-  const played = saved?.endAt != null;
-  // A saved game that cannot be read still counts as played. It never prints "undefined".
-  const found = sizeOf(saved?.found);
-  // A run worth keeping is the best reason to play today. Picked once, so it does not change under the reader.
-  const keep = useMemo(() => (!played && streak >= 2 ? pick('streakKeep', { n: streak }) : ''), [played, streak]);
-  // What today holds, never how much. A puzzle the engine cannot build says nothing.
-  const holds = useMemo(() => {
-    const p = played ? null : getPuzzle(t.def.id);
-    return p ? todayHoldsLine(dayProfile(p), pick) : '';
-  }, [played, t.def.id]);
-  const withLine = useMemo(() => {
-    const w = sponsorFor(t.def);
-    return w ? pick('sponsorWith', { name: w.name }) : '';
-  }, [t.def]);
-  return (
-    <Link to={`/d/${t.n}`} className={styles.daily}>
-      <span className={styles.dailyText}>
-        <span className={styles.kicker}>
-          {t.holiday ? `${t.holiday} daily` : 'Daily'} #{t.n} · {t.date}
-        </span>
-        <span className={styles.dailyTitle}>{t.def.title}</span>
-        {withLine && <span className={styles.dailyWith}>{withLine}</span>}
-        <span className={styles.dailySub}>
-          {played ? `Done for today. You found ${found}. New puzzle at midnight.` : keep || holds || 'One try. Count hidden. Wrong picks cost 10.'}
-        </span>
-      </span>
-      <span className={buttonClass(played ? 'secondary' : 'primary')}>{played ? 'See result' : 'Play today'}</span>
-    </Link>
-  );
-}
 
 /** The last 7 days as a ring, the run, and the days played this month. Shown once there is a daily to count. */
 export function Week({ run }: { run: Streak }) {
@@ -92,8 +52,6 @@ export function Games() {
     <div className={styles.screen}>
       {/* One thing to do, then the path. Who is on the case sits small in the corner, and leads to the stage. */}
       <PageHeader title="Cases" action={<Crew />} />
-
-      <DailyCard streak={run.streak} />
 
       <GameInvites />
 

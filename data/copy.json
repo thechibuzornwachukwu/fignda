@@ -183,13 +183,13 @@
     "{name} is in. Find them together."
   ],
   "remind": [
-    "Today's intercept is in. One try.",
-    "New words are hiding. Come find them.",
-    "A message for the Open Eye was caught today. Read it first."
+    "Your case is open. Pick it up where you left it.",
+    "A step is waiting on the board.",
+    "The board has a gap. Come and fill it."
   ],
   "remindStreak": [
-    "{n} days so far. Today's intercept is in.",
-    "Today's intercept is in. You are on {n} days.",
+    "{n} days so far. Your case is open.",
+    "You are on {n} days. A step is waiting.",
     "{n} days so far. Today is next."
   ],
   "remindFriend": [
@@ -197,8 +197,8 @@
     "{name} found theirs. Go find yours."
   ],
   "streakKeep": [
-    "{n} days so far. Today's intercept is ready.",
-    "You are on {n} days. Today's is up."
+    "{n} days so far. Your case is open.",
+    "You are on {n} days. A step is waiting."
   ],
   "streakDay": [
     "{n} days in a row.",

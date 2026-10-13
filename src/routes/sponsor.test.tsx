@@ -64,10 +64,9 @@ describe('With NAME', () => {
     expect(card).not.toHaveTextContent(/With /);
   });
 
-  it('shows on the daily card when today is a sponsored puzzle', () => {
+  it('Cases has no daily card to carry it', () => {
     const { container } = showGames();
-    const card = container.querySelector(`a[href="/d/${dayNo()}"]`)!;
-    expect(card).toHaveTextContent('With Chi Farms');
+    expect(container.querySelector(`a[href="/d/${dayNo()}"]`)).toBeNull();
   });
 
   it('is in the link preview of the puzzle and of the daily', () => {

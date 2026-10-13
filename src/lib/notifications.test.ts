@@ -1,4 +1,3 @@
-import { dayNo } from '../engine/daily';
 import { ago, BADGES, badgeLabel, describe as say, type Note } from './notifications';
 
 const NOW = Date.UTC(2026, 9, 8, 12);
@@ -18,7 +17,7 @@ describe('notification text and links', () => {
     [{ kind: 'follow' }, 'Ada followed you.', '/u/ada'],
     [{ kind: 'streak_ask' }, 'Ada wants a streak with you.', '/players#friend-streaks'],
     [{ kind: 'streak_start' }, 'Your streak with Ada has started.', '/players#friend-streaks'],
-    [{ kind: 'nudge' }, 'Ada has played today and nudged you.', `/d/${dayNo(new Date(NOW))}`],
+    [{ kind: 'nudge' }, 'Ada has played today and nudged you.', '/play'],
     [{ kind: 'badge', handle: null, name: null, data: { code: 'streak_7' } }, 'New badge: 7 day streak.', '/me#badges'],
     [{ kind: 'badge', handle: null, name: null, data: { code: 'points_1000' } }, 'New badge: 1,000 points.', '/me#badges'],
   ] as const)('%o', (over, text, to) => {

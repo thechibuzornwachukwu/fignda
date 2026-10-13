@@ -10,6 +10,7 @@ import { pick } from '../copy';
 import { LINEUP_TRIES, lineupStars, roleLabel, type Chapter, type Progress } from '../engine/chapter';
 import { useAuth } from '../lib/auth';
 import { loadChapterStars, recordChapterStars } from '../lib/chapterStore';
+import { markPlayedToday } from '../lib/playDays';
 import styles from './LineUp.module.css';
 
 /** "The Long Spoon" inside a question: "the Long Spoon". */
@@ -34,6 +35,7 @@ export function LineUp({ chapter, progress }: { chapter: Chapter; progress: Prog
 
   const name = () => {
     if (!chosen) return;
+    markPlayedToday();
     if (chosen.who === chapter.culprit) {
       setStars(recordChapterStars(chapter.id, last, lineupStars(wrong.length)));
       return;

@@ -18,6 +18,7 @@ import { useAuth } from '../lib/auth';
 import { loadChapterStars, recordChapterStars } from '../lib/chapterStore';
 import { loadFlow } from '../lib/firstMinute';
 import { guestBlocked, markGuestPlayed, playKey } from '../lib/guestLimit';
+import { markPlayedToday } from '../lib/playDays';
 import { LineUp } from './LineUp';
 import styles from './Step.module.css';
 
@@ -113,6 +114,7 @@ function Play({ chapter, at, def, solved }: { chapter: Chapter; at: number; def:
     onFinish: (s: Session) => {
       setBest(recordChapterStars(chapter.id, at, starsFor({ finished: true, found: s.found.length, total, hints: s.hints, wrongs: s.wrongs })));
       if (!auth.session) markGuestPlayed(playKey(chapter.id, undefined, at));
+      markPlayedToday();
     },
   });
   const instructionId = useId();
