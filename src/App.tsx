@@ -17,7 +17,6 @@ const Step = lazy(() => import('./routes/Step').then((m) => ({ default: m.Step }
 const Games = lazy(() => import('./routes/Games').then((m) => ({ default: m.Games })));
 const GameById = lazy(() => import('./routes/Game').then((m) => ({ default: m.GameById })));
 const PassageById = lazy(() => import('./routes/Game').then((m) => ({ default: m.PassageById })));
-const DailyGame = lazy(() => import('./routes/Game').then((m) => ({ default: m.DailyGame })));
 const GameByCode = lazy(() => import('./routes/Game').then((m) => ({ default: m.GameByCode })));
 const SignIn = lazy(() => import('./routes/SignIn').then((m) => ({ default: m.SignIn })));
 const Account = lazy(() => import('./routes/Account').then((m) => ({ default: m.Account })));
@@ -29,7 +28,6 @@ const GameLeaderboard = lazy(() => import('./routes/Leaderboard').then((m) => ({
 const Players = lazy(() => import('./routes/Players').then((m) => ({ default: m.Players })));
 const Circles = lazy(() => import('./routes/Circles').then((m) => ({ default: m.Circles })));
 const Circle = lazy(() => import('./routes/Circles').then((m) => ({ default: m.Circle })));
-const Answers = lazy(() => import('./routes/Answers').then((m) => ({ default: m.Answers })));
 const Notifications = lazy(() => import('./routes/Notifications').then((m) => ({ default: m.Notifications })));
 const OwnerPuzzles = lazy(() => import('./routes/OwnerPuzzles').then((m) => ({ default: m.OwnerPuzzles })));
 const Make = lazy(() => import('./routes/Make').then((m) => ({ default: m.Make })));
@@ -86,8 +84,8 @@ export function App() {
         <Route path="play/:id/:n" element={<PassageById />} />
         <Route path="case/:id" element={<Brief />} />
         <Route path="case/:id/:n" element={<Step />} />
-        <Route path="d/:n" element={<DailyGame />} />
-        <Route path="d/:n/answers" element={<Answers />} />
+        {/* There is no daily any more. An old link to one, or to its answers, opens the cases. */}
+        <Route path="d/*" element={<Navigate to="/play" replace />} />
         <Route
           path="p/:code"
           element={

@@ -1,5 +1,4 @@
 import { calendar, dailyIdFor, dailyPool, getGameDef, holidayFor } from '../games/catalog';
-import { pageFor, llmsTxt } from '../seo/pages';
 import { dailyGameId, dayNo, holidayOn, isoDate, type Calendar } from './daily';
 
 const day = (iso: string) => dayNo(new Date(`${iso}T12:00:00Z`));
@@ -47,14 +46,4 @@ describe('holiday dailies', () => {
     expect(holidayOn(n, cal)?.game).toBe('nigeria');
   });
 
-  it('link previews and llms.txt name the holiday, and only once the day is here', () => {
-    const n = day('2026-12-25');
-    const page = pageFor(`/d/${n}`, 'https://x.test', n);
-    expect(page.title).toContain(`Christmas daily #${n}`);
-    expect(page.title).toContain('books of the Bible');
-    expect(llmsTxt('https://x.test', n)).toContain("Today's Christmas daily");
-    // The day before, tomorrow's page says nothing.
-    expect(pageFor(`/d/${n}`, 'https://x.test', n - 1).noindex).toBe(true);
-    expect(pageFor(`/d/${n - 1}`, 'https://x.test', n - 1).title).toContain(`Daily #${n - 1}`);
-  });
 });

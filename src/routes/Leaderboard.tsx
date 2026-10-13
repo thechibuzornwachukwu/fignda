@@ -1,17 +1,13 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
-import { dayNo } from '../engine/daily';
 import { formatTime } from '../engine/time';
-import { dailyIdFor, getGameDef } from '../games/catalog';
-import { dailyDate, dailyLabel } from '../games/daily';
-import { fetchDailyBoard, fetchDailyRank, fetchFollowing, fetchFollowingBoard, fetchGameBoard, fetchTogetherBoard, type BoardRow, type MyRank, type TeamRow, fetchChapterBoard, type CaseRow } from '../lib/api';
+import { getGameDef } from '../games/catalog';
+import { fetchGameBoard, fetchTogetherBoard, type BoardRow, type MyRank, type TeamRow, fetchChapterBoard, type CaseRow } from '../lib/api';
 import { openCase } from '../lib/firstCase';
 import { chapters } from '../games/chapters';
-import { CROWDS, askedCrowd, defaultCrowd, type Crowd } from '../lib/crowd';
-import { sizeOf } from '../lib/unlocks';
 import { PageHeader } from '../components/PageHeader';
 import { PartnerNote } from '../components/PartnerNote';
 import { SkeletonList } from '../components/Skeleton';
@@ -20,8 +16,6 @@ import { useAuth } from '../lib/auth';
 import { Avatar } from '../components/Avatar';
 import styles from './Leaderboard.module.css';
 
-type Loaded = { rows: BoardRow[]; me: MyRank | null };
-type Load = { status: 'loading' } | { status: 'error' } | ({ status: 'ready' } & Loaded);
 
 function Board({ rows, me, myHandle, empty, emptyTitle }: { rows: BoardRow[]; me: MyRank | null; myHandle?: string; empty: ReactNode; emptyTitle: string }) {
   if (rows.length === 0) {
@@ -62,9 +56,7 @@ function Board({ rows, me, myHandle, empty, emptyTitle }: { rows: BoardRow[]; me
 }
 
 /**
- * The board of a written case: who has worked it, by the points their steps earned. It leads Ranks now that
- * nothing is ranked by the day. Its empty and failed states are 1 line with no pet: the day's board under it
- * holds the pet of this screen.
+ * The board of a written case: who has worked it, by the points their steps earned. It is what Ranks is.
  */
 function CaseRanks({ myHandle }: { myHandle?: string }) {
   const chapter = useMemo(() => openCase()?.chapter ?? chapters[0], []);
@@ -97,8 +89,16 @@ function CaseRanks({ myHandle }: { myHandle?: string }) {
         </Button>
       </div>
       {rows == null && <SkeletonList rows={5} avatar={28} />}
-      {rows === 'error' && <p className={styles.meta}>The case board did not load. Try again in a moment.</p>}
-      {Array.isArray(rows) && rows.length === 0 && <p className={styles.meta}>Nobody is on this board yet. Finish a step signed in and you are.</p>}
+      {rows === 'error' && (
+        <PartnerNote moment="error" layout="screen" className={styles.empty}>
+          <p>The board did not load. Try again in a moment.</p>
+        </PartnerNote>
+      )}
+      {Array.isArray(rows) && rows.length === 0 && (
+        <PartnerNote layout="screen" title="The board is open" className={styles.empty}>
+          <p>Nobody is on it yet. Finish a step signed in and you are.</p>
+        </PartnerNote>
+      )}
       {Array.isArray(rows) && rows.length > 0 && (
         <ol className={styles.board} aria-label="Case board">
           {rows.map((r) => (
@@ -122,27 +122,6 @@ function CaseRanks({ myHandle }: { myHandle?: string }) {
   );
 }
 
-/** `load` is null while there is nothing to ask for yet: the board reads as loading. */
-function useBoard(key: string, load: (() => Promise<Loaded>) | null): Load {
-  // Results are tagged with the key they answer, so a new key reads as loading without a reset.
-  const [state, setState] = useState<{ key: string; load: Load } | null>(null);
-  const idle = !load;
-  useEffect(() => {
-    if (!load) return;
-    let alive = true;
-    load()
-      // A reply that is not a list is an empty board, never a crash.
-      .then((r) => alive && setState({ key, load: { status: 'ready', ...r, rows: Array.isArray(r.rows) ? r.rows : [] } }))
-      .catch(() => alive && setState({ key, load: { status: 'error' } }));
-    return () => {
-      alive = false;
-    };
-    // `key` captures every input of `load`, and `idle` whether there is one.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, idle]);
-  return state?.key === key ? state.load : { status: 'loading' };
-}
-
 function GuestNote({ next }: { next: string }) {
   const auth = useAuth();
   if (auth.profile || auth.loading) return null;
@@ -157,139 +136,15 @@ function GuestNote({ next }: { next: string }) {
   );
 }
 
-/** How many people you follow: what decides which board opens. A lookup that fails counts as none. Null until known. */
-function useFollowing(handle: string | undefined): number | null {
-  const [state, setState] = useState<{ handle: string; following: number } | null>(null);
-  useEffect(() => {
-    if (!handle) return;
-    let alive = true;
-    fetchFollowing(handle)
-      .catch(() => [])
-      .then((f) => alive && setState({ handle, following: sizeOf(f) }));
-    return () => {
-      alive = false;
-    };
-  }, [handle]);
-  return handle && state?.handle === handle ? state.following : null;
-}
-
-const CROWD_LABEL: Record<Crowd, string> = { following: 'Following', everyone: 'Everyone' };
-
-/** /leaderboard?day=N&board=following|everyone. Where you stand today: one board at a time, your own row pinned in view. Circles are on Squad. */
+/** /leaderboard. Ranks is the board of the open case. */
 export function Leaderboard() {
   const auth = useAuth();
-  const [params, setParams] = useSearchParams();
-  const today = dayNo();
-  const wanted = Number(params.get('day'));
-  const day = Number.isInteger(wanted) && wanted >= 1 && wanted <= today ? wanted : today;
-  const game = getGameDef(dailyIdFor(day));
-  const me = auth.profile?.handle;
-  const following = useFollowing(me);
-  // An old link to the circle board names no board here: it opens on your crowd.
-  const asked = askedCrowd(params.get('board'));
-  // Guests have no crowd. Signed in, the address wins; otherwise wait to know who your crowd is.
-  const crowd: Crowd | null = !me ? 'everyone' : (asked ?? (following != null ? defaultCrowd(following) : null));
-
-  const state = useBoard(
-    `${day}|${me ?? ''}|${crowd ?? ''}`,
-    !crowd
-      ? null
-      : async () => {
-          // Your own row comes with either board, so it can be pinned when you are below the top.
-          const rank = me ? fetchDailyRank(day, me).catch(() => null) : Promise.resolve(null);
-          if (crowd === 'following') return { rows: await fetchFollowingBoard(day), me: null };
-          const [rows, mine] = await Promise.all([fetchDailyBoard(day), rank]);
-          return { rows, me: mine };
-        },
-  );
-
   if (!auth.enabled) return <Navigate to="/play" replace />;
-  const setQuery = (d: number, board: Crowd | null) => {
-    const q: Record<string, string> = {};
-    if (d !== today) q.day = String(d);
-    if (board) q.board = board;
-    setParams(q, { replace: true });
-  };
-  const go = (d: number) => setQuery(d, asked);
-  const options = CROWDS.map((c) => [c, CROWD_LABEL[c]] as const);
-
   return (
     <div className={styles.page}>
       <PageHeader title="Ranks" />
-
-      <CaseRanks myHandle={me} />
-
-      <section className={styles.section} aria-labelledby="daily-title">
-        <div className={styles.head}>
-          <div className={styles.headText}>
-            <span className={styles.kicker}>
-              {day === today ? 'Today' : dailyDate(day)} · {dailyLabel(day)} #{day}
-            </span>
-            <h2 id="daily-title" className={styles.h2}>
-              {game ? (day === today ? `Hidden ${game.noun}` : game.title) : 'Daily'}
-            </h2>
-          </div>
-          <div className={styles.dayNav}>
-            <button type="button" className={styles.navBtn} aria-label="Previous day" onClick={() => go(day - 1)} disabled={day <= 1}>
-              <Icon icon={ChevronLeft} size={18} />
-            </button>
-            <button type="button" className={styles.navBtn} aria-label="Next day" onClick={() => go(day + 1)} disabled={day >= today}>
-              <Icon icon={ChevronRight} size={18} />
-            </button>
-          </div>
-        </div>
-
-        {me && crowd && (
-          <div className={styles.switch}>
-            <Segmented label="Board" hideLabel options={options} value={crowd} onChange={(v) => setQuery(day, v)} />
-          </div>
-        )}
-        {state.status === 'loading' && <SkeletonList rows={8} avatar={28} />}
-        {state.status === 'error' && (
-          <PartnerNote moment="error" layout="screen" className={styles.empty}>
-            <p>The board did not load. Try again in a moment.</p>
-          </PartnerNote>
-        )}
-        {state.status === 'ready' && (
-          <Board
-            rows={state.rows}
-            me={state.me}
-            myHandle={me}
-            emptyTitle={crowd === 'following' ? 'Quiet so far' : day === today ? 'Between boards' : 'A quiet day'}
-            empty={
-              crowd === 'following' ? (
-                <>
-                  Nobody you follow has a verified score here yet.{' '}
-                  <Link to="/players" className={styles.inline}>
-                    Find players
-                  </Link>
-                  .
-                </>
-              ) : day === today ? (
-                <>
-                  Nothing is ranked today. Boards come back with the next case.{' '}
-                  <Link to="/play" className={styles.inline}>
-                    Open a case
-                  </Link>
-                  .
-                </>
-              ) : (
-                'Nobody was ranked on this day.'
-              )
-            }
-          />
-        )}
-        {day === today ? (
-          <p className={styles.meta}>The daily has ended. Every past day keeps its board.</p>
-        ) : (
-          <p className={styles.meta}>
-            <Link to={`/d/${day}/answers`} className={styles.inline}>
-              See that day's answers
-            </Link>
-          </p>
-        )}
-        <GuestNote next="/leaderboard" />
-      </section>
+      <CaseRanks myHandle={auth.profile?.handle} />
+      <GuestNote next="/leaderboard" />
     </div>
   );
 }

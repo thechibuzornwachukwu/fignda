@@ -25,13 +25,26 @@ describe('page metadata', () => {
     expect(p.body).toContain('This is a most remarkable puzzle');
   });
 
-  it('dailies never show the count; future days reveal nothing and are not indexed', () => {
-    const p = pageFor('/d/5', O, 10);
-    expect(p.title).toMatch(/^Daily #5: how many .* can you find\? · Gazecraft$/);
-    expect(allCopy(p)).not.toMatch(/\b\d+ (books|names|words|colours|elements)\b/);
-    const future = pageFor('/d/11', O, 10);
-    expect(future.noindex).toBe(true);
-    expect(future.title).toBe(pageFor('/', O).title);
+  it('a case page gives the brief and the way in, and nothing of the evidence or the ending', () => {
+    const p = pageFor('/case/the-long-spoon', O);
+    expect(p.title).toBe('The long spoon · A case · Gazecraft');
+    expect(p.canonical).toBe('/case/the-long-spoon');
+    expect(p.noindex).toBeFalsy();
+    expect(p.body).toContain('Tonight at 6 is the 20th cook-off final');
+    expect(p.body).toContain('href="/case/the-long-spoon"');
+    // Who did it, and how it ends, are for the player to find.
+    expect(allCopy(p)).not.toMatch(/Theo|photographer|soldering|MARLOW|planed her off/);
+    // A step is part of its case, not a page of its own.
+    expect(pageFor('/case/the-long-spoon/3', O)).toMatchObject({ canonical: '/case/the-long-spoon', noindex: true });
+    expect(pageFor('/case/nothing', O).noindex).toBe(true);
+  });
+
+  it('there is no daily: an old link to one, or to its answers, is the cases and is not indexed', () => {
+    for (const path of ['/d/5', '/d/5/answers', '/d/99999']) expect(pageFor(path, O), path).toMatchObject({ canonical: '/play', noindex: true });
+    expect(allCopy(pageFor('/', O))).not.toMatch(/\bdaily\b|\bdailies\b/i);
+    expect(allCopy(pageFor('/play', O))).not.toMatch(/\bdaily\b|\bdailies\b/i);
+    expect(allCopy(pageFor('/leaderboard', O))).not.toMatch(/\bdaily\b|\bdailies\b/i);
+    expect(FAQ.flat().join(' ')).not.toMatch(/\bdaily\b|\bdailies\b/i);
   });
 
   it('private and unknown pages are not indexed', () => {
@@ -42,14 +55,14 @@ describe('page metadata', () => {
   it('profiles use summary fields only', () => {
     const p = profilePage(O, { handle: 'ada', name: 'Ada Obi', current_streak: 5, dailies: 12, perfect: 3, followers: 1 });
     expect(p.title).toBe('Ada Obi (@ada) on Gazecraft');
-    expect(p.description).toBe('@ada set the bar: 5 day streak · 12 dailies · 3 perfect. Think you can beat it?');
+    expect(p.description).toBe('@ada set the bar: 5 day run · 3 perfect. Think you can beat it?');
     expect(allCopy(p)).not.toContain('@test');
   });
 
   it('copy follows the brand rules: no em dashes, no exclamation marks', () => {
-    const paths = ['/', '/play', '/play/bible', '/d/5', '/leaderboard', '/players', '/privacy'];
+    const paths = ['/', '/play', '/play/bible', '/case/the-long-spoon', '/leaderboard', '/players', '/privacy'];
     for (const path of paths) {
-      const c = allCopy(pageFor(path, O, 10));
+      const c = allCopy(pageFor(path, O));
       expect(c, path).not.toMatch(/\u2014/);
       expect(c, path).not.toMatch(/!/);
     }
@@ -59,8 +72,8 @@ describe('page metadata', () => {
   it('the home description carries the promise, and no public page claims a result', () => {
     expect(pageFor('/', O).description).toContain('Slow down. Look closer.');
     expect(pageFor('/', O).description.length).toBeLessThanOrEqual(160);
-    for (const path of ['/', '/play', '/play/general', '/play/science', '/d/5', '/d/5/answers', '/leaderboard', '/players', '/privacy']) {
-      const p = pageFor(path, O, 10);
+    for (const path of ['/', '/play', '/play/general', '/play/science', '/case/the-long-spoon', '/leaderboard', '/players', '/privacy']) {
+      const p = pageFor(path, O);
       // Puzzle paragraphs are the game, not a claim about it.
       expect([p.title, p.description, p.imageAlt, JSON.stringify(p.jsonLd)].join(' '), path).not.toMatch(BANNED_CLAIMS);
     }
@@ -77,43 +90,22 @@ describe('page metadata', () => {
 });
 
 describe('sitemap and llms.txt', () => {
-  it('lists main pages, every puzzle and the last 14 dailies, never profiles', () => {
-    const paths = sitemapPaths(100).map((u) => u.path);
+  it('lists main pages, every case and every puzzle, never a daily and never profiles', () => {
+    const paths = sitemapPaths().map((u) => u.path);
     expect(paths).toContain('/play/bible');
-    expect(paths.filter((p) => /^\/d\/\d+$/.test(p))).toHaveLength(14);
-    // Answers pages: the last 60 finished days, never today.
-    const answers = paths.filter((p) => p.endsWith('/answers'));
-    expect(answers).toHaveLength(60);
-    expect(answers[0]).toBe('/d/99/answers');
-    expect(answers).not.toContain('/d/100/answers');
+    expect(paths).toContain('/case/the-long-spoon');
+    expect(paths.filter((p) => p.startsWith('/d/'))).toEqual([]);
     expect(paths.some((p) => p.startsWith('/u/'))).toBe(false);
   });
 
   it('llms.txt is factual and links the real pages', () => {
-    const t = llmsTxt(O, 100);
+    const t = llmsTxt(O);
     expect(t.startsWith('# Gazecraft')).toBe(true);
     expect(t).toContain(`${O}/play/bible`);
     expect(t).toContain('Is Gazecraft free?');
+    expect(t).toContain(`${O}/case/the-long-spoon`);
+    expect(t).not.toMatch(/\bdaily\b|\bdailies\b/i);
     expect(t).not.toMatch(/[\u2014!]/);
   });
 });
 
-describe('answers pages', () => {
-  it('a past daily lists every answer and its paragraph', () => {
-    const p = pageFor('/d/5/answers', O, 10);
-    expect(p.title).toMatch(/^Gazecraft Daily #5 answers \(5 January 2026\) · Gazecraft$/);
-    expect(p.canonical).toBe('/d/5/answers');
-    expect(p.noindex).toBeUndefined();
-    expect(p.body).toMatch(/<ol>(<li>[^<]+<\/li>)+<\/ol>/);
-    expect(p.body).toContain('<blockquote>');
-  });
-
-  it("today's and future answers are never written out", () => {
-    for (const n of [10, 11, 500]) {
-      const p = pageFor(`/d/${n}/answers`, O, 10);
-      expect(p.noindex).toBe(true);
-      expect(p.body).not.toContain('<blockquote>');
-      expect(p.title).not.toContain('answers');
-    }
-  });
-});

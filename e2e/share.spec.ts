@@ -55,23 +55,6 @@ test.describe('export', () => {
   });
 });
 
-test('daily locks finds', async ({ page }) => {
-  await page.goto(`/d/${Math.floor((Date.now() - Date.UTC(2026, 0, 1)) / 864e5) + 1}`);
-  await page.getByRole('button', { name: "I'm done" }).click();
-  await page.getByRole('button', { name: 'Share' }).click();
-  const sheet = page.getByRole('dialog', { name: 'Share' });
-  // Result card for a daily never shows the total.
-  await expect(sheet.getByText(/^\d+ found$/).first()).toBeVisible();
-  await sheet.getByRole('radio', { name: 'Puzzle' }).click();
-  const toggle = sheet.getByRole('switch', { name: /Show my finds/ });
-  await expect(toggle).toContainText('Locked for daily puzzles until tomorrow');
-  await expect(toggle).toHaveAttribute('aria-disabled', 'true');
-  await toggle.click({ force: true }); // a determined click still cannot switch it on
-  await expect(toggle).toHaveAttribute('aria-checked', 'false');
-  await expect(sheet.getByText('Contains answers')).toHaveCount(0);
-  await expect(sheet.getByText(/How many .* can you find\?/).first()).toBeVisible();
-});
-
 test('show my finds stamps the card on a normal game', async ({ page }) => {
   const sheet = await finishAndOpenShare(page, '/play/bnote');
   await sheet.getByRole('radio', { name: 'Puzzle' }).click();

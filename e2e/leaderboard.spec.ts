@@ -1,30 +1,28 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
-const todayNo = () => {
-  const d = new Date();
-  return Math.floor((Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate()) - Date.UTC(2026, 0, 1)) / 864e5) + 1;
-};
-
-test('guest sees the daily board and a sign in prompt, and no list of puzzle boards', async ({ page }) => {
+test('Ranks is the board of the open case, with a sign in prompt for a guest and no daily', async ({ page }) => {
   await page.goto('/leaderboard');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Ranks');
-  await expect(page.getByText(`Today · Daily #${todayNo()}`)).toBeVisible();
-  await expect(page.getByText('The daily has ended. Every past day keeps its board.')).toBeVisible();
+  await expect(page.locator('[data-case-ranks="the-long-spoon"]')).toBeVisible();
+  await expect(page.getByRole('heading', { level: 2, name: 'The long spoon' })).toBeVisible();
   await expect(page.getByText('Guest scores stay on this device and are never ranked.')).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Next day' })).toBeDisabled();
-  await page.getByRole('button', { name: 'Previous day' }).click();
-  await expect(page).toHaveURL(new RegExp(`day=${todayNo() - 1}$`));
-  await expect(page.getByText(`Daily #${todayNo() - 1}`)).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Puzzle boards' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Previous day' })).toHaveCount(0);
+  await expect(page.getByText(/Daily #\d+/)).toHaveCount(0);
+  await page.getByRole('link', { name: 'Open the case' }).click();
+  await expect(page).toHaveURL(/\/case\/the-long-spoon$/);
   // An old link to a puzzle's board still opens.
   await page.goto('/leaderboard/bible');
   await expect(page.getByRole('link', { name: 'Play The classic' })).toBeVisible();
 });
 
-test('future days fall back to today', async ({ page }) => {
-  await page.goto(`/leaderboard?day=${todayNo() + 5}`);
-  await expect(page.getByText(`Today · Daily #${todayNo()}`)).toBeVisible();
+test('an old link to a day, or to a daily, opens what is there now', async ({ page }) => {
+  await page.goto('/leaderboard?day=3&board=following');
+  await expect(page.getByRole('heading', { level: 2, name: 'The long spoon' })).toBeVisible();
+  await page.goto('/d/5');
+  await expect(page).toHaveURL(/\/play$/);
+  await page.goto('/d/5/answers');
+  await expect(page).toHaveURL(/\/play$/);
 });
 
 test('a puzzle played alone has no board of its own', async ({ page }) => {

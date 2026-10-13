@@ -120,18 +120,6 @@ test('make a puzzle: every word is checked as you type', async ({ page }) => {
   await audit(page, 'make');
 });
 
-test("answers: a past daily lists its words; today's are never shown", async ({ page }) => {
-  const today = await page.evaluate(() => Math.floor((Date.now() - Date.UTC(2026, 0, 1)) / 864e5) + 1);
-  await page.goto(`/d/${today - 1}/answers`);
-  await expect(page.getByRole('heading', { name: /^Answers\./ })).toBeVisible();
-  expect(await page.getByRole('list', { name: 'Answers' }).getByRole('listitem').count()).toBeGreaterThan(3);
-  await expect(page.getByRole('main').getByRole('link', { name: 'Open a case' })).toHaveAttribute('href', '/play');
-  await audit(page, 'answers');
-
-  await page.goto(`/d/${today}/answers`);
-  await expect(page).toHaveURL(/\/play$/);
-});
-
 test('the Naija packs are cases on the path and playable', async ({ page }) => {
   await page.goto('/play');
   for (const title of ['Party at ours', 'Farm visit', 'Aunty Mary', 'Band practice']) await expect(page.locator('[data-journey]').getByRole('heading', { level: 3, name: new RegExp(title) })).toBeVisible();

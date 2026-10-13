@@ -69,14 +69,11 @@ describe('With NAME', () => {
     expect(container.querySelector(`a[href="/d/${dayNo()}"]`)).toBeNull();
   });
 
-  it('is in the link preview of the puzzle and of the daily', () => {
+  it('is in the link preview of the puzzle', () => {
     const game = pageFor('/play/bible', ORIGIN);
     expect(game.description).toMatch(/ With Chi Farms\.$/);
     expect(game.imageAlt).toMatch(/ With Chi Farms\.$/);
     expect(game.body).toContain('With Chi Farms.');
-    const daily = pageFor(`/d/${dayNo()}`, ORIGIN);
-    expect(daily.description).toMatch(/ With Chi Farms\.$/);
-    expect(daily.body).toContain('With Chi Farms.');
   });
 
   it('a puzzle with no sponsor, or a broken one, says nothing in its preview', () => {

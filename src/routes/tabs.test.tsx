@@ -194,24 +194,14 @@ describe('Games', () => {
 });
 
 describe('Leaders', () => {
-  it('a guest sees everyone, no switch, and a line when nobody is ranked', async () => {
-    open('/leaderboard');
-    expect(title()).toBe('Ranks');
-    expect(await screen.findByText(/Nothing is ranked today\. Boards come back with the next case\./)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Open a case' })).toHaveAttribute('href', '/play');
-    expect(screen.queryByRole('radiogroup')).toBeNull();
-    expect(screen.queryByRole('link', { name: 'Your circles' })).toBeNull();
-    expect(screen.getByText(/Guest scores stay on this device/)).toBeInTheDocument();
-    expectNoHoles();
-  });
-
-  it('the case board leads Ranks: who has worked the open case, by points, with steps and stars', async () => {
+  it('Ranks is the board of the open case: who has worked it, by points, with steps and stars', async () => {
     world.me = ADA;
     world.api.fetchChapterBoard = ok([
       { rank: 1, handle: 'bisi', score: 1650, stars: 14, steps: 6 },
       { rank: 2, handle: 'ada', score: 900, stars: 1, steps: 2 },
     ]);
     open('/leaderboard');
+    expect(title()).toBe('Ranks');
     const board = await screen.findByRole('list', { name: 'Case board' });
     const rows = within(board).getAllByRole('listitem');
     expect(rows.map((r) => r.textContent)).toEqual(['01@bisi6/614 stars1,650', '02@adaYou2/61 star900']);
@@ -220,108 +210,39 @@ describe('Leaders', () => {
     expectNoHoles();
   });
 
-  it('a case board with nobody on it, or one that does not load, is 1 line and no second pet', async () => {
+  it('there is no daily on Ranks: no day, no switch, no way to one', async () => {
+    open('/leaderboard?day=3&board=following');
+    await screen.findByRole('heading', { level: 2, name: 'The long spoon' });
+    expect(document.body.textContent).not.toMatch(/daily|dailies|Today ·/i);
+    expect(screen.queryByRole('button', { name: 'Previous day' })).toBeNull();
+    expect(screen.queryByRole('radiogroup')).toBeNull();
+    expect(document.querySelector('a[href^="/d/"]')).toBeNull();
+  });
+
+  it('a guest sees the board and the way to get on it', async () => {
     open('/leaderboard');
-    expect(await screen.findByText('Nobody is on this board yet. Finish a step signed in and you are.')).toBeInTheDocument();
-    cleanup();
+    expect(await screen.findByText('Nobody is on it yet. Finish a step signed in and you are.')).toBeInTheDocument();
+    expect(screen.getByText(/Guest scores stay on this device/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/signin?next=%2Fleaderboard');
+    expectNoHoles();
+  });
+
+  it('a board that did not load says so, and a reply that is not a list is an empty board', async () => {
     world.api.fetchChapterBoard = fail;
     open('/leaderboard');
-    expect(await screen.findByText('The case board did not load. Try again in a moment.')).toBeInTheDocument();
-    expectNoHoles();
-  });
-
-  it('a board that did not load says so', async () => {
-    world.api.fetchDailyBoard = fail;
-    open('/leaderboard');
     expect(await screen.findByText('The board did not load. Try again in a moment.')).toBeInTheDocument();
-  });
-
-  it('a reply that is not a list is an empty board', async () => {
-    world.api.fetchDailyBoard = ok(null);
+    cleanup();
+    world.api.fetchChapterBoard = ok(null);
     open('/leaderboard');
-    expect(await screen.findByText(/Nothing is ranked today\./)).toBeInTheDocument();
-  });
-
-  it('a single ranked player is a board of 1', async () => {
-    world.api.fetchDailyBoard = ok([{ rank: 1, handle: 'ada', score: 700, secs: 80, found: 7, total: null }]);
-    open('/leaderboard');
-    const board = await screen.findByRole('list', { name: 'Top scores' });
-    expect(within(board).getAllByRole('listitem')).toHaveLength(1);
-    expect(board).toHaveTextContent('7 found');
+    expect(await screen.findByText('Nobody is on it yet. Finish a step signed in and you are.')).toBeInTheDocument();
     expectNoHoles();
   });
 
-  it('signed in with no circle and nobody followed: opens on Everyone, and Circle is not offered yet', async () => {
-    world.me = ADA;
+  it('loading shows rows of the board, not a blank', () => {
+    world.api.fetchChapterBoard = () => new Promise(() => {});
     open('/leaderboard');
-    expect(await screen.findByRole('radio', { name: 'Everyone' })).toHaveAttribute('aria-checked', 'true');
-    expect(screen.queryByRole('radio', { name: 'Circle' })).toBeNull();
-    expect(screen.getByRole('radio', { name: 'Following' })).toBeInTheDocument();
-  });
-
-  it('following someone: opens on Following, with a line when none of them has played', async () => {
-    world.me = ADA;
-    world.api.fetchFollowing = ok([{ handle: 'bisi', name: 'Bisi' }]);
-    open('/leaderboard');
-    expect(await screen.findByRole('radio', { name: 'Following' })).toHaveAttribute('aria-checked', 'true');
-    expect(await screen.findByText(/Nobody you follow has a verified score here yet\./)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Find players' })).toBeInTheDocument();
-  });
-
-  it('circles are not on Ranks: an old link to the circle board opens on your crowd', async () => {
-    world.me = ADA;
-    world.api.myCircles = ok([{ code: 'ABCDEF', name: 'Obi family', members: 2, is_owner: true }]);
-    open('/leaderboard?board=circle');
-    expect(await screen.findByRole('radio', { name: 'Everyone' })).toHaveAttribute('aria-checked', 'true');
-    expect(screen.queryByRole('radio', { name: 'Circle' })).toBeNull();
-    expect(screen.queryByRole('link', { name: 'Your circles' })).toBeNull();
-  });
-
-  it('the address wins over the default', async () => {
-    world.me = ADA;
-    world.api.fetchFollowing = ok([{ handle: 'bisi', name: 'Bisi' }]);
-    open('/leaderboard?board=everyone');
-    expect(await screen.findByRole('radio', { name: 'Everyone' })).toHaveAttribute('aria-checked', 'true');
-  });
-
-  it('your own row is pinned on the board: marked in the top, and added under it when you are below', async () => {
-    world.me = ADA;
-    const top = [
-      { rank: 1, handle: 'bisi', score: 900, secs: 70, found: 9, total: null },
-      { rank: 2, handle: 'ada', score: 700, secs: 80, found: 7, total: null },
-    ];
-    world.api.fetchDailyBoard = ok(top);
-    world.api.fetchDailyRank = ok({ ...top[1], players: 2 });
-    const first = open('/leaderboard');
-    let board = await screen.findByRole('list', { name: 'Top scores' });
-    expect(within(board).getAllByRole('listitem')).toHaveLength(2);
-    expect(board.querySelectorAll('[data-mine]')).toHaveLength(1);
-    expect(board.querySelector('[data-apart]')).toBeNull();
-    first.unmount();
-
-    world.api.fetchDailyBoard = ok([top[0]]);
-    world.api.fetchDailyRank = ok({ rank: 41, handle: 'ada', score: 300, secs: 200, found: 3, total: null, players: 60 });
-    open('/leaderboard');
-    board = await screen.findByRole('list', { name: 'Top scores' });
-    const mine = board.querySelector('[data-mine]')!;
-    expect(mine).toHaveAttribute('data-apart');
-    expect(mine).toHaveTextContent('41');
-    expect(screen.getByText('You are #41 of 60.')).toBeInTheDocument();
-    expectNoHoles();
-  });
-
-  it('a board on its way is a skeleton, not a blank', () => {
-    world.api.fetchDailyBoard = () => new Promise(() => {});
-    const { container } = open('/leaderboard');
-    expect(container.querySelector('[data-skeleton][aria-busy="true"]')).not.toBeNull();
-  });
-
-  it('when the lookups fail it lands on Everyone', async () => {
-    world.me = ADA;
-    world.api.fetchFollowing = fail;
-    world.api.myCircles = fail;
-    open('/leaderboard');
-    expect(await screen.findByRole('radio', { name: 'Everyone' })).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByRole('heading', { level: 2, name: 'The long spoon' })).toBeInTheDocument();
+    expect(document.querySelector('[aria-busy="true"], [data-skeleton]')).not.toBeNull();
   });
 });
 
