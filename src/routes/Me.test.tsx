@@ -162,7 +162,7 @@ describe('You holds everything about you', () => {
 
   it('a guest with no records gets one calm line, and no badges', () => {
     show();
-    expect(within(records()).getByText(/shows here\. Records are kept in this browser\./)).toBeInTheDocument();
+    expect(within(records()).getByText('Your bests show here once you have some.')).toBeInTheDocument();
     expect(screen.queryByText('Longest word')).toBeNull();
     expect(screen.queryByRole('heading', { name: 'Badges' })).toBeNull();
     expect(document.body.textContent).not.toMatch(/undefined|NaN|\bnull\b/);
@@ -180,7 +180,7 @@ describe('You holds everything about you', () => {
   it('malformed storage reads as no records, and half valid storage keeps only what is a record', () => {
     localStorage.setItem('gazecraft-records', '{not json');
     const first = show();
-    expect(within(records()).getByText(/Records are kept in this browser\./)).toBeInTheDocument();
+    expect(within(records()).getByText('Your bests show here once you have some.')).toBeInTheDocument();
     first.unmount();
     localStorage.setItem('gazecraft-records', JSON.stringify({ clean: { Bible: 'fast', Cities: 90 }, daily: -3, long: { word: '', len: 'x' } }));
     show();
@@ -190,13 +190,16 @@ describe('You holds everything about you', () => {
     expect(screen.queryByText('Longest word')).toBeNull();
   });
 
-  it('signed in with a badge: the earned one, the next 3 to aim for, and the way to the public page', async () => {
+  it('signed in with a badge: a medal for each kind, the earned one struck and the rest as outlines, and the way to the public page', async () => {
     world.profile = ADA;
     world.badges = ['first_game'];
     show();
     const badges = await screen.findByRole('region', { name: 'Badges' });
     await waitFor(() => expect(within(badges).getAllByRole('listitem')).toHaveLength(4));
-    expect(within(badges).getAllByText(/Not earned yet/)).toHaveLength(3);
+    expect(within(badges).getByRole('button', { name: /^First step\. Earned\./ })).toBeInTheDocument();
+    expect(within(badges).getAllByRole('button', { name: /Not earned yet\./ })).toHaveLength(3);
+    // A medal says what it is. Nothing under it explains it.
+    expect(badges.textContent).not.toMatch(/Not earned|Finish a|Reach |in a row/);
     expect(badges).toHaveAttribute('id', 'badges');
     expect(screen.getByRole('link', { name: 'See your public page' })).toHaveAttribute('href', '/u/ada');
   });
@@ -209,13 +212,13 @@ describe('You holds everything about you', () => {
     expect(screen.getByRole('heading', { name: 'Your records' })).toBeInTheDocument();
   });
 
-  it('badges on their way are a skeleton, and a lookup that fails leaves the ones to aim for', async () => {
+  it('badges on their way are a skeleton, and a lookup that fails leaves the medals to aim for', async () => {
     world.profile = ADA;
     world.plays = [{ verified: true }];
     world.badges = null as unknown as string[];
     show();
     const badges = await screen.findByRole('region', { name: 'Badges' });
-    await waitFor(() => expect(within(badges).getAllByRole('listitem')).toHaveLength(3));
+    await waitFor(() => expect(within(badges).getAllByRole('listitem')).toHaveLength(4));
     expect(badges.querySelector('[data-skeleton]')).toBeNull();
   });
 });

@@ -18,7 +18,7 @@ describe('notification text and links', () => {
     [{ kind: 'streak_ask' }, 'Ada wants a streak with you.', '/players#friend-streaks'],
     [{ kind: 'streak_start' }, 'Your streak with Ada has started.', '/players#friend-streaks'],
     [{ kind: 'nudge' }, 'Ada has played today and nudged you.', '/play'],
-    [{ kind: 'badge', handle: null, name: null, data: { code: 'streak_7' } }, 'New badge: 7 day streak.', '/me#badges'],
+    [{ kind: 'badge', handle: null, name: null, data: { code: 'streak_7' } }, 'New badge: 7 day run.', '/me#badges'],
     [{ kind: 'badge', handle: null, name: null, data: { code: 'points_1000' } }, 'New badge: 1,000 points.', '/me#badges'],
   ] as const)('%o', (over, text, to) => {
     expect(say(note(over as Partial<Note>), NOW)).toEqual({ text, to });
@@ -45,7 +45,9 @@ describe('badges', () => {
   it('codes are unique and an unknown code still has a name', () => {
     expect(new Set(BADGES.map((b) => b.code)).size).toBe(BADGES.length);
     expect(badgeLabel('nope')).toBe('New badge');
-    expect(badgeLabel('first_game')).toBe('First game');
+    expect(badgeLabel('first_game')).toBe('First step');
+    // There is no daily, so no badge names one.
+    expect(BADGES.map((b) => `${b.label} ${b.how}`).join(' ')).not.toMatch(/daily|dailies/i);
   });
 });
 

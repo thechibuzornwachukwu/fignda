@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Lock, Pencil, Settings } from 'lucide-react';
+import { Check, Lock, Pencil, Settings } from 'lucide-react';
 import { avatarCode, avatarFor, parseAvatar, PARTS, type Avatar as Parts } from '../avatar/draw';
 import { EARNED, howTo, isEarned, type Standing } from '../avatar/earned';
 import { guestAvatar, guestAvatarCode, guestSeed, setGuestAvatarCode } from '../avatar/guest';
@@ -26,7 +26,8 @@ import { useStreak } from '../lib/useStreak';
 import { useUnlocks } from '../lib/useUnlocks';
 import { CharacterEditor } from './AvatarDesigner';
 import { Week } from './Games';
-import { BadgePills, RecordList } from './Yours';
+import { Medals } from '../components/Medals';
+import { RecordList } from './Yours';
 import styles from './Me.module.css';
 
 const num = (n: number) => n.toLocaleString('en-US');
@@ -35,6 +36,8 @@ const indexOf = (key: 'kit' | 'outfit', name: string) => (PARTS.find((p) => p.ke
 
 /** Detective gear, in the order it is offered: nothing, then every earned piece. */
 const GEAR = [{ part: 'kit' as const, name: 'none', need: undefined }, ...EARNED];
+/** Where on the drawing a piece of gear is worn: the card shows that part close up. The rest are shown whole. */
+const GEAR_VIEW: Record<string, string | undefined> = { badge: '12 50 72 72', 'magnifying glass': '12 50 72 72', 'detective coat': '12 50 72 72', 'detective hat': '6 -2 84 84' };
 type Gear = (typeof GEAR)[number];
 /** What is being tried on the stage, before it is chosen. */
 type Trying = { kind: 'partner'; id: PartnerId } | { kind: 'gear'; gear: Gear } | null;
@@ -167,7 +170,6 @@ export function Me() {
               <Partner who={shownPartner} moment={trying?.kind === 'partner' ? 'hello' : 'done'} size={128} />
             </span>
             <figcaption className={styles.caption}>{partnerName(shownPartner)}</figcaption>
-            <span className={styles.sub}>Your pet</span>
           </figure>
         </div>
         <div className={styles.act}>
@@ -211,10 +213,18 @@ export function Me() {
                 >
                   <Partner who={p.id} moment={locked ? 'asleep' : 'empty'} size={88} />
                   <span className={styles.name}>{p.name}</span>
-                  <span className={styles.state}>
-                    {locked && <Icon icon={Lock} size={16} />}
-                    {state}
-                  </span>
+                  {/* Whose it is, is drawn: a tick on the one beside you, a lock and its price on one not yet yours. */}
+                  {on && (
+                    <span className={styles.tick} aria-hidden="true">
+                      <Icon icon={Check} size={16} />
+                    </span>
+                  )}
+                  {locked && at != null && (
+                    <span className={styles.need} aria-hidden="true">
+                      <Icon icon={Lock} size={16} />
+                      {num(at)}
+                    </span>
+                  )}
                 </button>
               </li>
             );
@@ -243,12 +253,19 @@ export function Me() {
                   aria-label={`${title}. ${locked ? `Locked. ${state}` : `${state}.`}`}
                   onClick={() => setTrying({ kind: 'gear', gear: g })}
                 >
-                  <Avatar parts={wear(mine, g)} size={88} tile />
-                  <span className={styles.name}>{title}</span>
-                  <span className={styles.state}>
-                    {locked && <Icon icon={Lock} size={16} />}
-                    {state}
-                  </span>
+                  {/* The thing itself, close up. It needs no name under it, and no word for whose it is. */}
+                  <Avatar parts={wear(mine, g)} size={96} view={GEAR_VIEW[g.name]} tile />
+                  {on && (
+                    <span className={styles.tick} aria-hidden="true">
+                      <Icon icon={Check} size={16} />
+                    </span>
+                  )}
+                  {locked && (
+                    <span className={styles.need} aria-hidden="true">
+                      <Icon icon={Lock} size={16} />
+                      {howTo(g.need!)}
+                    </span>
+                  )}
                 </button>
               </li>
             );
@@ -265,7 +282,7 @@ export function Me() {
             Badges
           </h2>
           {/* The next 3 to aim for sit after the earned ones. */}
-          {earned == null ? <SkeletonPills /> : <BadgePills codes={earned} next={3} />}
+          {earned == null ? <SkeletonPills /> : <Medals codes={earned} counts={{ run: run.streak, cases: standing.cases, points: standing.points }} path={profile ? `/u/${profile.handle}` : '/play'} all />}
         </section>
       )}
 

@@ -3,6 +3,8 @@
 // Not part of the product and compiled out of production builds.
 
 import { useSearchParams } from 'react-router-dom';
+import { MedalFace, Medals } from '../components/Medals';
+import { MEDAL_KINDS, medalsOf } from '../lib/medals';
 import { OgCard, type OgInput } from '../components/OgCard';
 import { ShareCard, type CardData } from '../components/ShareCard';
 import { useCardBudget } from '../components/useCardBudget';
@@ -86,4 +88,21 @@ export function OgHarness() {
     ? { kind: 'game', title: g.title, noun: g.noun, text: g.text, dict: g.dict, daily: q.get('daily') === '1', sponsor }
     : { kind: 'default' };
   return <OgCard input={input} />;
+}
+
+/** Test only: every medal at every tier, then a player part way along, as You shows them. */
+export function MedalsHarness() {
+  return (
+    <div data-medals-harness style={{ display: 'grid', gap: 24, padding: 24 }}>
+      {MEDAL_KINDS.map((k) => (
+        <div key={k.key} style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+          {k.tiers.map((_, i) => {
+            const m = medalsOf(k.tiers.slice(0, i + 1).map((n) => k.code(n))).find((x) => x.key === k.key)!;
+            return <MedalFace key={i} medal={m} />;
+          })}
+        </div>
+      ))}
+      <Medals codes={['first_game', 'streak_7', 'cases_1', 'cases_5']} counts={{ run: 12, cases: 7, points: 640 }} all />
+    </div>
+  );
 }

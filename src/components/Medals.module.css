@@ -1,0 +1,172 @@
+.row {
+  display: flex;
+  gap: var(--space-3);
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-1) var(--space-1) var(--space-3);
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+}
+.row > li {
+  flex: none;
+  scroll-snap-align: start;
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  width: var(--medal-card);
+  padding: var(--space-4) var(--space-2) var(--space-3);
+  border: 2px solid var(--line-3);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
+  box-shadow: 0 var(--ledge) 0 var(--line-3);
+  color: var(--fg);
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform var(--dur-fast) var(--ease-out);
+}
+.card:active {
+  transform: translateY(var(--ledge));
+  box-shadow: none;
+}
+/* Not earned yet: flat and dashed, as a locked pet is. */
+.card:not([data-earned]) {
+  border-style: dashed;
+  box-shadow: none;
+}
+
+/* The medal: a ribbon, and a disc with a rim. Its metal is the tier. */
+.medal {
+  --metal: var(--surface-2);
+  --metal-rim: var(--line-3);
+  --metal-ink: var(--subtle);
+  position: relative;
+  display: grid;
+  justify-items: center;
+  width: var(--medal);
+  padding-top: calc(var(--medal) * 0.22);
+}
+.medal[data-size='lg'] {
+  --medal: var(--medal-lg);
+}
+.medal[data-metal='bronze'] {
+  --metal: var(--medal-bronze);
+  --metal-rim: var(--medal-bronze-rim);
+  --metal-ink: var(--paper-ink);
+}
+.medal[data-metal='silver'] {
+  --metal: var(--medal-silver);
+  --metal-rim: var(--medal-silver-rim);
+  --metal-ink: var(--paper-ink);
+}
+.medal[data-metal='gold'] {
+  --metal: var(--medal-gold);
+  --metal-rim: var(--medal-gold-rim);
+  --metal-ink: var(--paper-ink);
+}
+.medal[data-metal='jade'] {
+  --metal: var(--medal-jade);
+  --metal-rim: var(--medal-jade-rim);
+  --metal-ink: var(--paper-ink);
+}
+.medal[data-metal='onyx'] {
+  --metal: var(--medal-onyx);
+  --metal-rim: var(--medal-gold);
+  --metal-ink: var(--medal-gold);
+}
+/* 2 tails of ribbon behind the disc. */
+.ribbon {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: calc(var(--medal) * 0.56);
+  height: calc(var(--medal) * 0.5);
+  margin-left: calc(var(--medal) * -0.28);
+  background: var(--metal-rim);
+  clip-path: polygon(0 0, 38% 0, 50% 46%, 62% 0, 100% 0, 78% 100%, 50% 62%, 22% 100%);
+}
+.medal[data-metal='none'] .ribbon {
+  background: var(--line-3);
+}
+.disc {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-0h);
+  box-sizing: border-box;
+  width: calc(var(--medal) * 0.78);
+  height: calc(var(--medal) * 0.78);
+  border: var(--space-1h) solid var(--metal-rim);
+  border-radius: var(--radius-pill);
+  background: var(--metal);
+  color: var(--metal-ink);
+  box-shadow: 0 var(--ledge) 0 var(--metal-rim);
+}
+.medal[data-metal='none'] .disc {
+  border-style: dashed;
+  border-width: 2px;
+  box-shadow: none;
+}
+.face {
+  composes: stat from '../styles/type.module.css';
+  font-size: calc(var(--medal) * 0.22);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.name {
+  composes: small from '../styles/type.module.css';
+  max-width: 100%;
+  font-weight: 800;
+  line-height: 1.25;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.card:not([data-earned]) .name {
+  color: var(--muted);
+}
+/* How far to the next tier. A bar, and no words. */
+.track {
+  display: block;
+  width: 100%;
+  height: var(--space-1);
+  border-radius: var(--radius-pill);
+  background: var(--track);
+  overflow: hidden;
+}
+.fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--radius-pill);
+  background: var(--fg);
+}
+
+/* Opened: the medal large, its name, and the way to share it. */
+.show {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-5) var(--space-5);
+  text-align: center;
+}
+.title {
+  composes: h2 from '../styles/type.module.css';
+  margin: 0;
+}
+.toward {
+  composes: small from '../styles/type.module.css';
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  width: var(--medal-lg);
+  margin: 0;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}

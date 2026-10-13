@@ -29,7 +29,7 @@ import {
 } from "./ProfileSocial";
 import { Avatar } from "../components/Avatar";
 import { LevelBadge } from "../components/LevelBadge";
-import { BadgePills } from "./Yours";
+import { Medals } from "../components/Medals";
 import styles from "./Profile.module.css";
 
 type State =
@@ -171,7 +171,7 @@ export function Profile() {
       <h2 id="badges-title" className={styles.h2}>
         Badges
       </h2>
-      <BadgePills codes={badges} />
+      <Medals codes={badges} owner={profile.name} path={`/u/${profile.handle}`} />
     </section>
   );
 

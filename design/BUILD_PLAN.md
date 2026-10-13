@@ -13,6 +13,7 @@ Seed (after `npm run db:seed:gen`): `npx supabase db query --linked -f supabase/
 - A case is worked the way a detective works one: a brief, the scene, then steps that each end on a lead to the next, then the line-up. A step is one short sitting. The reasons are in `INSIGHTS.html` section 11, and the screens are in the prototype canvas "Gazecraft case storyline" (<https://claude.ai/artifact/Rif6VsH8K4MdDTBXSHSSF4>).
 - Nobody leaves clues on purpose. A clue is a trace left by accident, a record somebody else kept, a message meant for somebody else, or something the suspect tried to destroy.
 - A case has 3 kinds of work, and a chapter should have all 3: finding what is there (searching a scene), reading what was left (messages, records, traces), and weighing what could have happened (scenarios). The first chapter has only the second. Without the other 2 a player reads evidence and never looks for it or reasons from it.
+- Show it, do not caption it. A thing on screen explains itself by how it is drawn, and a thing a player earned looks earned: badges are medals with tiers, in metal, worth sharing. A line under a card that says what it is or whose it is means the drawing failed. Names that are identity stay.
 - Every method has a physical reason. A detective never plays a game: each method is a real thing somebody left, kept or tried to destroy (a blotter that kept a note back to front, a page written in lemon juice, a torn receipt), and the play is what you would do with it in your hands. A method with no such reason is left out. The full list, 22 of them, is the sheet "Every method has a physical reason" on the prototype canvas.
 - Evidence clears suspects. Every suspect is met in the brief and nobody new turns up at the end.
 - The case board is what a player watches change. It is a pinboard: photos, notes and thread. It opens nearly empty on the brief, gains a pin for each step solved, shows the cleared suspects taped over at the line-up, and reads "Solved" at the end. Threads are dotted until something is proved.
@@ -243,6 +244,9 @@ Play with no account, and sponsors get numbers, never people.
 - [ ] EU players under 16 checked before any marketing there.
 
 ### 9. Smaller
+
+- [ ] A medal shared as a picture: a card with the medal, the player's detective and their name, drawn as the share cards are. Today a medal is shared as a line of text and a link.
+- [ ] Read every screen against "show it, do not caption it" and take out the lines that explain: the stage on You ("Detective X is with you. New kit at 3."), Settings, Squad, the first minute.
 
 - [ ] Pick dailies from the `daily_candidates` view. Nothing reads it yet.
 - [ ] Usage per feature per week from the database. Under 2% of weekly players after a month moves behind "More".

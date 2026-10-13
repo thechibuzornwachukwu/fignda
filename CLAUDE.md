@@ -22,6 +22,7 @@ Design: `/design`. Read `SPEC.md` before UI work, `SECURITY.md` before data, aut
 - The cat, the dino, the dog and the robot are the player's pets. On screen say "pet", never "partner". Code keeps `partner`.
 - The pet's help is a "tip-off" on screen, never a "hint". Code keeps `hint`.
 - No em dashes. No exclamation marks. Short sentences. Digits for numbers.
+- Show it, do not caption it. A card, a medal or a control says what it is by how it is drawn. No line under it to explain it or to give a state the drawing can carry (a tick, a lock, a fill). A name that is who something is stays: a pet, a suspect.
 - Feedback lines come only from `src/copy` pools (`data/copy.json`) via `pick` / `onFound`. Never inline them.
 
 ## Code
@@ -33,7 +34,7 @@ src/games/       registry: type -> { build, check, Board }
 src/avatar/      player characters: shapes, parts (append only lists), draw, store
 src/components/  Logo Icon Button TextLink FilterTabs GameRow Puzzle Letter WordList
                  ProgressLine BigClock MobileBar ShareSheet ShareCard Segmented Toggle
-                 ThemeToggle Header Footer Dialog Skeleton PartnerNote CaseBoard StepResult
+                 ThemeToggle Header Footer Dialog Skeleton PartnerNote CaseBoard StepResult Medals
 src/routes/      Landing Games Game Brief Step LineUp SignIn Account
 src/lib/         supabase, api, storage
 design/stories/  one file a chapter, checked by src/engine/chapter.ts

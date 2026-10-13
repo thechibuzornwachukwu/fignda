@@ -196,3 +196,33 @@
     transition: none;
   }
 }
+
+/* Whose a pet or a piece of gear is, is drawn on its card and not written under it. */
+.card {
+  position: relative;
+}
+/* Chosen: a tick in the corner. */
+.tick {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+  display: grid;
+  place-items: center;
+  width: var(--space-6);
+  height: var(--space-6);
+  border-radius: var(--radius-pill);
+  background: var(--fg);
+  color: var(--bg);
+}
+/* Not yet earned: a lock and what it takes. The one thing a card still has to say. */
+.need {
+  composes: label from '../styles/type.module.css';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  max-width: 100%;
+  color: var(--subtle);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}

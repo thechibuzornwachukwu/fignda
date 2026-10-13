@@ -37,6 +37,7 @@ const Privacy = lazy(() => import('./routes/Privacy').then((m) => ({ default: m.
 
 // Test-only card harness. VITE_E2E is set only by the e2e build, so production compiles this away.
 const CardsHarness = import.meta.env.VITE_E2E === '1' ? lazy(() => import('./routes/CardsHarness').then((m) => ({ default: m.CardsHarness }))) : null;
+const MedalsHarness = import.meta.env.VITE_E2E === '1' ? lazy(() => import('./routes/CardsHarness').then((m) => ({ default: m.MedalsHarness }))) : null;
 const OgHarness = import.meta.env.VITE_E2E === '1' ? lazy(() => import('./routes/CardsHarness').then((m) => ({ default: m.OgHarness }))) : null;
 
 const blank = <div className={styles.loading} aria-busy="true" />;
@@ -118,6 +119,16 @@ export function App() {
           element={
             <Suspense>
               <OgHarness />
+            </Suspense>
+          }
+        />
+      )}
+      {MedalsHarness && (
+        <Route
+          path="__medals"
+          element={
+            <Suspense>
+              <MedalsHarness />
             </Suspense>
           }
         />
