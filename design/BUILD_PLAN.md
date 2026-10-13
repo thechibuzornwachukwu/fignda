@@ -68,14 +68,18 @@ The rules:
 - Guessing is pointless, never punished: whoever the evidence cleared cannot be named, the line-up has 2 tries, and then the mask comes off anyway.
 - 1 score: stars. A step read clean with no tip-off is 3. We do not add a second count.
 - A step exists because the case needs its fact. One that could be lifted out without the case changing is cut.
-- Cadence: 1 new case a fortnight, said out loud, so a player knows when to come back. A seasonal case opens on its date beside the path and never blocks it.
+- Nothing is gated by time. A case is open when the one before it is closed, and never by a date. We add about 1 case a fortnight, and a seasonal case opens on its date beside the path and never blocks it.
 - Shapes rotate: no 2 cases next to each other have the same shape, and no 2 next to each other have the same number of suspects.
 
 Decided on 13 Oct 2026, by the owner's leave ("make the right choices"). Each can still be changed, and a case is only fixed once it is written.
 
 - The place: Lantern Row. A market street with a hall behind it, a bakery, a bus stop, a library and a row of houses. It is nowhere in particular, so a player anywhere can stand in it. Casebook 1 is called Lantern Row, and every case in it happens there. A new casebook is a new place.
 - The cast returns. The 14 characters the game can draw live on Lantern Row. A suspect cleared in 1 case can be a witness in the next and a suspect again later, so a player comes to know the street. Nobody is the culprit twice in a casebook.
-- The pace: 1 case a fortnight, and a date is only ever given for a case that is already written and checked. The fortnight starts when cases 2 and 3 are both written, so there is always 1 case in hand. If a case is late nothing is announced, and nothing a player has is taken away.
+- The pace is the player's. Every case that is written is open, in order, and nothing waits for a date. A player may close a case in an evening or the whole casebook in 3 days, with tip-offs or without, and that is a good outcome, never a problem to prevent. No timer, no daily cap, no wait between cases, as Duolingo's path is all there and a learner goes as fast as they like.
+- A fortnight is how fast we write, not how fast anybody plays. We expect a step or 2 a day, which is a case in about 4 days and the casebook in about 5 weeks, and we plan for a player who goes 3 times that fast.
+- So casebook 1 opens as the game only when 4 of its 8 cases are written. Until then The long spoon is 1 case beside the packs, as it is today. After that we add 1 a fortnight, and a date is given only for a case already written and checked.
+- What a player finds at the end of what is written, so the game never just stops: (1) cold cases: any closed case again with no tip-offs, for a gold seal; (2) practice: the drills; (3) a seasonal case, when one is open; (4) the next file on the path, closed, with "Tell me when it opens" and no date unless it is written. Their run goes on: a step of a cold case or a drill counts as a day.
+- Nothing bought makes a case faster or easier. A tip-off costs points earned by playing, and points are never sold for it (Revenue: never for sale). What a player can buy is how their detective and their pet look.
 - Art never blocks the path. Case 5 needs the first drawn room. If the room is not ready, case 6 is released in its place and case 5 follows: both are written to stand in either slot.
 - The 2011 question runs through the book. The long spoon leaves it open whether a name was planed off fairly. Case 4 finds the record of that year, and case 8 reads it. It is the thread a player follows, and the Open Eye is behind it.
 
@@ -95,7 +99,7 @@ Casebook 1: Lantern Row. The premise of each case is 1 line and is where its wri
 | 8 | Who carries the cards | Who did it | 5 | None: every method so far | 7 cases, 7 cards with an open eye. 1 person on Lantern Row has been handing them out | The page from 2011 is read. The Open Eye itself is not named |
 
 Suspects run 4, 2, 1, 3, 4, 2, 1, 5, so no 2 neighbours match, and the shapes run through all 5 before any repeats twice.
-What this asks of the build, in order: the path shows a casebook (set 4e), the second case is written with its new method (set 1i-d), the packs move to practice (set 4c), interludes (set 1e), cold cases (after casebook 1 is out).
+What this asks of the build, in order: cases 2, 3 and 4 are written, each with its new method (sets 1i-d and 1i-b). Cold cases, because a fast player needs them the day the casebook opens. Then the path shows the casebook and the packs move to practice (sets 4e and 4c), which is the day it becomes the game. Then interludes (set 1e) and cases 5 to 8.
 
 ## Screens: one job each
 
@@ -150,7 +154,7 @@ Never for sale: hints, extra tries, time, or anything that touches a score; stre
 - [ ] Decide: what is sold to a church, a school or a wedding now. The price list sells a puzzle on the buyer's subject, which is a word hunt. It can stay that (sold as a drill, or a message hidden for the guests) or become a short case written for them, which costs more to make.
 - [ ] Decide: the 25 packs, one by one (set 4d). Suggested: chapters for the first 3 on the path and the 4 Naija packs, practice for the rest, and retire what reads badly.
 - [ ] Read The long spoon (`design/stories/the-long-spoon.json`) and say what is wrong with it before 1c is built on it. It is told on Market day (`fruits`): confirm or move it.
-- [ ] Casebook 1 is decided ("How the cases are structured"): Lantern Row, 8 cases, 1 a fortnight once 2 are in hand. Read the 8 premises and strike any you do not want before it is written.
+- [ ] Casebook 1 is decided ("How the cases are structured"): Lantern Row, 8 cases, the player's own pace, and it becomes the game once 4 are written. Read the 8 premises and strike any you do not want before it is written.
 - [ ] Read every photo before it ships. In a first search of Wikimedia Commons, 2 of 7 photos had to be thrown out after a look: a guitar shown from the back, and beads with no string in the shot. The licence was fine on both. Somebody has to look.
 - [ ] Prices for the models above. None is set. Pets open at 3,000, 9,000 and 20,000 points for now (`PARTNER_POINTS` and `partner_slots`): confirm or change.
 - [ ] The robot is named Agent 404. A trademark search on that name has not been run.
