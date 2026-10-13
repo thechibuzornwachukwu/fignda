@@ -128,13 +128,13 @@ test('your records are on You and never on a public page, and a new player sees 
 
   // You holds them. None yet: one calm line.
   await page.goto('/me');
-  await expect(page.getByRole('heading', { name: 'Your records' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your records' })).toHaveCount(0);
   await expect(page.getByText('Records are kept in this browser.', { exact: false })).toBeVisible();
 
   // Records live in this browser. Unreadable ones are dropped, never shown.
   await page.evaluate(() => localStorage.setItem('gazecraft-records', '{not json'));
   await page.goto('/me');
-  await expect(page.getByRole('heading', { name: 'Your records' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Your records' })).toHaveCount(0);
   await expect(page.getByText('undefined')).toHaveCount(0);
 
   const other = await browser.newPage();

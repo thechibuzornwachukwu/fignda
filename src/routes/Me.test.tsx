@@ -158,38 +158,15 @@ describe('You, signed in', () => {
 });
 
 describe('You holds everything about you', () => {
-  const records = () => screen.getByRole('region', { name: 'Your records' });
 
-  it('a guest with no records gets one calm line, and no badges', () => {
+  it('a guest has no badges, and nothing of the old word game: no records, no daily', () => {
+    localStorage.setItem('gazecraft-records', JSON.stringify({ clean: { Bible: 75 }, daily: 9, long: { word: 'Lamentations', len: 12 } }));
     show();
-    expect(within(records()).getByText('Your bests show here once you have some.')).toBeInTheDocument();
-    expect(screen.queryByText('Longest word')).toBeNull();
+    expect(screen.queryByRole('heading', { name: 'Your records' })).toBeNull();
+    expect(document.body.textContent).not.toMatch(/Longest word|Most found|Lamentations|daily/i);
     expect(screen.queryByRole('heading', { name: 'Badges' })).toBeNull();
     expect(document.body.textContent).not.toMatch(/undefined|NaN|\bnull\b/);
   });
-
-  it('records kept in this browser are listed', () => {
-    localStorage.setItem('gazecraft-records', JSON.stringify({ clean: { Bible: 75 }, daily: 7, long: { word: 'Habakkuk', len: 8 } }));
-    show();
-    expect(within(records()).getByText('Fastest clean read, Bible')).toBeInTheDocument();
-    expect(within(records()).getByText('1:15')).toBeInTheDocument();
-    expect(within(records()).getByText('Most found in a daily')).toBeInTheDocument();
-    expect(within(records()).getByText('Habakkuk')).toBeInTheDocument();
-  });
-
-  it('malformed storage reads as no records, and half valid storage keeps only what is a record', () => {
-    localStorage.setItem('gazecraft-records', '{not json');
-    const first = show();
-    expect(within(records()).getByText('Your bests show here once you have some.')).toBeInTheDocument();
-    first.unmount();
-    localStorage.setItem('gazecraft-records', JSON.stringify({ clean: { Bible: 'fast', Cities: 90 }, daily: -3, long: { word: '', len: 'x' } }));
-    show();
-    expect(within(records()).getByText('Fastest clean read, Cities')).toBeInTheDocument();
-    expect(within(records()).queryByText(/Bible/)).toBeNull();
-    expect(screen.queryByText('Most found in a daily')).toBeNull();
-    expect(screen.queryByText('Longest word')).toBeNull();
-  });
-
   it('signed in with a badge: a medal for each kind, the earned one struck and the rest as outlines, and the way to the public page', async () => {
     world.profile = ADA;
     world.badges = ['first_game'];
@@ -209,7 +186,7 @@ describe('You holds everything about you', () => {
     show();
     await act(async () => {});
     expect(screen.queryByRole('heading', { name: 'Badges' })).toBeNull();
-    expect(screen.getByRole('heading', { name: 'Your records' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Detective gear' })).toBeInTheDocument();
   });
 
   it('badges on their way are a skeleton, and a lookup that fails leaves the medals to aim for', async () => {

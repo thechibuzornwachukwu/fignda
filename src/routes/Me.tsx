@@ -27,7 +27,6 @@ import { useUnlocks } from '../lib/useUnlocks';
 import { CharacterEditor } from './AvatarDesigner';
 import { Week } from './Games';
 import { Medals } from '../components/Medals';
-import { RecordList } from './Yours';
 import styles from './Me.module.css';
 
 const num = (n: number) => n.toLocaleString('en-US');
@@ -47,7 +46,7 @@ const wear = (parts: Parts, g: Gear): Parts => ({ ...parts, [g.part]: indexOf(g.
 
 /**
  * /me. Everything about the player. Their detective and partner on a stage, and under it the partners and the detective gear as rows
- * to swipe, then the week, their badges and their records. Tap one to try it on the stage; one button under the stage chooses it. Guests too: what they choose
+ * to swipe, then the week and their medals. Tap one to try it on the stage; one button under the stage chooses it. Guests too: what they choose
  * is kept in the browser and moves to the account on sign in.
  */
 export function Me() {
@@ -286,12 +285,6 @@ export function Me() {
         </section>
       )}
 
-      <section className={styles.section} aria-labelledby="me-records">
-        <h2 id="me-records" className={styles.h2}>
-          Your records
-        </h2>
-        <RecordList />
-      </section>
 
       <p className={styles.more}>
         {profile ? (
