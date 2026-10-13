@@ -109,3 +109,27 @@ test('the line-up: 2 wrong names and the mask comes off anyway', async ({ page }
   await expect(page.locator('[data-culprit-photo]')).toContainText('Theo');
   await expect(page.getByRole('img', { name: '1 of 3 stars' })).toBeVisible();
 });
+
+test('a new player lands in the brief, and finds the case again on Cases', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('link', { name: 'Open your first case' }).first().click();
+  await expect(page).toHaveURL(/\/case\/the-long-spoon$/);
+  await page.goto('/play');
+  const card = page.locator('[data-chapter="the-long-spoon"]');
+  await expect(card.getByRole('heading', { name: 'The long spoon' })).toBeVisible();
+  await expect(card.getByRole('link', { name: 'Open the brief' })).toHaveAttribute('href', '/case/the-long-spoon');
+});
+
+test('half way through, the landing page and Cases say carry on, and a closed case leaves both', async ({ page }) => {
+  await seed(page, { 1: 3, 2: 2 });
+  await page.goto('/');
+  await expect(page.getByRole('link', { name: 'Carry on your case' }).first()).toHaveAttribute('href', '/case/the-long-spoon');
+  await page.goto('/play');
+  await expect(page.locator('[data-chapter]')).toContainText('Step 3 of 6');
+  await expect(page.locator('[data-chapter]').getByRole('link', { name: 'Carry on' })).toBeVisible();
+  await page.evaluate(() => localStorage.setItem('gazecraft-chapters', JSON.stringify({ 'the-long-spoon': { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3 } })));
+  await page.goto('/play');
+  await expect(page.locator('[data-chapter]')).toHaveCount(0);
+  await page.goto('/');
+  await expect(page.getByRole('link', { name: /your (first )?case/ })).toHaveCount(0);
+});

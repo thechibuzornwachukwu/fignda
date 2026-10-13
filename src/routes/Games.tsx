@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { guestAvatar } from '../avatar/guest';
+import { Button } from '../components/Button';
 import { Avatar } from '../components/Avatar';
 import { Partner } from '../components/Partner';
 import { PageHeader } from '../components/PageHeader';
@@ -11,6 +12,7 @@ import { pick } from '../copy';
 import { dayProfile } from '../engine/variableDay';
 import { todayHoldsLine } from '../games/resultLines';
 import { loadDaily, today } from '../games/daily';
+import { openCase } from '../lib/firstCase';
 import { useStreak, type Streak } from '../lib/useStreak';
 import { TextLink } from '../components/TextLink';
 import { useAuth } from '../lib/auth';
@@ -95,6 +97,8 @@ export function Games() {
 
       <GameInvites />
 
+      <ChapterCard />
+
       <Journey />
 
       {auth.enabled && open.make && (
@@ -109,6 +113,26 @@ export function Games() {
         </div>
       )}
     </div>
+  );
+}
+
+/** The written chapter that is open: its name, how far the player is, and the way to its brief. Gone once it is closed. */
+function ChapterCard() {
+  const open = useMemo(() => openCase(), []);
+  const line = useMemo(() => (open ? (open.started ? pick('chapterOn', { n: open.solved + 1, t: open.chapter.steps.length }) : pick('chapterNew', { n: open.chapter.steps.length })) : ''), [open]);
+  if (!open) return null;
+  return (
+    <section className={styles.chapter} aria-labelledby="chapter-title" data-chapter={open.chapter.id}>
+      <div className={styles.chapterText}>
+        <h2 id="chapter-title" className={styles.chapterTitle}>
+          {open.chapter.title}
+        </h2>
+        <p className={styles.chapterLine}>{line}</p>
+      </div>
+      <Button variant="secondary" to={open.to}>
+        {open.started ? 'Carry on' : 'Open the brief'}
+      </Button>
+    </section>
   );
 }
 

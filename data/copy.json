@@ -296,6 +296,18 @@
     "Not {name}. Look at who is still standing.",
     "{name} does not fit all 3. Try once more."
   ],
+  "chapterNew": [
+    "A new case. {n} steps, from the brief to the line-up.",
+    "A case to work: {n} steps, and a board to fill."
+  ],
+  "chapterOn": [
+    "Step {n} of {t}. The board has what you found.",
+    "You are on step {n} of {t}."
+  ],
+  "chapterKeep": [
+    "That detective is yours. Pick a look and a pet for the next case.",
+    "You closed it as a guest. Make the detective yours."
+  ],
   "briefMissing": [
     "That case is not on file. The ones that are sit on the path.",
     "Nothing is filed under that name. The path has every open case."

@@ -118,10 +118,10 @@ Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with 
 
 Build in this order. The aim of 1c to 1g is one thing: The long spoon played from its brief to its ending, by a new player, on a phone. Each set leaves the live game whole: a case with no written chapter keeps today's flow until section 4 moves it.
 
-- [ ] **Set 1c. The board on the path.** The brief and the case board are built (`/case/the-long-spoon`, by link only). Left: the board on the case card, and the brief opening from the path, once 1d makes a step playable. Photos for `item` pins replace the icon when the photo store exists (set 1i).
+- [ ] **Set 1c. Photos on the board.** Photos for `item` pins replace the icon when the photo store exists (set 1i).
 - [ ] **Set 1d. A step on a phone.** Steps of The long spoon are played at `/case/the-long-spoon/1` to `5`, the line-up and the ending are built, and each step ends on its fact, who it clears and its lead. Left: the phone bar a puzzle has (tip-off and done under the thumb, the selection bubble's line), the pet beside the feedback line, sound, and the word list for a hidden-words step. Then stars and a finished step on the account, which needs a chapter to have a row on the server (read `SECURITY.md` first).
 - [ ] **Set 1e. The Open Eye file.** Every message to the Open Eye that a player has read is filed in one place, and the file grows across cases and across days: a case's notice, and each day's intercept with its fact. The texts of The long spoon are written and pass the engine (`design/stories/the-long-spoon.json`).
-- [ ] **Set 1g. A new player lands in The long spoon.** The first minute opens its brief, not a pack. Then it is played by 5 people who have never seen the game, and what stops them is fixed before a second chapter is written.
+- [ ] **Set 1g. 5 people play it.** A new player now lands in The long spoon's brief, and it is on Cases while open. It is played by 5 people who have never seen the game, and what stops them is fixed before a second chapter is written. Still to decide after that: whether the first minute (the character, the pet, the guest limit of 2 games) wraps a chapter as it wraps a clue. Today a chapter counts toward neither.
 - [ ] **Set 1h. Call for backup.** On any step: a tip-off from the pet, a friend called into the step, or the case's 1 favour.
 - [ ] **Set 1i. New methods,** one a set, engine first, in this order: spot what is off (a drawn scene), the torn page, 4 pictures and 1 word (real photos, with the photo store and the credits page it needs), invisible ink, rub the pad, ink not word, what stood here. No clock on any of them. The rest are on the canvas sheet. "Bigger tag" is left out: nothing in a real case asks for it. The long spoon uses 3 methods because 3 are built. Each new one is first used in a chapter, never shipped by itself.
 - [ ] **Set 1j. The other 4 shapes,** one written chapter each, each plotted backward and passed by `checkChapter`, which learns each shape's ending as it comes.
@@ -154,7 +154,7 @@ The path, the daily, Make and the words on screen were built for a word game. Th
 - [ ] **Set 5d. The rest of the calendar,** one case at a time: Christmas week, New Year, Easter, Eid, Independence Day, Children's Day, Halloween, Valentine's.
 
 ### 6. Make, one feature
-
+This is somewhat redundant though, given the game has changed to Detective type "Cases"
 In the story, Make is a player writing a message that hides words in plain sight, as the Open Eye teaches: a drill for their circle, filed with practice (set 4c). It is never called a case, because it has no suspects and no evidence. "Any topic" goes away. It is Make with the system making the choices the player did not make. Engine and server parts exist: `hideForMe`, `topicIcon`, `giveaway`, `safetyCheck`, the job endpoints.
 
 - [ ] **Set 6a. The background wait.** The any-topic box uses the job (`startGenerate`, `runGenerateJob`, `getGenerateJob`), keeps the job id in the browser and picks the wait up on return.

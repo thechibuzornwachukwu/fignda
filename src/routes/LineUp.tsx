@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { characterFor } from '../avatar/draw';
 import { Avatar } from '../components/Avatar';
 import { Button } from '../components/Button';
@@ -8,6 +8,7 @@ import { StepResult } from '../components/StepResult';
 import { TextLink } from '../components/TextLink';
 import { pick } from '../copy';
 import { LINEUP_TRIES, lineupStars, roleLabel, type Chapter, type Progress } from '../engine/chapter';
+import { useAuth } from '../lib/auth';
 import { loadChapterStars, recordChapterStars } from '../lib/chapterStore';
 import styles from './LineUp.module.css';
 
@@ -24,6 +25,9 @@ export function LineUp({ chapter, progress }: { chapter: Chapter; progress: Prog
   const [wrong, setWrong] = useState<string[]>([]);
   const [picked, setPicked] = useState('');
   const [msg, setMsg] = useState('');
+  const auth = useAuth();
+  const guest = auth.enabled && !auth.profile;
+  const keep = useMemo(() => pick('chapterKeep'), []);
   const culprit = chapter.suspects.find((s) => s.who === chapter.culprit)!;
   const chosen = chapter.suspects.find((s) => s.who === picked);
   const left = LINEUP_TRIES - wrong.length;
@@ -71,6 +75,11 @@ export function LineUp({ chapter, progress }: { chapter: Chapter; progress: Prog
         <Button variant="accent" to="/play">
           Back to cases
         </Button>
+        {guest && (
+          <p className={styles.line} data-keep>
+            {keep} <TextLink to={`/welcome?from=${encodeURIComponent('/play')}`}>Choose your look</TextLink>
+          </p>
+        )}
       </div>
     );
 
