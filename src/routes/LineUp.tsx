@@ -8,6 +8,7 @@ import { StepResult } from '../components/StepResult';
 import { TextLink } from '../components/TextLink';
 import { pick } from '../copy';
 import { LINEUP_TRIES, lineupStars, roleLabel, type Chapter, type Progress } from '../engine/chapter';
+import { submitPlay } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { loadChapterStars, recordChapterStars } from '../lib/chapterStore';
 import { markPlayedToday } from '../lib/playDays';
@@ -33,11 +34,17 @@ export function LineUp({ chapter, progress }: { chapter: Chapter; progress: Prog
   const chosen = chapter.suspects.find((s) => s.who === picked);
   const left = LINEUP_TRIES - wrong.length;
 
+  // Signed in, the names tried are sent once the case is closed, and the server works out the stars itself.
+  const send = (named: string[]) => {
+    if (auth.session) void submitPlay({ game: { type: 'case', id: chapter.id, step: last, named }, log: { events: [], hints: [], finish: 1 } });
+  };
+
   const name = () => {
     if (!chosen) return;
     markPlayedToday();
     if (chosen.who === chapter.culprit) {
       setStars(recordChapterStars(chapter.id, last, lineupStars(wrong.length)));
+      send([...wrong, chosen.who]);
       return;
     }
     const next = [...wrong, chosen.who];
@@ -46,6 +53,7 @@ export function LineUp({ chapter, progress }: { chapter: Chapter; progress: Prog
     if (next.length >= LINEUP_TRIES) {
       setMsg(pick('unmaskOut'));
       setStars(recordChapterStars(chapter.id, last, lineupStars(next.length)));
+      send(next);
     } else setMsg(pick('lineupWrong', { name: chosen.name }));
   };
 

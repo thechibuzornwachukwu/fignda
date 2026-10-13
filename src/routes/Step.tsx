@@ -1,4 +1,4 @@
-import { useId, useMemo, useState } from 'react';
+import { useEffect, useId, useMemo, useState } from 'react';
 import { Navigate, useLocation, useParams } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { CaseBoard } from '../components/CaseBoard';
@@ -14,6 +14,7 @@ import { sumsTarget } from '../engine/sums';
 import { getChapter } from '../games/chapters';
 import { registry } from '../games/registry';
 import { useGameSession, type Session } from '../games/session';
+import { submitPlay } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { loadChapterStars, recordChapterStars } from '../lib/chapterStore';
 import { loadFlow } from '../lib/firstMinute';
@@ -117,6 +118,17 @@ function Play({ chapter, at, def, solved }: { chapter: Chapter; at: number; def:
       markPlayedToday();
     },
   });
+  const signedIn = !!auth.session;
+  const { endAt, startAt, sent, log } = g.s;
+  const markSent = g.markSent;
+  // Signed in, a finished step is sent once to be checked and kept on the account. A result opened again was
+  // sent when it was earned. A guest keeps theirs in this browser.
+  useEffect(() => {
+    if (!g.finished || !signedIn || endAt == null || sent) return;
+    markSent();
+    void submitPlay({ game: { type: 'case', id: chapter.id, step: at }, log: { events: log?.events ?? [], hints: log?.hints ?? [], finish: Math.max(1, endAt - startAt) } });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [g.finished, signedIn, endAt, sent]);
   const instructionId = useId();
   const { pathname } = useLocation();
   // Play first: the character and the pet are asked after the first result, not before. Once, until it is answered.

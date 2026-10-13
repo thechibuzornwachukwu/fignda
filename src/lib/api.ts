@@ -393,6 +393,10 @@ export async function newPlayers(): Promise<Array<PlayerRef & { created_at: stri
 
 /** Day numbers of the user's stored dailies. */
 export async function fetchDailyDays(): Promise<number[]> {
+  // The days a run is counted from: dailies, and days a checked step or clue was finished. A server that does
+  // not have the function yet answers with an error, and the dailies alone are read as before.
+  const all = await (await client()).rpc('my_play_days');
+  if (!all.error && Array.isArray(all.data)) return (all.data as unknown[]).map(Number).filter((n) => Number.isInteger(n) && n > 0);
   const { data, error } = await (await client()).from('plays').select('day_no').not('day_no', 'is', null);
   if (error) throw error;
   return data.map((r) => r.day_no as number);
@@ -475,6 +479,13 @@ export async function fetchProgress(): Promise<Array<{ clue_id: string; stars: n
   const { data, error } = await (await client()).rpc('my_progress');
   if (error) throw error;
   return (data ?? []) as Array<{ clue_id: string; stars: number }>;
+}
+
+/** Your steps of written chapters done on any device, with the best stars of each. */
+export async function fetchChapterProgress(): Promise<Array<{ chapter: string; step: number; stars: number }>> {
+  const { data, error } = await (await client()).rpc('my_chapter_progress');
+  if (error) throw error;
+  return (data ?? []) as Array<{ chapter: string; step: number; stars: number }>;
 }
 
 /** A player's lifetime points, clues included, as the server counts them. Null when there is no such player. */
@@ -585,7 +596,7 @@ export async function runGenerateJob(id: string, signal?: AbortSignal): Promise<
 
 export type PlaySubmission = {
   /** `clue`: a passage of a catalogue puzzle, counted from 1. It is kept as a clue of its case, on no board. */
-  game: { type: 'daily'; day_no: number } | { type: 'game'; id: string; clue?: number };
+  game: { type: 'daily'; day_no: number } | { type: 'game'; id: string; clue?: number } | { type: 'case'; id: string; step: number; named?: string[] };
   log: { events: Array<{ a: number; b: number; t: number }>; hints: number[]; finish: number };
   /** Room code when the game was played together. Goes to the Together board only. */
   room?: string;

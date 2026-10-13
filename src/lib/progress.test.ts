@@ -6,6 +6,7 @@ import { loadStars } from './starStore';
 const api = vi.hoisted(() => ({
   merged: [] as Array<Array<{ id: string; stars: number }>>,
   rows: [] as Array<{ clue_id: unknown; stars: unknown }>,
+  steps: [] as Array<{ chapter: unknown; step: unknown; stars: unknown }>,
   failUp: false,
   failDown: false,
 }));
@@ -19,6 +20,10 @@ vi.mock('./api', () => ({
     if (api.failDown) throw new Error('offline');
     return api.rows;
   },
+  fetchChapterProgress: async () => {
+    if (api.failDown) throw new Error('offline');
+    return api.steps;
+  },
 }));
 
 const { applyProgress, localProgress, PROGRESS_EVENT, syncProgress } = await import('./progress');
@@ -27,6 +32,7 @@ beforeEach(() => {
   localStorage.clear();
   api.merged = [];
   api.rows = [];
+  api.steps = [];
   api.failUp = false;
   api.failDown = false;
 });
@@ -86,6 +92,19 @@ describe('syncProgress', () => {
     expect(api.merged).toEqual([[{ id: 'bible~3', stars: 1 }]]);
     expect(loadStars()).toEqual({ 'bible~1': 3, 'bible~2': 2, 'bible~3': 1 });
     expect(heard).toHaveBeenCalledTimes(1);
+  });
+
+  it('steps of a written chapter done on another device come down, and stars only go up', async () => {
+    localStorage.setItem('gazecraft-chapters', JSON.stringify({ 'the-long-spoon': { 1: 3 } }));
+    api.steps = [{ chapter: 'the-long-spoon', step: 1, stars: 1 }, { chapter: 'the-long-spoon', step: 2, stars: 2 }, { chapter: 'Not A Chapter', step: 1, stars: 3 }, { chapter: 'the-long-spoon', step: 99, stars: 3 }, { chapter: 'the-long-spoon', step: 3, stars: 7 }];
+    const heard = vi.fn();
+    window.addEventListener(PROGRESS_EVENT, heard);
+    expect(await syncProgress()).toBe(true);
+    window.removeEventListener(PROGRESS_EVENT, heard);
+    expect(JSON.parse(localStorage.getItem('gazecraft-chapters')!)).toEqual({ 'the-long-spoon': { 1: 3, 2: 2 } });
+    expect(heard).toHaveBeenCalledTimes(1);
+    // The same rows again are nothing new.
+    expect(await syncProgress()).toBe(false);
   });
 
   it('nothing new: no event', async () => {

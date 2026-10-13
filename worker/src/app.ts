@@ -17,6 +17,7 @@ import { DISGUISE_STYLES } from '../../src/avatar/parts/disguises';
 import pools from '../../data/copy.json';
 import mirrorFile from '../../data/mirrorWords.json';
 import type { AiGenerate } from './ai';
+import { CHAPTERS, checkStep } from './caseStep';
 import { GUEST_KEY_RE, JOB, JOB_COLS, isDead, jobOut, ownerKey, refunds, withHeartbeat, type JobRow, type JobTiming } from './jobs';
 import { PUSH_ENDPOINT, type PushSend } from './push';
 import { MAX_LOG_EVENTS, MAX_PLAY_MS, replay } from './replay';
@@ -534,6 +535,10 @@ export const PlayBody = z
       z.object({ type: z.literal('daily'), day_no: z.number().int().min(1).max(100000) }).strict(),
       // clue: one passage of a catalogue puzzle, counted from 1. Without it, the whole puzzle.
       z.object({ type: z.literal('game'), id: z.string().regex(/^[a-z0-9-]{2,40}$/), clue: z.number().int().min(1).max(40).optional() }).strict(),
+      // A step of a written chapter, counted from 1. `named`: the line-up only, the suspects named, in order.
+      z
+        .object({ type: z.literal('case'), id: z.string().regex(/^[a-z0-9-]{2,40}$/), step: z.number().int().min(1).max(12), named: z.array(z.string().min(1).max(60)).max(2).optional() })
+        .strict(),
     ]),
     log: z
       .object({
@@ -566,6 +571,19 @@ async function plays(req: Request, deps: Deps) {
   // Dailies are one try, alone.
   if (room && game.type === 'daily') throw new HttpError(400, 'bad_request');
   const today = dayNo(deps.now?.() ?? new Date());
+
+  if (game.type === 'case') {
+    // A step of a written chapter, made by the same engine the client makes it with and replayed as a game of
+    // its own. Alone only. It is kept apart from `plays`, so no board of a puzzle or a day changes.
+    if (room) throw new HttpError(400, 'bad_request');
+    const chapter = CHAPTERS[game.id];
+    if (!chapter) throw new HttpError(404, 'unknown_game');
+    const c = checkStep(chapter, game.step, log, game.named);
+    if (!c.ok) throw new HttpError(c.status, c.reason);
+    const kept = await deps.db.rpc('record_step', { p_user: user.id, p_chapter: chapter.id, p_step: game.step, p_stars: c.stars, p_score: c.score });
+    if (kept.error || !kept.data) throw new HttpError(500, 'save_failed');
+    return json({ verified: true, step: game.step, found: c.found, total: c.total, hints: c.hints, secs: c.secs, score: c.score, stars: c.stars });
+  }
 
   let gameId: string;
   let dayNum: number | null = null;
