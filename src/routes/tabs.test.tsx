@@ -195,8 +195,8 @@ describe('Leaders', () => {
   it('a guest sees everyone, no switch, and a line when nobody is ranked', async () => {
     open('/leaderboard');
     expect(title()).toBe('Ranks');
-    expect(await screen.findByText(/No verified scores yet today\./)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Be the first' })).toBeInTheDocument();
+    expect(await screen.findByText(/Nothing is ranked today\. Boards come back with the next case\./)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Open a case' })).toHaveAttribute('href', '/play');
     expect(screen.queryByRole('radiogroup')).toBeNull();
     expect(screen.queryByRole('link', { name: 'Your circles' })).toBeNull();
     expect(screen.getByText(/Guest scores stay on this device/)).toBeInTheDocument();
@@ -212,7 +212,7 @@ describe('Leaders', () => {
   it('a reply that is not a list is an empty board', async () => {
     world.api.fetchDailyBoard = ok(null);
     open('/leaderboard');
-    expect(await screen.findByText(/No verified scores yet today\./)).toBeInTheDocument();
+    expect(await screen.findByText(/Nothing is ranked today\./)).toBeInTheDocument();
   });
 
   it('a single ranked player is a board of 1', async () => {

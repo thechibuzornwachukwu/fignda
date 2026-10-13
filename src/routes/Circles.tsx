@@ -254,9 +254,6 @@ export function Circle() {
               </h2>
             </div>
             <div className={styles.actions}>
-              <Button to={`/d/${today}`} size="sm">
-                Play today
-              </Button>
               <Button variant="secondary" size="sm" onClick={invite}>
                 Invite
               </Button>

@@ -10,7 +10,7 @@ test('guest sees the daily board and a sign in prompt, and no list of puzzle boa
   await page.goto('/leaderboard');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Ranks');
   await expect(page.getByText(`Today · Daily #${todayNo()}`)).toBeVisible();
-  await expect(page.getByText("Today's totals stay hidden until midnight.")).toBeVisible();
+  await expect(page.getByText('The daily has ended. Every past day keeps its board.')).toBeVisible();
   await expect(page.getByText('Guest scores stay on this device and are never ranked.')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Next day' })).toBeDisabled();
   await page.getByRole('button', { name: 'Previous day' }).click();

@@ -370,7 +370,7 @@ A case opens on its board. It is reached from the landing page and from Cases wh
 **The run, without a daily** (`src/lib/playDays.ts`, `useStreak`)
 - A day counts when something was finished on it: a step of a case, a clue on the path, or a daily played before the daily went. The days of steps and clues are kept in this browser (`gazecraft-days`, UTC day numbers, the last 800). The week ring, the run and "Days this month" on You are counted from all 3.
 - The server's run, friend streaks and boards still count dailies only, so a run shown to other players can be shorter than the player's own until set 4a is finished.
-- Nothing in the app leads to a daily: not Cases, the Play button, the landing page, a new player's page, the answers pages or a nudge. `/d/N` still opens from its own address, and today's board and a circle's table still show it.
+- Nothing in the app leads to a daily: not Cases, the Play button, the landing page, a new player's page, the answers pages or a nudge. `/d/N` still opens from its own address. Ranks still shows a day's board: an empty today is titled "Between boards" and says "Nothing is ranked today. Boards come back with the next case." with "Open a case", and the line under it says the daily has ended and every past day keeps its board. A circle's table has no "Play today" button.
 - Reminders (`remind`, `remindStreak`) and the run line (`streakKeep`) speak of the case: "Your case is open. Pick it up where you left it."
 
 **The chapter that is open** (`openCase`, the first written chapter not yet closed)

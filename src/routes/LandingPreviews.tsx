@@ -4,8 +4,8 @@ import { Letter } from '../components/Letter';
 import { ProgressLine } from '../components/ProgressLine';
 import { TextLink } from '../components/TextLink';
 import { score } from '../engine/score';
+import { chapters } from '../games/chapters';
 import type { GameDef } from '../games/catalog';
-import { today } from '../games/daily';
 import { registry } from '../games/registry';
 import styles from './LandingPreviews.module.css';
 
@@ -103,14 +103,13 @@ export function HeroArt() {
 const WEEK = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const RUN = 5;
 
-function DailyPreview() {
-  const t = today();
+/** A written case and a week of working it: a step a day and the run grows. */
+function CasePreview() {
+  const chapter = chapters[0];
   return (
     <div className={styles.preview} aria-hidden="true">
-      <span className={styles.kicker}>
-        {t.holiday ? `${t.holiday} daily` : 'Daily'} #{t.n} · {t.date}
-      </span>
-      <span className={styles.previewTitle}>{t.def.title}</span>
+      <span className={styles.kicker}>{chapter ? `A case · ${chapter.steps.length} steps` : 'A case'}</span>
+      <span className={styles.previewTitle}>{chapter?.title ?? 'A case to work'}</span>
       <div className={styles.week}>
         {WEEK.map((d, i) => (
           <span key={i} className={styles.day}>
@@ -188,7 +187,7 @@ export function Features() {
   return (
     <ul className={styles.features}>
       <li className={styles.wide}>
-        <DailyPreview />
+        <CasePreview />
         <h3 className={styles.h3}>A case to work</h3>
         <p className={styles.body}>A brief, a board and steps that each end on a lead. Work a step a day and your run grows.</p>
         <TextLink to="/play">See the cases</TextLink>

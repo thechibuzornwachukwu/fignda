@@ -200,7 +200,7 @@ export function Leaderboard() {
             rows={state.rows}
             me={state.me}
             myHandle={me}
-            emptyTitle={crowd === 'following' ? 'Quiet so far' : day === today ? 'The board is open' : 'A quiet day'}
+            emptyTitle={crowd === 'following' ? 'Quiet so far' : day === today ? 'Between boards' : 'A quiet day'}
             empty={
               crowd === 'following' ? (
                 <>
@@ -212,9 +212,9 @@ export function Leaderboard() {
                 </>
               ) : day === today ? (
                 <>
-                  No verified scores yet today.{' '}
-                  <Link to={`/d/${today}`} className={styles.inline}>
-                    Be the first
+                  Nothing is ranked today. Boards come back with the next case.{' '}
+                  <Link to="/play" className={styles.inline}>
+                    Open a case
                   </Link>
                   .
                 </>
@@ -225,7 +225,7 @@ export function Leaderboard() {
           />
         )}
         {day === today ? (
-          <p className={styles.meta}>Today's totals stay hidden until midnight.</p>
+          <p className={styles.meta}>The daily has ended. Every past day keeps its board.</p>
         ) : (
           <p className={styles.meta}>
             <Link to={`/d/${day}/answers`} className={styles.inline}>
