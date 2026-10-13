@@ -10,8 +10,7 @@ import { Partner } from '../components/Partner';
 import { Ring } from '../components/Ring';
 import { TextLink } from '../components/TextLink';
 import { PARTNERS } from '../engine/partners';
-import { nextClueTo } from '../games/caseFile';
-import { today } from '../games/daily';
+import { playNext } from '../lib/playNext';
 import { saveProfile } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { keepLook, loadFlow, loadLook, saveFlow } from '../lib/firstMinute';
@@ -35,7 +34,7 @@ export function Welcome() {
   const from = safeNext(params.get('from'), '');
   const asked = params.get('next');
   /** Where a new player ends: the page they asked for, else the result they came from, else the next clue. Never a menu. */
-  const [end] = useState(() => endOf(asked, from || nextClueTo() || `/d/${today().n}`));
+  const [end] = useState(() => endOf(asked, from || playNext().to));
 
   const [flow, setFlow] = useState<Flow>(loadFlow);
   const [left, setLeft] = useState<string | null>(null);

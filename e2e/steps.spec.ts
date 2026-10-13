@@ -51,7 +51,7 @@ test('the board fills in as steps are done', async ({ page }) => {
   await page.goto(CASE);
   await expect(page.locator('[data-case-board] [data-find]')).toHaveCount(2);
   await expect(page.locator('[data-case-board] [data-cleared]')).toHaveCount(1);
-  await expect(page.getByRole('link', { name: 'Carry on' })).toHaveAttribute('href', '/case/the-long-spoon/3');
+  await expect(page.getByRole('main').getByRole('link', { name: 'Carry on', exact: true })).toHaveAttribute('href', '/case/the-long-spoon/3');
 });
 
 test('a step that is not open says so, and one that does not exist leads back', async ({ page }) => {
@@ -123,10 +123,11 @@ test('a new player lands in the brief, and finds the case again on Cases', async
 test('half way through, the landing page and Cases say carry on, and a closed case leaves both', async ({ page }) => {
   await seed(page, { 1: 3, 2: 2 });
   await page.goto('/');
-  await expect(page.getByRole('link', { name: 'Carry on your case' }).first()).toHaveAttribute('href', '/case/the-long-spoon');
+  // The Play button leads straight to the step that is open.
+  await expect(page.getByRole('main').getByRole('link', { name: 'Carry on your case' })).toHaveAttribute('href', '/case/the-long-spoon/3');
   await page.goto('/play');
-  await expect(page.locator('[data-chapter]')).toContainText('Step 3 of 6');
-  await expect(page.locator('[data-chapter]').getByRole('link', { name: 'Carry on' })).toBeVisible();
+  await expect(page.locator('[data-chapter]')).toContainText(/step 3 of 6/i);
+  await expect(page.locator('[data-chapter]').getByRole('link', { name: 'Carry on', exact: true })).toBeVisible();
   await page.evaluate(() => localStorage.setItem('gazecraft-chapters', JSON.stringify({ 'the-long-spoon': { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3 } })));
   await page.goto('/play');
   await expect(page.locator('[data-chapter]')).toHaveCount(0);

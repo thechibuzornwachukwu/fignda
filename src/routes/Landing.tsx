@@ -3,10 +3,8 @@ import { Button } from '../components/Button';
 import { GameRow } from '../components/GameRow';
 import { TextLink } from '../components/TextLink';
 import { pick } from '../copy';
-import { nextClueTo } from '../games/caseFile';
 import { getPuzzle, sponsorFor } from '../games/catalog';
-import { today } from '../games/daily';
-import { openCase } from '../lib/firstCase';
+import { playNext } from '../lib/playNext';
 import { hasPlayed } from '../lib/firstMinute';
 import { useMediaQuery } from '../lib/media';
 import { LandingDemo } from './LandingDemo';
@@ -39,13 +37,8 @@ export function Landing() {
   // Play first (BUILD_PLAN 3b): a first time visitor on a phone opens on the demo sentence, with the pitch under it.
   // Decided once, when the page opens, so finishing the demo does not move the page under the player.
   const [fresh] = useState(() => !hasPlayed());
-  // Play first: a new player lands in a clue, one short sitting. Today's daily is for a player who has been here.
-  const [firstClue] = useState(() => (fresh ? nextClueTo() : null));
-  // A written chapter comes first: a new player lands in its brief, and one who left it half way finds it here.
-  const [chapter] = useState(() => {
-    const open = openCase();
-    return open && (fresh || open.started) ? open : null;
-  });
+  // Play first: a new player lands in the brief of a case. Anybody else is led to what is next for them.
+  const [play] = useState(playNext);
   const phone = useMediaQuery('(max-width: 759px)');
   const playFirst = fresh && phone;
   // One h1 on the page: the demo's when it leads, the pitch's otherwise.
@@ -76,13 +69,7 @@ export function Landing() {
               pull them out.
             </p>
             <div className={styles.actions}>
-              {chapter ? (
-                <Button to={chapter.to}>{chapter.started ? 'Carry on your case' : 'Open your first case'}</Button>
-              ) : firstClue ? (
-                <Button to={firstClue}>Play your first clue</Button>
-              ) : (
-                <Button to={`/d/${today().n}`}>Play today's daily</Button>
-              )}
+              <Button to={play.to}>{play.kind === 'case' ? (play.to.split('/').length > 3 ? 'Carry on your case' : fresh ? 'Open your first case' : 'Open the new case') : play.kind === 'clue' ? (fresh ? 'Play your first clue' : 'Play the next clue') : 'See your cases'}</Button>
               {!playFirst && (
                 <Button to="/#how" variant="secondary">
                   Try it here

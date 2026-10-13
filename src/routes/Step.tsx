@@ -1,7 +1,8 @@
 import { useId, useMemo, useState } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import { Navigate, useLocation, useParams } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { CaseBoard } from '../components/CaseBoard';
+import { GuestWall } from '../components/GuestWall';
 import { PartnerNote } from '../components/PartnerNote';
 import { Stars } from '../components/Stars';
 import { StepResult } from '../components/StepResult';
@@ -13,7 +14,10 @@ import { sumsTarget } from '../engine/sums';
 import { getChapter } from '../games/chapters';
 import { registry } from '../games/registry';
 import { useGameSession, type Session } from '../games/session';
+import { useAuth } from '../lib/auth';
 import { loadChapterStars, recordChapterStars } from '../lib/chapterStore';
+import { loadFlow } from '../lib/firstMinute';
+import { guestBlocked, markGuestPlayed, playKey } from '../lib/guestLimit';
 import { LineUp } from './LineUp';
 import styles from './Step.module.css';
 
@@ -48,6 +52,9 @@ export function Step() {
   const step = chapter && Number.isInteger(at) ? chapter.steps[at - 1] : undefined;
   const locked = useMemo(() => pick('stepLocked'), []);
   const soon = useMemo(() => pick('lineupSoon'), []);
+  const auth = useAuth();
+  // A guest plays 2 games, and a step is a game. Decided when it opens, so a result is never walled.
+  const [blocked] = useState(() => guestBlocked(playKey(id, undefined, Number.isInteger(at) && at > 0 ? at : undefined)));
   if (!chapter) return <Navigate to="/play" replace />;
   if (!step) return <Navigate to={`/case/${chapter.id}`} replace />;
 
@@ -61,6 +68,12 @@ export function Step() {
         </PartnerNote>
       </div>
     );
+
+  if (auth.enabled && blocked) {
+    // Still finding out who this is: never wall someone who is signed in.
+    if (auth.loading) return <div aria-busy="true" />;
+    if (!auth.session) return <GuestWall />;
+  }
 
   if (step.method === 'line-up') return <LineUp chapter={chapter} progress={progress} />;
 
@@ -86,6 +99,7 @@ function Play({ chapter, at, def, solved }: { chapter: Chapter; at: number; def:
   const step = chapter.steps[at - 1]!;
   const name = `${chapter.id}~${at}`;
   const mod = registry[def.type];
+  const auth = useAuth();
   const puzzle = useMemo(
     () => mod.build({ id: name, type: def.type, category: chapter.title, title: step.place, noun: 'words', difficulty: 'Easy', expectedAnswers: [], dict: def.dict, text: def.text }),
     [mod, name, def, chapter.title, step.place],
@@ -96,9 +110,17 @@ function Play({ chapter, at, def, solved }: { chapter: Chapter; at: number; def:
     mod,
     puzzle,
     resumeId: name,
-    onFinish: (s: Session) => setBest(recordChapterStars(chapter.id, at, starsFor({ finished: true, found: s.found.length, total, hints: s.hints, wrongs: s.wrongs }))),
+    onFinish: (s: Session) => {
+      setBest(recordChapterStars(chapter.id, at, starsFor({ finished: true, found: s.found.length, total, hints: s.hints, wrongs: s.wrongs })));
+      if (!auth.session) markGuestPlayed(playKey(chapter.id, undefined, at));
+    },
   });
   const instructionId = useId();
+  const { pathname } = useLocation();
+  // Play first: the character and the pet are asked after the first result, not before. Once, until it is answered.
+  const [lookAsk] = useState(() => !loadFlow().character);
+  const askLook = auth.enabled && !auth.session && lookAsk;
+  const lookLine = useMemo(() => pick('guestLook'), []);
   const finished = g.finished;
   const found = useMemo(() => g.s.found.map((f) => f.span), [g.s.found]);
   const missed = useMemo(() => (finished ? mod.missed(puzzle, g.foundSet) : []), [finished, mod, puzzle, g.foundSet]);
@@ -140,6 +162,11 @@ function Play({ chapter, at, def, solved }: { chapter: Chapter; at: number; def:
             </Button>
             <TextLink onClick={g.replay}>Play it again</TextLink>
           </div>
+          {askLook && (
+            <p className={styles.line} data-look-ask>
+              {lookLine} <TextLink to={`/welcome?from=${encodeURIComponent(pathname)}`}>Choose your look</TextLink>
+            </p>
+          )}
         </div>
       ) : (
         <p id={instructionId} className={styles.thing}>

@@ -6,14 +6,14 @@ import { TabBar } from './components/TabBar';
 import { useDelayedWaiting } from './components/useDelayedWaiting';
 import { Waiting } from './components/Waiting';
 import { hasTabBar, isPuzzle } from './lib/routes';
-import { Brief } from './routes/Brief';
-import { Step } from './routes/Step';
 import { Landing } from './routes/Landing';
 import { OpenByCode } from './routes/OpenByCode';
 import { prefersReducedMotion } from './lib/media';
 import styles from './App.module.css';
 
 // Landing loads first and alone; every other screen is fetched when visited.
+const Brief = lazy(() => import('./routes/Brief').then((m) => ({ default: m.Brief })));
+const Step = lazy(() => import('./routes/Step').then((m) => ({ default: m.Step })));
 const Games = lazy(() => import('./routes/Games').then((m) => ({ default: m.Games })));
 const GameById = lazy(() => import('./routes/Game').then((m) => ({ default: m.GameById })));
 const PassageById = lazy(() => import('./routes/Game').then((m) => ({ default: m.PassageById })));

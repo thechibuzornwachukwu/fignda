@@ -1,17 +1,18 @@
-// The Play button always knows what is next (BUILD_PLAN, Screens). One rule for the dock and the wide header.
+// The Play button always knows what is next (BUILD_PLAN, Screens). One rule for the dock, the wide header, the
+// landing page and the end of the first minute.
 
-import { dayNo } from '../engine/daily';
 import { nextClueTo } from '../games/caseFile';
-import { loadDaily } from '../games/daily';
-import { isFinished } from '../games/session';
+import { openCase } from './firstCase';
 
-export type PlayNext = { to: string; name: string; kind: 'daily' | 'clue' | 'done' };
+export type PlayNext = { to: string; name: string; kind: 'case' | 'clue' | 'done' };
 
-/** Today's daily while it is unplayed, then the next clue on the path. Nothing left at all: the way back to the cases. */
+/**
+ * The written case that is open: its brief before any step is done, then the step that is open. With every
+ * written case closed, the next clue on the path. Nothing left at all: the way back to the cases.
+ */
 export function playNext(): PlayNext {
-  const n = dayNo();
-  const saved = loadDaily(n);
-  if (!(saved && isFinished(saved))) return { to: `/d/${n}`, name: "Play today's daily", kind: 'daily' };
+  const open = openCase();
+  if (open) return { to: open.started ? `${open.to}/${open.solved + 1}` : open.to, name: open.started ? 'Carry on your case' : 'Open your case', kind: 'case' };
   const clue = nextClueTo();
   return clue ? { to: clue, name: 'Play the next clue', kind: 'clue' } : { to: '/play', name: 'All played. See your cases', kind: 'done' };
 }

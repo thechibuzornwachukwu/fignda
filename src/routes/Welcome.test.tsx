@@ -4,8 +4,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { vi } from 'vitest';
 import { GUEST_AVATAR_KEY } from '../avatar/guest';
-import { nextClueTo } from '../games/caseFile';
-import { today } from '../games/daily';
+import { playNext } from '../lib/playNext';
 import { FLOW_KEY, LOOK_KEY } from '../lib/firstMinute';
 import { Welcome } from './Welcome';
 
@@ -49,8 +48,8 @@ vi.mock('../lib/api', () => ({
   fetchPoints: async () => null,
 }));
 
-// Play first: with nothing played, the flow ends in the first clue on the path, never a menu.
-const FIRST = nextClueTo() ?? `/d/${today().n}`;
+// Play first: with nothing played, the flow ends in what is next, the brief of the case that is open, never a menu.
+const FIRST = playNext().to;
 
 function Where() {
   const { pathname, search } = useLocation();

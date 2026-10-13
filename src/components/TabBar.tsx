@@ -34,7 +34,7 @@ export function TabBar() {
   const starter = useMemo(() => guestAvatar(), []);
   if (!hasTabBar(pathname)) return null;
   const onYou = pathname === '/me' || pathname.startsWith('/u/') || pathname === '/settings' || pathname === '/signin';
-  // Today's daily, then the next clue. Nothing left at all: a tick, and the way back to the cases.
+  // The case that is open, then the next clue. Nothing left at all: a tick, and the way back to the cases.
   const play = playNext();
   return (
     <nav ref={ref} className={[styles.bar, tucked && styles.tucked].filter(Boolean).join(' ')} aria-label="Tabs" data-tucked={tucked || undefined}>

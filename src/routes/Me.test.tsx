@@ -228,31 +228,37 @@ describe('the dock’s Play button', () => {
       </MemoryRouter>,
     );
   const play = () => screen.getByRole('navigation', { name: 'Tabs' }).querySelector('[data-play]')!;
-  const finishDaily = () => localStorage.setItem(`gazecraft-daily-${dayNo()}`, JSON.stringify({ startAt: 1, endAt: 2, found: [], hints: 0, misses: 0 }));
+  const closeCases = () => localStorage.setItem('gazecraft-chapters', JSON.stringify({ 'the-long-spoon': { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3 } }));
 
-  it('order is Cases, You, Play, Squad, Ranks, and Play is today’s daily while it is unplayed', () => {
+  it('order is Cases, You, Play, Squad, Ranks, and Play opens the case that is open', () => {
     dock();
     expect(within(screen.getByRole('navigation', { name: 'Tabs' })).getAllByRole('link').map((a) => a.textContent)).toEqual(['Cases', 'You', 'Play', 'Squad', 'Ranks']);
-    expect(play().getAttribute('data-play')).toBe('daily');
-    expect(play().getAttribute('href')).toBe(`/d/${dayNo()}`);
-    expect(play()).toHaveAccessibleName("Play today's daily");
+    expect(play().getAttribute('data-play')).toBe('case');
+    expect(play().getAttribute('href')).toBe('/case/the-long-spoon');
+    expect(play()).toHaveAccessibleName('Open your case');
   });
 
-  it('broken daily storage is an unplayed daily, never a dead button', () => {
-    localStorage.setItem(`gazecraft-daily-${dayNo()}`, '{broken');
+  it('half way through a case, Play is the step that is open', () => {
+    localStorage.setItem('gazecraft-chapters', JSON.stringify({ 'the-long-spoon': { 1: 3, 2: 2 } }));
     dock();
-    expect(play().getAttribute('data-play')).toBe('daily');
+    expect(play().getAttribute('href')).toBe('/case/the-long-spoon/3');
+    expect(play()).toHaveAccessibleName('Carry on your case');
   });
 
+  it('it never leads to a daily, played or not, and broken storage is never a dead button', () => {
+    localStorage.setItem(`gazecraft-daily-${dayNo()}`, '{broken');
+    localStorage.setItem('gazecraft-chapters', '{broken');
+    dock();
+    expect(play().getAttribute('href')).toBe('/case/the-long-spoon');
+  });
   it('guests have a You tab of their own, not a sign in link', () => {
     dock();
     expect(screen.getByRole('link', { name: 'You' })).toHaveAttribute('href', '/me');
   });
 
-  it('the daily done: Play is the next clue, and with every case closed it is a tick back to Cases', () => {
-    finishDaily();
+  it('every written case closed: Play is the next clue, and with every case closed it is a tick back to Cases', () => {
+    closeCases();
     const first = dock();
-    if (play().getAttribute('data-play') === 'daily') return; // this build keeps dailies under another key: covered in the browser tests
     expect(play().getAttribute('data-play')).toBe('clue');
     expect(play().getAttribute('href')).toMatch(/^\/play\/[a-z0-9-]+\/1$/);
     first.unmount();

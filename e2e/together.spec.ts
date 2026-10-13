@@ -35,7 +35,7 @@ test.describe('phone tab bar', () => {
     const tabs = page.getByRole('navigation', { name: 'Tabs' });
     await expect(tabs).toBeVisible();
     await expect(tabs.getByRole('link')).toHaveText(['Cases', 'You', 'Play', 'Squad', 'Ranks']);
-    await expect(tabs.getByRole('link', { name: "Play today's daily" })).toHaveAttribute('href', /^\/d\/\d+$/);
+    await expect(tabs.getByRole('link', { name: 'Open your case' })).toHaveAttribute('href', '/case/the-long-spoon');
     await expect(tabs.getByRole('link', { name: 'Cases' })).toHaveAttribute('aria-current', 'page');
     await expect(page.getByRole('navigation', { name: 'Main' })).toBeHidden();
     await tabs.getByRole('link', { name: 'Ranks' }).click();

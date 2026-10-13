@@ -368,10 +368,11 @@ A case opens on its board. It is reached from the landing page and from Cases wh
   - The scrawl, both lines as 1, italic in `--board-ink`. Then what was found: the `pin` of each step solved, as slips of paper, in order. The board is named "The case board. ITEM. 4 suspects. 2 finds."
 
 **The chapter that is open** (`openCase`, the first written chapter not yet closed)
-- Landing: a first time visitor's main button is "Open your first case", to the brief. A player who has worked a step of it and not closed it sees "Carry on your case". Anybody else sees what they saw before: the first clue, or today's daily. A browser that has finished a step of a chapter is no longer a first visit.
+- Landing: a first time visitor's main button is "Open your first case", to the brief. A player who has worked a step of it and not closed it sees "Carry on your case". A player with no step done and something played sees "Open the new case". With every written case closed: "Play the next clue", or "See your cases". A browser that has finished a step of a chapter is no longer a first visit.
 - Cases: above the path, a card on `--surface` with a `--ledge` edge: the chapter's title (`h3`), a `chapterNew` line ("A new case. 6 steps, from the brief to the line-up.") or a `chapterOn` line ("Step 3 of 6. The board has what you found."), and a secondary button "Open the brief" or "Carry on". Secondary, because the daily card holds the screen's one accent. The card goes once the chapter is closed.
 - The ending, for a guest where sign in is set up: under "Back to cases", a `chapterKeep` line and "Choose your look", to the first minute.
-- The dock's Play button does not change: today's daily, then the next clue on the path.
+- The Play button (the dock, the wide header, the landing page, the end of the first minute) follows one rule, `playNext`: the written case that is open (its brief before any step is done, then the step that is open), then the next clue on the path, then Cases. It never leads to a daily.
+- The first minute wraps a chapter as it wraps a clue. A step is a game: it counts toward a guest's 2, and a 3rd step shows the guest wall in place of the step. After a guest's first result, under the way on, a `guestLook` line and "Choose your look" lead to the first minute, which ends back on that step.
 
 **Step `/case/:id/:n`** (one step of a written chapter)
 A step is played on the board its method has today, from the puzzle `stepPuzzle` builds: written evidence for hidden words and the blotter, a row from the sums engine for records. Steps open in order. A finished step can be played again, and the best stars are kept.

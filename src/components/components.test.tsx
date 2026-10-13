@@ -110,8 +110,8 @@ describe('Header', () => {
     expect(screen.getByRole('link', { name: 'Cases' }).className).toContain('active');
     expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/signin?next=%2Fplay');
     expect(screen.getByRole('button', { name: /Switch to/ })).toBeInTheDocument();
-    // The same Play as the dock: it knows what is next. Today's daily, while it is unplayed.
-    expect(screen.getByRole('link', { name: "Play today's daily" })).toHaveAttribute('href', expect.stringMatching(/^\/d\/\d+$/));
+    // The same Play as the dock: it knows what is next. The case that is open.
+    expect(screen.getByRole('link', { name: 'Open your case' })).toHaveAttribute('href', '/case/the-long-spoon');
   });
 
   it('on the landing page: its own sections and one way in', () => {
