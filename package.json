@@ -31,6 +31,7 @@
     "push:keys": "node scripts/push-keys.mjs",
     "ai:bench": "tsx scripts/ai-bench.ts",
     "pets:render": "tsx scripts/render-pets.ts",
+    "seasons:render": "node scripts/render-seasons.mjs",
     "characters:render": "tsx design/characters/build.ts",
     "brand:guide": "tsx design/brand/build.ts"
   },
