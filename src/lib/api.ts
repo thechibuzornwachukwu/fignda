@@ -121,6 +121,18 @@ export async function fetchDailyRank(day: number, handle: string): Promise<MyRan
   return (data as MyRank[])[0] ?? null;
 }
 
+export type CaseRow = { rank: number; handle: string; score: number; stars: number; steps: number };
+
+/** The board of a written case: each player's best checked score on each step, added up. Most points first. */
+export async function fetchChapterBoard(chapter: string): Promise<CaseRow[]> {
+  const { data, error } = await (await client()).rpc('chapter_board', { p_chapter: chapter });
+  if (error) throw error;
+  const rows = Array.isArray(data) ? (data as Array<Record<string, unknown>>) : [];
+  return rows
+    .filter((r) => typeof r.handle === 'string')
+    .map((r, i) => ({ rank: i + 1, handle: r.handle as string, score: Number(r.score) || 0, stars: Number(r.stars) || 0, steps: Number(r.steps) || 0 }));
+}
+
 /** Best verified play per player on one puzzle. */
 export async function fetchGameBoard(gameId: string, limit = 20): Promise<BoardRow[]> {
   const { data, error } = await (await client()).rpc('game_board', { p_game: gameId, p_limit: limit });

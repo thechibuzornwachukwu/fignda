@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '../components/Button';
@@ -7,17 +7,9 @@ import { dayNo } from '../engine/daily';
 import { formatTime } from '../engine/time';
 import { dailyIdFor, getGameDef } from '../games/catalog';
 import { dailyDate, dailyLabel } from '../games/daily';
-import {
-  fetchDailyBoard,
-  fetchDailyRank,
-  fetchFollowing,
-  fetchFollowingBoard,
-  fetchGameBoard,
-  fetchTogetherBoard,
-  type BoardRow,
-  type MyRank,
-  type TeamRow,
-} from '../lib/api';
+import { fetchDailyBoard, fetchDailyRank, fetchFollowing, fetchFollowingBoard, fetchGameBoard, fetchTogetherBoard, type BoardRow, type MyRank, type TeamRow, fetchChapterBoard, type CaseRow } from '../lib/api';
+import { openCase } from '../lib/firstCase';
+import { chapters } from '../games/chapters';
 import { CROWDS, askedCrowd, defaultCrowd, type Crowd } from '../lib/crowd';
 import { sizeOf } from '../lib/unlocks';
 import { PageHeader } from '../components/PageHeader';
@@ -66,6 +58,67 @@ function Board({ rows, me, myHandle, empty, emptyTitle }: { rows: BoardRow[]; me
         </p>
       )}
     </>
+  );
+}
+
+/**
+ * The board of a written case: who has worked it, by the points their steps earned. It leads Ranks now that
+ * nothing is ranked by the day. Its empty and failed states are 1 line with no pet: the day's board under it
+ * holds the pet of this screen.
+ */
+function CaseRanks({ myHandle }: { myHandle?: string }) {
+  const chapter = useMemo(() => openCase()?.chapter ?? chapters[0], []);
+  const id = chapter?.id ?? null;
+  const [state, setState] = useState<{ id: string; rows: CaseRow[] | 'error' } | null>(null);
+  useEffect(() => {
+    if (!id) return;
+    let alive = true;
+    fetchChapterBoard(id)
+      .then((rows) => alive && setState({ id, rows: Array.isArray(rows) ? rows : [] }))
+      .catch(() => alive && setState({ id, rows: 'error' }));
+    return () => {
+      alive = false;
+    };
+  }, [id]);
+  if (!chapter) return null;
+  const rows = state?.id === id ? state.rows : null;
+  const steps = chapter.steps.length;
+  return (
+    <section className={styles.section} aria-labelledby="case-title" data-case-ranks={chapter.id}>
+      <div className={styles.head}>
+        <div className={styles.headText}>
+          <span className={styles.kicker}>Case · {steps} steps</span>
+          <h2 id="case-title" className={styles.h2}>
+            {chapter.title}
+          </h2>
+        </div>
+        <Button to={`/case/${chapter.id}`} variant="secondary" size="sm">
+          Open the case
+        </Button>
+      </div>
+      {rows == null && <SkeletonList rows={5} avatar={28} />}
+      {rows === 'error' && <p className={styles.meta}>The case board did not load. Try again in a moment.</p>}
+      {Array.isArray(rows) && rows.length === 0 && <p className={styles.meta}>Nobody is on this board yet. Finish a step signed in and you are.</p>}
+      {Array.isArray(rows) && rows.length > 0 && (
+        <ol className={styles.board} aria-label="Case board">
+          {rows.map((r) => (
+            <li key={r.handle} className={styles.row} data-mine={r.handle === myHandle || undefined}>
+              <span className={styles.rank}>{String(r.rank).padStart(2, '0')}</span>
+              <Link to={`/u/${r.handle}`} className={styles.handle}>
+                <Avatar handle={r.handle} size={28} />
+                @{r.handle}
+                {r.handle === myHandle && <span className={styles.you}>You</span>}
+              </Link>
+              <span className={styles.found}>
+                {Math.min(r.steps, steps)}/{steps}
+              </span>
+              <span className={styles.time}>{r.stars === 1 ? '1 star' : `${r.stars} stars`}</span>
+              <span className={styles.score}>{r.score.toLocaleString('en-US')}</span>
+            </li>
+          ))}
+        </ol>
+      )}
+    </section>
   );
 }
 
@@ -163,6 +216,8 @@ export function Leaderboard() {
   return (
     <div className={styles.page}>
       <PageHeader title="Ranks" />
+
+      <CaseRanks myHandle={me} />
 
       <section className={styles.section} aria-labelledby="daily-title">
         <div className={styles.head}>

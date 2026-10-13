@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 // The 4 tabs: one header each, less at once, and a deliberate line wherever there is nothing to show.
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, within, cleanup } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { vi } from 'vitest';
 import { dayNo } from '../engine/daily';
@@ -37,6 +37,7 @@ vi.mock('../lib/api', async (original) => {
     'myCircles',
     'fetchCircleBoard',
     'fetchDailyBoard',
+    'fetchChapterBoard',
     'fetchDailyRank',
     'fetchFollowingBoard',
     'suggestedPlayers',
@@ -72,6 +73,7 @@ function emptyWorld() {
     myCircles: ok([]),
     fetchCircleBoard: ok([]),
     fetchDailyBoard: ok([]),
+    fetchChapterBoard: ok([]),
     fetchDailyRank: ok(null),
     fetchFollowingBoard: ok([]),
     suggestedPlayers: ok([]),
@@ -200,6 +202,31 @@ describe('Leaders', () => {
     expect(screen.queryByRole('radiogroup')).toBeNull();
     expect(screen.queryByRole('link', { name: 'Your circles' })).toBeNull();
     expect(screen.getByText(/Guest scores stay on this device/)).toBeInTheDocument();
+    expectNoHoles();
+  });
+
+  it('the case board leads Ranks: who has worked the open case, by points, with steps and stars', async () => {
+    world.me = ADA;
+    world.api.fetchChapterBoard = ok([
+      { rank: 1, handle: 'bisi', score: 1650, stars: 14, steps: 6 },
+      { rank: 2, handle: 'ada', score: 900, stars: 1, steps: 2 },
+    ]);
+    open('/leaderboard');
+    const board = await screen.findByRole('list', { name: 'Case board' });
+    const rows = within(board).getAllByRole('listitem');
+    expect(rows.map((r) => r.textContent)).toEqual(['01@bisi6/614 stars1,650', '02@adaYou2/61 star900']);
+    expect(screen.getByRole('heading', { level: 2, name: 'The long spoon' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Open the case' })).toHaveAttribute('href', '/case/the-long-spoon');
+    expectNoHoles();
+  });
+
+  it('a case board with nobody on it, or one that does not load, is 1 line and no second pet', async () => {
+    open('/leaderboard');
+    expect(await screen.findByText('Nobody is on this board yet. Finish a step signed in and you are.')).toBeInTheDocument();
+    cleanup();
+    world.api.fetchChapterBoard = fail;
+    open('/leaderboard');
+    expect(await screen.findByText('The case board did not load. Try again in a moment.')).toBeInTheDocument();
     expectNoHoles();
   });
 
