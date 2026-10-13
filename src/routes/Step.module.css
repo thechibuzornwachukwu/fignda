@@ -92,9 +92,41 @@
   color: var(--subtle);
   font-variant-numeric: tabular-nums;
 }
-.msg {
+/* The word list runs the width of the board above it. */
+.list {
+  width: 100%;
+}
+/* The pet beside the line it says. */
+.says {
   composes: small from '../styles/type.module.css';
-  min-height: 1.5em;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--space-8);
   margin: 0;
   color: var(--muted);
+}
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+/* On a phone the bar under the thumb has the tip-off, done and the line, so the ones on the page go. */
+@media (max-width: 760px) {
+  .screen {
+    padding-bottom: calc(var(--mobile-bar-space) + env(safe-area-inset-bottom));
+  }
+  .actions,
+  .says {
+    display: none;
+  }
+  .end .actions {
+    display: flex;
+  }
 }

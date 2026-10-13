@@ -68,7 +68,12 @@ test('a step fits a phone', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 700 });
   await seed(page, { 1: 3 });
   await page.goto(`${CASE}/2`);
-  await page.getByRole('button', { name: "I'm done" }).click();
+  // A step has the whole screen: no dock, and the bar under the thumb has the tip-off and done.
+  await expect(page.getByRole('navigation', { name: 'Tabs' })).toHaveCount(0);
+  const bar = page.locator('[data-mobile-bar]');
+  await expect(bar.getByRole('button', { name: 'Tip-off' })).toBeVisible();
+  await bar.getByRole('button', { name: 'Done' }).click();
+  await expect(bar).toHaveCount(0);
   await expect(page.locator('[data-step-result]')).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
 });

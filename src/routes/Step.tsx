@@ -3,10 +3,13 @@ import { Navigate, useLocation, useParams } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { CaseBoard } from '../components/CaseBoard';
 import { GuestWall } from '../components/GuestWall';
+import { MobileBar } from '../components/MobileBar';
+import { Partner } from '../components/Partner';
 import { PartnerNote } from '../components/PartnerNote';
 import { Stars } from '../components/Stars';
 import { StepResult } from '../components/StepResult';
 import { TextLink } from '../components/TextLink';
+import { WordList, type WordRow } from '../components/WordList';
 import { pick } from '../copy';
 import { chapterProgress, CLEAR_STARS, roleLabel, stepPuzzle, type Chapter, type StepPuzzle } from '../engine/chapter';
 import { starsFor } from '../engine/stars';
@@ -130,6 +133,25 @@ function Play({ chapter, at, def, solved }: { chapter: Chapter; at: number; def:
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [g.finished, signedIn, endAt, sent]);
   const instructionId = useId();
+  // The pet stands beside the line it says, in the mood of the last thing that happened.
+  const tally = `${g.s.found.length}|${g.s.wrongs}|${g.s.hints}`;
+  const [seen, setSeen] = useState({ tally, found: g.s.found.length, wrongs: g.s.wrongs, hints: g.s.hints, mood: 'empty' as 'empty' | 'found' | 'error' | 'loading' });
+  if (seen.tally !== tally) {
+    const mood = g.s.found.length > seen.found ? 'found' : g.s.wrongs > seen.wrongs ? 'error' : g.s.hints > seen.hints ? 'loading' : 'empty';
+    setSeen({ tally, found: g.s.found.length, wrongs: g.s.wrongs, hints: g.s.hints, mood });
+  }
+  const pet = <Partner moment={seen.mood} size={32} />;
+  // What has been found, newest first, then what is still hidden. After the finish, what was missed.
+  const rows = useMemo<WordRow[]>(() => {
+    const order = mod.listOrder(puzzle);
+    const done = [...g.s.found].reverse().map((f): WordRow => ({ key: f.key, label: f.label, length: f.key.length, state: 'found' }));
+    const rest = mod
+      .answers(puzzle)
+      .filter((a) => !g.foundSet.has(a.key))
+      .sort((a, b) => order(a.key) - order(b.key))
+      .map((a): WordRow => ({ key: a.key, label: a.label, length: a.length, state: g.finished ? 'missed' : 'hidden' }));
+    return done.concat(rest);
+  }, [mod, puzzle, g.s.found, g.foundSet, g.finished]);
   const { pathname } = useLocation();
   // Play first: the character and the pet are asked after the first result, not before. Once, until it is answered.
   const [lookAsk] = useState(() => !loadFlow().character);
@@ -210,9 +232,31 @@ function Play({ chapter, at, def, solved }: { chapter: Chapter; at: number; def:
           </span>
         </div>
       )}
-      <p className={styles.msg} aria-live="polite" role="status">
+      {!finished && (
+        <p className={styles.says} aria-hidden="true">
+          {pet}
+          <span>{g.s.msg}</span>
+        </p>
+      )}
+      <p className={styles.sr} aria-live="polite" role="status">
         {g.s.msg}
       </p>
+
+      <div className={styles.list}>
+        <WordList title={def.type === 'buried-sums' ? 'Runs' : 'Words'} count={`${g.s.found.length} of ${total}`} rows={rows} />
+      </div>
+
+      {!finished && (
+        <MobileBar
+          count={`${g.s.found.length} of ${total}`}
+          progress={total > 0 ? g.s.found.length / total : 0}
+          time={null}
+          message={g.s.msg || (def.type === 'buried-sums' ? 'Swipe across digits, or tap first then last' : 'Swipe across letters, or tap first then last')}
+          pet={pet}
+          onHint={g.hint}
+          onDone={g.finish}
+        />
+      )}
     </div>
   );
 }
