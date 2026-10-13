@@ -129,6 +129,29 @@
 .face:nth-child(even) {
   transform: rotate(var(--board-tilt));
 }
+/* The line-up: a photo that can be chosen is a button the size of the photo. */
+.choose {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-0h);
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+/* Chosen: ringed in ink and lifted, so it reads without colour. */
+.face[data-picked] {
+  outline: var(--space-1) solid var(--accent);
+  box-shadow:
+    0 0 0 var(--space-0h) var(--paper-ink),
+    0 var(--ledge) 0 var(--board-edge);
+}
 .portrait {
   display: grid;
   place-items: center;

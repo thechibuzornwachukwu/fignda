@@ -257,3 +257,9 @@ export function chapterProgress(chapter: Pick<Chapter, 'steps'>, stars: Readonly
     given: done.flatMap((s) => (s.gives ? [s.gives] : [])),
   };
 }
+
+/** The line-up: how many wrong names before the mask comes off anyway. Nobody is locked out. */
+export const LINEUP_TRIES = 2;
+
+/** Stars for a line-up: 3 for the right name at once, 2 after 1 wrong name, 1 when the tries ran out. */
+export const lineupStars = (wrong: number): 1 | 2 | 3 => (wrong <= 0 ? 3 : wrong < LINEUP_TRIES ? 2 : 1);

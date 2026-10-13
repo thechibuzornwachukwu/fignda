@@ -2,7 +2,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import pools from '../../data/copy.json';
 import games from '../../data/games.json';
-import { chapterProgress, checkChapter, NAME_MAX, stepPuzzle, type Chapter } from './chapter';
+import { chapterProgress, checkChapter, LINEUP_TRIES, lineupStars, NAME_MAX, stepPuzzle, type Chapter } from './chapter';
 import { buildHiddenWords } from './hiddenWords';
 import { buildMirror } from './mirror';
 import { buildSums } from './sums';
@@ -212,5 +212,12 @@ describe('chapterProgress', () => {
     expect(chapterProgress(c, { 1: 1, 2: 1 })).toEqual({ solved: 2, cleared: [], given: ['chance'] });
     expect(chapterProgress(c, { 1: 1, 2: 2 }).cleared).toEqual(['the stall owner']);
     expect(chapterProgress(c, { 1: 3, 2: 3, 3: 2, 4: 3, 5: 1 })).toEqual({ solved: 5, cleared: ['the stall owner', 'the baker', 'the caretaker'], given: ['chance', 'means', 'motive'] });
+  });
+});
+
+describe('lineupStars', () => {
+  it('3 at once, 2 after a wrong name, 1 when the tries ran out', () => {
+    expect([0, 1, 2, 5].map(lineupStars)).toEqual([3, 2, 1, 1]);
+    expect(LINEUP_TRIES).toBe(2);
   });
 });

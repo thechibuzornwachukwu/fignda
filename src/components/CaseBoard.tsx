@@ -12,6 +12,11 @@ type Props = {
   solved?: number;
   /** Suspects ruled out, by role. */
   cleared?: readonly string[];
+  /** The line-up: suspects named wrongly so far. They cannot be named again. */
+  ruledOut?: readonly string[];
+  /** The line-up: the suspect chosen, by role, and the way to choose one. Whoever is cleared cannot be chosen. */
+  picked?: string;
+  onPick?: (who: string) => void;
   className?: string;
 };
 
@@ -24,7 +29,7 @@ const ICONS: Partial<Record<PinKind, LucideIcon>> = { item: Search, map: Map, ph
  * A case board (SPEC section 6, Brief): a pinboard laid out from the chapter's own data, so no 2 cases open alike.
  * It opens nearly empty and gains a pin for each step solved. 1 to 5 suspects, and a name never widens the board.
  */
-export function CaseBoard({ chapter, solved = 0, cleared = [], className }: Props) {
+export function CaseBoard({ chapter, solved = 0, cleared = [], ruledOut = [], picked, onPick, className }: Props) {
   const suspects = chapter.suspects;
   const finds = chapter.steps.slice(0, Math.max(0, solved)).flatMap((s) => (s.pin ? [s.pin] : []));
   const label = `The case board. ${chapter.item.name}. ${suspects.length === 1 ? '1 suspect' : `${suspects.length} suspects`}. ${finds.length === 1 ? '1 find' : `${finds.length} finds`}.`;
@@ -52,8 +57,9 @@ export function CaseBoard({ chapter, solved = 0, cleared = [], className }: Prop
         <ul className={styles.faces} style={{ '--faces': suspects.length, '--rows-of': facesAcross(suspects.length) } as CSSProperties} data-faces>
           {suspects.map((s) => {
             const out = cleared.includes(s.who);
-            return (
-              <li key={s.who} className={styles.face} data-face data-cleared={out || undefined}>
+            const wrong = ruledOut.includes(s.who);
+            const inside = (
+              <>
                 <span className={styles.portrait}>
                   <Avatar parts={characterFor(`${chapter.id}~${s.who}`, s.look)} size={56} />
                 </span>
@@ -63,7 +69,18 @@ export function CaseBoard({ chapter, solved = 0, cleared = [], className }: Prop
                 <span className={styles.role} title={roleLabel(s.who)}>
                   {roleLabel(s.who)}
                 </span>
-                {out && <span className={styles.tape}>Cleared</span>}
+                {(out || wrong) && <span className={styles.tape}>{out ? 'Cleared' : 'Not them'}</span>}
+              </>
+            );
+            return (
+              <li key={s.who} className={styles.face} data-face data-cleared={out || wrong || undefined} data-picked={picked === s.who || undefined}>
+                {onPick && !out && !wrong ? (
+                  <button type="button" className={styles.choose} aria-pressed={picked === s.who} onClick={() => onPick(s.who)} data-choose={s.who}>
+                    {inside}
+                  </button>
+                ) : (
+                  inside
+                )}
               </li>
             );
           })}

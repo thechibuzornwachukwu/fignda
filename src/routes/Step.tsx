@@ -14,6 +14,7 @@ import { getChapter } from '../games/chapters';
 import { registry } from '../games/registry';
 import { useGameSession, type Session } from '../games/session';
 import { loadChapterStars, recordChapterStars } from '../lib/chapterStore';
+import { LineUp } from './LineUp';
 import styles from './Step.module.css';
 
 /** "The bakery" after "Go to": "the bakery". A name keeps its capital: "Rosa's night stall". */
@@ -61,7 +62,10 @@ export function Step() {
       </div>
     );
 
+  if (step.method === 'line-up') return <LineUp chapter={chapter} progress={progress} />;
+
   const def = stepPuzzle(chapter, at);
+  // Evidence that is not written yet: the board as filled, and a line saying so.
   if (!def)
     return (
       <div className={styles.screen} data-step="soon">

@@ -289,8 +289,12 @@
     "Not enough to clear {who}. 2 stars or more does it."
   ],
   "lineupSoon": [
-    "The line-up opens soon. Everything you found is on the board.",
-    "The line-up is not open yet. The board has all you found."
+    "This step is not written yet. Everything you found is on the board.",
+    "Nothing to work here yet. The board has all you found."
+  ],
+  "lineupWrong": [
+    "Not {name}. Look at who is still standing.",
+    "{name} does not fit all 3. Try once more."
   ],
   "briefMissing": [
     "That case is not on file. The ones that are sit on the path.",
