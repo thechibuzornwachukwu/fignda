@@ -12,6 +12,7 @@ Seed (after `npm run db:seed:gen`): `npx supabase db query --linked -f supabase/
 - One skill in every game: looking closely. Each method is a way of looking: at words, numbers, pictures, a room, a torn page.
 - A case is worked the way a detective works one: a brief, the scene, then steps that each end on a lead to the next, then the line-up. A step is one short sitting. The reasons are in `INSIGHTS.html` section 11, and the screens are in the prototype canvas "Gazecraft case storyline" (<https://claude.ai/artifact/Rif6VsH8K4MdDTBXSHSSF4>).
 - Nobody leaves clues on purpose. A clue is a trace left by accident, a record somebody else kept, a message meant for somebody else, or something the suspect tried to destroy.
+- A case has 3 kinds of work, and a chapter should have all 3: finding what is there (searching a scene), reading what was left (messages, records, traces), and weighing what could have happened (scenarios). The first chapter has only the second. Without the other 2 a player reads evidence and never looks for it or reasons from it.
 - Every method has a physical reason. A detective never plays a game: each method is a real thing somebody left, kept or tried to destroy (a blotter that kept a note back to front, a page written in lemon juice, a torn receipt), and the play is what you would do with it in your hands. A method with no such reason is left out. The full list, 22 of them, is the sheet "Every method has a physical reason" on the prototype canvas.
 - Evidence clears suspects. Every suspect is met in the brief and nobody new turns up at the end.
 - The case board is what a player watches change. It is a pinboard: photos, notes and thread. It opens nearly empty on the brief, gains a pin for each step solved, shows the cleared suspects taped over at the line-up, and reads "Solved" at the end. Threads are dotted until something is proved.
@@ -126,12 +127,38 @@ Build in this order. The aim of 1c to 1g is one thing: The long spoon played fro
 - [ ] **Set 1e. The Open Eye file.** Every message to the Open Eye that a player has read is filed in one place, and the file grows across cases and across days: a case's notice, and each day's intercept with its fact. The texts of The long spoon are written and pass the engine (`design/stories/the-long-spoon.json`).
 - [ ] **Set 1g. 5 people play it.** A new player lands in The long spoon's brief, it is on Cases while open, the Play button leads to it, and the first minute wraps it (a step counts toward a guest's 2 games, and the look is asked after the first result). It is played by 5 people who have never seen the game, and what stops them is fixed before a second chapter is written.
 - [ ] **Set 1h. Call for backup.** On any step: a tip-off from the pet, a friend called into the step, or the case's 1 favour.
-- [ ] **Set 1i. New methods,** one a set, engine first, in this order: spot what is off (a drawn scene), the torn page, 4 pictures and 1 word (real photos, with the photo store and the credits page it needs), invisible ink, rub the pad, ink not word, what stood here. No clock on any of them. The rest are on the canvas sheet. "Bigger tag" is left out: nothing in a real case asks for it. The long spoon uses 3 methods because 3 are built. Each new one is first used in a chapter, never shipped by itself.
+- [ ] **Set 1i. New methods,** one a set, engine first, in this order: spot what is off (a drawn scene, the first method of set 1i-c), the torn page, 4 pictures and 1 word (real photos, with the photo store and the credits page it needs), invisible ink, rub the pad, ink not word, what stood here. No clock on any of them. The rest are on the canvas sheet. "Bigger tag" is left out: nothing in a real case asks for it. The long spoon uses 3 methods because 3 are built. Each new one is first used in a chapter, never shipped by itself.
 - [ ] **Set 1i-b. Walk it back** (the memory palace, or method of loci: things are remembered by where they stood along a route). 2 forms, engine first, no clock on either.
   - The room, seen once. The physical reason: the scene was tidied before anybody photographed it, so the only record is the walk the detective took through it. The player walks a drawn room in a fixed order (door, shelf, window, table) with 1 thing at each stop, turns away when they choose, and then puts each thing back where it stood, or taps the stop where something is now missing or new. What was moved is the lead.
   - The trail, before the line-up. The places of the case are the stops: store room, night stall, bakery, gate, notice board. The finds are handed back out of order and the player pins each to the place it was found. It is the case told once more in 30 seconds, and it is the only step made of the chapter itself, so it needs nothing written.
   - A stop holds 1 thing, a room holds 4 to 6, and a tip-off puts 1 thing back. Wrong places cost nothing but a star: nobody is locked out.
   - On screen it is "Walk it back", never "memory palace", "memory" or "recall". We promise the practice, never a result (Direction), and a method that says it trains memory breaks that promise.
+
+- [ ] **Set 1i-c. Search the scene.** Finding the clues, not being handed them. A drawn room, no clock, and a tip-off points at a quarter of the room, never at the thing. Built one at a time, engine first:
+
+| Method | Why it is real | What the player does | Needs |
+|---|---|---|---|
+| Sweep the room | Searchers work a room in lanes or quarters so nothing is passed over | Tap everything that could matter among ordinary things. 5 to 7 are evidence, the rest are the room | 1 drawn room |
+| By torchlight | The power is off, or it is night | Move a circle of light over a dark room and tap what it shows | The same room, dimmed |
+| Look under it | Things are hidden where nobody dusts: under the rug, behind the frame, in the back of a drawer | Lift, slide and open. Each thing moved shows what was behind it | Layers in the drawing |
+| Bag and tag | Evidence is useless until it is sorted by what it answers | Each thing found goes in 1 of 3 bags: how, why, when. A wrong bag costs nothing but a star | Nothing drawn: the finds of the case |
+| What does not belong to the room | A scene holds what the visitor brought and forgot | Among the things found, pick the 1 that nobody who lives or works here owns | The finds, and 1 line on who uses the room |
+
+- [ ] **Set 1i-d. What could have happened.** Weighing scenarios. A detective holds more than 1 account at once and lets evidence rule them out: fixing on the first one is how real cases go wrong (`INSIGHTS.html` section 11, rule 3). Most of these need no drawing, so they are the cheapest new methods in the plan:
+
+| Method | Why it is real | What the player does | Needs |
+|---|---|---|---|
+| Which account fits | 3 people tell the evening 3 ways. Only 1 can be true | Read 3 short accounts. Each piece of evidence already found strikes out 1. Name the one left standing | Words only |
+| Could it be done | A claim has to survive the tape measure and the clock | Check a claim against 2 facts: a window 40 cm wide and a thing 90 cm long, or 12 minutes for a 20 minute walk. Say possible or not, and which fact decides it | Words and 2 numbers |
+| The missing step | A chain of events has a gap, and only 1 thing can fill it | 4 events in order with 1 blank. Pick, from 3, the event that must have happened in between | Words only |
+| Which came first | Traces lie on top of each other: a dry print under a wet one, dust over a ring | Put 3 or 4 traces in the order they were made | Small drawings of traces |
+| Walk it through | A route has to fit the building and the time | On a floor plan, lay the path from where they were seen to where the thing was. A path through a locked door, or one too long for the time, is refused | 1 floor plan |
+| Line of sight | A witness can only have seen what was in view | On the plan, from where the witness stood: could they have seen it? Tap what blocks the view, or say nothing does | The same floor plan |
+| Who could reach it | Means is physical: a shelf has a height and a person has a reach | The hook is 2.1 m up. Set each suspect against it, with or without the step ladder that was found | Words and numbers |
+
+- Rules for both sets. No clock on any of them. Nobody is harmed in a scene: no blood, no weapons, no body, and a room is searched for a thing that was taken or hidden. A scenario is never a trick: every fact a method uses is on the board first. A wrong answer costs a star and never the lead.
+- Order: Which account fits, Could it be done and The missing step first, because they need no art and they give a chapter its third kind of work at once. Then Sweep the room, which needs the first drawn room. The second chapter is written to use at least 1 method from each set.
+- `checkChapter` learns each method as it is built, and then asks a chapter for all 3 kinds of work.
 - [ ] **Set 1j. The other 4 shapes,** one written chapter each, each plotted backward and passed by `checkChapter`, which learns each shape's ending as it comes.
 - Later, once those are being played: Liar, Relay, Number series, Bury it.
 
