@@ -71,21 +71,30 @@ The rules:
 - Cadence: 1 new case a fortnight, said out loud, so a player knows when to come back. A seasonal case opens on its date beside the path and never blocks it.
 - Shapes rotate: no 2 cases next to each other have the same shape, and no 2 next to each other have the same number of suspects.
 
-Casebook 1, as a proposal. Titles and stories are the owner's to change. Each is plotted backward and passed by `checkChapter` before it is built.
+Decided on 13 Oct 2026, by the owner's leave ("make the right choices"). Each can still be changed, and a case is only fixed once it is written.
 
-| # | Case | Shape | Suspects | New method | Work |
-|---|---|---|---|---|---|
-| 1 | The long spoon (written) | Who did it | 4 | The line-up | Reading |
-| 2 | A case with no thief | Nothing was taken | 2 | Which account fits | Reading, weighing |
-| 3 | A case where we know who | Prove it | 1 | Could it be done | Reading, weighing |
-| 4 | The first Open Eye case | Where is it | 3 | Walk it back, the trail | Reading, weighing |
-| | Interlude: an intercepted message | | | | Reading |
-| 5 | A haunting that is not one | What is it really | 3 | Sweep the room (the first drawn room) | Finding, reading, weighing |
-| 6 | A case with 2 accounts and no witness | Who did it | 2 | The missing step | Finding, weighing |
-| 7 | A case about a forged thing | Prove it | 1 | The torn page | Finding, reading, weighing |
-| | Interlude: an intercepted message | | | | Reading |
-| 8 | The Open Eye case that closes the book | Who did it | 5 | None: every method so far | Finding, reading, weighing |
+- The place: Lantern Row. A market street with a hall behind it, a bakery, a bus stop, a library and a row of houses. It is nowhere in particular, so a player anywhere can stand in it. Casebook 1 is called Lantern Row, and every case in it happens there. A new casebook is a new place.
+- The cast returns. The 14 characters the game can draw live on Lantern Row. A suspect cleared in 1 case can be a witness in the next and a suspect again later, so a player comes to know the street. Nobody is the culprit twice in a casebook.
+- The pace: 1 case a fortnight, and a date is only ever given for a case that is already written and checked. The fortnight starts when cases 2 and 3 are both written, so there is always 1 case in hand. If a case is late nothing is announced, and nothing a player has is taken away.
+- Art never blocks the path. Case 5 needs the first drawn room. If the room is not ready, case 6 is released in its place and case 5 follows: both are written to stand in either slot.
+- The 2011 question runs through the book. The long spoon leaves it open whether a name was planed off fairly. Case 4 finds the record of that year, and case 8 reads it. It is the thread a player follows, and the Open Eye is behind it.
 
+Casebook 1: Lantern Row. The premise of each case is 1 line and is where its writing starts, not a script. Each is plotted backward and passed by `checkChapter` before it is built.
+
+| # | Case | Shape | Suspects | New method | Premise | The loose end it leaves |
+|---|---|---|---|---|---|---|
+| 1 | The long spoon (written) | Who did it | 4 | The line-up | The prize spoon is gone from a locked cabinet the night before the 20th final | The committee must vote on whether the 19th name stays |
+| 2 | The open box | Nothing was taken | 2 | Which account fits | The morning after the vote the ballot box is found unsealed, with every vote in it | 1 card in the box is not a vote: it has an open eye on it |
+| 3 | The early bus | Prove it | 1 | Could it be done | The last bus left 9 minutes early on the night of the final. The driver says the hall clock was fast | Somebody showed him the clock can be set from outside |
+| 4 | The year that is missing | Where is it | 3 | Walk it back, the trail | The hall's minute book for 2011 is gone from its shelf in the library | It is found with the page uncut. Reading it waits for case 8 |
+| | Interlude | | | | A message to the Open Eye, found in the returned book | |
+| 5 | The light in the hall | What is it really | 4 | Sweep the room | A light moves about the locked hall at night, and the street has decided it is haunted | Whoever it was had a key nobody signed for |
+| 6 | The 2 signs | Who did it | 2 | The missing step | 2 stalls wake to each other's signs on market day, and each owner blames the other | Both signs were repainted by the same hand |
+| 7 | The other spoon | Prove it | 1 | The torn page | A second Long Spoon turns up for sale, with all 20 names on it | The seller was sent the list of names by post |
+| | Interlude | | | | The envelope the list came in | |
+| 8 | Who carries the cards | Who did it | 5 | None: every method so far | 7 cases, 7 cards with an open eye. 1 person on Lantern Row has been handing them out | The page from 2011 is read. The Open Eye itself is not named |
+
+Suspects run 4, 2, 1, 3, 4, 2, 1, 5, so no 2 neighbours match, and the shapes run through all 5 before any repeats twice.
 What this asks of the build, in order: the path shows a casebook (set 4e), the second case is written with its new method (set 1i-d), the packs move to practice (set 4c), interludes (set 1e), cold cases (after casebook 1 is out).
 
 ## Screens: one job each
@@ -141,7 +150,7 @@ Never for sale: hints, extra tries, time, or anything that touches a score; stre
 - [ ] Decide: what is sold to a church, a school or a wedding now. The price list sells a puzzle on the buyer's subject, which is a word hunt. It can stay that (sold as a drill, or a message hidden for the guests) or become a short case written for them, which costs more to make.
 - [ ] Decide: the 25 packs, one by one (set 4d). Suggested: chapters for the first 3 on the path and the 4 Naija packs, practice for the rest, and retire what reads badly.
 - [ ] Read The long spoon (`design/stories/the-long-spoon.json`) and say what is wrong with it before 1c is built on it. It is told on Market day (`fruits`): confirm or move it.
-- [ ] Read casebook 1 ("How the cases are structured") and change what is wrong: the 8 cases, their shapes, and the name of the place they share. Say yes or no to 1 case a fortnight.
+- [ ] Casebook 1 is decided ("How the cases are structured"): Lantern Row, 8 cases, 1 a fortnight once 2 are in hand. Read the 8 premises and strike any you do not want before it is written.
 - [ ] Read every photo before it ships. In a first search of Wikimedia Commons, 2 of 7 photos had to be thrown out after a look: a guitar shown from the back, and beads with no string in the shot. The licence was fine on both. Somebody has to look.
 - [ ] Prices for the models above. None is set. Pets open at 3,000, 9,000 and 20,000 points for now (`PARTNER_POINTS` and `partner_slots`): confirm or change.
 - [ ] The robot is named Agent 404. A trademark search on that name has not been run.
