@@ -42,6 +42,52 @@ Seed (after `npm run db:seed:gen`): `npx supabase db query --linked -f supabase/
 - A new feature replaces or folds into an old one. 2 new games done properly before any more.
 - What a copy cannot have, so build toward it: the engine that makes and grades puzzles, the data on which words players miss, a case library the players write, home ground (Naija packs, Pidgin, Paystack), a player's own circle, a player's earned character, and trust.
 
+## How the cases are structured
+
+The reasons for each line are in `INSIGHTS.html` section 12. This is the structure they give.
+
+| Level | What it is | Size | On screen |
+|---|---|---|---|
+| Casebook | A place and its cases, with a thread behind them | 8 cases | A named banner on the path, and its own look |
+| Case | 1 story: something was taken, hidden or faked | A brief, 5 to 7 steps, the line-up, the ending | A file on the path, showing its board |
+| Step | 1 sitting on 1 piece of evidence | 2 to 4 minutes | A mark on the case, a screen of its own |
+| Interlude | 1 message to the Open Eye, intercepted between cases | 1 sitting | A small mark on the path between 2 cases |
+| Cold case | A closed case, worked again with no tip-offs | The same case | A gold seal on its file |
+| Practice | Drills: the old word packs | As many as a player likes | A shelf at the foot of Cases, off the path |
+
+The rules:
+
+- 1 path. Cases, interludes and the next thing to do are on it in order, and the Play button opens the next one. Nothing a player needs is in a menu. A player never chooses what to do next unless they want to.
+- Every case has the same bones: brief, steps, line-up, ending. What changes is its shape, its methods and its story.
+- A case has all 3 kinds of work: finding, reading and weighing. Until the methods for finding and weighing are built, a case has the 2 it can.
+- 1 new method a case, at most. It is met alone and easy, with nothing to lose. It comes back in each of the next 2 cases, mixed with older methods and harder. A method has 3 levels: plain, mixed, hard. No case is all 1 method.
+- Inside a case, 4 beats: a method is met plain, then harder, then with a twist (a suspect who lied, the obvious one cleared), then the line-up tests the whole case.
+- Most cases stand alone. In a casebook of 8, the 4th and the 8th carry the Open Eye. A player who misses a week loses nothing, and the 8th is worth reaching.
+- Each case leaves 1 loose end, and it is the first line of the next brief.
+- A sitting ends on a step with a lead, and the board shows everything found. We do not count on a player remembering where they were.
+- Guessing is pointless, never punished: whoever the evidence cleared cannot be named, the line-up has 2 tries, and then the mask comes off anyway.
+- 1 score: stars. A step read clean with no tip-off is 3. We do not add a second count.
+- A step exists because the case needs its fact. One that could be lifted out without the case changing is cut.
+- Cadence: 1 new case a fortnight, said out loud, so a player knows when to come back. A seasonal case opens on its date beside the path and never blocks it.
+- Shapes rotate: no 2 cases next to each other have the same shape, and no 2 next to each other have the same number of suspects.
+
+Casebook 1, as a proposal. Titles and stories are the owner's to change. Each is plotted backward and passed by `checkChapter` before it is built.
+
+| # | Case | Shape | Suspects | New method | Work |
+|---|---|---|---|---|---|
+| 1 | The long spoon (written) | Who did it | 4 | The line-up | Reading |
+| 2 | A case with no thief | Nothing was taken | 2 | Which account fits | Reading, weighing |
+| 3 | A case where we know who | Prove it | 1 | Could it be done | Reading, weighing |
+| 4 | The first Open Eye case | Where is it | 3 | Walk it back, the trail | Reading, weighing |
+| | Interlude: an intercepted message | | | | Reading |
+| 5 | A haunting that is not one | What is it really | 3 | Sweep the room (the first drawn room) | Finding, reading, weighing |
+| 6 | A case with 2 accounts and no witness | Who did it | 2 | The missing step | Finding, weighing |
+| 7 | A case about a forged thing | Prove it | 1 | The torn page | Finding, reading, weighing |
+| | Interlude: an intercepted message | | | | Reading |
+| 8 | The Open Eye case that closes the book | Who did it | 5 | None: every method so far | Finding, reading, weighing |
+
+What this asks of the build, in order: the path shows a casebook (set 4e), the second case is written with its new method (set 1i-d), the packs move to practice (set 4c), interludes (set 1e), cold cases (after casebook 1 is out).
+
 ## Screens: one job each
 
 The rule for every screen: one job, one main action, and the fewest taps to it. Anything that is not the job moves to the screen whose job it is, or goes. A player should never have to choose where to go to play: the dock's Play button always knows.
@@ -95,6 +141,7 @@ Never for sale: hints, extra tries, time, or anything that touches a score; stre
 - [ ] Decide: what is sold to a church, a school or a wedding now. The price list sells a puzzle on the buyer's subject, which is a word hunt. It can stay that (sold as a drill, or a message hidden for the guests) or become a short case written for them, which costs more to make.
 - [ ] Decide: the 25 packs, one by one (set 4d). Suggested: chapters for the first 3 on the path and the 4 Naija packs, practice for the rest, and retire what reads badly.
 - [ ] Read The long spoon (`design/stories/the-long-spoon.json`) and say what is wrong with it before 1c is built on it. It is told on Market day (`fruits`): confirm or move it.
+- [ ] Read casebook 1 ("How the cases are structured") and change what is wrong: the 8 cases, their shapes, and the name of the place they share. Say yes or no to 1 case a fortnight.
 - [ ] Read every photo before it ships. In a first search of Wikimedia Commons, 2 of 7 photos had to be thrown out after a look: a guitar shown from the back, and beads with no string in the shot. The licence was fine on both. Somebody has to look.
 - [ ] Prices for the models above. None is set. Pets open at 3,000, 9,000 and 20,000 points for now (`PARTNER_POINTS` and `partner_slots`): confirm or change.
 - [ ] The robot is named Agent 404. A trademark search on that name has not been run.
@@ -125,7 +172,7 @@ Build in this order. The aim of 1c to 1g is one thing: The long spoon played fro
 
 - [ ] **Set 1c. Photos on the board.** Photos for `item` pins replace the icon when the photo store exists (set 1i).
 - [ ] **Set 1e. The Open Eye file.** Every message to the Open Eye that a player has read is filed in one place, and the file grows across cases and across days: a case's notice, and each day's intercept with its fact. The texts of The long spoon are written and pass the engine (`design/stories/the-long-spoon.json`).
-- [ ] **Set 1g. 5 people play it.** A new player lands in The long spoon's brief, it is on Cases while open, the Play button leads to it, and the first minute wraps it (a step counts toward a guest's 2 games, and the look is asked after the first result). It is played by 5 people who have never seen the game, and what stops them is fixed before a second chapter is written.
+- [ ] **Set 1g. 5 people play it.** The long spoon is played by 5 people who have never seen the game, and what stops them is fixed. This no longer holds the second case back: the owner has asked for cases to be the game now, and 1 case is not a game.
 - [ ] **Set 1h. Call for backup.** On any step: a tip-off from the pet, a friend called into the step, or the case's 1 favour.
 - [ ] **Set 1i. New methods,** one a set, engine first, in this order: spot what is off (a drawn scene, the first method of set 1i-c), the torn page, 4 pictures and 1 word (real photos, with the photo store and the credits page it needs), invisible ink, rub the pad, ink not word, what stood here. No clock on any of them. The rest are on the canvas sheet. "Bigger tag" is left out: nothing in a real case asks for it. The long spoon uses 3 methods because 3 are built. Each new one is first used in a chapter, never shipped by itself.
 - [ ] **Set 1i-b. Walk it back** (the memory palace, or method of loci: things are remembered by where they stood along a route). 2 forms, engine first, no clock on either.
@@ -179,7 +226,7 @@ The path, the daily, Make and the words on screen were built for a word game. Th
 - [ ] **Set 4b. The words on screen.** Every "puzzle", "game", "word game" and "find N words" a player reads is checked against the direction: the landing, the first minute, share text, the SEO pages. Reminders and the end of day line already say intercept. A case is a case, a sitting is a step, and a pack is practice. The search pages keep the words people search for until the numbers say what brings players in.
 - [ ] **Set 4c. Practice.** A shelf off the path for packs with no chapter, named as what they are in the story: drills the Open Eye sets its pupils. A drill has no culprit, no secret and no unmasking, so the 14 culprits stop repeating. It keeps its stars and its room.
 - [ ] **Set 4d. The 25 packs are sorted,** one at a time: rewritten as a chapter, moved to practice, or retired. The 3 a new player meets first and the 4 Naija packs get chapters first. The read against `PUZZLE_STANDARD.md` happens here (`giveaways` flags bible, bnote, broad, nigeria, bpeople, world, afrobeats, eagles). A pack that reads badly is rewritten or retired, never just moved.
-- [ ] **Set 4e. The path is chapters.** Once 3 chapters are played, the path shows chapters only and practice is reached from its shelf. Sums and Mirror clues stop being added to a pack by rule: a method is in a case because its chapter put it there.
+- [ ] **Set 4e. The path is a casebook.** Cases shows casebook 1 under its banner: each case a file with its board, its steps as marks, and what is next lit. A case not yet written shows as a closed file with the date it opens. Closed cases fold. Interludes sit between cases as small marks. Practice is a shelf at the foot. Sums and Mirror clues stop being added to a pack by rule: a method is in a case because its chapter put it there.
 
 ### 5. Seasonal cases
 
