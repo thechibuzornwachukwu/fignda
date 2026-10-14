@@ -116,7 +116,7 @@ export function Welcome() {
               <h1 ref={heading} tabIndex={-1} className={styles.title}>
                 Sign in to keep it.
               </h1>
-              <p className={styles.lead}>Your character and your score go with you, on any device. We send a code to your email. No password.</p>
+              <p className={styles.lead}>We send a code to your email. No password.</p>
             </div>
           }
         />
@@ -146,7 +146,6 @@ export function Welcome() {
             </Button>
           ))}
         </fieldset>
-        <p className={styles.lead}>So we pick hair and outfits that suit you. Change it any time.</p>
         <div className={styles.links}>{skip('look')}</div>
       </div>
     );
@@ -186,7 +185,6 @@ function CharacterStep({ heading, onKeep, foot }: { heading: HeadingRef; onKeep:
         <h1 ref={heading} tabIndex={-1} className={styles.title}>
           This is you.
         </h1>
-        <p className={styles.lead}>Your character on every board, profile and room. Keep it or change it any time.</p>
       </div>
       <div className={styles.character}>
         <Avatar parts={parts} size={120} />
@@ -278,7 +276,6 @@ function NameStep({ userId, suggested, heading, onSaved, onGiveUp }: NameProps) 
             <br />
             we call you?
           </h1>
-          <p className={styles.lead}>This shows on boards and on cards you share. Change it any time.</p>
         </div>
       }
       foot={

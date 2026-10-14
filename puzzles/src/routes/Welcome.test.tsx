@@ -116,7 +116,7 @@ describe('a new guest', () => {
     expectStep('We believe you should look good.', 'Step 3 of 3');
     const group = screen.getByRole('group', { name: 'Who are we dressing?' });
     expect(within(group).getAllByRole('button').map((b) => b.textContent)).toEqual(['A woman', 'A man', "I'd rather not say"]);
-    expect(screen.getByText('So we pick hair and outfits that suit you. Change it any time.')).toBeInTheDocument();
+    expect(screen.queryByText(/Change it any time/)).toBeNull();
     click("I'd rather not say");
     // A full answer, not a skip.
     expect(localStorage.getItem(LOOK_KEY)).toBe('mixed');

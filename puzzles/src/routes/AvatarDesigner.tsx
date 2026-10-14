@@ -264,7 +264,6 @@ function Editor({ seed, code, look, onSave, onLook, onClose }: EditorProps) {
                   </button>
                 ))}
               </div>
-              <p className={styles.help}>So we pick hair and outfits that suit you. Change it any time.</p>
             </section>
           )}
           {current.parts.map((key) => {

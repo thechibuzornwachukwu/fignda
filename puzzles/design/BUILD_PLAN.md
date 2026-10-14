@@ -56,7 +56,6 @@ This is a business. Running costs are near zero, so the first sale is profit. No
 | Private board | A circle with its own puzzles, by the month or the term | Schools, companies, churches | Now |
 | Tournament | A week's contest on one puzzle, prize from the sponsor | Brands, companies, schools | Now |
 | Sponsored puzzle | A puzzle on the sponsor's subject, marked "With NAME", their link on the result and the share card | Brands | Now |
-| Sponsored daily | "Today's daily, with NAME" for a day or a week | Brands | Now |
 | Season takeover | A holiday case and the seasonal dress, "with NAME" | Brands | After set 5c |
 | Supporter | One payment: no ads ever, a badge | Players | Needs Paystack |
 | Plus, by the month | More puzzles in Make, private rooms, extra outfits | Players | Needs Paystack, set 6e |
@@ -120,11 +119,9 @@ All decided on the server from verified plays. One currency: lifetime points set
 
 - [ ] **Set 7a. Rest day:** 1 a week, earned by playing 5 of the last 7, used by itself, free. The same for friend streaks.
 - [ ] **Set 7b. Skill pays:** a clean read and a rare find add to the tally. Skill badges shown first: Clean read, No-hint perfect, Long word, Deep find, Rare eye, Case master.
-- [ ] **Set 7c. Sharp eye:** the share of rare words caught over the last 14 dailies.
-- [ ] **Set 7d. Crowns:** the first in your circle to find each word in today's daily. "Ahead of 62% today" on the global board from 5 players up.
-- [ ] **Set 7e. A goal the player picks** (Light, Regular, Keen: 1, 2 or 4 sittings a day), apart from the run. The run needs only the daily.
+- [ ] **Set 7e. A goal the player picks** (Light, Regular, Keen: 1, 2 or 4 sittings a day), apart from the run.
 - [ ] **Set 7f. Personal records** copied to the server, with best week.
-- [ ] **Set 7g. Leagues:** tables of about 20, 5 tiers, top 5 up, bottom 5 down. Weekly points come only from dailies and first clears, so nobody wins by grinding on Sunday night. No message about dropping, a player can leave, fewer than 5 players moves nobody down.
+- [ ] **Set 7g. Leagues:** tables of about 20, 5 tiers, top 5 up, bottom 5 down. Weekly points come only from first clears, so nobody wins by grinding on Sunday night. No message about dropping, a player can leave, fewer than 5 players moves nobody down.
 
 ### 8. Data and privacy (GDPR, Nigeria's NDPA)
 
@@ -137,15 +134,11 @@ Play with no account, and sponsors get numbers, never people.
 
 ### 9. Smaller
 
-- [ ] A medal shared as a picture: a card with the medal, the player's detective and their name, drawn as the share cards are. Today a medal is shared as a line of text and a link.
-- [ ] Read every screen against "show it, do not caption it" and take out the lines that explain: the stage on You ("Detective X is with you. New kit at 3."), Settings, Squad, the first minute.
-
-- [ ] Pick dailies from the `daily_candidates` view. Nothing reads it yet.
 - [ ] Usage per feature per week from the database. Under 2% of weekly players after a month moves behind "More".
 - [ ] A public list of player-made puzzles.
 - [ ] Reminders by email, once SMTP is set.
 - [ ] Later, once there are players to help: a help centre on GitBook (how a case works, tip-offs, circles, the account, privacy), linked from Settings and the footer. Advised to the owner. Check its free plan and whether it can sit on our own domain first.
-- [ ] Later, with it: email sequences on Loops, to teach a new player the game a little at a time (the first case, the daily, a circle, a pet). Advised to the owner. It needs the domain and a yes from the player at sign up, it is a new company that receives email addresses, so the privacy page names it, and every email has a way out. No guilt and no word about what would be lost, as in reminders.
+- [ ] Later, with it: email sequences on Loops, to teach a new player the game a little at a time (the first case, a circle, a pet). Advised to the owner. It needs the domain and a yes from the player at sign up, it is a new company that receives email addresses, so the privacy page names it, and every email has a way out. No guilt and no word about what would be lost, as in reminders.
 - [ ] `e2e/onboarding.spec.ts`, and a count of new visitors who finish a puzzle and then sign in.
 
 ## Checks still owed
@@ -170,7 +163,7 @@ Play with no account, and sponsors get numbers, never people.
 - "5 wrong codes, then a 15 minute lock" cannot be enforced exactly: Supabase checks sign in codes itself.
 - Two players finding the same word at the same moment both see it as theirs. The Together board credits the earlier one.
 - A room player who closes the tab before the end sends no play.
-- Reminder times follow the saved time zone. The daily changes at midnight UTC.
+- Reminder times follow the saved time zone.
 - Machine-written puzzles stop for the day when the free limits run out.
 - The avatar on the waiting screen bobs and does not blink.
 - Mirror words are found, not written: they are whatever everyday words a paragraph happens to hold backwards, so they have nothing to do with the puzzle's subject. A case whose text holds fewer than 3 has no Mirror clue.

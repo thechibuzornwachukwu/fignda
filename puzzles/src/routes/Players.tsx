@@ -276,7 +276,7 @@ export function Players() {
             me={me}
             myHandle={myHandle}
           />
-          {!me && !auth.loading && Array.isArray(suggested) && <p className={styles.note}>{signIn} to follow players and see them on your own leaderboard.</p>}
+          {!me && !auth.loading && Array.isArray(suggested) && <p className={styles.note}>{signIn} to follow players.</p>}
         </section>
       )}
 

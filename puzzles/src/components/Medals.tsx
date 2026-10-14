@@ -1,9 +1,12 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Flag, Flame, FolderCheck, Lock, Share2, Star, type LucideIcon } from 'lucide-react';
+import type { Avatar as AvatarParts } from '../avatar/draw';
 import { medalsOf, type Medal, type MedalCounts, type MedalKey } from '../lib/medals';
+import { cardToFile, deliver, shareUrlLabel } from '../lib/share';
 import { Button } from './Button';
 import { Dialog } from './Dialog';
 import { Icon } from './Icon';
+import { MEDAL_CARD, MedalCard } from './MedalCard';
 import styles from './Medals.module.css';
 
 const GLYPH: Record<MedalKey, LucideIcon> = { run: Flame, cases: FolderCheck, points: Star, first: Flag };
@@ -28,6 +31,10 @@ type Props = {
   counts?: MedalCounts;
   /** Who the medals belong to, for the words that are shared. Left out: "I". */
   owner?: string;
+  /** The name and the detective drawn on a shared medal's picture. */
+  name?: string;
+  handle?: string;
+  parts?: AvatarParts;
   /** The page a shared medal links to. */
   path?: string;
   /** Show the medals not earned yet too, as outlines. A player's own page does. */
@@ -39,9 +46,11 @@ type Props = {
  * is: its glyph, the number struck on it and its metal. Under it, only its name and a bar toward the next tier.
  * Tap one to see it large and share it.
  */
-export function Medals({ codes, counts, owner, path = '/play', all = false }: Props) {
+export function Medals({ codes, counts, owner, name, handle, parts, path = '/play', all = false }: Props) {
   const [open, setOpen] = useState<MedalKey | null>(null);
   const [said, setSaid] = useState('');
+  const [busy, setBusy] = useState(false);
+  const card = useRef<HTMLDivElement>(null);
   const medals = medalsOf(codes, counts).filter((m) => all || m.tier >= 0);
   if (medals.length === 0) return null;
   const shown = medals.find((m) => m.key === open);
@@ -49,6 +58,20 @@ export function Medals({ codes, counts, owner, path = '/play', all = false }: Pr
   const share = async (m: Medal) => {
     const url = `${window.location.origin}${path}`;
     const text = `${owner ? `${owner} earned` : 'I earned'} the ${m.name} medal on Gazecraft.`;
+    // The picture first: the medal, the detective and the name. Where it cannot be made, the line and the link.
+    if (card.current) {
+      setBusy(true);
+      try {
+        const file = await cardToFile(card.current, MEDAL_CARD, MEDAL_CARD, `gazecraft-${m.key}.png`);
+        const done = await deliver([file], text, url);
+        setSaid(done === 'saved' ? 'Saved' : '');
+        return;
+      } catch {
+        /* Fall back to the line and the link. */
+      } finally {
+        setBusy(false);
+      }
+    }
     try {
       if (navigator.share) await navigator.share({ title: 'Gazecraft', text, url });
       else {
@@ -105,10 +128,15 @@ export function Medals({ codes, counts, owner, path = '/play', all = false }: Pr
               </p>
             )}
             {shown.tier >= 0 && (
-              <Button variant="primary" onClick={() => void share(shown)}>
+              <Button variant="primary" onClick={() => void share(shown)} disabled={busy}>
                 <Icon icon={Share2} size={18} />
                 {said || 'Share'}
               </Button>
+            )}
+            {shown.tier >= 0 && (
+              <div className={styles.offstage} aria-hidden="true">
+                <MedalCard ref={card} medal={shown} name={name ?? owner ?? 'Gazecraft'} handle={handle} parts={parts} link={shareUrlLabel(path)} />
+              </div>
             )}
           </div>
         )}

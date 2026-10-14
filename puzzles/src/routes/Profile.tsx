@@ -171,7 +171,7 @@ export function Profile() {
       <h2 id="badges-title" className={styles.h2}>
         Badges
       </h2>
-      <Medals codes={badges} owner={profile.name} path={`/u/${profile.handle}`} />
+      <Medals codes={badges} owner={profile.name} handle={profile.handle} path={`/u/${profile.handle}`} />
     </section>
   );
 

@@ -319,7 +319,6 @@ export function SignIn() {
                 <br />
                 we call you?
               </h1>
-              <p className={styles.lead}>This shows on cards you share. Change it any time.</p>
             </div>
           }
           onSaved={async () => {

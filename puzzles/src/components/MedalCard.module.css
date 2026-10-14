@@ -1,0 +1,61 @@
+/* A medal card is drawn at 1080 square. Sizes here are card pixels, as on the other share cards. */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 80px;
+  box-sizing: border-box;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+.stage {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 72px;
+}
+
+/* The medal at 3 times its opened size: it is the picture. */
+.medal {
+  display: inline-flex;
+  transform: scale(2.4);
+  transform-origin: center;
+  margin: 0 120px;
+}
+
+.face {
+  border-radius: var(--radius-pill);
+  box-shadow: 0 0 0 6px var(--line-3);
+}
+
+.words {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+}
+
+.name {
+  font-size: 44px;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.title {
+  font-size: 72px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.link {
+  align-self: center;
+  font-size: 30px;
+  font-weight: 600;
+  color: var(--subtle);
+}

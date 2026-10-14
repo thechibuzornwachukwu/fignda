@@ -106,7 +106,7 @@ describe('You, as a guest', () => {
     localStorage.setItem('gazecraft-finished', '7');
     forgetPartner();
     const { container } = show();
-    expect(line()).toBe('Detective X is with you. New kit at 3.');
+    expect(line()).toBe('');
     expect(container.textContent).not.toMatch(/undefined|NaN|null/);
   });
 });
@@ -117,7 +117,8 @@ describe('You, signed in', () => {
     world.mine = { current: 'cat', owned: ['cat'], points: 1240, bonds: { cat: 4 } };
     show();
     expect(screen.getByRole('link', { name: 'Settings' })).toHaveAttribute('href', '/settings');
-    await waitFor(() => expect(line()).toBe('Detective X is with you. 4 cases closed together. New kit at 10.'));
+    await screen.findByRole('button', { name: 'Detective X. With you, 4 cases.' });
+    expect(line()).toBe('');
     expect(within(stage()).getByRole('progressbar')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Detective X. With you, 4 cases.' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Detective Tobs. Locked. 3,000 points.' }));
@@ -129,7 +130,8 @@ describe('You, signed in', () => {
     world.profile = ADA;
     world.mine = { current: 'dog', owned: ['cat', 'dino', 'dog', 'robot'], points: 25000, bonds: { dog: 12, cat: 1 } };
     show();
-    await waitFor(() => expect(line()).toBe('Detective Puff is with you. 12 cases closed together.'));
+    await screen.findByRole('button', { name: 'Detective X. Yours, 1 case.' });
+    expect(line()).toBe('');
     expect(screen.getByRole('region', { name: 'Pets' }).querySelectorAll('[data-locked]')).toHaveLength(0);
     expect(screen.getByRole('button', { name: 'Detective X. Yours, 1 case.' })).toBeInTheDocument();
   });

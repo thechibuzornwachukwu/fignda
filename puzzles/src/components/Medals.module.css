@@ -170,3 +170,11 @@
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
+
+/* The picture a shared medal becomes: drawn at full size, out of sight, until it is turned into a file. */
+.offstage {
+  position: fixed;
+  top: 0;
+  left: -200vw;
+  pointer-events: none;
+}

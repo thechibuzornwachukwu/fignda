@@ -86,7 +86,6 @@ export function Settings() {
         <h2 id="s-profile" className={styles.h2}>
           Profile
         </h2>
-        <p className={styles.help}>Your name and handle show on your profile, on shared cards and next to verified scores.</p>
         <form className={styles.form} onSubmit={save} noValidate>
           <Field
             label="Name"
@@ -141,7 +140,6 @@ export function Settings() {
             <dd>Email code{auth.session.user.app_metadata?.provider === 'google' ? ' and Google' : ''}</dd>
           </div>
         </dl>
-        <p className={styles.help}>Only you see your email. It is never shown to other players.</p>
       </section>
 
       <section className={styles.section} aria-labelledby="s-remind">
@@ -187,7 +185,6 @@ export function Settings() {
           >
             Sign out
           </Button>
-          <span className={styles.help}>Also clears Gazecraft data from this browser.</span>
         </div>
       </section>
 
@@ -197,13 +194,6 @@ export function Settings() {
         <h2 id="s-danger" className={styles.h2}>
           Delete account
         </h2>
-        <p className={styles.help}>
-          Removes your profile, plays, shared cards and custom puzzles at once. It cannot be undone.{' '}
-          <Link to="/privacy" className={styles.inline}>
-            What we keep
-          </Link>
-          .
-        </p>
         <div>
           <Button variant="secondary" onClick={() => setConfirm(true)}>
             Delete account

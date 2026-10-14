@@ -2,6 +2,7 @@
 // Playwright can measure readability: text never under 38px, nothing overflowing, every ratio and theme.
 // Not part of the product and compiled out of production builds.
 
+import { MedalCard } from '../components/MedalCard';
 import { useSearchParams } from 'react-router-dom';
 import { MedalFace, Medals } from '../components/Medals';
 import { MEDAL_KINDS, medalsOf } from '../lib/medals';
@@ -103,6 +104,7 @@ export function MedalsHarness() {
         </div>
       ))}
       <Medals codes={['first_game', 'streak_7', 'cases_1', 'cases_5']} counts={{ run: 12, cases: 7, points: 640 }} all />
+      <MedalCard medal={medalsOf(['streak_7', 'streak_30']).find((m) => m.key === 'run')!} name="Ada Obi" handle="ada" link="fignda.pages.dev/u/ada" />
     </div>
   );
 }

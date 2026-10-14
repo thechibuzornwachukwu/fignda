@@ -14,7 +14,7 @@ import { PageHeader } from '../components/PageHeader';
 import { Partner } from '../components/Partner';
 import { SkeletonPills } from '../components/Skeleton';
 import { TextLink } from '../components/TextLink';
-import { nextAt, nextBondAt, partnerName, PARTNERS, standingOf, type PartnerId } from '../engine/partners';
+import { nextAt, partnerName, PARTNERS, standingOf, type PartnerId } from '../engine/partners';
 import { doneClues } from '../games/caseFile';
 import { games } from '../games/catalog';
 import { fetchBadges, saveAvatar, saveLook } from '../lib/api';
@@ -113,18 +113,12 @@ export function Me() {
 
   // What the one button under the stage does, and what it says when there is nothing to do.
   let action: { label: string; run: () => Promise<boolean> } | null = null;
-  // The bond: cases closed together, and when the partner next gains a piece of kit.
-  const bondLine = (id: PartnerId) => {
-    const n = partner.bonds[id] ?? 0;
-    const at = nextBondAt(n);
-    const together = n === 0 ? '' : n === 1 ? ' 1 case closed together.' : ` ${n} cases closed together.`;
-    return `${partnerName(id)} is with you.${together}${at != null ? ` New kit at ${at}.` : ''}`;
-  };
-  let line = bondLine(partner.current);
+  // The pet beside the player says nothing: its kit shows the bond. A line is only for one that is locked.
+  let line = '';
   if (trying?.kind === 'partner') {
     const how = standingOf(partner, trying.id, partner.points);
     const at = nextAt(partner);
-    if (trying.id === partner.current) line = bondLine(trying.id);
+    if (trying.id === partner.current) line = '';
     else if (how === 'locked') line = at == null ? '' : !profile ? `Locked. Sign in and reach ${num(at)} points.` : `Locked. ${num(Math.max(0, at - partner.points))} points to go.`;
     else action = { label: `Select ${partnerName(trying.id)}`, run: () => choosePartner(trying.id, !!profile) };
     // A guest holds 1 partner and can swap it freely.
@@ -281,7 +275,7 @@ export function Me() {
             Badges
           </h2>
           {/* The next 3 to aim for sit after the earned ones. */}
-          {earned == null ? <SkeletonPills /> : <Medals codes={earned} counts={{ run: run.streak, cases: standing.cases, points: standing.points }} path={profile ? `/u/${profile.handle}` : '/play'} all />}
+          {earned == null ? <SkeletonPills /> : <Medals codes={earned} counts={{ run: run.streak, cases: standing.cases, points: standing.points }} name={profile?.name} parts={mine} path={profile ? `/u/${profile.handle}` : '/play'} all />}
         </section>
       )}
 
