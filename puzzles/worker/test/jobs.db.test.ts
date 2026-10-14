@@ -279,7 +279,7 @@ describe('failed jobs', () => {
     const who = { ip: '198.51.100.9', user: u };
     const { id } = (await (await start(deps(ai), who)).json()) as JobOut;
     expect((await run(deps(ai), who, id)).state).toBe('failed');
-    expect(await counted(`gen:user:${u.id}`)).toBe(1);
+    expect(await counted(`make:user:${u.id}`)).toBe(1);
   });
 
   it('a job nobody finished is given up on: after 3 runners, or after 15 minutes', async () => {

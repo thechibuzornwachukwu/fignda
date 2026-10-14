@@ -16,7 +16,9 @@ import { culpritOf } from '../../src/engine/secret';
 import { DISGUISE_STYLES } from '../../src/avatar/parts/disguises';
 import pools from '../../data/copy.json';
 import mirrorFile from '../../data/mirrorWords.json';
-import type { AiGenerate } from './ai';
+import iconTable from '../../data/topicIcons.json';
+import { readsBadly } from '../../src/engine/giveaway';
+import type { AiGenerate, AiMeta } from './ai';
 import { GUEST_KEY_RE, JOB, JOB_COLS, isDead, jobOut, ownerKey, refunds, withHeartbeat, type JobRow, type JobTiming } from './jobs';
 import { PUSH_ENDPOINT, type PushSend } from './push';
 import { MAX_LOG_EVENTS, MAX_PLAY_MS, replay } from './replay';
@@ -49,12 +51,12 @@ export type Deps = {
 
 export const LIMITS = {
   guestGeneratePerHour: 5,
-  userGeneratePerHour: 20,
+  /** Make, signed in: drafts asked for and puzzles published, on 1 count. */
+  makePerHour: 20,
   playsPerHour: 120,
   pushLinesPerHour: 60,
   invitesPerHour: 30,
   nudgesPerHour: 20,
-  puzzlesPerHour: 10,
   reportsPerHour: 20,
   /** Per address, guests too: a count has no player on it. A game is 2 or 3 of these, and a share 1. */
   countsPerHour: 240,
@@ -159,9 +161,12 @@ export const AiPuzzle = z
 
 const AI_ATTEMPTS = 2;
 
-/** One AI round: validated, filtered, at least 4 hidden words that cross word boundaries and sit on real words. */
-export async function draft(ai: AiGenerate, topic: string) {
-  const raw = await ai(topic).catch(() => null);
+/**
+ * One AI round: validated, filtered, at least 4 hidden words that cross word boundaries and sit on real words,
+ * and a paragraph that does not give its words away (`readsBadly`). `meta` says who to ask first and who wrote it.
+ */
+export async function draft(ai: AiGenerate, topic: string, meta?: AiMeta) {
+  const raw = await ai(topic, meta).catch(() => null);
   const parsed = raw == null ? null : AiPuzzle.safeParse(extractJson(raw));
   if (!parsed?.success) return null;
   const { title, paragraph, words } = parsed.data;
@@ -169,6 +174,7 @@ export async function draft(ai: AiGenerate, topic: string) {
   // A model that cannot hide a word cuts it in two with a space ("cr oss"). Those are not puzzles.
   const hidden = honestWords(paragraph, words);
   if (!hidden) return null;
+  if (readsBadly(buildHiddenWords({ text: paragraph, dict: hidden }))) return null;
   return { title, paragraph, dict: hidden };
 }
 
@@ -224,10 +230,15 @@ async function makeForTopic(deps: Deps, topic: string, userId: string | null): P
   const cached = await cachedFor(deps, key);
   if (cached) return { game: cached, cached: true };
 
-  // The engine decides what really hides. Keep real hits that cross word boundaries only.
+  // The engine decides what really hides. Keep real hits that cross word boundaries only. A signed in player
+  // is written for by Google first, for its better writing, while its free day lasts.
   let made: Awaited<ReturnType<typeof draft>> = null;
-  for (let i = 0; i < AI_ATTEMPTS && !made; i++) made = await draft(deps.ai, topic);
+  const meta: AiMeta = userId ? { first: 'gemini' } : {};
+  const started = nowOf(deps).getTime();
+  for (let i = 0; i < AI_ATTEMPTS && !made; i++) made = await draft(deps.ai, topic, meta);
   if (!made) throw new HttpError(422, 'generate_failed');
+  const secs = Math.min(3600, Math.max(0, Math.round((nowOf(deps).getTime() - started) / 1000)));
+  const by = meta.provider && /^[a-z0-9-]{1,40}$/.test(meta.provider) ? meta.provider : null;
   const { title, paragraph, dict } = made;
   const noun = `${topic.toLowerCase()} words`.slice(0, 80);
 
@@ -249,6 +260,8 @@ async function makeForTopic(deps: Deps, topic: string, userId: string | null): P
       dict,
       topic_key: key,
       safety,
+      made_by: by,
+      made_secs: secs,
     };
     const ins = await deps.db.from('games').insert(row).select(GAME_COLS).single();
     if (!ins.error) return { game: ins.data as GameRow, cached: false };
@@ -272,8 +285,8 @@ async function generate(req: Request, deps: Deps) {
 
   await limit(
     deps.db,
-    user ? `gen:user:${user.id}` : `gen:ip:${clientIp(req)}`,
-    user ? LIMITS.userGeneratePerHour : LIMITS.guestGeneratePerHour,
+    user ? `make:user:${user.id}` : `gen:ip:${clientIp(req)}`,
+    user ? LIMITS.makePerHour : LIMITS.guestGeneratePerHour,
   );
   const { game, cached } = await makeForTopic(deps, topic, user?.id ?? null);
   return json(cached ? { ...gameOut(game), cached: true } : gameOut(game));
@@ -321,9 +334,9 @@ async function startJob(req: Request, deps: Deps, topic: string, user: User | nu
   if (first?.state === 'waiting') return json(jobOut(first, nowOf(deps), timing(deps)));
 
   // Counted only now: asking again for the job you already have costs nothing.
-  const rateKey = user ? `gen:user:${user.id}` : `gen:ip:${ip}`;
+  const rateKey = user ? `make:user:${user.id}` : `gen:ip:${ip}`;
   if (!user) await limit(deps.db, `gentry:ip:${ip}`, LIMITS.guestGenerateTriesPerHour);
-  await limit(deps.db, rateKey, user ? LIMITS.userGeneratePerHour : LIMITS.guestGeneratePerHour);
+  await limit(deps.db, rateKey, user ? LIMITS.makePerHour : LIMITS.guestGeneratePerHour);
 
   // A topic made in the last 24 hours is ready at once.
   const cached = await cachedFor(deps, topicKey(topic));
@@ -438,16 +451,20 @@ export const PuzzleBody = z
       .transform((s) => cleanTopic(s))
       .pipe(z.string().min(MAKE.minText).max(MAKE.maxText)),
     words: z.array(z.string().regex(WORD_RE)).min(MAKE.minWords).max(MAKE.maxWords),
+    /** A lucide name from data/topicIcons.json. Left out: the puzzle's topic picks it. */
+    icon: z.string().refine((i) => ICONS.has(i)).optional(),
   })
   .strict();
+
+const ICONS: ReadonlySet<string> = new Set([iconTable.default, ...iconTable.icons.map((r) => r.icon)]);
 
 async function makePuzzle(req: Request, deps: Deps) {
   const user = await currentUser(deps.db, req);
   if (!user) throw new HttpError(401, 'sign_in_required');
-  await limit(deps.db, `puzzle:user:${user.id}`, LIMITS.puzzlesPerHour);
+  await limit(deps.db, `make:user:${user.id}`, LIMITS.makePerHour);
   const parsed = PuzzleBody.safeParse(await readJson(req));
   if (!parsed.success) throw new HttpError(400, 'bad_request');
-  const { title, noun, text, words } = parsed.data;
+  const { title, noun, text, words, icon } = parsed.data;
   if (isProfane(title, noun, text, words.join(' '))) throw new HttpError(422, 'not_allowed');
 
   // The same check the maker screen runs. Every word must really hide across word boundaries.
@@ -466,7 +483,7 @@ async function makePuzzle(req: Request, deps: Deps) {
     const code = shareCode();
     const ins = await deps.db
       .from('games')
-      .insert({ id: `c-${code.toLowerCase()}`, kind: 'custom', owner_id: user.id, share_code: code, category: 'Player made', title, noun, text, dict, safety })
+      .insert({ id: `c-${code.toLowerCase()}`, kind: 'custom', owner_id: user.id, share_code: code, category: 'Player made', title, noun, text, dict, safety, icon: icon ?? null })
       .select(GAME_COLS)
       .single();
     if (!ins.error) return json(gameOut(ins.data));
