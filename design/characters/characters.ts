@@ -17,7 +17,7 @@
 // TO ADD A CHARACTER: write its body and face, and add it to CAST.
 // A true side or three-quarter angle is new drawing for every character. `view` and `flip` are what exists.
 //
-// Run `npm run characters:render` to write index.html and the svg folder beside this file.
+// They are drawn on 1 page with everything else by `npm run sheet:render` (design/sheet).
 
 export const INK = '#141416';
 export const WHITE = '#ffffff';
