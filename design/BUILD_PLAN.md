@@ -77,7 +77,7 @@ Decided on 13 Oct 2026, by the owner's leave ("make the right choices"). Each ca
 - The cast returns. The 14 characters the game can draw live on Lantern Row. A suspect cleared in 1 case can be a witness in the next and a suspect again later, so a player comes to know the street. Nobody is the culprit twice in a casebook.
 - The pace is the player's. Every case that is written is open, in order, and nothing waits for a date. A player may close a case in an evening or the whole casebook in 3 days, with tip-offs or without, and that is a good outcome, never a problem to prevent. No timer, no daily cap, no wait between cases, as Duolingo's path is all there and a learner goes as fast as they like.
 - A fortnight is how fast we write, not how fast anybody plays. We expect a step or 2 a day, which is a case in about 4 days and the casebook in about 5 weeks, and we plan for a player who goes 3 times that fast.
-- Casebook 1 is the game: 7 of its 8 cases are written and open. A date is given only for a case already written and checked.
+- Casebook 1 is the game: all 8 cases are written and open. A date is given only for a case already written and checked.
 - What a player finds at the end of what is written, so the game never just stops: (1) cold cases: any closed case again with no tip-offs, for a gold seal; (2) practice: the drills; (3) a seasonal case, when one is open; (4) the next file on the path, closed, with "Tell me when it opens" and no date unless it is written. Their run goes on: a step of a cold case or a drill counts as a day.
 - Nothing bought makes a case faster or easier. A tip-off costs points earned by playing, and points are never sold for it (Revenue: never for sale). What a player can buy is how their detective and their pet look.
 - Art never blocks the path. Case 5 needs the first drawn room. If the room is not ready, case 6 is released in its place and case 5 follows: both are written to stand in either slot.
@@ -96,10 +96,10 @@ Casebook 1: Lantern Row. The premise of each case is 1 line and is where its wri
 | 6 | The 2 signs (written) | Who did it | 2 | The missing step | 2 stalls wake to each other's signs on market day, and each owner blames the other | Both signs were repainted by the same hand |
 | 7 | The other spoon (written) | Prove it | 1 | The torn page | A second Long Spoon turns up for sale, with all 20 names on it | The seller was sent the list of names by post |
 | | Interlude: The envelope (written) | | | | The envelope the list came in | |
-| 8 | Who carries the cards | Who did it | 5 | None: every method so far | 7 cases, 7 cards with an open eye. 1 person on Lantern Row has been handing them out | The page from 2011 is read. The Open Eye itself is not named |
+| 8 | Who carries the cards (written) | Who did it | 5 | None: every method so far | 7 cases, 7 cards with an open eye. 1 person on Lantern Row has been handing them out | The page from 2011 is read. The Open Eye itself is not named |
 
 Suspects run 4, 2, 1, 3, 4, 2, 1, 5, so no 2 neighbours match, and the shapes run through all 5 before any repeats twice.
-What this asks of the build, in order: cases 1 to 7 and both interludes are written and open. Next: case 8, Who carries the cards, which closes Lantern Row with every method so far and reads the 2011 page. Beside it: the Open Eye file (set 1e), a drill with no culprit and no unmasking (set 4c), cold cases and interludes kept on the account, and badges worth unlocking (set 5e).
+What this asks of the build, in order: Lantern Row is written, all 8 cases and both interludes, and open. Next: what a player finds at its end (cold cases are built; the next file on the path, with "Tell me when it opens"), the Open Eye file (set 1e), a drill with no culprit and no unmasking (set 4c), cold cases and interludes kept on the account, and badges worth unlocking (set 5e). Casebook 2 is a new place, decided before it is written.
 
 ## Screens: one job each
 
@@ -154,6 +154,8 @@ Never for sale: hints, extra tries, time, or anything that touches a score; stre
 - [ ] Decide: what is sold to a church, a school or a wedding now. The price list sells a puzzle on the buyer's subject, which is a word hunt. It can stay that (sold as a drill, or a message hidden for the guests) or become a short case written for them, which costs more to make.
 - [ ] Decide: the 25 packs, one by one (set 4d). Suggested: chapters for the first 3 on the path and the 4 Naija packs, practice for the rest, and retire what reads badly.
 - [ ] Read The long spoon (`design/stories/the-long-spoon.json`) and say what is wrong with it before 1c is built on it. It is told on Market day (`fruits`): confirm or move it.
+- [ ] Read Who carries the cards (`design/stories/who-carries-the-cards.json`). The hand is Mr Cole, the caretaker, who held the plane in 2011 and spent 6 weeks making the street look again. The 2011 vote was 9 to 9, and the chair broke the tie. Confirm or change before players reach it.
+- [ ] Decide casebook 2: a new place, its 8 premises, and its thread.
 - [ ] Read The other spoon and The envelope (`design/stories`). In case 7 the copy is Bea's art class, entered as the real thing to see if anyone could tell. Confirm or change.
 - [ ] Read The light in the hall and The 2 signs (`design/stories`). In case 5 the light is Ines, the usher, learning a song for her mother's 80th. In case 6 the culprit is Tomas, the gardener, for a rosette, and he did not hold the brush.
 - [ ] Read The year that is missing and The bookmark (`design/stories`) as a player would. The culprit is Noor, the librarian, and nothing was stolen: she shelved it under another cover. Confirm or change.

@@ -13,7 +13,7 @@ import { Step } from './Step';
 
 vi.mock('../lib/auth', () => ({ useAuth: () => ({ enabled: false, loading: false, profile: null, session: null }) }));
 
-const all = { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3 };
+const all = { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3, 7: 3 };
 const keep = (stars: Record<string, Record<number, number>>) => localStorage.setItem('gazecraft-chapters', JSON.stringify(stars));
 const kept = () => JSON.parse(localStorage.getItem('gazecraft-chapters') ?? '{}') as Record<string, Record<string, number>>;
 const open = (path: string) =>
@@ -40,7 +40,8 @@ describe('the casebook on Cases', () => {
     expect(screen.getByRole('img', { name: '6 steps' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Open the brief' })).toHaveAttribute('href', '/case/the-long-spoon');
     expect(container.querySelectorAll('[data-state="locked"][data-file]')).toHaveLength(chapters.length - 1);
-    expect(container.querySelector('[data-next-file]')).toHaveTextContent('Case 8');
+    // Every case in the casebook is written, so no file is left shut for want of one.
+    expect(container.querySelector('[data-next-file]')).toBeNull();
     expect([...container.querySelectorAll('[data-interlude]')].map((e) => e.getAttribute('data-state'))).toEqual(['locked', 'locked']);
   });
 

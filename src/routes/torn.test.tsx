@@ -9,7 +9,7 @@ import { Step } from './Step';
 
 vi.mock('../lib/auth', () => ({ useAuth: () => ({ enabled: false, loading: false, profile: null, session: null }) }));
 
-const all = { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3 };
+const all = { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3, 7: 3 };
 const before = Object.fromEntries(['the-long-spoon', 'the-open-box', 'the-early-bus', 'the-year-that-is-missing', 'the-light-in-the-hall', 'the-2-signs'].map((id) => [id, all]));
 const kept = () => JSON.parse(localStorage.getItem('gazecraft-chapters') ?? '{}') as Record<string, Record<string, number>>;
 const torn = tornOf(getChapter('the-other-spoon')!, 2)!;

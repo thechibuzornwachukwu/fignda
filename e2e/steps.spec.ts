@@ -134,12 +134,12 @@ test('half way through, the landing page and Cases say carry on, and a closed ca
   await expect(page.locator('[data-chapter]').getByRole('img', { name: 'Step 3 of 6' })).toBeVisible();
   await expect(page.locator('[data-chapter]').getByRole('link', { name: 'Carry on', exact: true })).toBeVisible();
   // Closed, the next case in the casebook is the one that is open.
-  await page.evaluate(() => localStorage.setItem('gazecraft-chapters', JSON.stringify({ 'the-long-spoon': { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3 } })));
+  await page.evaluate(() => localStorage.setItem('gazecraft-chapters', JSON.stringify({ 'the-long-spoon': { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3, 7: 3 } })));
   await page.goto('/play');
   await expect(page.locator('[data-chapter="the-open-box"]').getByRole('link', { name: 'Open the brief' })).toHaveAttribute('href', '/case/the-open-box');
   await page.evaluate(() => {
-    const all = { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3 };
-    localStorage.setItem('gazecraft-chapters', JSON.stringify({ 'the-long-spoon': all, 'the-open-box': all, 'the-early-bus': all, 'the-year-that-is-missing': all, 'the-light-in-the-hall': all, 'the-2-signs': all, 'the-other-spoon': all }));
+    const all = { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3, 7: 3 };
+    localStorage.setItem('gazecraft-chapters', JSON.stringify({ 'the-long-spoon': all, 'the-open-box': all, 'the-early-bus': all, 'the-year-that-is-missing': all, 'the-light-in-the-hall': all, 'the-2-signs': all, 'the-other-spoon': all, 'who-carries-the-cards': all }));
   });
   await page.goto('/play');
   await expect(page.locator('[data-chapter]')).toHaveCount(0);
@@ -149,7 +149,7 @@ test('half way through, the landing page and Cases say carry on, and a closed ca
 
 // Cases 2 and 3 (SPEC section 6, Which account fits, Could it be done). A case opens when the one before is closed.
 
-const ALL = { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3 };
+const ALL = { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3, 7: 3 };
 
 async function seedCases(page: Page, kept: Record<string, Record<number, number>>) {
   await page.addInitScript((k) => {
@@ -245,8 +245,8 @@ test('Cases is the casebook: closed files fold, the open one leads in, and pract
   await page.goto('/play');
   await expect(page.getByRole('heading', { level: 2, name: 'Lantern Row' })).toBeVisible();
   await expect(page.locator('[data-file="the-long-spoon"]')).toHaveAttribute('data-state', 'closed');
-  await expect(page.locator('[data-file][data-state="locked"]')).toHaveCount(5);
-  await expect(page.locator('[data-next-file]')).toContainText('Case 8');
+  await expect(page.locator('[data-file][data-state="locked"]')).toHaveCount(6);
+  await expect(page.locator('[data-next-file]')).toHaveCount(0);
   await expect(page.getByRole('heading', { level: 2, name: 'Practice' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   // A closed case can be worked cold: its own stars, an empty board, and no tip-off.
@@ -310,7 +310,7 @@ test('sweep the room: tap what matters in the drawn hall, and a tip-off rings a 
 
 test('the torn page: each right half is set against its line, and the page reads whole', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 700 });
-  const done = { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3 };
+  const done = { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3, 7: 3 };
   await seedCases(page, { 'the-long-spoon': done, 'the-open-box': done, 'the-early-bus': done, 'the-year-that-is-missing': done, 'the-light-in-the-hall': done, 'the-2-signs': done, 'the-other-spoon': { 1: 3 } });
   await page.goto('/case/the-other-spoon/2');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('The sale book');

@@ -274,7 +274,7 @@ describe('which account fits', () => {
   it('every written chapter is open to players, in the order of the casebook', async () => {
     const { chapters } = await import('../games/chapters');
     expect(files.some((f) => read(f).draft)).toBe(false);
-    expect(chapters.map((c) => c.id)).toEqual(['the-long-spoon', 'the-open-box', 'the-early-bus', 'the-year-that-is-missing', 'the-light-in-the-hall', 'the-2-signs', 'the-other-spoon']);
+    expect(chapters.map((c) => c.id)).toEqual(['the-long-spoon', 'the-open-box', 'the-early-bus', 'the-year-that-is-missing', 'the-light-in-the-hall', 'the-2-signs', 'the-other-spoon', 'who-carries-the-cards']);
   });
 
   it('a case closes on its last step and nowhere else', () => {
@@ -500,6 +500,30 @@ describe('the torn page', () => {
     const d = spoon2();
     d.steps[0]!.page = d.steps[1]!.page;
     expect(checkChapter(d, roles)).toContain('step 1: only a "torn page" step has a page');
+  });
+});
+
+describe('Lantern Row', () => {
+  const book = files.map(read);
+
+  it('is 8 cases, numbered 1 to 8, that run through all 5 shapes', () => {
+    expect(book.map((c) => c.number).sort((a, b) => a! - b!)).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+    expect(new Set(book.map((c) => c.shape))).toEqual(new Set(['who-did-it', 'nothing-was-taken', 'prove-it', 'where-is-it', 'what-is-it-really']));
+  });
+
+  it('nobody is the culprit twice, and the last case uses a method from each one before it', () => {
+    const culprits = book.map((c) => c.culprit);
+    expect(new Set(culprits).size).toBe(culprits.length);
+    const last = book.find((c) => c.number === 8)!;
+    expect(new Set(last.steps.map((s) => s.method))).toEqual(new Set(['buried-sums', 'torn', 'chain', 'claim', 'hidden-words', 'trail', 'line-up']));
+  });
+
+  it('no 2 cases next to each other share a shape or a number of suspects', () => {
+    const order = [...book].sort((a, b) => a.number! - b.number!);
+    order.slice(1).forEach((c, i) => {
+      expect(c.shape, c.id).not.toBe(order[i]!.shape);
+      expect(c.suspects.length, c.id).not.toBe(order[i]!.suspects.length);
+    });
   });
 });
 

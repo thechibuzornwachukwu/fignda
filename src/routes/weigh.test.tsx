@@ -11,7 +11,7 @@ import { Step } from './Step';
 // Sign in is not set up here, so nothing is sent and no guest wall stands in the way.
 vi.mock('../lib/auth', () => ({ useAuth: () => ({ enabled: false, loading: false, profile: null, session: null }) }));
 
-const all = { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3 };
+const all = { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3, 7: 3 };
 const keep = (stars: Record<string, Record<number, number>>) => localStorage.setItem('gazecraft-chapters', JSON.stringify(stars));
 const kept = () => JSON.parse(localStorage.getItem('gazecraft-chapters') ?? '{}') as Record<string, Record<string, number>>;
 const open = (path: string) =>

@@ -9,6 +9,7 @@ import earlyBus from '../../design/stories/the-early-bus.json';
 import longSpoon from '../../design/stories/the-long-spoon.json';
 import openBox from '../../design/stories/the-open-box.json';
 import missingYear from '../../design/stories/the-year-that-is-missing.json';
+import cards from '../../design/stories/who-carries-the-cards.json';
 import { LINEUP_TRIES, lineupStars, pickStep, pickWrongs, stepPuzzle, sweepResult, tornOf, tornStars, tornWrongs, trailOf, trailStars, trailWrongs, type Chapter } from '../../src/engine/chapter';
 import { EVALUATE } from '../../src/engine/evaluate';
 import { buildHiddenWords } from '../../src/engine/hiddenWords';
@@ -18,7 +19,7 @@ import { buildSums } from '../../src/engine/sums';
 import { replay, type PlayLog } from './replay';
 
 /** Every written chapter, by id. A new file in `design/stories` is added here: a test fails until it is. */
-export const CHAPTERS: Readonly<Record<string, Chapter>> = Object.fromEntries(([longSpoon, openBox, earlyBus, missingYear, lightInTheHall, twoSigns, otherSpoon] as unknown as Chapter[]).map((c) => [c.id, c]));
+export const CHAPTERS: Readonly<Record<string, Chapter>> = Object.fromEntries(([longSpoon, openBox, earlyBus, missingYear, lightInTheHall, twoSigns, otherSpoon, cards] as unknown as Chapter[]).map((c) => [c.id, c]));
 
 export type StepCheck =
   | { ok: true; stars: 1 | 2 | 3; score: number; found: number; total: number; hints: number; secs: number }
