@@ -39,7 +39,9 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: flex-end;
   gap: var(--space-3) var(--space-5);
+  width: 100%;
 }
 .line {
   composes: small from '../styles/type.module.css';

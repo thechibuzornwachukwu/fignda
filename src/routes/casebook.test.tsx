@@ -40,8 +40,8 @@ describe('the casebook on Cases', () => {
     expect(screen.getByRole('img', { name: '6 steps' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Open the brief' })).toHaveAttribute('href', '/case/the-long-spoon');
     expect(container.querySelectorAll('[data-state="locked"][data-file]')).toHaveLength(chapters.length - 1);
-    expect(container.querySelector('[data-next-file]')).toHaveTextContent('Case 7');
-    expect(container.querySelector('[data-interlude]')).toHaveAttribute('data-state', 'locked');
+    expect(container.querySelector('[data-next-file]')).toHaveTextContent('Case 8');
+    expect([...container.querySelectorAll('[data-interlude]')].map((e) => e.getAttribute('data-state'))).toEqual(['locked', 'locked']);
   });
 
   it('half way: the steps are marks, closed files fold to a row, and the way in is Carry on', () => {
@@ -123,7 +123,7 @@ describe('an interlude', () => {
   it('is 1 board, ends on what it says, and leads back to Cases', () => {
     keep(Object.fromEntries(chapters.map((c) => [c.id, all])));
     const { container } = open('/interlude/the-bookmark');
-    expect(interludes).toHaveLength(1);
+    expect(interludes.map((i) => i.id)).toEqual(['the-bookmark', 'the-envelope']);
     expect(screen.getByRole('heading', { level: 1, name: 'The bookmark' })).toBeInTheDocument();
     expect(container.querySelector('[data-marks]')).toBeNull();
     expect(screen.getByRole('link', { name: 'Cases' })).toHaveAttribute('href', '/play');

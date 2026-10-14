@@ -1,5 +1,4 @@
 import { useMemo, useState } from 'react';
-import { Button } from '../components/Button';
 import { Stars } from '../components/Stars';
 import { StepResult } from '../components/StepResult';
 import { TextLink } from '../components/TextLink';
@@ -11,6 +10,7 @@ import { loadChapterStars, recordChapterStars } from '../lib/chapterStore';
 import { markGuestPlayed, playKey } from '../lib/guestLimit';
 import { markPlayedToday } from '../lib/playDays';
 import page from './Step.module.css';
+import { Onward } from './Onward';
 import { Marks } from './StepMarks';
 import { wayOn } from './stepWay';
 import styles from './Trail.module.css';
@@ -65,12 +65,7 @@ export function Trail({ chapter, at, solved }: { chapter: Chapter; at: number; s
               {step.lead}
             </p>
           )}
-          <div className={page.actions}>
-            <Button variant="accent" to={`${base}/${at + 1}`}>
-              {wayOn(chapter, at)}
-            </Button>
-            <TextLink onClick={again}>Play it again</TextLink>
-          </div>
+          <Onward to={`${base}/${at + 1}`} label={wayOn(chapter, at)} stars={best} onAgain={again} />
         </div>
       ) : (
         <p className={styles.hand} aria-live="polite" data-in-hand>

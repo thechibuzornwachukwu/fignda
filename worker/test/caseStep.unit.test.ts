@@ -1,7 +1,7 @@
 // A step of a written chapter, checked on the server from the play log alone, and the line-up from the chapter.
 
 import { readdirSync, readFileSync } from 'node:fs';
-import { claimPick, stepPuzzle, trailOf, type Chapter } from '../../src/engine/chapter';
+import { claimPick, stepPuzzle, tornOf, trailOf, type Chapter } from '../../src/engine/chapter';
 import { buildHiddenWords } from '../../src/engine/hiddenWords';
 import { buildMirror } from '../../src/engine/mirror';
 import { buildSums } from '../../src/engine/sums';
@@ -131,6 +131,23 @@ describe('sweep the room on the server', () => {
   it('refuses taps nobody could have made', () => {
     for (const picked of [[0, 0], [room.things.length], [-1]]) expect(checkStep(hall, 1, none, undefined, picked), picked.join()).toMatchObject({ ok: false, status: 400 });
     expect(checkStep(hall, 1, none, ['the usher'], evidence)).toMatchObject({ ok: false, status: 400 });
+  });
+});
+
+describe('the torn page on the server', () => {
+  const spoon2 = CHAPTERS['the-other-spoon'] as Chapter;
+  const right = tornOf(spoon2, 2)!.order;
+
+  it('every line whole is 3 stars, 1 set wrong is 2, and more is 1', () => {
+    expect(checkStep(spoon2, 2, none, undefined, right)).toMatchObject({ ok: true, stars: 3, found: 4, total: 4, score: 0 });
+    const one = [...right];
+    one[0] = (one[0]! + 1) % 4;
+    expect(checkStep(spoon2, 2, none, undefined, one)).toMatchObject({ ok: true, stars: 2 });
+    expect(checkStep(spoon2, 2, none, undefined, right.map((p) => (p + 1) % 4))).toMatchObject({ ok: true, stars: 1 });
+  });
+
+  it('refuses a page that could not have been set', () => {
+    for (const picked of [[], right.slice(1), [...right, 0], [9, 0, 1, 2]]) expect(checkStep(spoon2, 2, none, undefined, picked), picked.join()).toMatchObject({ ok: false, status: 400 });
   });
 });
 

@@ -5,6 +5,7 @@
 import gamesFile from '../../data/games.json';
 import twoSigns from '../../design/stories/the-2-signs.json';
 import lightInTheHall from '../../design/stories/the-light-in-the-hall.json';
+import otherSpoon from '../../design/stories/the-other-spoon.json';
 import earlyBus from '../../design/stories/the-early-bus.json';
 import longSpoon from '../../design/stories/the-long-spoon.json';
 import openBox from '../../design/stories/the-open-box.json';
@@ -17,7 +18,7 @@ import { sponsorOf } from '../engine/sponsor';
 type Game = { id: string; category: string; title: string; noun: string; text: string; dict: string[]; sponsor?: unknown };
 const data = gamesFile as unknown as { games: Game[]; dailyPool: string[]; filters: string[] };
 /** Every written case. A new file in `design/stories` is added here: a test fails until it is. */
-export const CASES: readonly Chapter[] = [longSpoon, openBox, earlyBus, missingYear, lightInTheHall, twoSigns] as unknown as Chapter[];
+export const CASES: readonly Chapter[] = [longSpoon, openBox, earlyBus, missingYear, lightInTheHall, twoSigns, otherSpoon] as unknown as Chapter[];
 /** Curated order for lists: follows the filter tabs, so no single topic leads. */
 const games = [...data.games].sort((a, b) => data.filters.indexOf(a.category) - data.filters.indexOf(b.category));
 

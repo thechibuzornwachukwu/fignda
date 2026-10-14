@@ -18,6 +18,7 @@ import { markGuestPlayed, playKey } from '../lib/guestLimit';
 import { markPlayedToday } from '../lib/playDays';
 import styles from './Claim.module.css';
 import page from './Step.module.css';
+import { Onward } from './Onward';
 import { Marks } from './StepMarks';
 import { wayOn } from './stepWay';
 
@@ -99,12 +100,7 @@ export function Claim({ chapter, at, solved }: { chapter: Chapter; at: number; s
               {step.lead}
             </p>
           )}
-          <div className={page.actions}>
-            <Button variant="accent" to={`${base}/${at + 1}`}>
-              {wayOn(chapter, at)}
-            </Button>
-            <TextLink onClick={again}>Play it again</TextLink>
-          </div>
+          <Onward to={`${base}/${at + 1}`} label={wayOn(chapter, at)} stars={best} onAgain={again} />
           {askLook && (
             <p className={page.line} data-look-ask>
               {lookLine} <TextLink to={`/welcome?from=${encodeURIComponent(pathname)}`}>Choose your look</TextLink>
@@ -163,14 +159,14 @@ export function Claim({ chapter, at, solved }: { chapter: Chapter; at: number; s
             />
           </div>
           <div className={styles.actions}>
-            <Button variant="accent" onClick={say} disabled={!ready || wrong.includes(said)}>
-              Say so
-            </Button>
             <span className={styles.tries} role="img" aria-label={left === 1 ? '1 try left' : `${left} tries left`} data-tries={left}>
               {Array.from({ length: choice.tries }, (_, i) => (
                 <span key={i} className={styles.pip} data-spent={i >= left || undefined} />
               ))}
             </span>
+            <Button variant="accent" onClick={say} disabled={!ready || wrong.includes(said)}>
+              Say so
+            </Button>
           </div>
           <p className={page.line} aria-live="polite" role="status">
             {msg}

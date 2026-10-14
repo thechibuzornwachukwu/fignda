@@ -38,11 +38,12 @@
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
-/* A small thing is still a thumb's width to tap: the hit area grows round it to 40 at least, the drawing does not. */
+/* A small thing is still a fingertip wide to tap: the hit area grows round it to 32 at least, the drawing does not.
+   No more, so it never covers the middle of the thing beside it. */
 .thing::after {
   content: '';
   position: absolute;
-  inset: min(0px, calc(50% - var(--space-5)));
+  inset: min(0px, calc(50% - var(--space-4)));
 }
 .thing:focus-visible {
   outline: var(--space-0h) solid var(--fg);

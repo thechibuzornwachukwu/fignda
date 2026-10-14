@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import pools from '../../data/copy.json';
-import { accountStars, accountThatStands, chapterProgress, checkChapter, claimPick, claimStars, quarterOf, SCENE_H, SCENE_W, sweepHint, sweepResult, trailOf, trailStars, trailWrongs, LINEUP_TRIES, lineupStars, NAME_MAX, pickStep, pickWrongs, stepPuzzle, type Chapter } from './chapter';
+import { accountStars, accountThatStands, chapterProgress, checkChapter, claimPick, claimStars, quarterOf, SCENE_H, SCENE_W, sweepHint, sweepResult, tornOf, tornStars, tornWrongs, trailOf, trailStars, trailWrongs, LINEUP_TRIES, lineupStars, NAME_MAX, pickStep, pickWrongs, stepPuzzle, type Chapter } from './chapter';
 import { buildHiddenWords } from './hiddenWords';
 import { buildMirror } from './mirror';
 import { buildSums } from './sums';
@@ -274,7 +274,7 @@ describe('which account fits', () => {
   it('every written chapter is open to players, in the order of the casebook', async () => {
     const { chapters } = await import('../games/chapters');
     expect(files.some((f) => read(f).draft)).toBe(false);
-    expect(chapters.map((c) => c.id)).toEqual(['the-long-spoon', 'the-open-box', 'the-early-bus', 'the-year-that-is-missing', 'the-light-in-the-hall', 'the-2-signs']);
+    expect(chapters.map((c) => c.id)).toEqual(['the-long-spoon', 'the-open-box', 'the-early-bus', 'the-year-that-is-missing', 'the-light-in-the-hall', 'the-2-signs', 'the-other-spoon']);
   });
 
   it('a case closes on its last step and nowhere else', () => {
@@ -431,9 +431,9 @@ describe('sweep the room', () => {
     expect(stepPuzzle(c, 1)).toBeNull();
   });
 
-  it('the game shows the same drawing the sketch holds', () => {
-    const sketch = readFileSync('design/sketches/the-hall.html', 'utf8').match(/<svg[\s\S]*<\/svg>/)![0];
-    expect(readFileSync('src/scenes/the-hall.svg', 'utf8')).toContain(sketch);
+  it.each(['the-hall', 'the-sale-room'])('the game shows the same %s the sketch holds', (scene) => {
+    const sketch = readFileSync(`design/sketches/${scene}.html`, 'utf8').match(/<svg[\s\S]*<\/svg>/)![0];
+    expect(readFileSync(`src/scenes/${scene}.svg`, 'utf8')).toContain(sketch);
   });
 
   it('a tap on evidence is found, a tap on the room is a wrong one, and each thing is tapped once', () => {
@@ -469,3 +469,37 @@ describe('sweep the room', () => {
     expect(checkChapter(f, roles)).toContain('step 2: only a "sweep the room" step has a room');
   });
 });
+
+describe('the torn page', () => {
+  const spoon2 = (): Chapter => read('the-other-spoon.json');
+
+  it('tears every line near its middle, hands the right halves back out of order, and puts each back whole', () => {
+    const c = spoon2();
+    const t = tornOf(c, 2)!;
+    expect(c.steps[1]!.method).toBe('torn');
+    expect(t.lefts).toHaveLength(4);
+    t.lefts.forEach((l, k) => expect(l + t.rights[t.order[k]!]).toBe(c.steps[1]!.page![k]));
+    expect(t.order).not.toEqual([0, 1, 2, 3]);
+    expect(tornOf(c, 2)).toEqual(t);
+    expect(t.edges.every((e) => e.length === 5 && e.every((n) => n >= 0 && n <= 3))).toBe(true);
+    expect(stepPuzzle(c, 2)).toBeNull();
+  });
+
+  it('a line gets 1 pick, and a wrong half costs a star and nothing else', () => {
+    const t = tornOf(spoon2(), 2)!;
+    expect(tornWrongs(t, t.order)).toBe(0);
+    expect(tornWrongs(t, t.order.map((p) => (p + 1) % 4))).toBe(4);
+    for (const picks of [[], t.order.slice(1), [...t.order, 0], [9, 0, 1, 2]]) expect(tornWrongs(t, picks)).toBe(-1);
+    expect([0, 1, 2].map(tornStars)).toEqual([3, 2, 1]);
+  });
+
+  it('a torn page has 3 to 6 lines that can be torn and read, and only this method has one', () => {
+    const c = spoon2();
+    c.steps[1]!.page = ['Too short', 'Lot 20, entered on Tuesday at 10'];
+    expect(checkChapter(c, roles)).toContain('step 2: a torn page has 3 to 6 lines of 10 to 40 letters');
+    const d = spoon2();
+    d.steps[0]!.page = d.steps[1]!.page;
+    expect(checkChapter(d, roles)).toContain('step 1: only a "torn page" step has a page');
+  });
+});
+

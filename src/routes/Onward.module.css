@@ -1,0 +1,35 @@
+/* The way on: replay at the left, the next place at the right. */
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  width: 100%;
+}
+.again {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--space-12);
+  height: var(--space-12);
+  margin: 0 auto 0 0;
+  padding: 0;
+  border: 1px solid var(--line-3);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  color: var(--fg);
+  cursor: pointer;
+}
+.again:hover {
+  background: var(--surface-2);
+}
+.again:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+/* On a phone the way on fills the row beside the replay button. */
+@media (max-width: 760px) {
+  .on {
+    flex: 1 1 auto;
+  }
+}

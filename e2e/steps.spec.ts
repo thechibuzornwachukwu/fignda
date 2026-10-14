@@ -139,7 +139,7 @@ test('half way through, the landing page and Cases say carry on, and a closed ca
   await expect(page.locator('[data-chapter="the-open-box"]').getByRole('link', { name: 'Open the brief' })).toHaveAttribute('href', '/case/the-open-box');
   await page.evaluate(() => {
     const all = { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3 };
-    localStorage.setItem('gazecraft-chapters', JSON.stringify({ 'the-long-spoon': all, 'the-open-box': all, 'the-early-bus': all, 'the-year-that-is-missing': all, 'the-light-in-the-hall': all, 'the-2-signs': all }));
+    localStorage.setItem('gazecraft-chapters', JSON.stringify({ 'the-long-spoon': all, 'the-open-box': all, 'the-early-bus': all, 'the-year-that-is-missing': all, 'the-light-in-the-hall': all, 'the-2-signs': all, 'the-other-spoon': all }));
   });
   await page.goto('/play');
   await expect(page.locator('[data-chapter]')).toHaveCount(0);
@@ -245,8 +245,8 @@ test('Cases is the casebook: closed files fold, the open one leads in, and pract
   await page.goto('/play');
   await expect(page.getByRole('heading', { level: 2, name: 'Lantern Row' })).toBeVisible();
   await expect(page.locator('[data-file="the-long-spoon"]')).toHaveAttribute('data-state', 'closed');
-  await expect(page.locator('[data-file][data-state="locked"]')).toHaveCount(4);
-  await expect(page.locator('[data-next-file]')).toContainText('Case 7');
+  await expect(page.locator('[data-file][data-state="locked"]')).toHaveCount(5);
+  await expect(page.locator('[data-next-file]')).toContainText('Case 8');
   await expect(page.getByRole('heading', { level: 2, name: 'Practice' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   // A closed case can be worked cold: its own stars, an empty board, and no tip-off.
@@ -268,7 +268,7 @@ test('the interlude opens once case 4 is closed, and is 1 board', async ({ page 
   await page.getByRole('button', { name: "I'm done" }).click();
   await expect(page.locator('[data-fact]')).toContainText('Hall. Glow. Key. Dark.');
   await page.getByRole('link', { name: 'Back to cases' }).click();
-  await expect(page.locator('[data-interlude]')).toHaveAttribute('data-state', 'read');
+  await expect(page.locator('[data-interlude="the-bookmark"]')).toHaveAttribute('data-state', 'read');
 });
 
 test('the missing step: the thing that fits fills the gap', async ({ page }) => {
@@ -306,4 +306,21 @@ test('sweep the room: tap what matters in the drawn hall, and a tip-off rings a 
   await expect(page.locator('[data-fact]')).toContainText('Nobody walks through walls');
   await expect(page.getByRole('img', { name: '2 of 3 stars' })).toBeVisible();
   await expect(page.getByRole('link', { name: "Go to the caretaker's desk" })).toHaveAttribute('href', '/case/the-light-in-the-hall/2');
+});
+
+test('the torn page: each right half is set against its line, and the page reads whole', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 700 });
+  const done = { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3 };
+  await seedCases(page, { 'the-long-spoon': done, 'the-open-box': done, 'the-early-bus': done, 'the-year-that-is-missing': done, 'the-light-in-the-hall': done, 'the-2-signs': done, 'the-other-spoon': { 1: 3 } });
+  await page.goto('/case/the-other-spoon/2');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('The sale book');
+  await expect(page.locator('[data-line]')).toHaveCount(4);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  // Set each line by its sense: the half that finishes it.
+  for (const end of ['on Tuesday at 10', 'Long Spoon', 'class, 14 pupils', 'kiln fund']) {
+    await page.locator('[data-half]', { hasText: end.slice(-8) }).first().click();
+  }
+  await expect(page.locator('[data-torn="done"]')).toBeVisible();
+  await expect(page.locator('[data-fact]')).toContainText('It is the first entry for lot 20');
+  await expect(page.getByRole('link', { name: 'Go to the art room' })).toHaveAttribute('href', '/case/the-other-spoon/3');
 });

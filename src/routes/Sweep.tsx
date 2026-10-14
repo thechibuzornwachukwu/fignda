@@ -1,6 +1,5 @@
 import { Check, X } from 'lucide-react';
 import { useMemo, useState, type CSSProperties } from 'react';
-import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
 import { MobileBar } from '../components/MobileBar';
 import { Skeleton, SkeletonGroup } from '../components/Skeleton';
@@ -18,6 +17,7 @@ import { markGuestPlayed, playKey } from '../lib/guestLimit';
 import { markPlayedToday } from '../lib/playDays';
 import { SCENES } from '../scenes';
 import page from './Step.module.css';
+import { Onward } from './Onward';
 import { Marks } from './StepMarks';
 import { wayOn } from './stepWay';
 import styles from './Sweep.module.css';
@@ -101,12 +101,7 @@ export function Sweep({ chapter, at, solved }: { chapter: Chapter; at: number; s
               {step.lead}
             </p>
           )}
-          <div className={page.actions}>
-            <Button variant="accent" to={`${base}/${at + 1}`}>
-              {wayOn(chapter, at)}
-            </Button>
-            <TextLink onClick={again}>Play it again</TextLink>
-          </div>
+          <Onward to={`${base}/${at + 1}`} label={wayOn(chapter, at)} stars={best} onAgain={again} />
         </div>
       )}
 

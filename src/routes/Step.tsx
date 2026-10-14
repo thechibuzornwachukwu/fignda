@@ -1,6 +1,5 @@
 import { useEffect, useId, useMemo, useState } from 'react';
 import { Navigate, useLocation, useParams } from 'react-router-dom';
-import { Button } from '../components/Button';
 import { CaseBoard } from '../components/CaseBoard';
 import { GuestWall } from '../components/GuestWall';
 import { MobileBar } from '../components/MobileBar';
@@ -30,8 +29,10 @@ import { Chain } from './Chain';
 import { Claim } from './Claim';
 import { LineUp } from './LineUp';
 import styles from './Step.module.css';
+import { Onward } from './Onward';
 import { Marks } from './StepMarks';
 import { Sweep } from './Sweep';
+import { TornPage } from './TornPage';
 import { wayOn } from './stepWay';
 import { Trail } from './Trail';
 
@@ -76,6 +77,7 @@ export function Step() {
 
   if (step.method === 'line-up') return <LineUp chapter={chapter} progress={progress} />;
   if (step.method === 'accounts') return <Accounts chapter={chapter} progress={progress} />;
+  if (step.method === 'torn') return <TornPage key={`${chapter.id}~${at}`} chapter={chapter} at={at} solved={progress.solved} />;
   if (step.method === 'sweep') return <Sweep key={`${chapter.id}~${at}`} chapter={chapter} at={at} solved={progress.solved} />;
   if (step.method === 'chain') return <Chain key={`${chapter.id}~${at}`} chapter={chapter} at={at} solved={progress.solved} />;
   if (step.method === 'trail') return <Trail key={`${chapter.id}~${at}`} chapter={chapter} at={at} solved={progress.solved} />;
@@ -194,12 +196,7 @@ export function Play({ chapter, at, def, solved, alone }: { chapter: Chapter; at
               {step.lead}
             </p>
           )}
-          <div className={styles.actions}>
-            <Button variant="accent" to={alone?.on ?? `${base}/${at + 1}`}>
-              {alone?.onLabel ?? wayOn(chapter, at)}
-            </Button>
-            <TextLink onClick={g.replay}>Play it again</TextLink>
-          </div>
+          <Onward to={alone?.on ?? `${base}/${at + 1}`} label={alone?.onLabel ?? wayOn(chapter, at)} stars={best} onAgain={g.replay} />
           {askLook && (
             <p className={styles.line} data-look-ask>
               {lookLine} <TextLink to={`/welcome?from=${encodeURIComponent(pathname)}`}>Choose your look</TextLink>

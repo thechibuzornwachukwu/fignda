@@ -2,5 +2,6 @@
 // every room shares, and copied here as the svg the game shows. A test keeps the 2 the same.
 
 import hall from './the-hall.svg';
+import saleRoom from './the-sale-room.svg';
 
-export const SCENES: Readonly<Record<string, string>> = { 'the-hall': hall };
+export const SCENES: Readonly<Record<string, string>> = { 'the-hall': hall, 'the-sale-room': saleRoom };

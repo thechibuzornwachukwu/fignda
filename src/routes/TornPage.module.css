@@ -1,0 +1,72 @@
+/* The page: a sheet of the sale book, each line a strip torn top to bottom. */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: var(--space-4) var(--space-3);
+  list-style: none;
+  background: var(--paper);
+  box-shadow: 0 var(--ledge) 0 var(--board-edge);
+}
+.line {
+  display: flex;
+  align-items: stretch;
+  min-height: var(--space-10);
+}
+.left,
+.right {
+  composes: small from '../styles/type.module.css';
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: var(--space-10);
+  color: var(--paper-ink);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  white-space: pre;
+}
+.left {
+  justify-content: flex-end;
+  padding: var(--space-1) var(--space-4) var(--space-1) var(--space-2);
+  background: var(--photo);
+}
+.right {
+  padding: var(--space-1) var(--space-2) var(--space-1) var(--space-4);
+  background: var(--photo);
+}
+/* On the page the right half sits over the left by the depth of the tear, so the 2 edges close up. */
+.line .right {
+  margin-left: calc(var(--space-1) * -3);
+}
+/* Where the next half goes: an empty strip, ringed while it is the line that is open. */
+.gap {
+  flex: 1 1 auto;
+  min-height: var(--space-10);
+  border: 2px dashed var(--line-3);
+  border-radius: var(--radius-xs);
+}
+.line[data-state='open'] .gap {
+  border-color: var(--paper-ink);
+}
+/* A line set wrong first: the right half is in, and the line is marked. */
+.line[data-state='mended'] .right {
+  box-shadow: inset 0 calc(var(--space-0h) * -1) 0 var(--miss);
+}
+/* The pile of halves still to set, each a button the size of its strip. */
+.pile {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pile button {
+  margin: 0;
+  border: 0;
+  box-shadow: 0 var(--ledge) 0 var(--board-edge);
+  cursor: pointer;
+}

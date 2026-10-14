@@ -77,7 +77,7 @@ Decided on 13 Oct 2026, by the owner's leave ("make the right choices"). Each ca
 - The cast returns. The 14 characters the game can draw live on Lantern Row. A suspect cleared in 1 case can be a witness in the next and a suspect again later, so a player comes to know the street. Nobody is the culprit twice in a casebook.
 - The pace is the player's. Every case that is written is open, in order, and nothing waits for a date. A player may close a case in an evening or the whole casebook in 3 days, with tip-offs or without, and that is a good outcome, never a problem to prevent. No timer, no daily cap, no wait between cases, as Duolingo's path is all there and a learner goes as fast as they like.
 - A fortnight is how fast we write, not how fast anybody plays. We expect a step or 2 a day, which is a case in about 4 days and the casebook in about 5 weeks, and we plan for a player who goes 3 times that fast.
-- So casebook 1 opens as the game only when 4 of its 8 cases are written. Until then The long spoon is 1 case beside the packs, as it is today. After that we add 1 a fortnight, and a date is given only for a case already written and checked.
+- Casebook 1 is the game: 7 of its 8 cases are written and open. A date is given only for a case already written and checked.
 - What a player finds at the end of what is written, so the game never just stops: (1) cold cases: any closed case again with no tip-offs, for a gold seal; (2) practice: the drills; (3) a seasonal case, when one is open; (4) the next file on the path, closed, with "Tell me when it opens" and no date unless it is written. Their run goes on: a step of a cold case or a drill counts as a day.
 - Nothing bought makes a case faster or easier. A tip-off costs points earned by playing, and points are never sold for it (Revenue: never for sale). What a player can buy is how their detective and their pet look.
 - Art never blocks the path. Case 5 needs the first drawn room. If the room is not ready, case 6 is released in its place and case 5 follows: both are written to stand in either slot.
@@ -94,12 +94,12 @@ Casebook 1: Lantern Row. The premise of each case is 1 line and is where its wri
 | | Interlude: The bookmark (written) | | | | A message to the Open Eye, found in the returned book | |
 | 5 | The light in the hall (written) | What is it really | 4 | Sweep the room | A light moves about the locked hall at night, and the street has decided it is haunted | Whoever it was had a key nobody signed for |
 | 6 | The 2 signs (written) | Who did it | 2 | The missing step | 2 stalls wake to each other's signs on market day, and each owner blames the other | Both signs were repainted by the same hand |
-| 7 | The other spoon | Prove it | 1 | The torn page | A second Long Spoon turns up for sale, with all 20 names on it | The seller was sent the list of names by post |
-| | Interlude | | | | The envelope the list came in | |
+| 7 | The other spoon (written) | Prove it | 1 | The torn page | A second Long Spoon turns up for sale, with all 20 names on it | The seller was sent the list of names by post |
+| | Interlude: The envelope (written) | | | | The envelope the list came in | |
 | 8 | Who carries the cards | Who did it | 5 | None: every method so far | 7 cases, 7 cards with an open eye. 1 person on Lantern Row has been handing them out | The page from 2011 is read. The Open Eye itself is not named |
 
 Suspects run 4, 2, 1, 3, 4, 2, 1, 5, so no 2 neighbours match, and the shapes run through all 5 before any repeats twice.
-What this asks of the build, in order: cases 1 to 6 and the first interlude are written and open, and Sweep the room is built on the drawn hall. Next: case 7 with The torn page (the sale room is drawn), the second interlude and case 8. Beside them: the Open Eye file (set 1e), a drill with no culprit and no unmasking (set 4c), and cold cases and interludes kept on the account.
+What this asks of the build, in order: cases 1 to 7 and both interludes are written and open. Next: case 8, Who carries the cards, which closes Lantern Row with every method so far and reads the 2011 page. Beside it: the Open Eye file (set 1e), a drill with no culprit and no unmasking (set 4c), cold cases and interludes kept on the account, and badges worth unlocking (set 5e).
 
 ## Screens: one job each
 
@@ -109,8 +109,8 @@ Navigation, on a phone: no bar across the top. Each screen is its title, one act
 
 | Screen | Its one job | Main action | State |
 |---|---|---|---|
-| Play (dock) | Start the next thing | Today's daily, then the next clue | Built |
-| Cases `/play` | Show where you are in the case | The next clue on the path | Built: daily card, then the path. Closed cases fold into one row |
+| Play (dock) | Start the next thing | The case that is open, then the next drill | Built |
+| Cases `/play` | Show where you are in the casebook | The case that is open | Built: the casebook, a file a case, then practice at the foot |
 | Puzzle, clue | Find the words | Done | Built |
 | Result | Say what happened and lead on | Next clue, or Share | Built: a popup at the finish of a clue, then one line and 2 buttons, the rest behind "More" |
 | Unmasking | Name the culprit | Pick a letter | Built: the last clue of a case, made to be won. A line about the culprit, first letters given, a bank of letters, a hint. 6 tries, then the mask comes off either way |
@@ -154,6 +154,7 @@ Never for sale: hints, extra tries, time, or anything that touches a score; stre
 - [ ] Decide: what is sold to a church, a school or a wedding now. The price list sells a puzzle on the buyer's subject, which is a word hunt. It can stay that (sold as a drill, or a message hidden for the guests) or become a short case written for them, which costs more to make.
 - [ ] Decide: the 25 packs, one by one (set 4d). Suggested: chapters for the first 3 on the path and the 4 Naija packs, practice for the rest, and retire what reads badly.
 - [ ] Read The long spoon (`design/stories/the-long-spoon.json`) and say what is wrong with it before 1c is built on it. It is told on Market day (`fruits`): confirm or move it.
+- [ ] Read The other spoon and The envelope (`design/stories`). In case 7 the copy is Bea's art class, entered as the real thing to see if anyone could tell. Confirm or change.
 - [ ] Read The light in the hall and The 2 signs (`design/stories`). In case 5 the light is Ines, the usher, learning a song for her mother's 80th. In case 6 the culprit is Tomas, the gardener, for a rosette, and he did not hold the brush.
 - [ ] Read The year that is missing and The bookmark (`design/stories`) as a player would. The culprit is Noor, the librarian, and nothing was stolen: she shelved it under another cover. Confirm or change.
 - [ ] Read The open box and The early bus (`design/stories`) as a player would, and say what is wrong. In The early bus the driver is Kwame, his reason is a daughter's flight, and the evidence names him before the end, which a "prove it" now allows: confirm or change each.
@@ -190,7 +191,7 @@ Build in this order. The aim of 1c to 1g is one thing: The long spoon played fro
 - [ ] **Set 1e. The Open Eye file.** Every message to the Open Eye that a player has read is filed in one place, and the file grows across cases: a case's notice, and each interlude with what it says. Interludes are built (`SPEC.md` section 6, Interlude). The file is not.
 - [ ] **Set 1g. 5 people play it.** The long spoon is played by 5 people who have never seen the game, and what stops them is fixed. This no longer holds the second case back: the owner has asked for cases to be the game now, and 1 case is not a game.
 - [ ] **Set 1h. Call for backup.** On any step: a tip-off from the pet, a friend called into the step, or the case's 1 favour.
-- [ ] **Set 1i. New methods,** one a set, engine first, in this order: spot what is off (a drawn scene, the first method of set 1i-c), the torn page, 4 pictures and 1 word (real photos, with the photo store and the credits page it needs), invisible ink, rub the pad, ink not word, what stood here. No clock on any of them. The rest are on the canvas sheet. "Bigger tag" is left out: nothing in a real case asks for it. The long spoon uses 3 methods because 3 are built. Each new one is first used in a chapter, never shipped by itself.
+- [ ] **Set 1i. New methods,** one a set, engine first, in this order: 4 pictures and 1 word (real photos, with the photo store and the credits page it needs), invisible ink, rub the pad, ink not word, what stood here. Sweep the room (case 5) and the torn page (case 7) are built. No clock on any of them. The rest are on the canvas sheet. "Bigger tag" is left out: nothing in a real case asks for it. The long spoon uses 3 methods because 3 are built. Each new one is first used in a chapter, never shipped by itself.
 - [ ] **Set 1i-b. Walk it back, the room** (the memory palace, or method of loci). The trail is built (`SPEC.md` section 6). Left: the room, seen once. The physical reason: the scene was tidied before anybody photographed it, so the only record is the walk the detective took through it. The player walks a drawn room in a fixed order (door, shelf, window, table) with 1 thing at each stop, turns away when they choose, and then puts each thing back where it stood, or taps the stop where something is now missing or new. What was moved is the lead. A room holds 4 to 6 things, and a tip-off puts 1 back. No clock. On screen it is "Walk it back", never "memory palace", "memory" or "recall". Needs the first drawn room.
 
 - [ ] **Set 1i-c. Search the scene.** Finding the clues, not being handed them. A drawn room, no clock, and a tip-off points at a quarter of the room, never at the thing. Built one at a time, engine first:
@@ -215,8 +216,7 @@ Build in this order. The aim of 1c to 1g is one thing: The long spoon played fro
 - Rules for both sets. No clock on any of them. Nobody is harmed in a scene: no blood, no weapons, no body, and a room is searched for a thing that was taken or hidden. A scenario is never a trick: every fact a method uses is on the board first. A wrong answer costs a star and never the lead.
 - Built: Which account fits (case 2), Could it be done (case 3) and The missing step (case 6), in `SPEC.md` section 6. Sweep the room is built (case 5). The rest of set 1i-c follows, each on a room already drawn.
 - `checkChapter` learns each method as it is built, and then asks a chapter for all 3 kinds of work.
-- [ ] **Set 1j. The other 4 shapes,** one written chapter each, each plotted backward and passed by `checkChapter`, which learns each shape's ending as it comes.
-- Later, once those are being played: Liar, Relay, Number series, Bury it.
+- Later, once the 5 shapes are being played: Liar, Relay, Number series, Bury it.
 
 ### 2. Sell now
 

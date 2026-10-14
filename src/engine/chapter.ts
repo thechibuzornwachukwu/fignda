@@ -11,7 +11,7 @@ export const SHAPES = ['who-did-it', 'prove-it', 'what-is-it-really', 'where-is-
 export type Shape = (typeof SHAPES)[number];
 
 /** The methods a step can use today. A new method joins this list in the set that builds its engine. */
-export const METHODS = ['hidden-words', 'mirror', 'buried-sums', 'unmask', 'line-up', 'accounts', 'claim', 'trail', 'chain', 'sweep'] as const;
+export const METHODS = ['hidden-words', 'mirror', 'buried-sums', 'unmask', 'line-up', 'accounts', 'claim', 'trail', 'chain', 'sweep', 'torn'] as const;
 export type Method = (typeof METHODS)[number];
 
 /** The methods a case can close on. A case closes on its last step, and only there. */
@@ -128,6 +128,8 @@ export type Step = {
   chain?: Chain;
   /** The room searched, on a "sweep the room" step. */
   room?: Room;
+  /** The page, line by line, on a "torn page" step. The engine tears it. */
+  page?: string[];
   /** What the step leaves behind once it is done. */
   fact: string;
   /** The fact as a few words, pinned to the board when the step is solved. Every step but the last has one. */
@@ -282,6 +284,13 @@ export function checkChapter(raw: unknown, roles: readonly string[]): string[] {
         if (things.some((t) => !inside(t.box))) out.push(`${at}: every thing sits inside the drawing`);
         if (new Set(things.map((t) => t.name)).size !== things.length) out.push(`${at}: 2 things in the room share a name`);
       }
+    }
+    if (s.method === 'torn' || s.page != null) {
+      const lines = Array.isArray(s.page) ? s.page : [];
+      if (s.method !== 'torn') out.push(`${at}: only a "torn page" step has a page`);
+      else if (lines.length < TORN_MIN || lines.length > TORN_MAX || lines.some((l) => text(l).length < TORN_LINE_MIN || text(l).length > TORN_LINE_MAX)) out.push(`${at}: a torn page has ${TORN_MIN} to ${TORN_MAX} lines of ${TORN_LINE_MIN} to ${TORN_LINE_MAX} letters`);
+      else if (new Set(tornOf({ id: text(c.id), steps }, i + 1)!.rights).size !== lines.length) out.push(`${at}: 2 torn halves read the same`);
+      if (lines.some((l) => /[\u2014!]/.test(l))) out.push(`${at}: a torn page breaks the copy rules`);
     }
     if (s.method === 'trail' && !trailOf({ id: text(c.id), steps }, i + 1)) out.push(`${at}: a trail needs ${TRAIL_MIN} finds or more behind it, each at a place of its own`);
     // Written evidence is checked by the engine that will grade it: every word is there, and no other.
@@ -486,4 +495,45 @@ export function sweepHint(room: Room, found: ReadonlySet<number>): number {
   const i = room.things.findIndex((t, k) => t.evidence && !found.has(k));
   return i < 0 ? -1 : quarterOf(room.things[i]!.box);
 }
+
+/** A torn page: 3 to 6 lines, each long enough to tear and short enough to read on a phone. */
+export const TORN_MIN = 3;
+export const TORN_MAX = 6;
+export const TORN_LINE_MIN = 10;
+export const TORN_LINE_MAX = 40;
+
+/**
+ * The torn page (set 1i): a page torn top to bottom, and the right halves handed back out of order to be set
+ * against the left. Each line tears near its middle, at a place the chapter's id and the line choose, so it is
+ * the same on every device. `edges` is the shape of each tear, 5 offsets from 0 to 3, the same on both halves,
+ * so a tear can be matched by its shape as well as by its sense. `rights` are in the order they are handed out:
+ * `order[k]` is the right half that belongs to line k.
+ */
+export type Torn = { lefts: string[]; rights: string[]; order: number[]; edges: number[][] };
+
+export function tornOf(chapter: Pick<Chapter, 'id' | 'steps'>, n: number): Torn | null {
+  const lines = chapter.steps[n - 1]?.page;
+  if (!Array.isArray(lines) || lines.length === 0) return null;
+  const seed = (k: number, salt: string) => hash(`${chapter.id}~${n}~${k}~${salt}`);
+  const cut = lines.map((l, k) => Math.max(3, Math.min(l.length - 3, Math.floor(l.length / 2) + (seed(k, 'cut') % 5) - 2)));
+  const shuffled = lines.map((_, k) => k).sort((a, b) => seed(a, 'deal') - seed(b, 'deal'));
+  // Handed back in the order of the page, it would be no test: turn the hand by 1.
+  if (shuffled.every((v, i) => v === i)) shuffled.push(shuffled.shift()!);
+  const order = lines.map((_, k) => shuffled.indexOf(k));
+  return {
+    lefts: lines.map((l, k) => l.slice(0, cut[k])),
+    rights: shuffled.map((k) => lines[k]!.slice(cut[k])),
+    order,
+    edges: lines.map((_, k) => [0, 1, 2, 3, 4].map((j) => seed(k, `edge${j}`) % 4)),
+  };
+}
+
+/** The lines set wrong, from the right half picked for each line in order. A line gets 1 pick. -1 for picks nobody could have made. */
+export function tornWrongs(torn: Torn, picks: readonly number[]): number {
+  if (picks.length !== torn.lefts.length || picks.some((p) => !Number.isInteger(p) || p < 0 || p >= torn.rights.length)) return -1;
+  return picks.filter((p, k) => p !== torn.order[k]).length;
+}
+
+/** Stars for a torn page: 3 with every line whole, 2 with 1 set wrong, else 1. */
+export const tornStars = trailStars;
 

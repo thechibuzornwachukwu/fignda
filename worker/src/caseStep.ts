@@ -4,11 +4,12 @@
 
 import twoSigns from '../../design/stories/the-2-signs.json';
 import lightInTheHall from '../../design/stories/the-light-in-the-hall.json';
+import otherSpoon from '../../design/stories/the-other-spoon.json';
 import earlyBus from '../../design/stories/the-early-bus.json';
 import longSpoon from '../../design/stories/the-long-spoon.json';
 import openBox from '../../design/stories/the-open-box.json';
 import missingYear from '../../design/stories/the-year-that-is-missing.json';
-import { LINEUP_TRIES, lineupStars, pickStep, pickWrongs, stepPuzzle, sweepResult, trailOf, trailStars, trailWrongs, type Chapter } from '../../src/engine/chapter';
+import { LINEUP_TRIES, lineupStars, pickStep, pickWrongs, stepPuzzle, sweepResult, tornOf, tornStars, tornWrongs, trailOf, trailStars, trailWrongs, type Chapter } from '../../src/engine/chapter';
 import { EVALUATE } from '../../src/engine/evaluate';
 import { buildHiddenWords } from '../../src/engine/hiddenWords';
 import { buildMirror } from '../../src/engine/mirror';
@@ -17,7 +18,7 @@ import { buildSums } from '../../src/engine/sums';
 import { replay, type PlayLog } from './replay';
 
 /** Every written chapter, by id. A new file in `design/stories` is added here: a test fails until it is. */
-export const CHAPTERS: Readonly<Record<string, Chapter>> = Object.fromEntries(([longSpoon, openBox, earlyBus, missingYear, lightInTheHall, twoSigns] as unknown as Chapter[]).map((c) => [c.id, c]));
+export const CHAPTERS: Readonly<Record<string, Chapter>> = Object.fromEntries(([longSpoon, openBox, earlyBus, missingYear, lightInTheHall, twoSigns, otherSpoon] as unknown as Chapter[]).map((c) => [c.id, c]));
 
 export type StepCheck =
   | { ok: true; stars: 1 | 2 | 3; score: number; found: number; total: number; hints: number; secs: number }
@@ -51,6 +52,13 @@ export function checkStep(chapter: Chapter, step: number, log: PlayLog, named?: 
     if (!r || named) return { ok: false, status: 400, reason: 'bad_request' };
     const stars = starsFor({ finished: true, found: r.found, total: r.total, hints: log.hints.length, wrongs: r.wrongs }) as 1 | 2 | 3;
     return { ok: true, stars, score: 0, found: r.found, total: r.total, hints: log.hints.length, secs: 0 };
+  }
+
+  if (s.method === 'torn') {
+    const torn = tornOf(chapter, step);
+    const wrong = torn ? tornWrongs(torn, picked ?? []) : -1;
+    if (!torn || wrong < 0 || named) return { ok: false, status: 400, reason: 'bad_request' };
+    return { ok: true, stars: tornStars(wrong), score: 0, found: torn.lefts.length - wrong, total: torn.lefts.length, hints: 0, secs: 0 };
   }
 
   if (s.method === 'trail') {

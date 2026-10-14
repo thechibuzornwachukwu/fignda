@@ -1,6 +1,5 @@
 import { Check } from 'lucide-react';
 import { useState } from 'react';
-import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
 import { Stars } from '../components/Stars';
 import { StepResult } from '../components/StepResult';
@@ -15,6 +14,7 @@ import { markGuestPlayed, playKey } from '../lib/guestLimit';
 import { markPlayedToday } from '../lib/playDays';
 import styles from './Chain.module.css';
 import page from './Step.module.css';
+import { Onward } from './Onward';
 import { Marks } from './StepMarks';
 import { wayOn } from './stepWay';
 
@@ -88,12 +88,7 @@ export function Chain({ chapter, at, solved }: { chapter: Chapter; at: number; s
               {step.lead}
             </p>
           )}
-          <div className={page.actions}>
-            <Button variant="accent" to={`${base}/${at + 1}`}>
-              {wayOn(chapter, at)}
-            </Button>
-            <TextLink onClick={again}>Play it again</TextLink>
-          </div>
+          <Onward to={`${base}/${at + 1}`} label={wayOn(chapter, at)} stars={best} onAgain={again} />
         </div>
       )}
 
