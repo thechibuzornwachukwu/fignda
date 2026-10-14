@@ -1,0 +1,156 @@
+{
+  "id": "the-open-box",
+  "casebook": "lantern-row",
+  "number": 2,
+  "shape": "nothing-was-taken",
+  "title": "The open box",
+  "item": {
+    "name": "The ballot box",
+    "line": "A biscuit tin with a slot cut in the lid and the committee's wax seal across it. It holds the street's votes on whether the 19th name stays on the Long Spoon."
+  },
+  "place": "The committee room",
+  "brief": [
+    "Last night Lantern Row voted on the name burned back onto the Long Spoon. The box was sealed at 9 pm, in front of the committee.",
+    "At 8 this morning the seal is broken and the lid sits loose. The count is at noon.",
+    "The secretary is sure somebody has been at the votes. 2 people had reason to be in the room after it was locked.",
+    "Before anybody is accused: was anything taken at all?"
+  ],
+  "board": {
+    "pins": [
+      {
+        "kind": "item",
+        "label": "the ballot box"
+      },
+      {
+        "kind": "note",
+        "title": "Committee room",
+        "lines": [
+          "Sealed at 9 pm.",
+          "Seal broken by 8 am.",
+          "Count at noon."
+        ]
+      },
+      {
+        "kind": "faces"
+      }
+    ],
+    "scrawl": [
+      "A broken seal.",
+      "Is anything gone?"
+    ]
+  },
+  "suspects": [
+    {
+      "who": "the usher",
+      "name": "Ines",
+      "look": "feminine",
+      "line": "Kept the door for the vote and locked the room after it.",
+      "says": "I locked up at 9 and went straight home."
+    },
+    {
+      "who": "the choir leader",
+      "name": "Otto",
+      "look": "masculine",
+      "line": "Rehearses in the hall. His choir sang at a wedding that evening.",
+      "says": "I was at the wedding until late. Ask anybody who danced."
+    }
+  ],
+  "culprit": "the choir leader",
+  "steps": [
+    {
+      "place": "The committee room",
+      "method": "buried-sums",
+      "thing": "The roll of voters and the box itself. Everybody who voted signed the roll, and every card in the box can be counted without being read.",
+      "fact": "41 names are on the roll and 41 cards are in the box. Whatever happened to the seal, no vote is missing.",
+      "pin": "41 names, 41 cards",
+      "lead": "Nothing is gone. So why open it? The secretary wrote the tally down at the close and blotted it. Her blotter is still on the desk.",
+      "to": "The secretary's desk"
+    },
+    {
+      "place": "The secretary's desk",
+      "method": "mirror",
+      "thing": "The blotter. The tally sheet went into the safe, but the blotter kept its wet ink, back to front.",
+      "text": ".thgie ytriht :xob eht ni yllaT .enin ,etov fo esolC",
+      "words": [
+        "nine",
+        "tally",
+        "thirty",
+        "eight"
+      ],
+      "fact": "At the close, at 9 pm, the box held 38 cards. By morning it held 41. Nothing was taken out. 3 were put in.",
+      "pin": "38 at the close, 41 now",
+      "gives": "chance",
+      "lead": "It was opened after 9, and the room was locked. Ines had key 4 and says she went straight home. The bus keeps a roll of every fare.",
+      "to": "The bus stop"
+    },
+    {
+      "place": "The bus stop",
+      "method": "buried-sums",
+      "thing": "The ticket roll from last night's buses, and the key book from the hall. Each is kept by somebody with no stake in the vote.",
+      "fact": "Ines handed key 4 in at 9.05 pm and paid her fare on the 9.10. She came back on the 9.50 for her umbrella, which is why she said nothing. The cloakroom is at the door, 2 floors below.",
+      "pin": "Key 4 handed in at 9.05",
+      "clears": "the usher",
+      "lead": "Key 4 was on its hook all night. But the caretaker's board has a label for every key in the building, and 1 more opens that room.",
+      "to": "The key board"
+    },
+    {
+      "place": "The key board",
+      "method": "hidden-words",
+      "thing": "The label strip under the hooks, punched from a label maker in 1 row with no spaces.",
+      "text": "KEYNINEMUSICCUPBOARDINTHECOMMITTEEROOMHELDBYTHECHOIR",
+      "words": [
+        "key",
+        "music",
+        "cupboard",
+        "choir"
+      ],
+      "fact": "Key 9 opens the music cupboard, and the music cupboard is inside the committee room. That key lets its holder into the room at any hour. The choir keeps it.",
+      "pin": "Key 9: the music cupboard",
+      "gives": "means",
+      "lead": "Somebody with key 9 was in the room after 9. The choir's notice for last night is still pinned by the piano, and it reads oddly.",
+      "to": "The piano"
+    },
+    {
+      "place": "The piano",
+      "method": "hidden-words",
+      "thing": "A rehearsal notice that is really a promise passed in plain sight, to 3 singers who could not stay for the vote.",
+      "text": "Bravo tenors. Please all bring both reeds and folders. Lola tends the door. Wedding at 7, back by 9.",
+      "words": [
+        "vote",
+        "seal",
+        "three",
+        "late"
+      ],
+      "fact": "3 singers signed the roll at 4 pm and left their votes sealed with their leader, because they sang at a wedding at 7. The rules allow a sealed vote handed over before the close, if it goes in the box.",
+      "pin": "3 votes, left sealed",
+      "gives": "motive",
+      "lead": "Nothing taken, 3 cards added, a second key, and a promise. 3 accounts of last night are going round the street. Only 1 can be true.",
+      "to": "The committee room, at noon"
+    },
+    {
+      "place": "The committee room, at noon",
+      "method": "accounts",
+      "thing": "3 accounts of the same night, as the street is telling it. Each piece of evidence already on the board strikes 1 of them out.",
+      "accounts": [
+        {
+          "text": "Somebody opened the box to take votes out and change the result.",
+          "struckBy": 1
+        },
+        {
+          "text": "Ines came back for more than her umbrella, and opened the box with key 4.",
+          "struckBy": 3
+        },
+        {
+          "text": "The wedding ran late. 3 votes that had been promised a place arrived after the seal, and were put in anyway.",
+          "stands": true
+        }
+      ],
+      "fact": "Chance: after the close at 9 pm. Means: key 9, to the cupboard in the room. Motive: 3 votes left in his keeping."
+    }
+  ],
+  "ending": {
+    "found": "Nothing was taken. 3 votes were put in after the seal, by the man who had promised to carry them. He broke the wax with a thumb and pressed it back, badly.",
+    "confession": "They sang so the street could have its wedding and its vote. I was not going to lose theirs to a blob of wax. I should have knocked on a door and said so.",
+    "after": "The committee counts all 41 at noon, and argues about the 3 until 1. Under the last card in the tin is one that is not a vote: a plain card with an open eye."
+  }
+}

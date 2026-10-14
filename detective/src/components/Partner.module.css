@@ -1,0 +1,7 @@
+/* A partner's portrait: a rounded square, so it never reads as a player's round avatar. */
+.partner {
+  display: block;
+  flex: none;
+  border-radius: var(--radius-xl);
+  background: var(--surface-2);
+}

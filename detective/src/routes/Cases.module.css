@@ -1,0 +1,10 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: var(--screen-top-game) 0 var(--space-12);
+}

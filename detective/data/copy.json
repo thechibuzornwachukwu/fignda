@@ -1,0 +1,261 @@
+{
+  "found": [
+    "{w}. Nice.",
+    "{w}. Got it.",
+    "There it is. {w}.",
+    "{w}. Sharp.",
+    "Yes. {w}.",
+    "{w}, spotted.",
+    "Clean find. {w}."
+  ],
+  "foundLong": [
+    "{w}. Big one.",
+    "{w}. That took eyes.",
+    "Long one. {w}."
+  ],
+  "foundQuick": [
+    "{w}. Quick.",
+    "Fast. {w}.",
+    "{w} already. Speedy."
+  ],
+  "streak": [
+    "{w}. On a roll.",
+    "{w}. {n} in a row.",
+    "{w}. Keep going."
+  ],
+  "lastOne": [
+    "{w}. One left.",
+    "{w}. Just one more."
+  ],
+  "firstFind": [
+    "{w}. First one down.",
+    "{w}. And we are off."
+  ],
+  "wrong": [
+    "Not that one",
+    "Not quite",
+    "Nope, keep looking",
+    "Not hiding there",
+    "Try another stretch"
+  ],
+  "wrongSums": [
+    "That run does not add up",
+    "Wrong total. Try another run",
+    "Not the target. Keep adding"
+  ],
+  "wrongUnmask": [
+    "Not in the name. A try gone",
+    "No. That letter is not there",
+    "Wrong letter. One try fewer"
+  ],
+  "wrongDaily": [
+    "Not that one. 10 off.",
+    "Not quite. 10 off.",
+    "Nope. 10 off."
+  ],
+  "close": [
+    "So close. Check the edges.",
+    "Almost. One letter off.",
+    "Nearly. Nudge it."
+  ],
+  "closeSums": [
+    "One digit off. Check the ends.",
+    "Nearly. One digit more or one less."
+  ],
+  "already": [
+    "Already found",
+    "Got that one",
+    "That one is yours"
+  ],
+  "hint": [
+    "One starts where the hand points",
+    "Look where the hand points",
+    "Start at the hand"
+  ],
+  "hintLongest": [
+    "The longest one left starts at the hand",
+    "Start at the hand. It is the longest left"
+  ],
+  "hintShortest": [
+    "The shortest one left starts at the hand",
+    "Start at the hand. It is the shortest left"
+  ],
+  "hintNear": [
+    "One starts close to your last find",
+    "Look near your last find. The hand is on it"
+  ],
+  "hintStill": [
+    "The hand is still on it",
+    "Same letter. One starts there",
+    "Still marked. Start at the hand"
+  ],
+  "resumed": [
+    "Back where you left it",
+    "Your finds are still here",
+    "Picked up where you stopped"
+  ],
+  "tapNext": [
+    "Now tap the last letter",
+    "Now the last letter"
+  ],
+  "tapNextSums": [
+    "Now tap the last digit",
+    "Now the last digit"
+  ],
+  "idle": [
+    "Take your time",
+    "Read it slowly",
+    "Try the long words first"
+  ],
+  "titlePerfect": [
+    "All found. Sharp eyes.",
+    "Every one. Clean sweep.",
+    "Nothing got past you."
+  ],
+  "titleGood": [
+    "Good run.",
+    "Solid finding.",
+    "Most of them. Nice."
+  ],
+  "titleLow": [
+    "Nice try.",
+    "They hid well today.",
+    "Tough one."
+  ],
+  "titleZero": [
+    "They all got away.",
+    "Next time."
+  ],
+  "waiting": [
+    "Getting it ready.",
+    "One moment.",
+    "Still working on it.",
+    "Nearly there.",
+    "This one takes a little longer.",
+    "Hang on. It is coming.",
+    "Putting the last pieces in place.",
+    "Thanks for waiting.",
+    "Not stuck. Just careful."
+  ],
+  "reveal": [
+    "{w} was hiding there."
+  ],
+  "teamFound": [
+    "{name} found {w}.",
+    "{w}, spotted by {name}.",
+    "{name} got {w}."
+  ],
+  "cleanRead": [
+    "A clean read. No tip-offs, no wrong picks.",
+    "Clean read. No tip-off, nothing wrong."
+  ],
+  "stepLocked": [
+    "That step opens when the one before it is done.",
+    "One step at a time. The one before this is still open."
+  ],
+  "stepNotCleared": [
+    "{who} is not cleared yet. 2 stars or more does it. Play it again when you like.",
+    "Not enough to clear {who}. 2 stars or more does it."
+  ],
+  "lineupSoon": [
+    "This step is not written yet. Everything you found is on the board.",
+    "Nothing to work here yet. The board has all you found."
+  ],
+  "lineupWrong": [
+    "Not {name}. Look at who is still standing.",
+    "{name} does not fit all 3. Try once more."
+  ],
+  "accountsOut": [
+    "2 have fallen. The one left is the one that stands.",
+    "Both of those fall. That leaves 1."
+  ],
+  "claimWrong": [
+    "That does not hold. Set each fact against what was said.",
+    "Not quite. Only 1 of the 2 facts settles it."
+  ],
+  "claimOut": [
+    "Out of tries. Here is how it stands.",
+    "No tries left. This is what the facts say."
+  ],
+  "sweepHint": [
+    "Look again in that corner of the room.",
+    "Something there is not where it belongs."
+  ],
+  "eyeEmpty": [
+    "Every message to the Open Eye you read is filed here. The first is in your case.",
+    "Messages passed in plain sight end up here, once you have read them."
+  ],
+  "caseLocked": [
+    "That file opens when the case before it is closed.",
+    "One case at a time. The one before this is still open."
+  ],
+  "chapterKeep": [
+    "You closed it as a guest. Sign in and it stays yours on every device.",
+    "Closed as a guest. Sign in to keep your cases."
+  ],
+  "briefMissing": [
+    "That case is not on file. The ones that are sit on the path.",
+    "Nothing is filed under that name. The path has every open case."
+  ],
+  "culpritWho": [
+    "the baker",
+    "the choir leader",
+    "the tailor",
+    "the bus driver",
+    "the librarian",
+    "the gardener",
+    "the drummer",
+    "the caretaker",
+    "the photographer",
+    "the usher",
+    "the stall owner",
+    "the coach",
+    "the art teacher",
+    "the neighbour from 2 doors down"
+  ],
+  "confession": [
+    "It was {who}. \"I hid the {secret}. It was meant to be a surprise.\"",
+    "Under the disguise: {who}. \"The {secret} was with me all along. I wanted to see who would notice.\"",
+    "It was {who}. \"Yes, I hid the {secret}. I was proud of that hiding place.\"",
+    "Unmasked: {who}. \"I took the {secret} for a joke. You were quicker than I thought.\""
+  ],
+  "unmaskOut": [
+    "Out of tries. The mask comes off anyway.",
+    "No tries left. Here is who it was."
+  ],
+  "starsOf": [
+    "{n} of 3 stars"
+  ],
+  "sayErrorCat": [
+    "Not this time.",
+    "Something slipped past me."
+  ],
+  "sayErrorDino": [
+    "I nearly had it.",
+    "That one got away from me."
+  ],
+  "sayErrorDog": [
+    "It will come. It always does.",
+    "Nothing came back yet. I am still glad you came."
+  ],
+  "sayErrorRobot": [
+    "404. I am lost.",
+    "0 results came back."
+  ],
+  "sayClosedCat": [
+    "It was there the whole time.",
+    "Closed. Signed with an X."
+  ],
+  "sayClosedDino": [
+    "We got them. I roared, quietly.",
+    "Case closed. I found the long one first."
+  ],
+  "sayClosedDog": [
+    "You closed it. I knew you would.",
+    "Every clue. What a good day."
+  ],
+  "sayClosedRobot": [
+    "1 case closed. I wrote down how you did it.",
+    "Every clue read. 0 left in this case."
+  ]
+}

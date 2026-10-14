@@ -1,0 +1,132 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-5);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: var(--screen-top-game) 0 var(--space-12);
+}
+.top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  width: 100%;
+}
+.marks {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1h);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.mark {
+  width: var(--space-2h);
+  height: var(--space-2h);
+  border-radius: var(--radius-pill);
+  box-shadow: inset 0 0 0 2px var(--line-3);
+}
+/* A records step is square. */
+.mark[data-kind='sums'] {
+  border-radius: var(--radius-xs);
+}
+/* The last step, largest. */
+.mark[data-kind='last'] {
+  width: var(--space-4);
+  height: var(--space-4);
+}
+.mark[data-state='done'] {
+  background: var(--fg);
+  box-shadow: none;
+}
+/* The step being played: longer, ringed in ink, so it reads without colour. */
+.mark[data-state='here'] {
+  width: var(--space-6);
+  background: var(--accent);
+  box-shadow: inset 0 0 0 2px var(--fg);
+}
+.title {
+  composes: gameTitle from '../styles/type.module.css';
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.thing,
+.lead {
+  composes: body from '../styles/type.module.css';
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.thing {
+  color: var(--muted);
+}
+.lead {
+  color: var(--fg);
+  font-weight: 700;
+}
+.line {
+  composes: small from '../styles/type.module.css';
+  margin: 0;
+  color: var(--muted);
+}
+.end {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-4);
+  width: 100%;
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3) var(--space-5);
+  width: 100%;
+}
+.count {
+  composes: small from '../styles/type.module.css';
+  margin-left: auto;
+  color: var(--subtle);
+  font-variant-numeric: tabular-nums;
+}
+/* The word list runs the width of the board above it. */
+.list {
+  width: 100%;
+}
+/* The pet beside the line it says. */
+.says {
+  composes: small from '../styles/type.module.css';
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--space-8);
+  margin: 0;
+  color: var(--muted);
+}
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+/* On a phone the bar under the thumb has the tip-off, done and the line, so the ones on the page go. */
+@media (max-width: 760px) {
+  .screen {
+    padding-bottom: calc(var(--mobile-bar-space) + env(safe-area-inset-bottom));
+  }
+  .actions,
+  .says {
+    display: none;
+  }
+  .end .actions {
+    display: flex;
+  }
+}

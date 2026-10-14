@@ -1,0 +1,15 @@
+name = "lantern-row-api"
+main = "src/index.ts"
+compatibility_date = "2026-09-01"
+compatibility_flags = ["nodejs_compat"]
+
+# Public settings. Secrets are NOT here: set them with
+#   npx wrangler secret put SUPABASE_SERVICE_ROLE_KEY --config worker/wrangler.toml
+# The game's own Supabase project. Not set until the owner creates it: until then sign in is off and every
+# player is a guest, with progress kept in the browser.
+[vars]
+SUPABASE_URL = ""
+# Comma separated. Only these origins are served.
+APP_ORIGINS = "https://lantern-row.pages.dev,http://localhost:5174,http://localhost:4174"
+
+# Local dev (`npm run worker:dev`) reads secrets from worker/.dev.vars (gitignored, blocked by the commit guard).

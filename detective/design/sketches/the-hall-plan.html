@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Floor plan of the hall</title>
+<style>html, body { margin: 0; background: #f3ead9; } svg { display: block; }</style>
+</head>
+<body>
+<!--
+  The hall from above, for "Walk it through" (lay a route that fits the building and the time) and "Line of sight"
+  (could a witness have seen it from where they stood). The same room as the-hall.png, from the ceiling: the stage
+  at the top, the side door on the left, the window and the piano on the right, the rows of chairs, the store room
+  behind the stage, and the alley hatch outside the back wall. Drawn without words: a plan shows what it is.
+  Same visual contract as the-hall.html. Doors are drawn with their swing, so a door that is locked can be shown
+  shut by a bar across it.
+-->
+<svg width="1200" height="900" viewBox="0 0 1200 900" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="hand" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.016" numOctaves="2" seed="5" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="3"/>
+    </filter>
+    <pattern id="boards" width="40" height="40" patternUnits="userSpaceOnUse">
+      <rect width="40" height="40" fill="#d6be96"/>
+      <line x1="0" y1="0" x2="0" y2="40" stroke="#c3a87c" stroke-width="2"/>
+    </pattern>
+  </defs>
+  <g stroke="#2a2622" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" filter="url(#hand)">
+    <!-- Outside: the alley along the back, and the hatch in the back wall -->
+    <rect x="160" y="30" width="880" height="56" fill="#e3d6bd" stroke-width="2"/>
+    <rect x="236" y="74" width="34" height="24" fill="#d0a65a"/>
+
+    <!-- The floor, inside the walls -->
+    <rect x="170" y="100" width="860" height="700" fill="url(#boards)" stroke="none"/>
+
+    <!-- The store room behind the stage, top left -->
+    <rect x="170" y="100" width="200" height="190" fill="#e9dcc3" stroke="none"/>
+    <rect x="190" y="118" width="70" height="40" fill="#7a5236"/>
+    <!-- The stage -->
+    <rect x="390" y="100" width="420" height="160" fill="#7a5236"/>
+    <path d="M390,240 C450,250 520,230 600,246 C680,230 750,250 810,240" fill="none" stroke="#b5573c" stroke-width="10"/>
+    <!-- Steps down from the stage -->
+    <rect x="770" y="260" width="40" height="34" fill="#a17a52"/>
+
+    <!-- Walls, thick, with the gaps for doors and the window -->
+    <g stroke-width="12">
+      <path d="M170,100 L1030,100"/>
+      <path d="M170,100 L170,520 M170,610 L170,800"/>
+      <path d="M1030,100 L1030,220 M1030,380 L1030,800"/>
+      <path d="M170,800 L560,800 M660,800 L1030,800"/>
+      <path d="M370,100 L370,220 M370,280 L370,290 L170,290"/>
+    </g>
+    <!-- The window: a double line in the right wall -->
+    <rect x="1022" y="220" width="16" height="160" fill="#7d93a8"/>
+    <line x1="1030" y1="220" x2="1030" y2="380" stroke-width="2"/>
+    <!-- Doors, each with its swing -->
+    <path d="M170,520 L240,520" stroke-width="4"/>
+    <path d="M240,520 A70,70 0 0 1 170,590" fill="none" stroke-dasharray="6 8" stroke-width="2"/>
+    <path d="M560,800 L560,730" stroke-width="4"/>
+    <path d="M560,730 A70,70 0 0 1 630,800" fill="none" stroke-dasharray="6 8" stroke-width="2"/>
+    <path d="M370,220 L430,220" stroke-width="4"/>
+    <path d="M430,220 A60,60 0 0 1 370,280" fill="none" stroke-dasharray="6 8" stroke-width="2"/>
+
+    <!-- The clock, high on the back wall, and the notice board on the wall below it -->
+    <circle cx="300" cy="306" r="0" fill="none" stroke="none"/>
+    <circle cx="520" cy="94" r="0" stroke="none"/>
+    <rect x="176" y="380" width="10" height="90" fill="#b98a5a"/>
+
+    <!-- The piano against the right wall -->
+    <rect x="950" y="420" width="70" height="200" fill="#7a5236"/>
+    <rect x="938" y="430" width="12" height="180" fill="#fbfaf6"/>
+
+    <!-- Chairs: 5 rows of 8, with an aisle down the middle -->
+    <g fill="#7d93a8" stroke-width="2">
+      <rect x="300" y="360" width="34" height="34"/><rect x="350" y="360" width="34" height="34"/><rect x="400" y="360" width="34" height="34"/><rect x="450" y="360" width="34" height="34"/>
+      <rect x="640" y="360" width="34" height="34"/><rect x="690" y="360" width="34" height="34"/><rect x="740" y="360" width="34" height="34"/><rect x="790" y="360" width="34" height="34"/>
+      <rect x="300" y="430" width="34" height="34"/><rect x="350" y="430" width="34" height="34"/><rect x="400" y="430" width="34" height="34"/><rect x="450" y="430" width="34" height="34"/>
+      <rect x="640" y="430" width="34" height="34"/><rect x="690" y="430" width="34" height="34"/><rect x="740" y="430" width="34" height="34"/><rect x="790" y="430" width="34" height="34"/>
+      <rect x="300" y="500" width="34" height="34"/><rect x="350" y="500" width="34" height="34"/><rect x="400" y="500" width="34" height="34"/><rect x="450" y="500" width="34" height="34"/>
+      <rect x="640" y="500" width="34" height="34"/><rect x="690" y="500" width="34" height="34"/><rect x="740" y="500" width="34" height="34"/><rect x="790" y="500" width="34" height="34"/>
+      <rect x="300" y="570" width="34" height="34"/><rect x="350" y="570" width="34" height="34"/><rect x="400" y="570" width="34" height="34"/><rect x="450" y="570" width="34" height="34"/>
+      <rect x="640" y="570" width="34" height="34"/><rect x="690" y="570" width="34" height="34"/><rect x="740" y="570" width="34" height="34"/><rect x="790" y="570" width="34" height="34"/>
+      <rect x="300" y="640" width="34" height="34"/><rect x="350" y="640" width="34" height="34"/><rect x="400" y="640" width="34" height="34"/><rect x="450" y="640" width="34" height="34"/>
+      <rect x="640" y="640" width="34" height="34"/><rect x="690" y="640" width="34" height="34"/><rect x="740" y="640" width="34" height="34"/>
+      <!-- 1 chair out of its row, turned to the window -->
+      <rect x="860" y="300" width="34" height="34" transform="rotate(28 877 317)"/>
+    </g>
+    <!-- The chair backs, a stroke on the stage side of each -->
+    <g stroke-width="4">
+      <path d="M300,360 h34 M350,360 h34 M400,360 h34 M450,360 h34 M640,360 h34 M690,360 h34 M740,360 h34 M790,360 h34"/>
+      <path d="M300,430 h34 M350,430 h34 M400,430 h34 M450,430 h34 M640,430 h34 M690,430 h34 M740,430 h34 M790,430 h34"/>
+      <path d="M300,500 h34 M350,500 h34 M400,500 h34 M450,500 h34 M640,500 h34 M690,500 h34 M740,500 h34 M790,500 h34"/>
+      <path d="M300,570 h34 M350,570 h34 M400,570 h34 M450,570 h34 M640,570 h34 M690,570 h34 M740,570 h34 M790,570 h34"/>
+      <path d="M300,640 h34 M350,640 h34 M400,640 h34 M450,640 h34 M640,640 h34 M690,640 h34 M740,640 h34"/>
+    </g>
+
+    <!-- Bucket and mop by the side door -->
+    <circle cx="210" cy="720" r="20" fill="#7d93a8"/>
+    <!-- The street outside the main door -->
+    <rect x="160" y="814" width="880" height="56" fill="#e3d6bd" stroke-width="2"/>
+  </g>
+</svg>
+</body>
+</html>

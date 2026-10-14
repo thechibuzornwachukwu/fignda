@@ -1,0 +1,38 @@
+.stars {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-0h);
+  line-height: 0;
+}
+.on,
+.off {
+  display: inline-flex;
+}
+/* Earned: filled. Not earned: an outline. Ink, never lime. */
+.on {
+  color: var(--fg);
+}
+.on svg {
+  fill: currentColor;
+}
+.off {
+  color: var(--line-4);
+}
+
+/* One at a time, each a step behind the last. Never from scale 0. */
+.stars[data-pop] .on {
+  animation: pop var(--dur-star) var(--ease-out) backwards;
+  animation-delay: calc(var(--dur-star-step) * var(--i));
+}
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stars[data-pop] .on {
+    animation: none;
+  }
+}

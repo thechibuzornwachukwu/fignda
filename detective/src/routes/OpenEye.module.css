@@ -1,0 +1,79 @@
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+  padding-bottom: var(--space-12);
+}
+/* The file: each message as the dark card it was found on, with what it says pinned under it. */
+.file {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.entry {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.card,
+.shut {
+  position: relative;
+  box-sizing: border-box;
+  border-radius: var(--radius-xs);
+  box-shadow: 0 var(--ledge) 0 var(--board-edge);
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-4) var(--space-3);
+  background: var(--board);
+  color: var(--board-ink);
+}
+.eye {
+  display: grid;
+  place-items: center;
+  width: var(--space-8);
+  height: var(--space-8);
+  border-radius: var(--radius-pill);
+  background: var(--paper);
+  color: var(--paper-ink);
+}
+.text {
+  composes: body from '../styles/type.module.css';
+  margin: 0;
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+.from {
+  composes: caption from '../styles/type.module.css';
+  color: var(--board-ink);
+  opacity: 0.75;
+}
+.says {
+  composes: small from '../styles/type.module.css';
+  margin: 0 var(--space-3);
+  padding: var(--space-3) var(--space-3h);
+  background: var(--paper);
+  color: var(--paper-ink);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+  box-shadow: 0 var(--ledge) 0 var(--board-edge);
+  transform: rotate(calc(var(--board-tilt) * -0.5));
+}
+/* A message not read yet: the shape of its card, shut, with the eye on it. */
+.shut {
+  display: grid;
+  place-items: center;
+  height: var(--space-18);
+  border: 2px dashed var(--line-3);
+  box-shadow: none;
+  color: var(--subtle);
+}

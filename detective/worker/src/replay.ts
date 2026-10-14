@@ -1,0 +1,81 @@
+// Replays a client play log with the shared engine and recomputes the result.
+// The client's own counts and score are never trusted.
+
+import { evalWords, type Evaluate } from '../../src/engine/evaluate';
+import type { Answer } from '../../src/engine/hiddenWords';
+import { score } from '../../src/engine/score';
+
+export type PlayEvent = { a: number; b: number; t: number };
+export type PlayLog = { events: PlayEvent[]; hints: number[]; finish: number };
+
+export const MAX_LOG_EVENTS = 500;
+/** Finds closer together than this are a bot, not a person. */
+export const MIN_FIND_GAP_MS = 150;
+export const MAX_PLAY_MS = 7 * 24 * 3600 * 1000;
+
+export type Rejection =
+  | 'log_too_long'
+  | 'out_of_order'
+  | 'finish_before_last_event'
+  | 'index_out_of_range'
+  | 'duplicate_find'
+  | 'too_fast';
+
+export type ReplayResult =
+  | {
+      ok: true;
+      found: number;
+      total: number;
+      hints: number;
+      misses: number;
+      secs: number;
+      score: number;
+      /** Wrong picks in any game, near misses left out. Scored on the daily only (`misses`). */
+      wrongs: number;
+      /** Clean read: every word found, no wrong picks, no hints. Never changes the score. */
+      clean: boolean;
+      /** Each word this log really selected, with its time. Room plays store these. */
+      finds: Array<{ k: string; t: number }>;
+    }
+  | { ok: false; reason: Rejection };
+
+const sorted = (xs: number[]) => xs.every((x, i) => i === 0 || x >= xs[i - 1]!);
+
+/** `evaluate` is the game type's own rule (`EVALUATE`): hidden words unless another is given. */
+export function replay(puzzle: { S: string; answers: readonly Answer[] }, log: PlayLog, daily: boolean, evaluate: Evaluate = evalWords): ReplayResult {
+  const { events, hints, finish } = log;
+  if (events.length + hints.length > MAX_LOG_EVENTS) return { ok: false, reason: 'log_too_long' };
+  if (!sorted(events.map((e) => e.t)) || !sorted(hints)) return { ok: false, reason: 'out_of_order' };
+  const last = Math.max(0, ...events.map((e) => e.t), ...hints);
+  if (finish < last || finish > MAX_PLAY_MS) return { ok: false, reason: 'finish_before_last_event' };
+
+  const n = puzzle.S.length;
+  const found = new Set<string>();
+  const finds: Array<{ k: string; t: number }> = [];
+  let wrongs = 0;
+  let lastFind = 0; // the clock starts at 0
+
+  for (const e of events) {
+    if (e.a >= n || e.b >= n) return { ok: false, reason: 'index_out_of_range' };
+    const r = evaluate(puzzle, e.a, e.b, found);
+    if (r.kind === 'already') return { ok: false, reason: 'duplicate_find' };
+    if (r.kind === 'hit') {
+      if (e.t - lastFind < MIN_FIND_GAP_MS) return { ok: false, reason: 'too_fast' };
+      lastFind = e.t;
+      found.add(r.key);
+      finds.push({ k: r.key, t: e.t });
+      // A near miss is not a wrong pick.
+    } else if (r.kind === 'wrong') wrongs++;
+  }
+
+  const total = puzzle.answers.length;
+  const secs = Math.floor(finish / 1000);
+  const result = { found: found.size, total, hints: hints.length, misses: daily ? wrongs : 0, secs };
+  return { ok: true, ...result, score: score(result), wrongs, clean: isCleanRead({ ...result, wrongs }), finds };
+}
+
+/** The same rule as the result screen (src/games/session.ts isCleanRead), from replayed numbers only. */
+export function isCleanRead(r: { found: number; total: number; hints: number; wrongs: number }, room = false): boolean {
+  // A room play is never one: a teammate may have found some of the words.
+  return !room && r.total > 0 && r.found === r.total && r.hints === 0 && r.wrongs === 0;
+}

@@ -1,0 +1,125 @@
+.result {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-2) var(--space-1) 0;
+}
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  min-width: 0;
+}
+.slip,
+.photo {
+  position: relative;
+  box-sizing: border-box;
+  box-shadow: 0 var(--ledge) 0 var(--board-edge);
+}
+.slip::before,
+.photo::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--pin-dot) / -2);
+  left: 50%;
+  width: var(--pin-dot);
+  height: var(--pin-dot);
+  margin-left: calc(var(--pin-dot) / -2);
+  border-radius: var(--radius-pill);
+  background: var(--pin);
+}
+.slip {
+  composes: body from '../styles/type.module.css';
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+  padding: var(--space-4) var(--space-3h) var(--space-3);
+  background: var(--paper);
+  color: var(--paper-ink);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+  transform: rotate(calc(var(--board-tilt) * -0.75));
+}
+.photo {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-0h);
+  width: var(--face-max);
+  padding: var(--space-1h) var(--space-1);
+  background: var(--photo);
+  color: var(--paper-ink);
+  transform: rotate(var(--board-tilt));
+}
+.portrait {
+  display: grid;
+  place-items: center;
+  max-width: 100%;
+  overflow: hidden;
+}
+.photo[data-cleared] .portrait {
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+.name,
+.role {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+.name {
+  composes: small from '../styles/type.module.css';
+  font-weight: 800;
+}
+.role {
+  composes: caption from '../styles/type.module.css';
+  color: var(--paper-muted);
+}
+.tape {
+  composes: label from '../styles/type.module.css';
+  position: absolute;
+  top: 34%;
+  right: calc(var(--space-1) * -1);
+  left: calc(var(--space-1) * -1);
+  padding: var(--space-0h) 0;
+  background: var(--board-ink);
+  color: var(--paper-ink);
+  text-align: center;
+  transform: rotate(-11deg);
+}
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.tag {
+  composes: small from '../styles/type.module.css';
+  padding: var(--space-1h) var(--space-3);
+  border-radius: var(--radius-pill);
+  font-weight: 800;
+}
+/* Not found yet: an empty outline. */
+.tag[data-state='open'] {
+  box-shadow: inset 0 0 0 1px var(--line-3);
+  color: var(--subtle);
+}
+/* Found on an earlier step: ringed in ink. */
+.tag[data-state='had'] {
+  box-shadow: inset 0 0 0 2px var(--fg);
+  color: var(--fg);
+}
+/* Found on this step. Lime means found. */
+.tag[data-state='new'] {
+  background: var(--accent);
+  color: var(--on-accent);
+}

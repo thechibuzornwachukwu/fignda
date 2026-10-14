@@ -1,0 +1,16 @@
+.link {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--line-3);
+  transition: color var(--dur-base) var(--ease-std);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+.link:hover {
+  color: var(--fg);
+}

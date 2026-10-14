@@ -1,0 +1,220 @@
+/* A pinboard: paper and photos on cork. It is a thing, so it looks the same in both themes. */
+.board {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: var(--space-6) var(--space-3) var(--space-5);
+  border: var(--space-1h) solid var(--board-edge);
+  border-radius: var(--radius-xl);
+  background: var(--board);
+  color: var(--board-ink);
+}
+.pins {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--space-6) var(--space-4);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pin {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+  padding: var(--space-3);
+  background: var(--paper);
+  color: var(--paper-ink);
+  box-shadow: 0 var(--ledge) 0 var(--board-edge);
+}
+.pin:nth-child(odd) {
+  transform: rotate(calc(var(--board-tilt) * -1));
+}
+.pin:nth-child(even) {
+  transform: rotate(var(--board-tilt));
+}
+.pin::before,
+.face::before {
+  content: '';
+  position: absolute;
+  top: calc(var(--pin-dot) / -2);
+  left: 50%;
+  width: var(--pin-dot);
+  height: var(--pin-dot);
+  margin-left: calc(var(--pin-dot) / -2);
+  border-radius: var(--radius-pill);
+  background: var(--pin);
+}
+.pin[data-kind='left'] {
+  background: var(--paper-ink);
+  color: var(--paper);
+}
+/* The faces are photos of their own, in a row across the board. */
+.pin[data-kind='faces'] {
+  flex: 1 1 100%;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  transform: none;
+}
+.pin[data-kind='faces']::before {
+  content: none;
+}
+.picture {
+  display: grid;
+  place-items: center;
+  padding: var(--space-4) var(--space-6);
+  background: var(--photo);
+  color: var(--paper-muted);
+}
+.caption {
+  composes: small from '../styles/type.module.css';
+  font-weight: 800;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.noteTitle {
+  composes: label from '../styles/type.module.css';
+  color: var(--paper-ink);
+}
+.noteLine {
+  composes: small from '../styles/type.module.css';
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+.left {
+  display: grid;
+  place-items: center;
+  padding: var(--space-1) var(--space-3);
+}
+.faces {
+  display: grid;
+  grid-template-columns: repeat(var(--rows-of), minmax(0, var(--face-max)));
+  justify-content: center;
+  gap: var(--space-5) var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* On a phone 4 faces sit 2 by 2 and 5 sit 3 and 2, so a role is read whole. With room, all in 1 row. */
+@media (min-width: 560px) {
+  .faces {
+    grid-template-columns: repeat(var(--faces), minmax(0, var(--face-max)));
+  }
+}
+.face {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-0h);
+  box-sizing: border-box;
+  min-width: 0;
+  padding: var(--space-1h) var(--space-1) var(--space-1h);
+  background: var(--photo);
+  color: var(--paper-ink);
+  box-shadow: 0 var(--ledge) 0 var(--board-edge);
+}
+.face:nth-child(odd) {
+  transform: rotate(calc(var(--board-tilt) * -1));
+}
+.face:nth-child(even) {
+  transform: rotate(var(--board-tilt));
+}
+/* The line-up: a photo that can be chosen is a button the size of the photo. */
+.choose {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-0h);
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+/* Chosen: ringed in ink and lifted, so it reads without colour. */
+.face[data-picked] {
+  outline: var(--space-1) solid var(--accent);
+  box-shadow:
+    0 0 0 var(--space-0h) var(--paper-ink),
+    0 var(--ledge) 0 var(--board-edge);
+}
+.portrait {
+  display: grid;
+  place-items: center;
+  max-width: 100%;
+  overflow: hidden;
+}
+.face[data-cleared] .portrait {
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+/* A name is 1 line. A long one is cut with an ellipsis and never widens its photo. */
+.name,
+.role {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
+}
+.name {
+  composes: small from '../styles/type.module.css';
+  font-weight: 800;
+}
+.role {
+  composes: caption from '../styles/type.module.css';
+  color: var(--paper-muted);
+}
+.tape {
+  composes: label from '../styles/type.module.css';
+  position: absolute;
+  top: 34%;
+  right: calc(var(--space-1) * -1);
+  left: calc(var(--space-1) * -1);
+  padding: var(--space-0h) 0;
+  background: var(--board-ink);
+  color: var(--paper-ink);
+  text-align: center;
+  transform: rotate(-11deg);
+}
+.scrawl {
+  composes: itemTitle from '../styles/type.module.css';
+  margin: 0;
+  color: var(--board-ink);
+  font-style: italic;
+  text-align: center;
+}
+.finds {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3) var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.find {
+  composes: small from '../styles/type.module.css';
+  max-width: 100%;
+  padding: var(--space-1h) var(--space-2h);
+  background: var(--paper);
+  color: var(--paper-ink);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+  box-shadow: 0 var(--ledge) 0 var(--board-edge);
+}

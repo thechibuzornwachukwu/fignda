@@ -1,0 +1,30 @@
+.ring {
+  display: block;
+  flex: none;
+  fill: none;
+}
+.track,
+.empty {
+  stroke: var(--line-3);
+}
+.fill,
+.done {
+  stroke: var(--fg);
+}
+.fill {
+  transition: stroke-dashoffset var(--dur-slower) var(--ease-out), stroke var(--dur-base) var(--ease-std);
+}
+.rest {
+  stroke: var(--muted);
+}
+/* Closed: the only time the ring is lime. --accent-ink is the lime that stays readable as a thin line on both themes. */
+.ring[data-closed='true'] .fill,
+.ring[data-closed='true'] .done {
+  stroke: var(--accent-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fill {
+    transition: none;
+  }
+}

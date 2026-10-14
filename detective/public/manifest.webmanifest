@@ -1,0 +1,11 @@
+{
+  "name": "Lantern Row",
+  "short_name": "Lantern Row",
+  "description": "A detective game: 8 cases on 1 street.",
+  "start_url": "/cases",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#0d0d0e",
+  "theme_color": "#0d0d0e",
+  "icons": [{ "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

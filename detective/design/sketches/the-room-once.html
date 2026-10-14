@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The room, seen once</title>
+<style>html, body { margin: 0; background: #f3ead9; } svg { display: block; }</style>
+</head>
+<body>
+<!--
+  The committee room, seen once, for "Walk it back, the room": the scene was tidied before anybody photographed it,
+  so the only record is the walk the detective took through it. A fixed route with 4 stops, and 1 thing at each:
+  1 the door (an umbrella on its hook), 2 the shelf (the ballot tin from case 2), 3 the window (a pot of herbs),
+  4 the table (a teapot). Nothing else in the room competes with them: it is a room to remember, not to search.
+  The route is a dotted line on the floor with a numbered disc at each stop. Same visual contract as the-hall.html.
+-->
+<svg width="1200" height="900" viewBox="0 0 1200 900" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="hand" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="2" seed="13" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="4"/>
+    </filter>
+    <g id="stop"><circle r="26" fill="#fbfaf6" stroke-width="3"/></g>
+  </defs>
+  <g stroke="#2a2622" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" filter="url(#hand)">
+    <!-- Room -->
+    <polygon points="0,0 1200,0 1020,110 180,110" fill="#e3d6bd"/>
+    <polygon points="0,0 180,110 180,560 0,700" fill="#e9dcc3"/>
+    <polygon points="1200,0 1020,110 1020,560 1200,700" fill="#e9dcc3"/>
+    <rect x="180" y="110" width="840" height="450" fill="#efe4cf"/>
+    <polygon points="0,700 180,560 1020,560 1200,700 1200,900 0,900" fill="#d6be96"/>
+    <line x1="180" y1="540" x2="1020" y2="540" stroke-width="2"/>
+
+    <!-- 1. The door, on the back wall at the left, and the umbrella on its hook -->
+    <rect x="220" y="230" width="150" height="310" fill="#8fa37e"/>
+    <circle cx="350" cy="390" r="6" fill="#2a2622"/>
+    <path d="M396,250 l0,20 l-10,0" fill="none"/>
+    <path d="M396,270 C396,290 380,300 380,330 L380,470" fill="none"/>
+    <path d="M360,330 C360,300 420,300 420,330 L404,470 L392,470 L380,330 Z" fill="#5d7187"/>
+
+    <!-- 2. The shelf, and the ballot tin on it -->
+    <rect x="470" y="300" width="200" height="16" fill="#7a5236"/>
+    <path d="M490,316 L500,346 M650,316 L640,346" fill="none"/>
+    <rect x="530" y="240" width="90" height="60" rx="6" fill="#b5573c"/>
+    <rect x="556" y="246" width="38" height="6" fill="#2a2622"/>
+    <circle cx="575" cy="276" r="9" fill="#d0a65a"/>
+
+    <!-- 3. The window, and the pot of herbs on its sill -->
+    <rect x="740" y="180" width="200" height="230" fill="#a8bccd"/>
+    <line x1="840" y1="180" x2="840" y2="410"/><line x1="740" y1="295" x2="940" y2="295"/>
+    <rect x="726" y="410" width="228" height="16" fill="#efe4cf"/>
+    <path d="M808,410 L816,370 L864,370 L872,410 Z" fill="#c46a4e"/>
+    <path d="M826,370 C820,340 830,326 840,320 M840,370 L840,316 M854,370 C860,340 852,330 846,322" fill="none" stroke="#5a8f3c" stroke-width="4"/>
+    <ellipse cx="826" cy="340" rx="8" ry="5" fill="#8fa37e"/><ellipse cx="854" cy="336" rx="8" ry="5" fill="#8fa37e"/><ellipse cx="840" cy="318" rx="7" ry="5" fill="#8fa37e"/>
+
+    <!-- 4. The table, front right, and the teapot on it -->
+    <polygon points="760,690 1080,690 1130,740 710,740" fill="#a17a52"/>
+    <rect x="710" y="740" width="420" height="22" fill="#7a5236"/>
+    <path d="M730,762 L730,880 M1110,762 L1110,880" stroke-width="6"/>
+    <ellipse cx="920" cy="660" rx="54" ry="40" fill="#fbfaf6"/>
+    <path d="M974,650 C1000,640 1006,620 1012,612" fill="none" stroke-width="6"/>
+    <path d="M866,646 C840,640 840,676 868,676" fill="none" stroke-width="5"/>
+    <ellipse cx="920" cy="622" rx="22" ry="8" fill="#fbfaf6"/><circle cx="920" cy="610" r="6" fill="#b5573c"/>
+
+    <!-- The route on the floor, door to shelf to window to table -->
+    <path d="M300,620 C380,640 470,610 570,600 C690,592 780,600 850,610 C820,650 720,680 668,714" fill="none" stroke="#8a6a4a" stroke-width="5" stroke-dasharray="2 16"/>
+  </g>
+  <!-- Numbered stops, drawn without the wobble so the digits stay clean -->
+  <g stroke="#2a2622" font-family="system-ui, sans-serif" font-size="26" font-weight="800" text-anchor="middle">
+    <use href="#stop" x="300" y="620"/><text x="300" y="629" stroke="none" fill="#2a2622">1</text>
+    <use href="#stop" x="570" y="600"/><text x="570" y="609" stroke="none" fill="#2a2622">2</text>
+    <use href="#stop" x="850" y="610"/><text x="850" y="619" stroke="none" fill="#2a2622">3</text>
+    <use href="#stop" x="650" y="740"/><text x="650" y="749" stroke="none" fill="#2a2622">4</text>
+  </g>
+</svg>
+</body>
+</html>
