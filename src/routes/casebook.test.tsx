@@ -40,7 +40,7 @@ describe('the casebook on Cases', () => {
     expect(screen.getByRole('img', { name: '6 steps' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Open the brief' })).toHaveAttribute('href', '/case/the-long-spoon');
     expect(container.querySelectorAll('[data-state="locked"][data-file]')).toHaveLength(chapters.length - 1);
-    expect(container.querySelector('[data-next-file]')).toHaveTextContent('Case 5');
+    expect(container.querySelector('[data-next-file]')).toHaveTextContent('Case 7');
     expect(container.querySelector('[data-interlude]')).toHaveAttribute('data-state', 'locked');
   });
 

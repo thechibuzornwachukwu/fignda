@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import pools from '../../data/copy.json';
-import { accountStars, accountThatStands, chapterProgress, checkChapter, claimPick, claimStars, trailOf, trailStars, trailWrongs, LINEUP_TRIES, lineupStars, NAME_MAX, pickStep, pickWrongs, stepPuzzle, type Chapter } from './chapter';
+import { accountStars, accountThatStands, chapterProgress, checkChapter, claimPick, claimStars, quarterOf, SCENE_H, SCENE_W, sweepHint, sweepResult, trailOf, trailStars, trailWrongs, LINEUP_TRIES, lineupStars, NAME_MAX, pickStep, pickWrongs, stepPuzzle, type Chapter } from './chapter';
 import { buildHiddenWords } from './hiddenWords';
 import { buildMirror } from './mirror';
 import { buildSums } from './sums';
@@ -274,7 +274,7 @@ describe('which account fits', () => {
   it('every written chapter is open to players, in the order of the casebook', async () => {
     const { chapters } = await import('../games/chapters');
     expect(files.some((f) => read(f).draft)).toBe(false);
-    expect(chapters.map((c) => c.id)).toEqual(['the-long-spoon', 'the-open-box', 'the-early-bus', 'the-year-that-is-missing', 'the-2-signs']);
+    expect(chapters.map((c) => c.id)).toEqual(['the-long-spoon', 'the-open-box', 'the-early-bus', 'the-year-that-is-missing', 'the-light-in-the-hall', 'the-2-signs']);
   });
 
   it('a case closes on its last step and nowhere else', () => {
@@ -416,5 +416,56 @@ describe('the missing step', () => {
     const f = signs();
     f.steps[0]!.chain = f.steps[2]!.chain;
     expect(checkChapter(f, roles)).toContain('step 1: only a "missing step" step has a chain');
+  });
+});
+
+describe('sweep the room', () => {
+  const hall = (): Chapter => read('the-light-in-the-hall.json');
+  const room = () => hall().steps[0]!.room!;
+
+  it('The light in the hall opens on the drawn hall: 6 pieces of evidence among the room', () => {
+    const c = hall();
+    expect(c.steps[0]!.method).toBe('sweep');
+    expect(room().scene).toBe('the-hall');
+    expect(room().things.filter((t) => t.evidence)).toHaveLength(6);
+    expect(stepPuzzle(c, 1)).toBeNull();
+  });
+
+  it('the game shows the same drawing the sketch holds', () => {
+    const sketch = readFileSync('design/sketches/the-hall.html', 'utf8').match(/<svg[\s\S]*<\/svg>/)![0];
+    expect(readFileSync('src/scenes/the-hall.svg', 'utf8')).toContain(sketch);
+  });
+
+  it('a tap on evidence is found, a tap on the room is a wrong one, and each thing is tapped once', () => {
+    const r = room();
+    const evidence = r.things.flatMap((t, i) => (t.evidence ? [i] : []));
+    const clock = r.things.findIndex((t) => t.name === 'The clock');
+    expect(sweepResult(r, evidence)).toEqual({ found: 6, total: 6, wrongs: 0 });
+    expect(sweepResult(r, [clock, evidence[0]!])).toEqual({ found: 1, total: 6, wrongs: 1 });
+    expect(sweepResult(r, [])).toEqual({ found: 0, total: 6, wrongs: 0 });
+    for (const picks of [[0, 0], [-1], [r.things.length], [0.5]]) expect(sweepResult(r, picks)).toBeNull();
+  });
+
+  it('a tip-off points at the quarter of the room with the next thing missed, never at the thing', () => {
+    const r = room();
+    expect([quarterOf([0, 0, 10, 10]), quarterOf([SCENE_W - 10, 0, 10, 10]), quarterOf([0, SCENE_H - 10, 10, 10]), quarterOf([SCENE_W - 10, SCENE_H - 10, 10, 10])]).toEqual([0, 1, 2, 3]);
+    // The torch on the piano is first, top right.
+    expect(sweepHint(r, new Set())).toBe(1);
+    expect(sweepHint(r, new Set(r.things.flatMap((t, i) => (t.evidence ? [i] : []))))).toBe(-1);
+  });
+
+  it('a room holds 5 to 7 pieces of evidence, 6 ordinary things at least, and everything inside the drawing', () => {
+    const c = hall();
+    c.steps[0]!.room!.things.forEach((t) => delete t.evidence);
+    expect(checkChapter(c, roles)).toContain('step 1: a room holds 5 to 7 pieces of evidence');
+    const d = hall();
+    d.steps[0]!.room!.things = d.steps[0]!.room!.things.filter((t) => t.evidence);
+    expect(checkChapter(d, roles)).toContain('step 1: a room has 6 ordinary things at least, to look past');
+    const e = hall();
+    e.steps[0]!.room!.things[0]!.box = [1180, 0, 40, 40];
+    expect(checkChapter(e, roles)).toContain('step 1: every thing sits inside the drawing');
+    const f = hall();
+    f.steps[1]!.room = f.steps[0]!.room;
+    expect(checkChapter(f, roles)).toContain('step 2: only a "sweep the room" step has a room');
   });
 });

@@ -308,6 +308,10 @@
     "Out of tries. Here is how it stands.",
     "No tries left. This is what the facts say."
   ],
+  "sweepHint": [
+    "Look again in that corner of the room.",
+    "Something there is not where it belongs."
+  ],
   "caseLocked": [
     "That file opens when the case before it is closed.",
     "One case at a time. The one before this is still open."

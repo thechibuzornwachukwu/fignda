@@ -543,7 +543,7 @@ export const PlayBody = z
           id: z.string().regex(/^[a-z0-9-]{2,40}$/),
           step: z.number().int().min(1).max(12),
           named: z.array(z.string().min(1).max(60)).max(2).optional(),
-          picked: z.array(z.number().int().min(0).max(7)).max(8).optional(),
+          picked: z.array(z.number().int().min(0).max(39)).max(40).optional(),
         })
         .strict(),
     ]),

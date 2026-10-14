@@ -139,7 +139,7 @@ test('half way through, the landing page and Cases say carry on, and a closed ca
   await expect(page.locator('[data-chapter="the-open-box"]').getByRole('link', { name: 'Open the brief' })).toHaveAttribute('href', '/case/the-open-box');
   await page.evaluate(() => {
     const all = { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3 };
-    localStorage.setItem('gazecraft-chapters', JSON.stringify({ 'the-long-spoon': all, 'the-open-box': all, 'the-early-bus': all, 'the-year-that-is-missing': all, 'the-2-signs': all }));
+    localStorage.setItem('gazecraft-chapters', JSON.stringify({ 'the-long-spoon': all, 'the-open-box': all, 'the-early-bus': all, 'the-year-that-is-missing': all, 'the-light-in-the-hall': all, 'the-2-signs': all }));
   });
   await page.goto('/play');
   await expect(page.locator('[data-chapter]')).toHaveCount(0);
@@ -245,8 +245,8 @@ test('Cases is the casebook: closed files fold, the open one leads in, and pract
   await page.goto('/play');
   await expect(page.getByRole('heading', { level: 2, name: 'Lantern Row' })).toBeVisible();
   await expect(page.locator('[data-file="the-long-spoon"]')).toHaveAttribute('data-state', 'closed');
-  await expect(page.locator('[data-file][data-state="locked"]')).toHaveCount(3);
-  await expect(page.locator('[data-next-file]')).toContainText('Case 5');
+  await expect(page.locator('[data-file][data-state="locked"]')).toHaveCount(4);
+  await expect(page.locator('[data-next-file]')).toContainText('Case 7');
   await expect(page.getByRole('heading', { level: 2, name: 'Practice' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   // A closed case can be worked cold: its own stars, an empty board, and no tip-off.
@@ -273,7 +273,7 @@ test('the interlude opens once case 4 is closed, and is 1 board', async ({ page 
 
 test('the missing step: the thing that fits fills the gap', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 700 });
-  await seedCases(page, { 'the-long-spoon': ALL, 'the-open-box': ALL, 'the-early-bus': ALL, 'the-year-that-is-missing': ALL, 'the-2-signs': { 1: 3, 2: 3 } });
+  await seedCases(page, { 'the-long-spoon': ALL, 'the-open-box': ALL, 'the-early-bus': ALL, 'the-year-that-is-missing': ALL, 'the-light-in-the-hall': ALL, 'the-2-signs': { 1: 3, 2: 3 } });
   await page.goto('/case/the-2-signs/3');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText("The watchman's hut");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
@@ -284,4 +284,26 @@ test('the missing step: the thing that fits fills the gap', async ({ page }) => 
   await expect(page.getByRole('img', { name: '2 of 3 stars' })).toBeVisible();
   await page.getByRole('link', { name: 'Go to the pot store' }).click();
   await expect(page).toHaveURL(/\/case\/the-2-signs\/4$/);
+});
+
+test('sweep the room: tap what matters in the drawn hall, and a tip-off rings a quarter of it', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 700 });
+  await seedCases(page, { 'the-long-spoon': ALL, 'the-open-box': ALL, 'the-early-bus': ALL, 'the-year-that-is-missing': ALL });
+  await page.goto('/case/the-light-in-the-hall/1');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('The hall');
+  await expect(page.locator('[data-room="the-hall"] img')).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
+  // On a phone the tip-off is on the bar under the thumb.
+  await page.locator('[data-mobile-bar]').getByRole('button', { name: 'Tip-off' }).click();
+  await expect(page.locator('[data-quarter="1"]')).toBeVisible();
+  await page.getByRole('button', { name: 'The torch on the piano' }).click();
+  await expect(page.locator('[data-quarter]')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'The torch on the piano' })).toHaveAttribute('data-state', 'found');
+  await page.getByRole('button', { name: 'The clock' }).click();
+  await expect(page.getByRole('button', { name: 'The clock' })).toHaveAttribute('data-state', 'wrong');
+  for (const name of ['The muddy prints', 'The wax on the stage', 'The key on the floor', 'The chair turned round', 'The window latch']) await page.getByRole('button', { name }).click();
+  await expect(page.locator('[data-sweep="done"]')).toBeVisible();
+  await expect(page.locator('[data-fact]')).toContainText('Nobody walks through walls');
+  await expect(page.getByRole('img', { name: '2 of 3 stars' })).toBeVisible();
+  await expect(page.getByRole('link', { name: "Go to the caretaker's desk" })).toHaveAttribute('href', '/case/the-light-in-the-hall/2');
 });

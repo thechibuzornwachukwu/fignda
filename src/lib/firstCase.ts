@@ -17,6 +17,8 @@ export type OpenCase = {
 
 /** A case is open when every case before it in the casebook is closed. Nothing is gated by a date. */
 export function caseOpen(chapter: Chapter): boolean {
+  // A case already started stays open, even when a case written later is put before it: nothing locks a player out.
+  if (Object.keys(loadChapterStars(chapter.id)).length > 0) return true;
   return chapters.slice(0, Math.max(0, chapters.findIndex((c) => c.id === chapter.id))).every(caseClosed);
 }
 

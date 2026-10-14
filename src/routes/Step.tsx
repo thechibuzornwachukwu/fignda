@@ -31,6 +31,7 @@ import { Claim } from './Claim';
 import { LineUp } from './LineUp';
 import styles from './Step.module.css';
 import { Marks } from './StepMarks';
+import { Sweep } from './Sweep';
 import { wayOn } from './stepWay';
 import { Trail } from './Trail';
 
@@ -75,6 +76,7 @@ export function Step() {
 
   if (step.method === 'line-up') return <LineUp chapter={chapter} progress={progress} />;
   if (step.method === 'accounts') return <Accounts chapter={chapter} progress={progress} />;
+  if (step.method === 'sweep') return <Sweep key={`${chapter.id}~${at}`} chapter={chapter} at={at} solved={progress.solved} />;
   if (step.method === 'chain') return <Chain key={`${chapter.id}~${at}`} chapter={chapter} at={at} solved={progress.solved} />;
   if (step.method === 'trail') return <Trail key={`${chapter.id}~${at}`} chapter={chapter} at={at} solved={progress.solved} />;
   if (step.method === 'claim') return <Claim key={`${chapter.id}~${at}`} chapter={chapter} at={at} solved={progress.solved} />;

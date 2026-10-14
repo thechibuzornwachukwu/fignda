@@ -11,7 +11,7 @@ export const SHAPES = ['who-did-it', 'prove-it', 'what-is-it-really', 'where-is-
 export type Shape = (typeof SHAPES)[number];
 
 /** The methods a step can use today. A new method joins this list in the set that builds its engine. */
-export const METHODS = ['hidden-words', 'mirror', 'buried-sums', 'unmask', 'line-up', 'accounts', 'claim', 'trail', 'chain'] as const;
+export const METHODS = ['hidden-words', 'mirror', 'buried-sums', 'unmask', 'line-up', 'accounts', 'claim', 'trail', 'chain', 'sweep'] as const;
 export type Method = (typeof METHODS)[number];
 
 /** The methods a case can close on. A case closes on its last step, and only there. */
@@ -93,6 +93,21 @@ export type Chain = { events: string[]; gap: number; options: Array<{ text: stri
 export const CHAIN_EVENTS = 3;
 export const CHAIN_OPTIONS = 3;
 
+/**
+ * Sweep the room (set 1i-c): a drawn room, and every thing in it a player can tap. 5 to 7 are evidence, the rest
+ * are the room. A box is x, y, width and height on the drawing, which is 1200 by 900.
+ */
+export type RoomThing = { name: string; box: [number, number, number, number]; evidence?: boolean };
+export type Room = { scene: string; things: RoomThing[] };
+
+/** The size every room is drawn at (design/sketches). */
+export const SCENE_W = 1200;
+export const SCENE_H = 900;
+/** How many things in a room are evidence, and how many ordinary things a room has at least, to look past. */
+export const SWEEP_MIN = 5;
+export const SWEEP_MAX = 7;
+export const SWEEP_ROOM_MIN = 6;
+
 export type Step = {
   place: string;
   method: Method;
@@ -111,6 +126,8 @@ export type Step = {
   claim?: Claim;
   /** The events and the gap, on a "missing step" step. */
   chain?: Chain;
+  /** The room searched, on a "sweep the room" step. */
+  room?: Room;
   /** What the step leaves behind once it is done. */
   fact: string;
   /** The fact as a few words, pinned to the board when the step is solved. Every step but the last has one. */
@@ -247,6 +264,23 @@ export function checkChapter(raw: unknown, roles: readonly string[]): string[] {
         if (!(Number.isInteger(k!.gap) && k!.gap >= 1 && k!.gap < events.length)) out.push(`${at}: the gap is between 2 events`);
         if (options.filter((o) => o.fits).length !== 1) out.push(`${at}: exactly 1 thing fits the gap`);
         if ([...events, ...options.map((o) => o.text)].some((l) => text(l).length > LINE_MAX || /[\u2014!]/.test(l))) out.push(`${at}: a chain breaks the copy rules`);
+      }
+    }
+    if (s.method === 'sweep' || s.room != null) {
+      const things = Array.isArray(s.room?.things) ? s.room.things : [];
+      const evidence = things.filter((t) => t.evidence).length;
+      if (s.method !== 'sweep') out.push(`${at}: only a "sweep the room" step has a room`);
+      else if (!text(s.room?.scene) || things.some((t) => !text(t.name))) out.push(`${at}: a room needs its scene and a name for every thing in it`);
+      else {
+        if (evidence < SWEEP_MIN || evidence > SWEEP_MAX) out.push(`${at}: a room holds ${SWEEP_MIN} to ${SWEEP_MAX} pieces of evidence`);
+        if (things.length - evidence < SWEEP_ROOM_MIN) out.push(`${at}: a room has ${SWEEP_ROOM_MIN} ordinary things at least, to look past`);
+        const inside = (b: unknown): boolean => {
+          if (!Array.isArray(b) || b.length !== 4 || !b.every((v) => typeof v === 'number')) return false;
+          const [x, y, w, h] = b as number[];
+          return w! > 0 && h! > 0 && x! >= 0 && y! >= 0 && x! + w! <= SCENE_W && y! + h! <= SCENE_H;
+        };
+        if (things.some((t) => !inside(t.box))) out.push(`${at}: every thing sits inside the drawing`);
+        if (new Set(things.map((t) => t.name)).size !== things.length) out.push(`${at}: 2 things in the room share a name`);
       }
     }
     if (s.method === 'trail' && !trailOf({ id: text(c.id), steps }, i + 1)) out.push(`${at}: a trail needs ${TRAIL_MIN} finds or more behind it, each at a place of its own`);
@@ -433,4 +467,23 @@ export function trailWrongs(trail: Trail, picks: readonly number[]): number {
 
 /** Stars for a trail: 3 with every find in its place, 2 with 1 misplaced, else 1. Wrong places cost nothing else. */
 export const trailStars = (wrong: number): 1 | 2 | 3 => (wrong <= 0 ? 3 : wrong === 1 ? 2 : 1);
+
+/**
+ * A sweep, from the things tapped in order (by their place in the room, each once): the evidence found, how much
+ * there is, and the taps on things that are only the room. Null for taps nobody could have made.
+ */
+export function sweepResult(room: Room, picks: readonly number[]): { found: number; total: number; wrongs: number } | null {
+  if (new Set(picks).size !== picks.length || picks.some((p) => !Number.isInteger(p) || p < 0 || p >= room.things.length)) return null;
+  const found = picks.filter((p) => room.things[p]!.evidence).length;
+  return { found, total: room.things.filter((t) => t.evidence).length, wrongs: picks.length - found };
+}
+
+/** The quarter of the room a tip-off points at: 0 top left, 1 top right, 2 bottom left, 3 bottom right. Never the thing. */
+export const quarterOf = (box: RoomThing['box']): number => (box[1] + box[3] / 2 >= SCENE_H / 2 ? 2 : 0) + (box[0] + box[2] / 2 >= SCENE_W / 2 ? 1 : 0);
+
+/** The tip-off: the quarter of the first piece of evidence not found yet, in the room's own order. -1 when all are found. */
+export function sweepHint(room: Room, found: ReadonlySet<number>): number {
+  const i = room.things.findIndex((t, k) => t.evidence && !found.has(k));
+  return i < 0 ? -1 : quarterOf(room.things[i]!.box);
+}
 

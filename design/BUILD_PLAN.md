@@ -92,14 +92,14 @@ Casebook 1: Lantern Row. The premise of each case is 1 line and is where its wri
 | 3 | The early bus (written) | Prove it | 1 | Could it be done | The last bus left 9 minutes early on the night of the final. The driver says the hall clock was fast | Somebody showed him the clock can be set from outside |
 | 4 | The year that is missing (written) | Where is it | 3 | Walk it back, the trail | The hall's minute book for 2011 is gone from its shelf in the library | It is found with the page uncut. Reading it waits for case 8 |
 | | Interlude: The bookmark (written) | | | | A message to the Open Eye, found in the returned book | |
-| 5 | The light in the hall | What is it really | 4 | Sweep the room | A light moves about the locked hall at night, and the street has decided it is haunted | Whoever it was had a key nobody signed for |
-| 6 | The 2 signs (written, open after case 4) | Who did it | 2 | The missing step | 2 stalls wake to each other's signs on market day, and each owner blames the other | Both signs were repainted by the same hand |
+| 5 | The light in the hall (written) | What is it really | 4 | Sweep the room | A light moves about the locked hall at night, and the street has decided it is haunted | Whoever it was had a key nobody signed for |
+| 6 | The 2 signs (written) | Who did it | 2 | The missing step | 2 stalls wake to each other's signs on market day, and each owner blames the other | Both signs were repainted by the same hand |
 | 7 | The other spoon | Prove it | 1 | The torn page | A second Long Spoon turns up for sale, with all 20 names on it | The seller was sent the list of names by post |
 | | Interlude | | | | The envelope the list came in | |
 | 8 | Who carries the cards | Who did it | 5 | None: every method so far | 7 cases, 7 cards with an open eye. 1 person on Lantern Row has been handing them out | The page from 2011 is read. The Open Eye itself is not named |
 
 Suspects run 4, 2, 1, 3, 4, 2, 1, 5, so no 2 neighbours match, and the shapes run through all 5 before any repeats twice.
-What this asks of the build, in order: cases 1 to 4, case 6 and the first interlude are written and open. Case 6 is released ahead of case 5, which waits for the first drawn room (Sweep the room). Next: the room and case 5, then case 7 with The torn page, the second interlude and case 8. Beside them: the Open Eye file (set 1e), a drill with no culprit and no unmasking (set 4c), and cold cases and interludes kept on the account.
+What this asks of the build, in order: cases 1 to 6 and the first interlude are written and open, and Sweep the room is built on the drawn hall. Next: case 7 with The torn page (the sale room is drawn), the second interlude and case 8. Beside them: the Open Eye file (set 1e), a drill with no culprit and no unmasking (set 4c), and cold cases and interludes kept on the account.
 
 ## Screens: one job each
 
@@ -154,7 +154,7 @@ Never for sale: hints, extra tries, time, or anything that touches a score; stre
 - [ ] Decide: what is sold to a church, a school or a wedding now. The price list sells a puzzle on the buyer's subject, which is a word hunt. It can stay that (sold as a drill, or a message hidden for the guests) or become a short case written for them, which costs more to make.
 - [ ] Decide: the 25 packs, one by one (set 4d). Suggested: chapters for the first 3 on the path and the 4 Naija packs, practice for the rest, and retire what reads badly.
 - [ ] Read The long spoon (`design/stories/the-long-spoon.json`) and say what is wrong with it before 1c is built on it. It is told on Market day (`fruits`): confirm or move it.
-- [ ] Read The 2 signs (`design/stories/the-2-signs.json`). The culprit is Tomas, the gardener, for a rosette, and he did not hold the brush. Its first brief line is written to follow case 4 for now: when case 5 is written, that line takes case 5's loose end.
+- [ ] Read The light in the hall and The 2 signs (`design/stories`). In case 5 the light is Ines, the usher, learning a song for her mother's 80th. In case 6 the culprit is Tomas, the gardener, for a rosette, and he did not hold the brush.
 - [ ] Read The year that is missing and The bookmark (`design/stories`) as a player would. The culprit is Noor, the librarian, and nothing was stolen: she shelved it under another cover. Confirm or change.
 - [ ] Read The open box and The early bus (`design/stories`) as a player would, and say what is wrong. In The early bus the driver is Kwame, his reason is a daughter's flight, and the evidence names him before the end, which a "prove it" now allows: confirm or change each.
 - [ ] Casebook 1 is decided ("How the cases are structured"): Lantern Row, 8 cases, the player's own pace, and it becomes the game once 4 are written. Read the 8 premises and strike any you do not want before it is written.
@@ -197,7 +197,6 @@ Build in this order. The aim of 1c to 1g is one thing: The long spoon played fro
 
 | Method | Why it is real | What the player does | Needs |
 |---|---|---|---|
-| Sweep the room | Searchers work a room in lanes or quarters so nothing is passed over | Tap everything that could matter among ordinary things. 5 to 7 are evidence, the rest are the room | 1 drawn room |
 | By torchlight | The power is off, or it is night | Move a circle of light over a dark room and tap what it shows | The same room, dimmed |
 | Look under it | Things are hidden where nobody dusts: under the rug, behind the frame, in the back of a drawer | Lift, slide and open. Each thing moved shows what was behind it | Layers in the drawing |
 | Bag and tag | Evidence is useless until it is sorted by what it answers | Each thing found goes in 1 of 3 bags: how, why, when. A wrong bag costs nothing but a star | Nothing drawn: the finds of the case |
@@ -214,7 +213,7 @@ Build in this order. The aim of 1c to 1g is one thing: The long spoon played fro
 
 - How a room is drawn (learned from xiaohu-ip-studio and Comfyui-Anima-Wardrobe, 14 Oct 2026). The sketches are in `design/sketches`, each an `.html` drawing and its `.png`: the hall (case 5), the hall in layers, the floor plan of the hall, traces, the sale room (case 7) and the committee room seen once. 1 look for every room, never drifting: warm cream ground, ink line in 1 weight with a slight hand wobble, flat muted fills (terracotta, sage, dusty blue, ochre, wood), even light, no gradient, texture or blur. Lime is never in a drawing: it only marks what was found. Every thing in a room is locked or swappable: the evidence is fixed by the chapter, the ordinary things around it can change, and none may clash with it. The test: take the evidence out and the room no longer tells the story. Each drawing is checked by eye and redrawn when a thing reads as something else.
 - Rules for both sets. No clock on any of them. Nobody is harmed in a scene: no blood, no weapons, no body, and a room is searched for a thing that was taken or hidden. A scenario is never a trick: every fact a method uses is on the board first. A wrong answer costs a star and never the lead.
-- Built: Which account fits (case 2), Could it be done (case 3) and The missing step (case 6), in `SPEC.md` section 6. Next is Sweep the room, which needs the first drawn room.
+- Built: Which account fits (case 2), Could it be done (case 3) and The missing step (case 6), in `SPEC.md` section 6. Sweep the room is built (case 5). The rest of set 1i-c follows, each on a room already drawn.
 - `checkChapter` learns each method as it is built, and then asks a chapter for all 3 kinds of work.
 - [ ] **Set 1j. The other 4 shapes,** one written chapter each, each plotted backward and passed by `checkChapter`, which learns each shape's ending as it comes.
 - Later, once those are being played: Liar, Relay, Number series, Bury it.

@@ -115,6 +115,25 @@ describe('the missing step on the server', () => {
   });
 });
 
+describe('sweep the room on the server', () => {
+  const hall = CHAPTERS['the-light-in-the-hall'] as Chapter;
+  const room = hall.steps[0]!.room!;
+  const evidence = room.things.flatMap((t, i) => (t.evidence ? [i] : []));
+  const clock = room.things.findIndex((t) => t.name === 'The clock');
+
+  it('every piece found with no tip-off and no wrong tap is 3 stars, and tip-offs come from the log', () => {
+    expect(checkStep(hall, 1, none, undefined, evidence)).toMatchObject({ ok: true, stars: 3, found: 6, total: 6 });
+    expect(checkStep(hall, 1, none, undefined, [clock, ...evidence])).toMatchObject({ ok: true, stars: 2 });
+    expect(checkStep(hall, 1, { events: [], hints: [1000], finish: 5000 }, undefined, evidence)).toMatchObject({ ok: true, stars: 2, hints: 1 });
+    expect(checkStep(hall, 1, none, undefined, evidence.slice(0, 2))).toMatchObject({ ok: true, stars: 1, found: 2 });
+  });
+
+  it('refuses taps nobody could have made', () => {
+    for (const picked of [[0, 0], [room.things.length], [-1]]) expect(checkStep(hall, 1, none, undefined, picked), picked.join()).toMatchObject({ ok: false, status: 400 });
+    expect(checkStep(hall, 1, none, ['the usher'], evidence)).toMatchObject({ ok: false, status: 400 });
+  });
+});
+
 describe('the trail on the server', () => {
   const year = CHAPTERS['the-year-that-is-missing'] as Chapter;
   const right = trailOf(year, 5)!.finds.map((f) => f.place);
@@ -144,7 +163,7 @@ describe('the request', () => {
     expect(body({ type: 'case', id: 'the-long-spoon', step: 1, named: ['a', 'b', 'c'] })).toBe(false);
     expect(body({ type: 'case', id: 'the-long-spoon', step: 1, extra: 1 })).toBe(false);
     expect(body({ type: 'case', id: 'the-open-box', step: 6, picked: [0, 2] })).toBe(true);
-    expect(body({ type: 'case', id: 'the-open-box', step: 6, picked: [0, 1, 2, 3, 0, 1, 2, 3, 0] })).toBe(false);
-    expect(body({ type: 'case', id: 'the-open-box', step: 6, picked: [8] })).toBe(false);
+    expect(body({ type: 'case', id: 'the-open-box', step: 6, picked: Array.from({ length: 41 }, (_, i) => i % 4) })).toBe(false);
+    expect(body({ type: 'case', id: 'the-open-box', step: 6, picked: [40] })).toBe(false);
   });
 });

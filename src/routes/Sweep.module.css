@@ -1,0 +1,107 @@
+/* The room: the drawing, the width of the screen, and a button over every thing in it. */
+.room {
+  position: relative;
+  box-sizing: border-box;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--radius-xs);
+  background: var(--paper);
+  box-shadow: 0 var(--ledge) 0 var(--board-edge);
+}
+.scene {
+  display: block;
+  width: 100%;
+  height: 100%;
+  user-select: none;
+}
+/* Until the drawing is in, its shape stands where it will be. */
+.wait {
+  position: absolute;
+  inset: 0;
+  display: flex;
+}
+.wait > span {
+  flex: 1;
+  height: 100% !important;
+}
+/* A thing is a button the size of the thing. Nothing shows until it is tapped: the drawing is the room. */
+.thing {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+/* A small thing is still a thumb's width to tap: the hit area grows round it to 40 at least, the drawing does not. */
+.thing::after {
+  content: '';
+  position: absolute;
+  inset: min(0px, calc(50% - var(--space-5)));
+}
+.thing:focus-visible {
+  outline: var(--space-0h) solid var(--fg);
+}
+.thing:disabled {
+  cursor: default;
+}
+/* Evidence comes after the room in the chapter, so it sits on top of what it lies on. */
+.thing[data-evidence] {
+  z-index: 1;
+}
+/* Found. Lime means found. */
+.thing[data-state='found'] {
+  box-shadow: inset 0 0 0 var(--space-1) var(--accent);
+}
+/* Missed: shown once the sweep is over, ringed in ink. */
+.thing[data-state='missed'] {
+  box-shadow: inset 0 0 0 var(--space-0h) var(--paper-ink);
+  background: color-mix(in srgb, var(--paper) 35%, transparent);
+}
+.thing[data-state='wrong'] {
+  background: color-mix(in srgb, var(--paper-ink) 18%, transparent);
+}
+.mark {
+  display: grid;
+  place-items: center;
+  width: var(--space-6);
+  height: var(--space-6);
+  border-radius: var(--radius-pill);
+  background: var(--paper-ink);
+  color: var(--paper);
+}
+.thing[data-state='found'] .mark {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+/* A tip-off: a quarter of the room ringed, never the thing. */
+.quarter {
+  position: absolute;
+  width: 50%;
+  height: 50%;
+  border: var(--space-0h) dashed var(--paper-ink);
+  border-radius: var(--radius-xs);
+  pointer-events: none;
+  box-sizing: border-box;
+}
+.quarter[data-quarter='0'] {
+  top: 0;
+  left: 0;
+}
+.quarter[data-quarter='1'] {
+  top: 0;
+  right: 0;
+}
+.quarter[data-quarter='2'] {
+  bottom: 0;
+  left: 0;
+}
+.quarter[data-quarter='3'] {
+  right: 0;
+  bottom: 0;
+}
