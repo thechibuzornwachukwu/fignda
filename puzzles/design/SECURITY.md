@@ -128,6 +128,7 @@ Risks: leaked keys, faked scores, AI endpoint abuse, injected text in shared con
 ## Privacy
 - Collect email, name, handle. Cookieless analytics (Cloudflare Web Analytics).
 - The look ("Who are we dressing?") is optional and personal. It is kept off `profiles`, which everyone can read, in `profile_private`. No view or function reads it. It orders choices in the avatar editor and nothing else: never ranking, matching or ads. A guest's answer stays in the browser.
+- Download my data: `export_my_data()`, signed in only, returns the caller's own rows as 1 JSON document. Other players appear by handle, never by id. A push address is left out (the browser holds it as a secret), and so are counts with no player on them.
 - Delete account cascades profile, plays, shares.
 - Privacy page before launch.
 

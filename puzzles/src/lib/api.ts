@@ -768,6 +768,13 @@ async function loadCustomGame(code: string): Promise<CustomGame | null> {
   return g ? { id: g.id, title: g.title, noun: g.noun, text: g.text, dict: g.dict, code: g.share_code } : null;
 }
 
+/** Everything kept about the signed in player, as 1 JSON document (`export_my_data`). */
+export async function exportMyData(): Promise<unknown> {
+  const { data, error } = await (await client()).rpc('export_my_data');
+  if (error || data == null) throw error ?? new Error('empty');
+  return data;
+}
+
 export async function deleteAccount(): Promise<void> {
   const { error } = await (await client()).rpc('delete_account');
   if (error) throw error;

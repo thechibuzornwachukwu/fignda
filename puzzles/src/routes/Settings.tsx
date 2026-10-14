@@ -1,12 +1,14 @@
 import { useState, useSyncExternalStore, type FormEvent } from 'react';
 import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Download } from 'lucide-react';
 import { Button } from '../components/Button';
+import { Icon } from '../components/Icon';
 import { Dialog } from '../components/Dialog';
 import { Field } from '../components/Field';
 import { Segmented } from '../components/Segmented';
 import { TextLink } from '../components/TextLink';
 import { Toggle } from '../components/Toggle';
-import { saveProfile } from '../lib/api';
+import { exportMyData, saveProfile } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { checkProfile } from '../lib/streak';
 import { setSound, soundOn, subscribeSound } from '../lib/sound';
@@ -189,6 +191,8 @@ export function Settings() {
         </div>
       </section>
 
+      <MyData handle={p.handle} />
+
       <section className={styles.danger} aria-labelledby="s-danger">
         <h2 id="s-danger" className={styles.h2}>
           Delete account
@@ -231,4 +235,42 @@ export function Settings() {
 function SoundSetting() {
   const on = useSyncExternalStore(subscribeSound, soundOn, () => true);
   return <Toggle label="Sounds" note="A soft tick per letter as you select, a chime when you find a word." checked={on} onChange={setSound} />;
+}
+
+/** Download my data: everything kept about this player, saved as a JSON file named for them and the day. */
+function MyData({ handle }: { handle: string }) {
+  const [state, setState] = useState<'idle' | 'busy' | 'failed'>('idle');
+  const download = async () => {
+    setState('busy');
+    try {
+      const data = await exportMyData();
+      const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `gazecraft-${handle}-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      setState('idle');
+    } catch {
+      setState('failed');
+    }
+  };
+  return (
+    <section className={styles.section} aria-labelledby="s-data">
+      <h2 id="s-data" className={styles.h2}>
+        Your data
+      </h2>
+      <div className={styles.row}>
+        <Button variant="secondary" onClick={download} disabled={state === 'busy'}>
+          <Icon icon={Download} size={18} />
+          Download my data
+        </Button>
+        {state === 'failed' && (
+          <span className={styles.help} role="alert">
+            That did not download. Try again.
+          </span>
+        )}
+      </div>
+    </section>
+  );
 }

@@ -326,7 +326,7 @@ A stage, the way a runner game shows its characters: who you are is the front of
 - Under the rows, everything else about the player: the week, Badges (signed in: the earned ones, then the next 3 to aim for, said as not earned yet; `#badges`; a skeleton of pills while they load), and Your records (kept in this browser, so guests have them too; with none, one line that says where they come from).
 - Last, one link, "See your public page", to `/u/HANDLE`. A guest is told their choices are kept in this browser, with a link to sign in.
 - A badge notification opens `/me#badges`.
-- Settings holds the account only (name, sign out, reminders, theme, delete) and one line pointing here.
+- Settings holds the account only (name, sign out, reminders, theme, download my data, delete) and one line pointing here.
 
 **Cases:** one thing to do, then the path. In order: PageHeader "Cases" with the crew as its action, room invites, the path, and at the foot "Make a puzzle" once it is unlocked. Nothing else: the week and the way to the board are not here. The crew is 2 faces at 36 in a pill, the player's avatar and their pet, leading to `/me` ("Change your detective, pet and gear").
 

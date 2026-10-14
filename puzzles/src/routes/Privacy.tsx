@@ -92,6 +92,14 @@ export function Privacy() {
       </section>
 
       <section className={styles.section}>
+        <h2 className={styles.h2}>Getting a copy</h2>
+        <p>
+          Download everything we keep about you from <Link to="/settings">Settings</Link>, as 1 file. Other players in it
+          are named by their handle only.
+        </p>
+      </section>
+
+      <section className={styles.section}>
         <h2 className={styles.h2}>Deleting everything</h2>
         <p>
           Delete your account from <Link to="/settings">Settings</Link>. It removes your profile, plays,
@@ -100,7 +108,7 @@ export function Privacy() {
         </p>
       </section>
 
-      <p className={styles.updated}>Updated 12 Oct 2026.</p>
+      <p className={styles.updated}>Updated 14 Oct 2026.</p>
     </article>
   );
 }

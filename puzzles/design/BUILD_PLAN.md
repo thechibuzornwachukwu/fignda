@@ -130,7 +130,6 @@ All decided on the server from verified plays. One currency: lifetime points set
 
 Play with no account, and sponsors get numbers, never people.
 
-- [ ] "Download my data" in Settings. Delete exists.
 - [ ] How long play logs, jobs, reports and notifications are kept, written into `SECURITY.md` and deleted by the hourly job.
 - [ ] Find data kept as counts per word and per puzzle. A deleted account leaves the counts and takes the plays.
 - [ ] Private boards: a data agreement with the school or company, and an organiser who sees only its own members.
