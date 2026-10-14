@@ -3,7 +3,11 @@
 // bundle). Facts only: nothing here claims numbers we do not have.
 
 import gamesFile from '../../data/games.json';
+import twoSigns from '../../design/stories/the-2-signs.json';
+import earlyBus from '../../design/stories/the-early-bus.json';
 import longSpoon from '../../design/stories/the-long-spoon.json';
+import openBox from '../../design/stories/the-open-box.json';
+import missingYear from '../../design/stories/the-year-that-is-missing.json';
 import type { Chapter } from '../engine/chapter';
 import { pick } from '../copy';
 import { buildHiddenWords } from '../engine/hiddenWords';
@@ -12,7 +16,7 @@ import { sponsorOf } from '../engine/sponsor';
 type Game = { id: string; category: string; title: string; noun: string; text: string; dict: string[]; sponsor?: unknown };
 const data = gamesFile as unknown as { games: Game[]; dailyPool: string[]; filters: string[] };
 /** Every written case. A new file in `design/stories` is added here: a test fails until it is. */
-export const CASES: readonly Chapter[] = [longSpoon] as unknown as Chapter[];
+export const CASES: readonly Chapter[] = [longSpoon, openBox, earlyBus, missingYear, twoSigns] as unknown as Chapter[];
 /** Curated order for lists: follows the filter tabs, so no single topic leads. */
 const games = [...data.games].sort((a, b) => data.filters.indexOf(a.category) - data.filters.indexOf(b.category));
 
@@ -172,7 +176,7 @@ function gamePage(origin: string, g: Game): Page {
 
 /** A written case: its title, what is missing, and the way in. Nothing of its evidence or its ending. */
 function casePage(origin: string, c: Chapter): Page {
-  const description = `${c.brief[0] ?? c.item.line} ${c.steps.length} steps, from the brief to the line-up.`;
+  const description = `${c.brief[0] ?? c.item.line} ${c.steps.length} steps, from the brief to the ending.`;
   return {
     title: `${c.title} · A case · ${SITE}`,
     description,

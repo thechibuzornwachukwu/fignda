@@ -1,0 +1,172 @@
+{
+  "id": "the-year-that-is-missing",
+  "casebook": "lantern-row",
+  "number": 4,
+  "shape": "where-is-it",
+  "title": "The year that is missing",
+  "item": {
+    "name": "The 2011 minute book",
+    "line": "The hall's record of 1 year, bound in green and 46 cm tall. It says what was decided about the name planed off the Long Spoon."
+  },
+  "place": "The library",
+  "brief": [
+    "A card under a wiper, with a drawing of the rod and an open eye. That is 3 cards now, and nobody admits to sending 1.",
+    "On Wednesday the committee sent for the hall's minute book for 2011. Its place on the library shelf is empty.",
+    "Minute books are never lent. 3 people have a reason to care about that year.",
+    "Leave who for later. Where is it?"
+  ],
+  "board": {
+    "pins": [
+      {
+        "kind": "map",
+        "label": "The library, by shelf"
+      },
+      {
+        "kind": "note",
+        "title": "Minutes shelf",
+        "lines": [
+          "2010 and 2012 there.",
+          "2011 gone.",
+          "Never lent."
+        ]
+      },
+      {
+        "kind": "faces"
+      }
+    ],
+    "scrawl": [
+      "Not who.",
+      "Where?"
+    ]
+  },
+  "suspects": [
+    {
+      "who": "the baker",
+      "name": "Marco",
+      "look": "masculine",
+      "line": "Wants 2011 read aloud. Says the count was wrong that year too.",
+      "says": "I asked for it at the desk, like anybody would."
+    },
+    {
+      "who": "the caretaker",
+      "name": "Mr Cole",
+      "look": "masculine",
+      "line": "Held the plane in 2011. Has a key to every room.",
+      "says": "I was home on Monday night. I do not go near that shelf."
+    },
+    {
+      "who": "the librarian",
+      "name": "Noor",
+      "look": "feminine",
+      "line": "Keeps the shelves, the ledger and the desk.",
+      "says": "It was on its shelf when I dusted on Monday."
+    }
+  ],
+  "culprit": "the librarian",
+  "steps": [
+    {
+      "place": "The minutes shelf",
+      "method": "buried-sums",
+      "thing": "The shelf list and the loans ledger. One gives every volume's size, the other every book that has left the building.",
+      "fact": "The 2011 volume is the tall one: green, 46 cm. No minute book is in the loans ledger, this week or ever.",
+      "pin": "2011: green, 46 cm tall",
+      "lead": "It was not lent. Somebody asked for it, though: the request desk blots every slip.",
+      "to": "The request desk"
+    },
+    {
+      "place": "The request desk",
+      "method": "mirror",
+      "thing": "The desk blotter. The request slips go in a tray, but the blotter kept their wet ink, back to front.",
+      "text": ".yrekab eht yb rof deksA .evif net yadseuT ,flehs no toN .1102 ,setuniM",
+      "words": [
+        "minutes",
+        "shelf",
+        "tuesday",
+        "bakery"
+      ],
+      "fact": "Marco asked for the 2011 minutes on Tuesday at 10.05 and was told: not on shelf. A man who has the book does not queue to ask for it.",
+      "pin": "Gone by Tuesday, 10.05",
+      "clears": "the baker",
+      "gives": "chance",
+      "lead": "Gone between Monday's dusting and Tuesday morning. The street has made up its mind: Mr Cole, on Monday night, with his tool bag.",
+      "to": "The caretaker's desk"
+    },
+    {
+      "place": "The caretaker's desk",
+      "method": "claim",
+      "thing": "The street's claim, set against the tape measure. His tool bag is on the desk.",
+      "claim": {
+        "says": "Mr Cole carried it out on Monday night, zipped in his tool bag. The bag is 35 cm long.",
+        "facts": [
+          {
+            "text": "It was gone by Tuesday, 10.05.",
+            "from": 2
+          },
+          {
+            "text": "The 2011 volume is 46 cm tall.",
+            "from": 1,
+            "decides": true
+          }
+        ],
+        "possible": false
+      },
+      "fact": "It could not be done. 46 cm of book does not zip into 35 cm of bag, and it is too tall to go out under a coat.",
+      "pin": "Too tall for the bag",
+      "clears": "the caretaker",
+      "lead": "So it never left the library. A book that tall stands on 1 other shelf: the atlases. The suggestions box beside them has a card that reads oddly.",
+      "to": "The atlas shelf"
+    },
+    {
+      "place": "The atlas shelf",
+      "method": "hidden-words",
+      "thing": "A card from the suggestions box. It is a message passed in plain sight, and it came from the Open Eye.",
+      "text": "That last disco very loud. Rich ideas, though. The sun cuts in by ten.",
+      "words": [
+        "atlas",
+        "cover",
+        "hide",
+        "uncut"
+      ],
+      "fact": "Read the way the Open Eye teaches, it says: \"Hide it under an atlas cover. Leave it uncut.\" Somebody was told how, and told not to read it.",
+      "pin": "Under an atlas cover",
+      "gives": "means",
+      "lead": "4 finds, 4 places, all inside 1 building. Walk it back before anybody is named.",
+      "to": "The library door"
+    },
+    {
+      "place": "The library door",
+      "method": "trail",
+      "thing": "The case, walked once more from the door. Each find goes back where it was found.",
+      "fact": "Every stop is behind the desk. By the door is a note to the committee, refused twice: \"Lock 2011 away until tempers cool.\"",
+      "pin": "Lock it away: refused",
+      "gives": "motive",
+      "lead": "It never left, it was moved by somebody who knows the shelves, and somebody asked twice for it to be kept safe. 3 accounts are going round.",
+      "to": "The reading room"
+    },
+    {
+      "place": "The reading room",
+      "method": "accounts",
+      "thing": "3 accounts of where the book went. Each piece of evidence already on the board strikes 1 of them out.",
+      "accounts": [
+        {
+          "text": "It was lent out by mistake and is sitting in somebody's house.",
+          "struckBy": 1
+        },
+        {
+          "text": "Mr Cole took it out of the building on Monday night, to keep 2011 buried.",
+          "struckBy": 3
+        },
+        {
+          "text": "It never left. It was shelved under an atlas cover by somebody who wanted it safe, not gone.",
+          "stands": true
+        }
+      ],
+      "fact": "Chance: before Tuesday, 10.05. Means: an atlas cover. Motive: a request to lock it away, refused twice."
+    }
+  ],
+  "ending": {
+    "found": "The 2011 minutes are on the atlas shelf, inside the cover of an atlas of rivers. The year is tied shut with ribbon and the committee's wax, uncut. Nobody has read it, Noor included.",
+    "confession": "They were going to pull it apart across my desk before the committee had even met. I did not hide it from them. I shelved it where it would wait.",
+    "after": "The book goes into the hall safe, ribbon uncut, until the committee meets. Noor keeps her desk. Tucked inside the atlas cover is a plain card with an open eye."
+  }
+}

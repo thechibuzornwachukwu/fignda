@@ -36,7 +36,7 @@ test.describe('the journey', () => {
   test('a new guest: the first clue is next with their avatar on it, the rest are locked', async ({ page }) => {
     await open(page);
     await expect(journey(page)).toHaveAttribute('data-journey', 'going');
-    await expect(journey(page).getByRole('heading', { level: 2, name: 'Your path' })).toBeVisible();
+    await expect(journey(page).getByRole('heading', { level: 2, name: 'Practice' })).toBeVisible();
     const states = await statesOf(page);
     expect(states.length).toBeGreaterThan(1);
     expect(states[0]).toBe('next');

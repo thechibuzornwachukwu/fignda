@@ -1,5 +1,5 @@
 /** Puzzle screens, and a step of a written case: they carry their own bottom bar and their own way back. */
-export const isPuzzle = (p: string) => /^\/(play\/[^/]+(\/\d+)?|d\/\d+|p\/[^/]+|case\/[^/]+\/\d+)\/?$/.test(p);
+export const isPuzzle = (p: string) => /^\/(play\/[^/]+(\/\d+)?|d\/\d+|p\/[^/]+|(case|cold)\/[^/]+\/\d+|interlude\/[^/]+)\/?$/.test(p);
 
 /** The first minute: one question per screen, and no way out but Skip. */
 export const isWelcome = (p: string) => /^\/welcome\/?$/.test(p);

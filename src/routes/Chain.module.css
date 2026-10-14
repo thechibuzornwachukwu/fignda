@@ -1,0 +1,123 @@
+/* What happened, top to bottom, on 1 line, with a gap in it. */
+.events {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: 0 var(--space-1);
+  list-style: none;
+}
+.events::before {
+  content: '';
+  position: absolute;
+  top: var(--space-3);
+  bottom: var(--space-3);
+  left: calc(var(--space-1) + var(--space-2) - 1px);
+  width: 2px;
+  background: var(--line-3);
+}
+.event {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+}
+.dot {
+  flex: none;
+  width: var(--space-4);
+  height: var(--space-4);
+  margin-top: var(--space-1);
+  border-radius: var(--radius-pill);
+  background: var(--fg);
+  box-shadow: 0 0 0 var(--space-1) var(--bg);
+}
+.event[data-gap] .dot {
+  background: var(--bg);
+  box-shadow:
+    inset 0 0 0 2px var(--fg),
+    0 0 0 var(--space-1) var(--bg);
+}
+.text {
+  composes: small from '../styles/type.module.css';
+  color: var(--fg);
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+/* The gap: the shape of a slip, empty. */
+.gap {
+  flex: 1 1 auto;
+  min-height: var(--space-10);
+  border: 2px dashed var(--line-3);
+  border-radius: var(--radius-xs);
+}
+.slip,
+.option {
+  composes: small from '../styles/type.module.css';
+  position: relative;
+  box-sizing: border-box;
+  padding: var(--space-2) var(--space-3);
+  background: var(--paper);
+  color: var(--paper-ink);
+  font-weight: 700;
+  text-align: left;
+  overflow-wrap: anywhere;
+  box-shadow: 0 var(--ledge) 0 var(--board-edge);
+}
+.slip {
+  flex: 1 1 auto;
+}
+/* The one that fits. Lime means found. */
+.tick {
+  position: absolute;
+  top: calc(var(--space-2) * -1);
+  right: calc(var(--space-2) * -1);
+  display: grid;
+  place-items: center;
+  width: var(--space-6);
+  height: var(--space-6);
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+/* The 3 things that could have happened, as slips to put in the gap. */
+.options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: 0 var(--space-1);
+  list-style: none;
+}
+.option {
+  display: block;
+  width: 100%;
+  min-height: var(--space-12);
+  margin: 0;
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+.option[data-struck] {
+  color: var(--paper-muted);
+  text-decoration: line-through;
+  cursor: default;
+}
+.tries {
+  display: inline-flex;
+  gap: var(--space-1h);
+}
+.pip {
+  width: var(--space-3);
+  height: var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--fg);
+}
+.pip[data-spent] {
+  background: none;
+  box-shadow: inset 0 0 0 2px var(--line-3);
+}

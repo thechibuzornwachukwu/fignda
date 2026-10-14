@@ -208,7 +208,8 @@ describe('the dock’s Play button', () => {
       </MemoryRouter>,
     );
   const play = () => screen.getByRole('navigation', { name: 'Tabs' }).querySelector('[data-play]')!;
-  const closeCases = () => localStorage.setItem('gazecraft-chapters', JSON.stringify({ 'the-long-spoon': { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3 } }));
+  const all = { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3 };
+  const closeCases = () => localStorage.setItem('gazecraft-chapters', JSON.stringify({ 'the-long-spoon': all, 'the-open-box': all, 'the-early-bus': all, 'the-year-that-is-missing': all, 'the-2-signs': all }));
 
   it('order is Cases, You, Play, Squad, Ranks, and Play opens the case that is open', () => {
     dock();

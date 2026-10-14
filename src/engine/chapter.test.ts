@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import pools from '../../data/copy.json';
-import { accountStars, accountThatStands, chapterProgress, checkChapter, LINEUP_TRIES, lineupStars, NAME_MAX, stepPuzzle, type Chapter } from './chapter';
+import { accountStars, accountThatStands, chapterProgress, checkChapter, claimPick, claimStars, trailOf, trailStars, trailWrongs, LINEUP_TRIES, lineupStars, NAME_MAX, pickStep, pickWrongs, stepPuzzle, type Chapter } from './chapter';
 import { buildHiddenWords } from './hiddenWords';
 import { buildMirror } from './mirror';
 import { buildSums } from './sums';
@@ -57,9 +57,15 @@ describe('checkChapter', () => {
 
   it('a board of 1 is a chapter in any shape but a "who did it"', () => {
     expect(checkChapter(withSuspects(1), roles)).toEqual(['a "who did it" needs 2 suspects or more']);
+    // A "prove it" has nobody to pick from a line, so it closes on the accounts.
     const c = { ...withSuspects(1), shape: 'prove-it' as const };
-    c.steps[c.steps.length - 1]!.method = 'unmask';
+    const last = c.steps[c.steps.length - 1]!;
+    last.method = 'accounts';
+    last.accounts = [{ text: 'It was borrowed.', struckBy: 1 }, { text: 'It was taken.', stands: true }, { text: 'It was lost.', struckBy: 2 }];
     expect(checkChapter(c, roles)).toEqual([]);
+    last.method = 'unmask';
+    delete last.accounts;
+    expect(checkChapter(c, roles)).toEqual(['step 6: a case closes on its last step, and only there: the line-up or the accounts']);
   });
 
   it('no board of 0 or of 6', () => {
@@ -265,9 +271,150 @@ describe('which account fits', () => {
     expect([0, 1, 2, 3].map(accountStars)).toEqual([3, 2, 1, 1]);
   });
 
-  it('a draft is written and checked, and not open to players', async () => {
+  it('every written chapter is open to players, in the order of the casebook', async () => {
     const { chapters } = await import('../games/chapters');
-    expect(box().draft).toBe(true);
-    expect(chapters.map((c) => c.id)).toEqual(['the-long-spoon']);
+    expect(files.some((f) => read(f).draft)).toBe(false);
+    expect(chapters.map((c) => c.id)).toEqual(['the-long-spoon', 'the-open-box', 'the-early-bus', 'the-year-that-is-missing', 'the-2-signs']);
+  });
+
+  it('a case closes on its last step and nowhere else', () => {
+    const c = box();
+    c.steps[2]!.method = 'accounts';
+    c.steps[2]!.accounts = c.steps[5]!.accounts;
+    expect(checkChapter(c, roles)).toContain('step 3: a case closes on its last step, and only there: the line-up or the accounts');
+  });
+});
+
+describe('could it be done', () => {
+  const bus = (): Chapter => read('the-early-bus.json');
+
+  it('The early bus tests 1 claim against 2 facts already found, and 1 of them decides', () => {
+    const c = bus();
+    const step = c.steps[3]!;
+    expect(step.method).toBe('claim');
+    expect(step.claim!.facts.map((f) => f.from)).toEqual([1, 2]);
+    expect(step.claim!.facts.filter((f) => f.decides)).toHaveLength(1);
+    // It has no board of letters or digits, and it is not where the case closes.
+    expect(stepPuzzle(c, 4)).toBeNull();
+    expect(c.steps[5]!.method).toBe('accounts');
+  });
+
+  it('a "prove it" names its 1 suspect from the brief, and any other shape still may not', () => {
+    const c = bus();
+    expect(c.suspects).toHaveLength(1);
+    expect(c.steps.some((s) => /Kwame/.test(`${s.lead} ${s.fact}`))).toBe(true);
+    expect(checkChapter(c, roles)).toEqual([]);
+    expect(checkChapter({ ...c, shape: 'nothing-was-taken' }, roles)).toContain('step 3: it names the culprit');
+  });
+
+  it('a fact comes from a step before, exactly 1 decides, there are 2, and only this method has a claim', () => {
+    const c = bus();
+    c.steps[3]!.claim!.facts[1]!.from = 4;
+    expect(checkChapter(c, roles)).toContain('step 4: a fact comes from a step before this one');
+    const d = bus();
+    d.steps[3]!.claim!.facts[0]!.decides = true;
+    expect(checkChapter(d, roles)).toContain('step 4: exactly 1 fact decides');
+    const e = bus();
+    e.steps[3]!.claim!.facts.pop();
+    expect(checkChapter(e, roles)).toContain('step 4: a claim needs what is said, 2 facts and whether it could be done');
+    const f = bus();
+    f.steps[0]!.claim = f.steps[3]!.claim;
+    expect(checkChapter(f, roles)).toContain('step 1: only a "could it be done" step has a claim');
+    const g = bus();
+    g.steps[3]!.claim!.says = 'Nobody could!';
+    expect(checkChapter(g, roles)).toContain('step 4: a claim breaks the copy rules');
+  });
+
+  it('3 stars at once, 2 after a wrong verdict, 1 after 2', () => {
+    expect([0, 1, 2, 3].map(claimStars)).toEqual([3, 2, 1, 1]);
+  });
+});
+
+describe('a step answered by picking', () => {
+  const accounts = pickStep(read('the-open-box.json').steps[5])!;
+  const claim = pickStep(read('the-early-bus.json').steps[3])!;
+
+  it('knows the right pick, out of how many, and the wrong picks allowed', () => {
+    expect(accounts).toMatchObject({ right: 2, options: 3, tries: 2 });
+    // The 2nd fact decides, and it could be done.
+    expect(claim).toMatchObject({ right: claimPick(1, true), options: 4, tries: 2 });
+    expect(pickStep(read('the-long-spoon.json').steps[0])).toBeNull();
+    expect(pickStep(undefined)).toBeNull();
+  });
+
+  it('counts the wrong picks before the right one, or every try spent', () => {
+    expect(pickWrongs(accounts, [2])).toBe(0);
+    expect(pickWrongs(accounts, [0, 2])).toBe(1);
+    expect(pickWrongs(accounts, [0, 1])).toBe(2);
+    expect(pickWrongs(claim, [claimPick(1, true)])).toBe(0);
+    expect(pickWrongs(claim, [claimPick(0, true), claimPick(1, false)])).toBe(2);
+  });
+
+  it('refuses a list nobody could have made', () => {
+    for (const picks of [[], [0], [2, 0], [0, 0], [0, 1, 2], [3], [-1], [0.5, 2]]) expect(pickWrongs(accounts, picks), picks.join()).toBe(-1);
+    expect(pickWrongs(claim, [4])).toBe(-1);
+  });
+});
+
+describe('walk it back, the trail', () => {
+  const year = (): Chapter => read('the-year-that-is-missing.json');
+
+  it('is made of the chapter itself: its places in order, and its finds handed back out of order', () => {
+    const t = trailOf(year(), 5)!;
+    expect(t.places).toEqual(['The minutes shelf', 'The request desk', "The caretaker's desk", 'The atlas shelf']);
+    expect(t.finds.map((f) => f.pin).sort()).toEqual(['2011: green, 46 cm tall', 'Gone by Tuesday, 10.05', 'Too tall for the bag', 'Under an atlas cover'].sort());
+    expect(t.finds.map((f) => f.place)).not.toEqual([0, 1, 2, 3]);
+    expect(trailOf(year(), 5)).toEqual(t);
+    for (const f of t.finds) expect(year().steps[f.place]!.pin).toBe(f.pin);
+  });
+
+  it('needs 3 finds behind it, each at a place of its own', () => {
+    expect(trailOf(year(), 3)).toBeNull();
+    const c = year();
+    c.steps[1]!.place = c.steps[0]!.place;
+    expect(trailOf(c, 5)).toBeNull();
+    const d = year();
+    d.steps[1]!.method = 'trail';
+    expect(checkChapter(d, roles)).toContain('step 2: a trail needs 3 finds or more behind it, each at a place of its own');
+  });
+
+  it('a find gets 1 pick, and a wrong place costs a star and nothing else', () => {
+    const t = trailOf(year(), 5)!;
+    const right = t.finds.map((f) => f.place);
+    expect(trailWrongs(t, right)).toBe(0);
+    expect(trailWrongs(t, right.map((p) => (p + 1) % 4))).toBe(4);
+    for (const picks of [[], right.slice(1), [...right, 0], [4, 0, 1, 2], [0.5, 0, 1, 2]]) expect(trailWrongs(t, picks)).toBe(-1);
+    expect([0, 1, 2, 4].map(trailStars)).toEqual([3, 2, 1, 1]);
+  });
+});
+
+describe('the missing step', () => {
+  const signs = (): Chapter => read('the-2-signs.json');
+
+  it('The 2 signs has 3 events with 1 gap between them, and 1 of 3 things fits it', () => {
+    const c = signs();
+    const k = c.steps[2]!.chain!;
+    expect(c.steps[2]!.method).toBe('chain');
+    expect(k.events).toHaveLength(3);
+    expect(k.gap).toBe(1);
+    expect(pickStep(c.steps[2])).toMatchObject({ right: 1, options: 3, tries: 2 });
+    expect(stepPuzzle(c, 3)).toBeNull();
+    // A case where nothing was taken asks its own question at the line-up.
+    expect(c.ask).toBe('Who changed the 2 signs?');
+  });
+
+  it('the gap is in between, exactly 1 thing fits, and only this method has a chain', () => {
+    const c = signs();
+    c.steps[2]!.chain!.gap = 3;
+    expect(checkChapter(c, roles)).toContain('step 3: the gap is between 2 events');
+    const d = signs();
+    d.steps[2]!.chain!.options[0]!.fits = true;
+    expect(checkChapter(d, roles)).toContain('step 3: exactly 1 thing fits the gap');
+    const e = signs();
+    e.steps[2]!.chain!.events.pop();
+    expect(checkChapter(e, roles)).toContain('step 3: a chain needs 3 events and 3 things that could fill the gap');
+    const f = signs();
+    f.steps[0]!.chain = f.steps[2]!.chain;
+    expect(checkChapter(f, roles)).toContain('step 1: only a "missing step" step has a chain');
   });
 });

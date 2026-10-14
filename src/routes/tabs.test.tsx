@@ -116,7 +116,7 @@ describe('Games', () => {
     expect(title()).toBe('Cases');
     expect(screen.queryByRole('link', { name: /Daily #\d+/ })).toBeNull();
     expect(screen.getByRole('link', { name: 'Open the brief' })).toHaveAttribute('href', '/case/the-long-spoon');
-    expect(within(screen.getByRole('region', { name: 'Your path' })).getAllByRole('link').length).toBeGreaterThan(0);
+    expect(within(screen.getByRole('region', { name: 'Practice' })).getAllByRole('link').length).toBeGreaterThan(0);
     expect(screen.queryByRole('region', { name: 'All games' })).toBeNull();
     expect(screen.getByRole('link', { name: /Change your detective, pet and gear/ })).toHaveAttribute('href', '/me');
     // Give the any-topic check time to answer: it still must not show.
@@ -135,7 +135,7 @@ describe('Games', () => {
     open('/play');
     expect(screen.queryByRole('link', { name: 'Make a puzzle' })).toBeNull();
     expect(screen.queryByText('Play today')).toBeNull();
-    expect(screen.getByRole('region', { name: 'Your path' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Practice' })).toBeInTheDocument();
     expectNoHoles();
   });
 
@@ -150,7 +150,7 @@ describe('Games', () => {
     open('/play?f=Nothing');
     expect(title()).toBe('Cases');
     expect(screen.queryByRole('group', { name: 'Filter games' })).toBeNull();
-    expect(screen.getByRole('region', { name: 'Your path' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Practice' })).toBeInTheDocument();
   });
 
   it('the direct link shows any topic before it is unlocked, and keeps it', async () => {
@@ -188,7 +188,7 @@ describe('Games', () => {
     world.api.myGameInvites = fail;
     open('/play');
     await Promise.resolve();
-    expect(screen.getByRole('region', { name: 'Your path' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Practice' })).toBeInTheDocument();
     expectNoHoles();
   });
 });

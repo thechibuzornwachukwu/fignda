@@ -1,6 +1,6 @@
 # Build plan
 
-What is left, in sets that ship one at a time. What is built is in `SPEC.md` and git history. The picture of this plan is `NEWPLAN.html`; where they differ, this file wins.
+What is left, in sets that ship one at a time. What is built is in `SPEC.md` and git history. How the game is drawn today, on 1 page: `design/sheet/current.png` (`npm run sheet:render`). Ink is for the crime scenes, the evidence and the board only: the pets, the players, the cast and the screens stay in clean shapes, and the 2 share the warm ink, the cream paper and lime for found.
 
 Deploy: `npx supabase db push`, then `npm run deploy:api`, then `npm run deploy:site`.
 Seed (after `npm run db:seed:gen`): `npx supabase db query --linked -f supabase/seed.sql`.
@@ -88,18 +88,18 @@ Casebook 1: Lantern Row. The premise of each case is 1 line and is where its wri
 | # | Case | Shape | Suspects | New method | Premise | The loose end it leaves |
 |---|---|---|---|---|---|---|
 | 1 | The long spoon (written) | Who did it | 4 | The line-up | The prize spoon is gone from a locked cabinet the night before the 20th final | The committee must vote on whether the 19th name stays |
-| 2 | The open box (written, a draft) | Nothing was taken | 2 | Which account fits | The morning after the vote the ballot box is found unsealed, with every vote in it | 1 card in the box is not a vote: it has an open eye on it |
-| 3 | The early bus | Prove it | 1 | Could it be done | The last bus left 9 minutes early on the night of the final. The driver says the hall clock was fast | Somebody showed him the clock can be set from outside |
-| 4 | The year that is missing | Where is it | 3 | Walk it back, the trail | The hall's minute book for 2011 is gone from its shelf in the library | It is found with the page uncut. Reading it waits for case 8 |
-| | Interlude | | | | A message to the Open Eye, found in the returned book | |
+| 2 | The open box (written) | Nothing was taken | 2 | Which account fits | The morning after the vote the ballot box is found unsealed, with every vote in it | 1 card in the box is not a vote: it has an open eye on it |
+| 3 | The early bus (written) | Prove it | 1 | Could it be done | The last bus left 9 minutes early on the night of the final. The driver says the hall clock was fast | Somebody showed him the clock can be set from outside |
+| 4 | The year that is missing (written) | Where is it | 3 | Walk it back, the trail | The hall's minute book for 2011 is gone from its shelf in the library | It is found with the page uncut. Reading it waits for case 8 |
+| | Interlude: The bookmark (written) | | | | A message to the Open Eye, found in the returned book | |
 | 5 | The light in the hall | What is it really | 4 | Sweep the room | A light moves about the locked hall at night, and the street has decided it is haunted | Whoever it was had a key nobody signed for |
-| 6 | The 2 signs | Who did it | 2 | The missing step | 2 stalls wake to each other's signs on market day, and each owner blames the other | Both signs were repainted by the same hand |
+| 6 | The 2 signs (written, open after case 4) | Who did it | 2 | The missing step | 2 stalls wake to each other's signs on market day, and each owner blames the other | Both signs were repainted by the same hand |
 | 7 | The other spoon | Prove it | 1 | The torn page | A second Long Spoon turns up for sale, with all 20 names on it | The seller was sent the list of names by post |
 | | Interlude | | | | The envelope the list came in | |
 | 8 | Who carries the cards | Who did it | 5 | None: every method so far | 7 cases, 7 cards with an open eye. 1 person on Lantern Row has been handing them out | The page from 2011 is read. The Open Eye itself is not named |
 
 Suspects run 4, 2, 1, 3, 4, 2, 1, 5, so no 2 neighbours match, and the shapes run through all 5 before any repeats twice.
-What this asks of the build, in order: case 2 is written and passes `checkChapter` (`design/stories/the-open-box.json`), marked `draft` so no player reaches it. Next is the screen for its last step, "Which account fits" (3 accounts, tap the one that stands, and each of the others shows the pin that strikes it out), the Worker's check of that step, and the ending of a case that is not a "who did it". Then the draft mark comes off. Then cases 3 and 4, each with its new method (sets 1i-d and 1i-b). Cold cases, because a fast player needs them the day the casebook opens. Then the path shows the casebook and the packs move to practice (sets 4e and 4c), which is the day it becomes the game. Then interludes (set 1e) and cases 5 to 8.
+What this asks of the build, in order: cases 1 to 4, case 6 and the first interlude are written and open. Case 6 is released ahead of case 5, which waits for the first drawn room (Sweep the room). Next: the room and case 5, then case 7 with The torn page, the second interlude and case 8. Beside them: the Open Eye file (set 1e), a drill with no culprit and no unmasking (set 4c), and cold cases and interludes kept on the account.
 
 ## Screens: one job each
 
@@ -154,6 +154,9 @@ Never for sale: hints, extra tries, time, or anything that touches a score; stre
 - [ ] Decide: what is sold to a church, a school or a wedding now. The price list sells a puzzle on the buyer's subject, which is a word hunt. It can stay that (sold as a drill, or a message hidden for the guests) or become a short case written for them, which costs more to make.
 - [ ] Decide: the 25 packs, one by one (set 4d). Suggested: chapters for the first 3 on the path and the 4 Naija packs, practice for the rest, and retire what reads badly.
 - [ ] Read The long spoon (`design/stories/the-long-spoon.json`) and say what is wrong with it before 1c is built on it. It is told on Market day (`fruits`): confirm or move it.
+- [ ] Read The 2 signs (`design/stories/the-2-signs.json`). The culprit is Tomas, the gardener, for a rosette, and he did not hold the brush. Its first brief line is written to follow case 4 for now: when case 5 is written, that line takes case 5's loose end.
+- [ ] Read The year that is missing and The bookmark (`design/stories`) as a player would. The culprit is Noor, the librarian, and nothing was stolen: she shelved it under another cover. Confirm or change.
+- [ ] Read The open box and The early bus (`design/stories`) as a player would, and say what is wrong. In The early bus the driver is Kwame, his reason is a daughter's flight, and the evidence names him before the end, which a "prove it" now allows: confirm or change each.
 - [ ] Casebook 1 is decided ("How the cases are structured"): Lantern Row, 8 cases, the player's own pace, and it becomes the game once 4 are written. Read the 8 premises and strike any you do not want before it is written.
 - [ ] Read every photo before it ships. In a first search of Wikimedia Commons, 2 of 7 photos had to be thrown out after a look: a guitar shown from the back, and beads with no string in the shot. The licence was fine on both. Somebody has to look.
 - [ ] Prices for the models above. None is set. Pets open at 3,000, 9,000 and 20,000 points for now (`PARTNER_POINTS` and `partner_slots`): confirm or change.
@@ -184,15 +187,11 @@ Rules for every set: write it into `SPEC.md` first. Engine work is pure TS with 
 Build in this order. The aim of 1c to 1g is one thing: The long spoon played from its brief to its ending, by a new player, on a phone. Each set leaves the live game whole: a case with no written chapter keeps today's flow until section 4 moves it.
 
 - [ ] **Set 1c. Photos on the board.** Photos for `item` pins replace the icon when the photo store exists (set 1i).
-- [ ] **Set 1e. The Open Eye file.** Every message to the Open Eye that a player has read is filed in one place, and the file grows across cases and across days: a case's notice, and each day's intercept with its fact. The texts of The long spoon are written and pass the engine (`design/stories/the-long-spoon.json`).
+- [ ] **Set 1e. The Open Eye file.** Every message to the Open Eye that a player has read is filed in one place, and the file grows across cases: a case's notice, and each interlude with what it says. Interludes are built (`SPEC.md` section 6, Interlude). The file is not.
 - [ ] **Set 1g. 5 people play it.** The long spoon is played by 5 people who have never seen the game, and what stops them is fixed. This no longer holds the second case back: the owner has asked for cases to be the game now, and 1 case is not a game.
 - [ ] **Set 1h. Call for backup.** On any step: a tip-off from the pet, a friend called into the step, or the case's 1 favour.
 - [ ] **Set 1i. New methods,** one a set, engine first, in this order: spot what is off (a drawn scene, the first method of set 1i-c), the torn page, 4 pictures and 1 word (real photos, with the photo store and the credits page it needs), invisible ink, rub the pad, ink not word, what stood here. No clock on any of them. The rest are on the canvas sheet. "Bigger tag" is left out: nothing in a real case asks for it. The long spoon uses 3 methods because 3 are built. Each new one is first used in a chapter, never shipped by itself.
-- [ ] **Set 1i-b. Walk it back** (the memory palace, or method of loci: things are remembered by where they stood along a route). 2 forms, engine first, no clock on either.
-  - The room, seen once. The physical reason: the scene was tidied before anybody photographed it, so the only record is the walk the detective took through it. The player walks a drawn room in a fixed order (door, shelf, window, table) with 1 thing at each stop, turns away when they choose, and then puts each thing back where it stood, or taps the stop where something is now missing or new. What was moved is the lead.
-  - The trail, before the line-up. The places of the case are the stops: store room, night stall, bakery, gate, notice board. The finds are handed back out of order and the player pins each to the place it was found. It is the case told once more in 30 seconds, and it is the only step made of the chapter itself, so it needs nothing written.
-  - A stop holds 1 thing, a room holds 4 to 6, and a tip-off puts 1 thing back. Wrong places cost nothing but a star: nobody is locked out.
-  - On screen it is "Walk it back", never "memory palace", "memory" or "recall". We promise the practice, never a result (Direction), and a method that says it trains memory breaks that promise.
+- [ ] **Set 1i-b. Walk it back, the room** (the memory palace, or method of loci). The trail is built (`SPEC.md` section 6). Left: the room, seen once. The physical reason: the scene was tidied before anybody photographed it, so the only record is the walk the detective took through it. The player walks a drawn room in a fixed order (door, shelf, window, table) with 1 thing at each stop, turns away when they choose, and then puts each thing back where it stood, or taps the stop where something is now missing or new. What was moved is the lead. A room holds 4 to 6 things, and a tip-off puts 1 back. No clock. On screen it is "Walk it back", never "memory palace", "memory" or "recall". Needs the first drawn room.
 
 - [ ] **Set 1i-c. Search the scene.** Finding the clues, not being handed them. A drawn room, no clock, and a tip-off points at a quarter of the room, never at the thing. Built one at a time, engine first:
 
@@ -208,16 +207,14 @@ Build in this order. The aim of 1c to 1g is one thing: The long spoon played fro
 
 | Method | Why it is real | What the player does | Needs |
 |---|---|---|---|
-| Which account fits | 3 people tell the evening 3 ways. Only 1 can be true | Read 3 short accounts. Each piece of evidence already found strikes out 1. Name the one left standing | Words only |
-| Could it be done | A claim has to survive the tape measure and the clock | Check a claim against 2 facts: a window 40 cm wide and a thing 90 cm long, or 12 minutes for a 20 minute walk. Say possible or not, and which fact decides it | Words and 2 numbers |
-| The missing step | A chain of events has a gap, and only 1 thing can fill it | 4 events in order with 1 blank. Pick, from 3, the event that must have happened in between | Words only |
 | Which came first | Traces lie on top of each other: a dry print under a wet one, dust over a ring | Put 3 or 4 traces in the order they were made | Small drawings of traces |
 | Walk it through | A route has to fit the building and the time | On a floor plan, lay the path from where they were seen to where the thing was. A path through a locked door, or one too long for the time, is refused | 1 floor plan |
 | Line of sight | A witness can only have seen what was in view | On the plan, from where the witness stood: could they have seen it? Tap what blocks the view, or say nothing does | The same floor plan |
 | Who could reach it | Means is physical: a shelf has a height and a person has a reach | The hook is 2.1 m up. Set each suspect against it, with or without the step ladder that was found | Words and numbers |
 
+- How a room is drawn (learned from xiaohu-ip-studio and Comfyui-Anima-Wardrobe, 14 Oct 2026). The sketches are in `design/sketches`, each an `.html` drawing and its `.png`: the hall (case 5), the hall in layers, the floor plan of the hall, traces, the sale room (case 7) and the committee room seen once. 1 look for every room, never drifting: warm cream ground, ink line in 1 weight with a slight hand wobble, flat muted fills (terracotta, sage, dusty blue, ochre, wood), even light, no gradient, texture or blur. Lime is never in a drawing: it only marks what was found. Every thing in a room is locked or swappable: the evidence is fixed by the chapter, the ordinary things around it can change, and none may clash with it. The test: take the evidence out and the room no longer tells the story. Each drawing is checked by eye and redrawn when a thing reads as something else.
 - Rules for both sets. No clock on any of them. Nobody is harmed in a scene: no blood, no weapons, no body, and a room is searched for a thing that was taken or hidden. A scenario is never a trick: every fact a method uses is on the board first. A wrong answer costs a star and never the lead.
-- Order: Which account fits, Could it be done and The missing step first, because they need no art and they give a chapter its third kind of work at once. Then Sweep the room, which needs the first drawn room. The second chapter is written to use at least 1 method from each set.
+- Built: Which account fits (case 2), Could it be done (case 3) and The missing step (case 6), in `SPEC.md` section 6. Next is Sweep the room, which needs the first drawn room.
 - `checkChapter` learns each method as it is built, and then asks a chapter for all 3 kinds of work.
 - [ ] **Set 1j. The other 4 shapes,** one written chapter each, each plotted backward and passed by `checkChapter`, which learns each shape's ending as it comes.
 - Later, once those are being played: Liar, Relay, Number series, Bury it.
@@ -237,9 +234,9 @@ The path, the daily, Make and the words on screen were built for a word game. Th
 - [ ] **Set 4h. Nothing is anchored on the word game.** The owner's word, 13 Oct 2026: remove the concept of the game being anchored on the old word game format. Records are off You. Left, in this order: (1) the landing page and the first minute lead with a case and a board, not a sentence with words hidden in it; (2) Cases is the cases: the path of 25 word packs moves to a practice shelf (set 4c) and no longer reads as the game; (3) a result speaks of what was learned, never of words found, time and score, outside practice; (4) the share card of a pack, its records, and the result lines about long words and rare finds go with the packs to practice; (5) the profile shows cases closed, medals and the run, never puzzles played and words found.
 - [ ] **Set 4a. No dailies, anywhere.** The owner's word: remove the concept completely, cases are the anchor. Done: no screen, link, reminder or search page offers a daily, `/d/N` and its answers open Cases, Ranks is the case board, and the run, friend streaks, points and badges count steps and clues on the server. Left, in passes that each leave the game working: (1) what a player can still read: a circle's table (it shows the last dailies: it becomes the case board for its members, which needs `chapter_board` to take a circle), a profile's "Last 14 dailies" and its daily counts, the "Perfect daily" badge, and the words daily or dailies in Privacy, Squad and sign in; (2) the code nobody can reach: the daily's branch of the game screen, its share card and text, its copy pools (`wrongDaily`, `doneToday`, `recordDaily`, `interceptBrief`, `interceptFact`), its records, and `src/games/daily.ts`; (3) the server: `/api/plays` stops taking a daily and the daily's own endpoints go, while its rows are kept so no score or badge is lost; (4) the tests of all of it. `dayNo` stays: it is the calendar a run is counted on, not the daily.
 - [ ] **Set 4b. The words on screen.** Every "puzzle", "game", "word game" and "find N words" a player reads is checked against the direction: the landing, the first minute, share text, the SEO pages. Reminders and the end of day line already say intercept. A case is a case, a sitting is a step, and a pack is practice. The search pages keep the words people search for until the numbers say what brings players in.
-- [ ] **Set 4c. Practice.** A shelf off the path for packs with no chapter, named as what they are in the story: drills the Open Eye sets its pupils. A drill has no culprit, no secret and no unmasking, so the 14 culprits stop repeating. It keeps its stars and its room.
+- [ ] **Set 4c. Practice.** The packs are a shelf at the foot of Cases, under "Practice". Left: a pack is still drawn as a case there. A drill has no culprit, no secret and no unmasking, so the 14 culprits stop repeating, and it is named as what it is in the story: drills the Open Eye sets its pupils. It keeps its stars and its room.
 - [ ] **Set 4d. The 25 packs are sorted,** one at a time: rewritten as a chapter, moved to practice, or retired. The 3 a new player meets first and the 4 Naija packs get chapters first. The read against `PUZZLE_STANDARD.md` happens here (`giveaways` flags bible, bnote, broad, nigeria, bpeople, world, afrobeats, eagles). A pack that reads badly is rewritten or retired, never just moved.
-- [ ] **Set 4e. The path is a casebook.** Cases shows casebook 1 under its banner: each case a file with its board, its steps as marks, and what is next lit. A case not yet written shows as a closed file with the date it opens. Closed cases fold. Interludes sit between cases as small marks. Practice is a shelf at the foot. Sums and Mirror clues stop being added to a pack by rule: a method is in a case because its chapter put it there.
+- [ ] **Set 4e. The path is a casebook.** Built: the banner, a file a case, steps as marks, closed files folded, interludes as marks, practice at the foot (`SPEC.md` section 6). Left: a file does not show its board, the next file has no "Tell me when it opens", and Sums and Mirror clues are still added to a pack by rule.
 
 ### 5. Seasonal cases
 
@@ -268,6 +265,15 @@ These replace the daily as the reason to come back. A case here is a written cha
 - A season that belongs to one country or one faith is offered, never forced: it shows where the player is or where they chose, and Settings can turn dress off. Somebody who does not keep Christmas still gets snow in December and no manger.
 - Nothing in a season is for sale or timed out: a case opened in its season can be finished after it, and moves to the archive (set 5a).
 - [ ] **Set 5d. The rest of the calendar,** one case at a time, each with its dress from the table above, in the order their dates come. A national day (Independence Day and others) is written only where there are players to play it.
+
+- [ ] **Set 5e. Badges worth unlocking.** The owner's word, 14 Oct 2026: today's medals are 4 metal discs with a number on them, and they are not worth unlocking. Every badge is its own drawing, never the same disc with a different number, and a badge is collected in sets, as Duolingo's are:
+  - The casebook: 1 badge a case, drawn from its story (the Long Spoon, the ballot tin, the bus clock, the green minute book, the 2 signs), and a large one for closing Lantern Row.
+  - The methods: 1 for each way of looking the first time it is done clean (the blotter, the till roll, the trail, the accounts, the missing step).
+  - The pets: Detective X, Tobs, Puff and Agent 404 each in a moment of their own, earned by closing cases with that pet beside you.
+  - Cold cases: the gold seal of each case, in 1 set.
+  - The seasons: 1 a season, from its things (a lantern, a pumpkin, a wreath), still earnable after the date.
+  - The run and the points stay, redrawn as things in the story (a key ring that gains keys, a notebook that fills) and no longer as a disc.
+  A badge not yet earned is its silhouette, so the set shows what is missing without a word. Unlocking one is a moment: it is drawn in, the pet reacts, and Share is 1 tap. Badges already earned on the server carry over to their new drawing. Drawn in the clean shapes of the cast, not in ink.
 
 ### 6. Make, one feature
 This is somewhat redundant though, given the game has changed to Detective type "Cases"
@@ -342,6 +348,10 @@ Play with no account, and sponsors get numbers, never people.
 - Reminder times follow the saved time zone. The daily changes at midnight UTC.
 - Machine-written puzzles stop for the day when the free limits run out.
 - The avatar on the waiting screen bobs and does not blink.
+- A step answered by picking (the accounts, a claim) played again is played knowing the answer, so its 3 stars can always be had. It scores no points, so no board moves.
+- A case opens when the one before it is closed, by the stars in this browser. A player who closed case 1 on another device and is not signed in here finds case 2 shut.
+- A cold case, its gold seal and an interlude read are kept in this browser only. A second device starts them again, and nothing about them is on the account or a board.
+- The trail gives a find 1 pick. A player who taps the same stop 4 times finishes with 1 star and the lead.
 - Mirror words are found, not written: they are whatever everyday words a paragraph happens to hold backwards, so they have nothing to do with the puzzle's subject. A case whose text holds fewer than 3 has no Mirror clue.
 - Sums and Mirror clues give no piece of the secret.
 - A written chapter's suspects are drawn from the 14 culprits (`culpritWho`), so chapters share faces until more are drawn.

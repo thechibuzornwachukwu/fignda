@@ -4,6 +4,7 @@
 import { chapterProgress, type Chapter } from '../engine/chapter';
 import { chapters } from '../games/chapters';
 import { loadChapterStars } from './chapterStore';
+import { caseClosed } from './cold';
 
 export type OpenCase = {
   chapter: Chapter;
@@ -13,6 +14,11 @@ export type OpenCase = {
   solved: number;
   started: boolean;
 };
+
+/** A case is open when every case before it in the casebook is closed. Nothing is gated by a date. */
+export function caseOpen(chapter: Chapter): boolean {
+  return chapters.slice(0, Math.max(0, chapters.findIndex((c) => c.id === chapter.id))).every(caseClosed);
+}
 
 /** The first written chapter that is not closed yet. None: every chapter is closed, or none is written. */
 export function openCase(): OpenCase | null {

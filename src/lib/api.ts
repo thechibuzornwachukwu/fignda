@@ -608,7 +608,7 @@ export async function runGenerateJob(id: string, signal?: AbortSignal): Promise<
 
 export type PlaySubmission = {
   /** `clue`: a passage of a catalogue puzzle, counted from 1. It is kept as a clue of its case, on no board. */
-  game: { type: 'daily'; day_no: number } | { type: 'game'; id: string; clue?: number } | { type: 'case'; id: string; step: number; named?: string[] };
+  game: { type: 'daily'; day_no: number } | { type: 'game'; id: string; clue?: number } | { type: 'case'; id: string; step: number; named?: string[]; picked?: number[] };
   log: { events: Array<{ a: number; b: number; t: number }>; hints: number[]; finish: number };
   /** Room code when the game was played together. Goes to the Together board only. */
   room?: string;

@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import { Clock, Eye, Image, Map, Search, type LucideIcon } from 'lucide-react';
 import { characterFor } from '../avatar/draw';
-import { roleLabel, type Chapter, type Pin, type PinKind } from '../engine/chapter';
+import { faceSeed, roleLabel, type Chapter, type Pin, type PinKind } from '../engine/chapter';
 import { Avatar } from './Avatar';
 import { Icon } from './Icon';
 import styles from './CaseBoard.module.css';
@@ -61,7 +61,7 @@ export function CaseBoard({ chapter, solved = 0, cleared = [], ruledOut = [], pi
             const inside = (
               <>
                 <span className={styles.portrait}>
-                  <Avatar parts={characterFor(`${chapter.id}~${s.who}`, s.look)} size={56} />
+                  <Avatar parts={characterFor(faceSeed(chapter, s.who), s.look)} size={56} />
                 </span>
                 <span className={styles.name} title={s.name}>
                   {s.name}

@@ -14,6 +14,7 @@ import styles from './App.module.css';
 // Landing loads first and alone; every other screen is fetched when visited.
 const Brief = lazy(() => import('./routes/Brief').then((m) => ({ default: m.Brief })));
 const Step = lazy(() => import('./routes/Step').then((m) => ({ default: m.Step })));
+const Interlude = lazy(() => import('./routes/Interlude').then((m) => ({ default: m.Interlude })));
 const Games = lazy(() => import('./routes/Games').then((m) => ({ default: m.Games })));
 const GameById = lazy(() => import('./routes/Game').then((m) => ({ default: m.GameById })));
 const PassageById = lazy(() => import('./routes/Game').then((m) => ({ default: m.PassageById })));
@@ -85,6 +86,10 @@ export function App() {
         <Route path="play/:id/:n" element={<PassageById />} />
         <Route path="case/:id" element={<Brief />} />
         <Route path="case/:id/:n" element={<Step />} />
+        {/* A closed case worked again, with no tip-offs: the same screens, with stars of their own. */}
+        <Route path="cold/:id" element={<Brief />} />
+        <Route path="cold/:id/:n" element={<Step />} />
+        <Route path="interlude/:id" element={<Interlude />} />
         {/* There is no daily any more. An old link to one, or to its answers, opens the cases. */}
         <Route path="d/*" element={<Navigate to="/play" replace />} />
         <Route

@@ -33,6 +33,8 @@ type Props = {
   done?: Iterable<string> | null;
   /** Best stars per clue id. Defaults to this browser's. A clue with stars counts as done. */
   stars?: Readonly<Record<string, unknown>> | null;
+  /** The heading over it. On Cases it is the practice shelf. */
+  title?: string;
   className?: string;
 };
 
@@ -61,7 +63,7 @@ function safePath(catalogue: readonly JourneyGame[]): Path {
  * line. A list of links in order. Done clues can be replayed, the next one carries the player's avatar, the rest
  * are locked. A closed case is a link to its whole puzzle.
  */
-export function Journey({ catalogue = games, path, done, stars, className }: Props) {
+export function Journey({ catalogue = games, path, done, stars, title = 'Your path', className }: Props) {
   const { profile, enabled } = useAuth();
   const navigate = useNavigate();
   const headId = useId();
@@ -296,7 +298,7 @@ export function Journey({ catalogue = games, path, done, stars, className }: Pro
     <section className={[styles.journey, className].filter(Boolean).join(' ')} aria-labelledby={headId} data-journey={state}>
       <header className={styles.head}>
         <h2 id={headId} className={styles.title}>
-          Your path
+          {title}
         </h2>
         {view.total > 0 && (
           <p className={styles.count}>

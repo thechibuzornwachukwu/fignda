@@ -1,9 +1,13 @@
 // A step of a written chapter, checked on the server (BUILD_PLAN set 4a). The puzzle is made again here by the
 // engine the client made it with, and the play log is replayed against it, so the stars and the score are the
-// server's own. The line-up has no board: it is checked against the chapter itself.
+// server's own. The line-up and a step answered by picking have no board: they are checked against the chapter.
 
+import twoSigns from '../../design/stories/the-2-signs.json';
+import earlyBus from '../../design/stories/the-early-bus.json';
 import longSpoon from '../../design/stories/the-long-spoon.json';
-import { LINEUP_TRIES, lineupStars, stepPuzzle, type Chapter } from '../../src/engine/chapter';
+import openBox from '../../design/stories/the-open-box.json';
+import missingYear from '../../design/stories/the-year-that-is-missing.json';
+import { LINEUP_TRIES, lineupStars, pickStep, pickWrongs, stepPuzzle, trailOf, trailStars, trailWrongs, type Chapter } from '../../src/engine/chapter';
 import { EVALUATE } from '../../src/engine/evaluate';
 import { buildHiddenWords } from '../../src/engine/hiddenWords';
 import { buildMirror } from '../../src/engine/mirror';
@@ -12,7 +16,7 @@ import { buildSums } from '../../src/engine/sums';
 import { replay, type PlayLog } from './replay';
 
 /** Every written chapter, by id. A new file in `design/stories` is added here: a test fails until it is. */
-export const CHAPTERS: Readonly<Record<string, Chapter>> = Object.fromEntries(([longSpoon] as unknown as Chapter[]).map((c) => [c.id, c]));
+export const CHAPTERS: Readonly<Record<string, Chapter>> = Object.fromEntries(([longSpoon, openBox, earlyBus, missingYear, twoSigns] as unknown as Chapter[]).map((c) => [c.id, c]));
 
 export type StepCheck =
   | { ok: true; stars: 1 | 2 | 3; score: number; found: number; total: number; hints: number; secs: number }
@@ -20,13 +24,15 @@ export type StepCheck =
 
 /**
  * Check a finished step. `named` is for the line-up only: the suspects named, in order. The culprit, when
- * named, is the last name, and nobody is named twice or after the tries ran out.
+ * named, is the last name, and nobody is named twice or after the tries ran out. `picked` is for a step
+ * answered by picking only ("which account fits", "could it be done"): the picks made, in order, by the same rule.
  */
-export function checkStep(chapter: Chapter, step: number, log: PlayLog, named?: readonly string[]): StepCheck {
+export function checkStep(chapter: Chapter, step: number, log: PlayLog, named?: readonly string[], picked?: readonly number[]): StepCheck {
   const s = chapter.steps[step - 1];
   if (!s) return { ok: false, status: 404, reason: 'unknown_step' };
 
   if (s.method === 'line-up') {
+    if (picked) return { ok: false, status: 400, reason: 'bad_request' };
     const list = named ?? [];
     const suspects = new Set(chapter.suspects.map((x) => x.who));
     if (list.length === 0 || list.length > LINEUP_TRIES || new Set(list).size !== list.length || list.some((w) => !suspects.has(w))) return { ok: false, status: 400, reason: 'bad_request' };
@@ -37,6 +43,22 @@ export function checkStep(chapter: Chapter, step: number, log: PlayLog, named?: 
   }
 
   if (named) return { ok: false, status: 400, reason: 'bad_request' };
+
+  if (s.method === 'trail') {
+    const trail = trailOf(chapter, step);
+    const wrong = trail ? trailWrongs(trail, picked ?? []) : -1;
+    if (!trail || wrong < 0) return { ok: false, status: 400, reason: 'bad_request' };
+    return { ok: true, stars: trailStars(wrong), score: 0, found: trail.finds.length - wrong, total: trail.finds.length, hints: 0, secs: 0 };
+  }
+
+  const choice = pickStep(s);
+  if (choice) {
+    const wrong = pickWrongs(choice, picked ?? []);
+    if (wrong < 0) return { ok: false, status: 400, reason: 'bad_request' };
+    // Like the line-up, it scores nothing: the stars say how it went.
+    return { ok: true, stars: choice.stars(wrong), score: 0, found: wrong < choice.tries ? 1 : 0, total: 1, hints: 0, secs: 0 };
+  }
+  if (picked) return { ok: false, status: 400, reason: 'bad_request' };
   const def = stepPuzzle(chapter, step);
   if (!def) return { ok: false, status: 404, reason: 'unknown_step' };
   const r =

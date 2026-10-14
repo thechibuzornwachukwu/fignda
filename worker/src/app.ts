@@ -536,8 +536,15 @@ export const PlayBody = z
       // clue: one passage of a catalogue puzzle, counted from 1. Without it, the whole puzzle.
       z.object({ type: z.literal('game'), id: z.string().regex(/^[a-z0-9-]{2,40}$/), clue: z.number().int().min(1).max(40).optional() }).strict(),
       // A step of a written chapter, counted from 1. `named`: the line-up only, the suspects named, in order.
+      // `picked`: a step answered by picking only, the picks made, in order, counted from 0.
       z
-        .object({ type: z.literal('case'), id: z.string().regex(/^[a-z0-9-]{2,40}$/), step: z.number().int().min(1).max(12), named: z.array(z.string().min(1).max(60)).max(2).optional() })
+        .object({
+          type: z.literal('case'),
+          id: z.string().regex(/^[a-z0-9-]{2,40}$/),
+          step: z.number().int().min(1).max(12),
+          named: z.array(z.string().min(1).max(60)).max(2).optional(),
+          picked: z.array(z.number().int().min(0).max(7)).max(8).optional(),
+        })
         .strict(),
     ]),
     log: z
@@ -578,7 +585,7 @@ async function plays(req: Request, deps: Deps) {
     if (room) throw new HttpError(400, 'bad_request');
     const chapter = CHAPTERS[game.id];
     if (!chapter) throw new HttpError(404, 'unknown_game');
-    const c = checkStep(chapter, game.step, log, game.named);
+    const c = checkStep(chapter, game.step, log, game.named, game.picked);
     if (!c.ok) throw new HttpError(c.status, c.reason);
     const kept = await deps.db.rpc('record_step', { p_user: user.id, p_chapter: chapter.id, p_step: game.step, p_stars: c.stars, p_score: c.score });
     if (kept.error || !kept.data) throw new HttpError(500, 'save_failed');

@@ -11,8 +11,11 @@ export const SHAPES = ['who-did-it', 'prove-it', 'what-is-it-really', 'where-is-
 export type Shape = (typeof SHAPES)[number];
 
 /** The methods a step can use today. A new method joins this list in the set that builds its engine. */
-export const METHODS = ['hidden-words', 'mirror', 'buried-sums', 'unmask', 'line-up', 'accounts'] as const;
+export const METHODS = ['hidden-words', 'mirror', 'buried-sums', 'unmask', 'line-up', 'accounts', 'claim', 'trail', 'chain'] as const;
 export type Method = (typeof METHODS)[number];
+
+/** The methods a case can close on. A case closes on its last step, and only there. */
+export const CLOSERS: readonly Method[] = ['line-up', 'accounts'];
 
 export const PROOFS = ['means', 'motive', 'chance'] as const;
 export type Proof = (typeof PROOFS)[number];
@@ -36,6 +39,12 @@ export type Board = {
   /** Up to 2 short lines written on the board by hand: "4 near the hall.", "1 of them." */
   scrawl?: string[];
 };
+
+/**
+ * The seed a suspect's face is drawn from. The cast returns across a casebook, so a face belongs to the person on
+ * the street (casebook and role), never to the case: Rosa looks the same in every case she is in.
+ */
+export const faceSeed = (chapter: { id: string; casebook?: string }, who: string): string => `${chapter.casebook ?? chapter.id}~${who}`;
 
 /** "the stall owner" as the words under a face: "Stall owner". */
 export const roleLabel = (who: string): string => {
@@ -64,6 +73,26 @@ export type Account = { text: string; stands?: boolean; struckBy?: number };
 /** How many accounts are weighed. 3: enough that 1 is not simply the other one's opposite. */
 export const ACCOUNTS = 3;
 
+/**
+ * Could it be done (set 1i-d): a claim set against 2 facts. Each fact comes from a step already done, counted
+ * from 1, so nothing is weighed that was not found first. Exactly 1 of them decides whether it could be done.
+ */
+export type ClaimFact = { text: string; from: number; decides?: boolean };
+export type Claim = { says: string; facts: ClaimFact[]; possible: boolean };
+
+/** How many facts a claim is set against. 2: the one that decides, and one that only seems to. */
+export const CLAIM_FACTS = 2;
+
+/**
+ * The missing step (set 1i-d): events in order with 1 gap, and 3 things that could have happened in it. Exactly
+ * 1 fits. `gap` is how many events come before it, so it is never first or last: a gap is in between.
+ */
+export type Chain = { events: string[]; gap: number; options: Array<{ text: string; fits?: boolean }> };
+
+/** How many events are known, and how many things could fill the gap. */
+export const CHAIN_EVENTS = 3;
+export const CHAIN_OPTIONS = 3;
+
 export type Step = {
   place: string;
   method: Method;
@@ -78,6 +107,10 @@ export type Step = {
   words?: string[];
   /** The accounts weighed, on a "which account fits" step. */
   accounts?: Account[];
+  /** The claim tested, on a "could it be done" step. */
+  claim?: Claim;
+  /** The events and the gap, on a "missing step" step. */
+  chain?: Chain;
   /** What the step leaves behind once it is done. */
   fact: string;
   /** The fact as a few words, pinned to the board when the step is solved. Every step but the last has one. */
@@ -101,6 +134,8 @@ export type Chapter = {
   draft?: boolean;
   shape: Shape;
   title: string;
+  /** The question the line-up asks, where nothing was taken: "Who changed the 2 signs?" */
+  ask?: string;
   item: { name: string; line: string };
   place: string;
   brief: string[];
@@ -139,6 +174,8 @@ export function checkChapter(raw: unknown, roles: readonly string[]): string[] {
   const suspects = Array.isArray(c.suspects) ? c.suspects : [];
   const steps = Array.isArray(c.steps) ? c.steps : [];
   const culprit = suspects.find((s) => s.who === c.culprit);
+  // Who the evidence must not name before the end. A "prove it" says who from the brief: its question is how.
+  const hidden = c.shape === 'prove-it' ? undefined : culprit;
 
   if (!text(c.id) || !text(c.title) || !text(c.place)) out.push('id, title and place are needed');
   if (!SHAPES.includes(c.shape as Shape)) out.push('unknown shape');
@@ -188,6 +225,31 @@ export function checkChapter(raw: unknown, roles: readonly string[]): string[] {
         if (list.some((a) => text(a.text).length > LINE_MAX || /[\u2014!]/.test(a.text))) out.push(`${at}: an account breaks the copy rules`);
       }
     }
+    if (s.method === 'claim' || s.claim != null) {
+      const k = s.claim;
+      const facts = Array.isArray(k?.facts) ? k.facts : [];
+      if (s.method !== 'claim') out.push(`${at}: only a "could it be done" step has a claim`);
+      else if (!text(k?.says) || typeof k?.possible !== 'boolean' || facts.length !== CLAIM_FACTS || facts.some((f) => !text(f.text))) out.push(`${at}: a claim needs what is said, ${CLAIM_FACTS} facts and whether it could be done`);
+      else {
+        if (facts.filter((f) => f.decides).length !== 1) out.push(`${at}: exactly 1 fact decides`);
+        // A claim is set against what is already on the board, never against something still to come.
+        if (facts.some((f) => !(Number.isInteger(f.from) && f.from >= 1 && f.from <= i))) out.push(`${at}: a fact comes from a step before this one`);
+        if ([k!.says, ...facts.map((f) => f.text)].some((l) => text(l).length > LINE_MAX || /[—!]/.test(l))) out.push(`${at}: a claim breaks the copy rules`);
+      }
+    }
+    if (s.method === 'chain' || s.chain != null) {
+      const k = s.chain;
+      const events = Array.isArray(k?.events) ? k.events : [];
+      const options = Array.isArray(k?.options) ? k.options : [];
+      if (s.method !== 'chain') out.push(`${at}: only a "missing step" step has a chain`);
+      else if (events.length !== CHAIN_EVENTS || events.some((e) => !text(e)) || options.length !== CHAIN_OPTIONS || options.some((o) => !text(o.text))) out.push(`${at}: a chain needs ${CHAIN_EVENTS} events and ${CHAIN_OPTIONS} things that could fill the gap`);
+      else {
+        if (!(Number.isInteger(k!.gap) && k!.gap >= 1 && k!.gap < events.length)) out.push(`${at}: the gap is between 2 events`);
+        if (options.filter((o) => o.fits).length !== 1) out.push(`${at}: exactly 1 thing fits the gap`);
+        if ([...events, ...options.map((o) => o.text)].some((l) => text(l).length > LINE_MAX || /[\u2014!]/.test(l))) out.push(`${at}: a chain breaks the copy rules`);
+      }
+    }
+    if (s.method === 'trail' && !trailOf({ id: text(c.id), steps }, i + 1)) out.push(`${at}: a trail needs ${TRAIL_MIN} finds or more behind it, each at a place of its own`);
     // Written evidence is checked by the engine that will grade it: every word is there, and no other.
     if (s.text != null || s.words != null) {
       const words = Array.isArray(s.words) ? s.words.map(norm) : [];
@@ -196,10 +258,11 @@ export function checkChapter(raw: unknown, roles: readonly string[]): string[] {
       else {
         const found = (s.method === 'mirror' ? buildMirror : buildHiddenWords)({ text: s.text!, dict: words }).answers.map((a) => a.key);
         for (const w of words) if (!found.includes(w)) out.push(`${at}: the engine does not find ${w}`);
-        if (culprit && (has(s.text!, culprit.who) || has(s.text!, culprit.name))) out.push(`${at}: it names the culprit`);
+        if (hidden && (has(s.text!, hidden.who) || has(s.text!, hidden.name))) out.push(`${at}: it names the culprit`);
       }
     }
     if (c.shape === 'who-did-it' && (s.method === 'line-up') !== last) out.push(`${at}: the line-up is the last step, and only the last`);
+    else if (CLOSERS.includes(s.method) !== last) out.push(`${at}: a case closes on its last step, and only there: the line-up or the accounts`);
     if (last) {
       if (s.lead || s.to || s.clears || s.gives) out.push(`${at}: the last step leads nowhere and clears nobody`);
       return;
@@ -212,7 +275,7 @@ export function checkChapter(raw: unknown, roles: readonly string[]): string[] {
     if (s.gives) given.push(s.gives);
     if (s.gives && !PROOFS.includes(s.gives)) out.push(`${at}: gives is means, motive or chance`);
     // Evidence clears. It never points at anybody until the end.
-    if (culprit && [s.thing, s.fact, text(s.lead), text(s.pin)].some((l) => has(l, culprit.who) || has(l, culprit.name))) out.push(`${at}: it names the culprit`);
+    if (hidden && [s.thing, s.fact, text(s.lead), text(s.pin)].some((l) => has(l, hidden.who) || has(l, hidden.name))) out.push(`${at}: it names the culprit`);
   });
 
   for (const s of suspects) {
@@ -226,7 +289,7 @@ export function checkChapter(raw: unknown, roles: readonly string[]): string[] {
 
   // The copy rules, and one look a line.
   const lines = [
-    text(c.title), text(c.item?.line), ...(Array.isArray(c.brief) ? c.brief : []),
+    text(c.title), text(c.ask), text(c.item?.line), ...(Array.isArray(c.brief) ? c.brief : []),
     ...suspects.flatMap((s) => [s.line, s.says]),
     ...steps.flatMap((s) => [s.thing, s.fact, text(s.lead)]),
     text(c.ending?.found), text(c.ending?.confession), text(c.ending?.after),
@@ -297,3 +360,77 @@ export const accountThatStands = (step: Pick<Step, 'accounts'> | undefined): num
  * 3 accounts the third pick cannot be wrong, so nobody is locked out.
  */
 export const accountStars = (wrong: number): 1 | 2 | 3 => (wrong <= 0 ? 3 : wrong === 1 ? 2 : 1);
+
+/** Stars for a "could it be done" step: 3 for the right verdict at once, 2 after 1 wrong, 1 after 2. */
+export const claimStars = (wrong: number): 1 | 2 | 3 => (wrong <= 0 ? 3 : wrong === 1 ? 2 : 1);
+
+/** A verdict on a claim as 1 number, the way it is kept and sent: the fact that decides (0 or 1) twice over, plus 1 for "it could be done". */
+export const claimPick = (fact: number, possible: boolean): number => fact * 2 + (possible ? 1 : 0);
+
+/**
+ * A step answered by picking, not by searching: which pick is right, out of how many, how many wrong picks are
+ * allowed before the answer is shown anyway, and the stars for it. Null for any other step. Picks count from 0.
+ */
+export type PickStep = { right: number; options: number; tries: number; stars: (wrong: number) => 1 | 2 | 3 };
+
+export function pickStep(step: Pick<Step, 'method' | 'accounts' | 'claim' | 'chain'> | undefined): PickStep | null {
+  if (step?.method === 'chain' && step.chain) return { right: step.chain.options.findIndex((o) => o.fits), options: CHAIN_OPTIONS, tries: CHAIN_OPTIONS - 1, stars: accountStars };
+  if (step?.method === 'accounts' && step.accounts) return { right: accountThatStands(step), options: ACCOUNTS, tries: ACCOUNTS - 1, stars: accountStars };
+  if (step?.method === 'claim' && step.claim) {
+    return { right: claimPick(step.claim.facts.findIndex((f) => f.decides), step.claim.possible), options: CLAIM_FACTS * 2, tries: 2, stars: claimStars };
+  }
+  return null;
+}
+
+/**
+ * Whether a list of picks could have been played: none twice, none out of range, the right one last when it is
+ * there, and otherwise every try spent. The wrong picks before the end, or -1 for a list nobody could have made.
+ */
+export function pickWrongs(step: PickStep, picks: readonly number[]): number {
+  if (picks.length === 0 || picks.length > step.tries || new Set(picks).size !== picks.length) return -1;
+  if (picks.some((p) => !Number.isInteger(p) || p < 0 || p >= step.options)) return -1;
+  const at = picks.indexOf(step.right);
+  if (at >= 0) return at === picks.length - 1 ? at : -1;
+  return picks.length === step.tries ? step.tries : -1;
+}
+
+/** A trail is walked back over this many finds at least. Fewer is not a walk. */
+export const TRAIL_MIN = 3;
+
+/**
+ * Walk it back, the trail (set 1i-b): the places of the case are the stops, in the order they were worked, and
+ * the finds are handed back out of order to be pinned where each was found. It is made of the chapter itself,
+ * so nothing is written for it. `finds` are in the order they are handed out, the same on every device.
+ */
+export type Trail = { places: string[]; finds: Array<{ pin: string; place: number }> };
+
+const hash = (s: string): number => {
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
+  return h >>> 0;
+};
+
+/** The trail of step `n`, counted from 1. Null when fewer than 3 finds lie behind it, or 2 share a place. */
+export function trailOf(chapter: Pick<Chapter, 'id' | 'steps'>, n: number): Trail | null {
+  const stops = chapter.steps.slice(0, Math.max(0, n - 1)).filter((s) => typeof s.pin === 'string' && s.pin.trim() !== '');
+  const places = stops.map((s) => s.place);
+  if (stops.length < TRAIL_MIN || new Set(places).size !== places.length) return null;
+  const order = stops.map((_, i) => i).sort((a, b) => hash(`${chapter.id}~${n}~${a}`) - hash(`${chapter.id}~${n}~${b}`));
+  // Handed back in the order they were found, it would be no test: turn the hand by 1.
+  if (order.every((v, i) => v === i)) order.push(order.shift()!);
+  return { places, finds: order.map((i) => ({ pin: stops[i]!.pin!, place: i })) };
+}
+
+/**
+ * The finds put in the wrong place, from the places picked for each find in the order they were handed out. A
+ * find gets 1 pick: wrong, it is put where it belongs and the next is handed over. -1 for picks nobody could
+ * have made.
+ */
+export function trailWrongs(trail: Trail, picks: readonly number[]): number {
+  if (picks.length !== trail.finds.length || picks.some((p) => !Number.isInteger(p) || p < 0 || p >= trail.places.length)) return -1;
+  return picks.filter((p, i) => p !== trail.finds[i]!.place).length;
+}
+
+/** Stars for a trail: 3 with every find in its place, 2 with 1 misplaced, else 1. Wrong places cost nothing else. */
+export const trailStars = (wrong: number): 1 | 2 | 3 => (wrong <= 0 ? 3 : wrong === 1 ? 2 : 1);
+

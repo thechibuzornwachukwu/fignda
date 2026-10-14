@@ -1,5 +1,5 @@
 import { characterFor } from '../avatar/draw';
-import { CLEAR_STARS, roleLabel, type Chapter, type Proof } from '../engine/chapter';
+import { CLEAR_STARS, faceSeed, roleLabel, type Chapter, type Proof } from '../engine/chapter';
 import { Avatar } from './Avatar';
 import styles from './StepResult.module.css';
 
@@ -37,7 +37,7 @@ export function StepResult({ chapter, at, stars }: Props) {
         {suspect && (
           <span className={styles.photo} data-suspect={suspect.who} data-cleared={cleared || undefined}>
             <span className={styles.portrait}>
-              <Avatar parts={characterFor(`${chapter.id}~${suspect.who}`, suspect.look)} size={56} />
+              <Avatar parts={characterFor(faceSeed(chapter, suspect.who), suspect.look)} size={56} />
             </span>
             <span className={styles.name} title={suspect.name}>
               {suspect.name}

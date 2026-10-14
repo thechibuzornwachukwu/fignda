@@ -20,31 +20,19 @@ import { useGameSession, type Session } from '../games/session';
 import { submitPlay } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { loadChapterStars, recordChapterStars } from '../lib/chapterStore';
+import { caseClosed, caseWay, useCase, useCold } from '../lib/cold';
+import { caseOpen } from '../lib/firstCase';
 import { loadFlow } from '../lib/firstMinute';
 import { guestBlocked, markGuestPlayed, playKey } from '../lib/guestLimit';
 import { markPlayedToday } from '../lib/playDays';
+import { Accounts } from './Accounts';
+import { Chain } from './Chain';
+import { Claim } from './Claim';
 import { LineUp } from './LineUp';
 import styles from './Step.module.css';
-
-/** "The bakery" after "Go to": "the bakery". A name keeps its capital: "Rosa's night stall". */
-const toPlace = (place: string): string => (/^The /.test(place) ? `the ${place.slice(4)}` : place);
-
-/** The marks at the top right: one a step, a records step square, the last one largest. */
-function Marks({ chapter, at, solved }: { chapter: Chapter; at: number; solved: number }) {
-  return (
-    <ol className={styles.marks} aria-label={`${chapter.title}, step ${at} of ${chapter.steps.length}`} data-marks>
-      {chapter.steps.map((s, i) => (
-        <li
-          key={i}
-          className={styles.mark}
-          data-kind={i === chapter.steps.length - 1 ? 'last' : s.method === 'buried-sums' ? 'sums' : 'words'}
-          data-state={i + 1 === at ? 'here' : i < solved ? 'done' : 'ahead'}
-          aria-hidden="true"
-        />
-      ))}
-    </ol>
-  );
-}
+import { Marks } from './StepMarks';
+import { wayOn } from './stepWay';
+import { Trail } from './Trail';
 
 /**
  * /case/:id/:n. One step of a written chapter, played on the board its method has. It ends on what was learned
@@ -58,29 +46,38 @@ export function Step() {
   const locked = useMemo(() => pick('stepLocked'), []);
   const soon = useMemo(() => pick('lineupSoon'), []);
   const auth = useAuth();
+  const cold = useCold();
   // A guest plays 2 games, and a step is a game. Decided when it opens, so a result is never walled.
   const [blocked] = useState(() => guestBlocked(playKey(id, undefined, Number.isInteger(at) && at > 0 ? at : undefined)));
   if (!chapter) return <Navigate to="/play" replace />;
-  if (!step) return <Navigate to={`/case/${chapter.id}`} replace />;
+  // A case opens when the one before it is closed. The brief says so.
+  const { sid, base } = caseWay(chapter.id, cold);
+  // A cold case is a closed case, worked again.
+  if (cold && !caseClosed(chapter)) return <Navigate to={`/case/${chapter.id}`} replace />;
+  if (!step || !caseOpen(chapter)) return <Navigate to={base} replace />;
 
-  const progress = chapterProgress(chapter, loadChapterStars(chapter.id));
+  const progress = chapterProgress(chapter, loadChapterStars(sid));
   if (at > progress.solved + 1)
     return (
       <div className={styles.screen} data-step="locked">
         <PartnerNote moment="empty" layout="screen" title="Not yet">
           <p>{locked}</p>
-          <TextLink to={`/case/${chapter.id}`}>Back to the board</TextLink>
+          <TextLink to={base}>Back to the board</TextLink>
         </PartnerNote>
       </div>
     );
 
-  if (auth.enabled && blocked) {
+  if (auth.enabled && blocked && !cold) {
     // Still finding out who this is: never wall someone who is signed in.
     if (auth.loading) return <div aria-busy="true" />;
     if (!auth.session) return <GuestWall />;
   }
 
   if (step.method === 'line-up') return <LineUp chapter={chapter} progress={progress} />;
+  if (step.method === 'accounts') return <Accounts chapter={chapter} progress={progress} />;
+  if (step.method === 'chain') return <Chain key={`${chapter.id}~${at}`} chapter={chapter} at={at} solved={progress.solved} />;
+  if (step.method === 'trail') return <Trail key={`${chapter.id}~${at}`} chapter={chapter} at={at} solved={progress.solved} />;
+  if (step.method === 'claim') return <Claim key={`${chapter.id}~${at}`} chapter={chapter} at={at} solved={progress.solved} />;
 
   const def = stepPuzzle(chapter, at);
   // Evidence that is not written yet: the board as filled, and a line saying so.
@@ -88,7 +85,7 @@ export function Step() {
     return (
       <div className={styles.screen} data-step="soon">
         <div className={styles.top}>
-          <TextLink to={`/case/${chapter.id}`}>The board</TextLink>
+          <TextLink to={base}>The board</TextLink>
           <Marks chapter={chapter} at={at} solved={progress.solved} />
         </div>
         <h1 className={styles.title}>{step.place}</h1>
@@ -100,9 +97,13 @@ export function Step() {
   return <Play key={`${chapter.id}~${at}`} chapter={chapter} at={at} def={def} solved={progress.solved} />;
 }
 
-function Play({ chapter, at, def, solved }: { chapter: Chapter; at: number; def: StepPuzzle; solved: number }) {
+/** An interlude is 1 step by itself: its own way back and way on, no marks, and nothing sent. */
+export type Alone = { back: string; backLabel: string; on: string; onLabel: string };
+
+export function Play({ chapter, at, def, solved, alone }: { chapter: Chapter; at: number; def: StepPuzzle; solved: number; alone?: Alone }) {
   const step = chapter.steps[at - 1]!;
-  const name = `${chapter.id}~${at}`;
+  const { cold, sid, base } = useCase(chapter.id);
+  const name = `${sid}~${at}`;
   const mod = registry[def.type];
   const auth = useAuth();
   const puzzle = useMemo(
@@ -110,14 +111,14 @@ function Play({ chapter, at, def, solved }: { chapter: Chapter; at: number; def:
     [mod, name, def, chapter.title, step.place],
   );
   const total = mod.answers(puzzle).length;
-  const [best, setBest] = useState<number>(() => loadChapterStars(chapter.id)[at] ?? 0);
+  const [best, setBest] = useState<number>(() => loadChapterStars(sid)[at] ?? 0);
   const g = useGameSession({
     mod,
     puzzle,
     resumeId: name,
     onFinish: (s: Session) => {
-      setBest(recordChapterStars(chapter.id, at, starsFor({ finished: true, found: s.found.length, total, hints: s.hints, wrongs: s.wrongs })));
-      if (!auth.session) markGuestPlayed(playKey(chapter.id, undefined, at));
+      setBest(recordChapterStars(sid, at, starsFor({ finished: true, found: s.found.length, total, hints: s.hints, wrongs: s.wrongs })));
+      if (!auth.session && !cold) markGuestPlayed(playKey(chapter.id, undefined, at));
       markPlayedToday();
     },
   });
@@ -127,7 +128,7 @@ function Play({ chapter, at, def, solved }: { chapter: Chapter; at: number; def:
   // Signed in, a finished step is sent once to be checked and kept on the account. A result opened again was
   // sent when it was earned. A guest keeps theirs in this browser.
   useEffect(() => {
-    if (!g.finished || !signedIn || endAt == null || sent) return;
+    if (!g.finished || !signedIn || endAt == null || sent || cold || alone) return;
     markSent();
     void submitPlay({ game: { type: 'case', id: chapter.id, step: at }, log: { events: log?.events ?? [], hints: log?.hints ?? [], finish: Math.max(1, endAt - startAt) } });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -168,13 +169,12 @@ function Play({ chapter, at, def, solved }: { chapter: Chapter; at: number; def:
       : def.type === 'mirror'
         ? `Find ${total} words. They read right to left.`
         : `Find ${total} hidden words.`;
-  const last = at + 1 === chapter.steps.length;
 
   return (
     <div className={styles.screen} data-step={at} data-finished={finished || undefined}>
       <div className={styles.top}>
-        <TextLink to={`/case/${chapter.id}`}>The board</TextLink>
-        <Marks chapter={chapter} at={at} solved={Math.max(solved, finished ? at : 0)} />
+        <TextLink to={alone?.back ?? base}>{alone?.backLabel ?? 'The board'}</TextLink>
+        {!alone && <Marks chapter={chapter} at={at} solved={Math.max(solved, finished ? at : 0)} />}
       </div>
       <h1 className={styles.title}>{step.place}</h1>
 
@@ -193,8 +193,8 @@ function Play({ chapter, at, def, solved }: { chapter: Chapter; at: number; def:
             </p>
           )}
           <div className={styles.actions}>
-            <Button variant="accent" to={`/case/${chapter.id}/${at + 1}`}>
-              {last ? 'To the line-up' : `Go to ${toPlace(step.to ?? '')}`}
+            <Button variant="accent" to={alone?.on ?? `${base}/${at + 1}`}>
+              {alone?.onLabel ?? wayOn(chapter, at)}
             </Button>
             <TextLink onClick={g.replay}>Play it again</TextLink>
           </div>
@@ -225,7 +225,7 @@ function Play({ chapter, at, def, solved }: { chapter: Chapter; at: number; def:
 
       {!finished && (
         <div className={styles.actions}>
-          <TextLink onClick={g.hint}>Ask for a tip-off</TextLink>
+          {!cold && <TextLink onClick={g.hint}>Ask for a tip-off</TextLink>}
           <TextLink onClick={g.finish}>I'm done</TextLink>
           <span className={styles.count}>
             {g.s.found.length} of {total}
@@ -253,7 +253,7 @@ function Play({ chapter, at, def, solved }: { chapter: Chapter; at: number; def:
           time={null}
           message={g.s.msg || (def.type === 'buried-sums' ? 'Swipe across digits, or tap first then last' : 'Swipe across letters, or tap first then last')}
           pet={pet}
-          onHint={g.hint}
+          onHint={cold ? undefined : g.hint}
           onDone={g.finish}
         />
       )}

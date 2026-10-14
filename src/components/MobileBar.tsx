@@ -14,7 +14,8 @@ type Props = {
   message: string;
   /** The player's pet, in the mood of the last thing that happened. It stands beside the line it says. */
   pet?: ReactNode;
-  onHint: () => void;
+  /** Left out on a cold case: there are no tip-offs. */
+  onHint?: () => void;
   onDone: () => void;
 };
 
@@ -33,9 +34,11 @@ export function MobileBar({ count, progress, left, time, message, pet, onHint, o
         <span className={styles.msg} aria-hidden="true">
           {message}
         </span>
-        <Button variant="secondary" size="touch" onClick={onHint}>
-          Tip-off
-        </Button>
+        {onHint && (
+          <Button variant="secondary" size="touch" onClick={onHint}>
+            Tip-off
+          </Button>
+        )}
         <Button variant="primary" size="touch" onClick={onDone}>
           Done
         </Button>
