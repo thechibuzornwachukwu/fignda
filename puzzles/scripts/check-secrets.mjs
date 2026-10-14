@@ -91,7 +91,7 @@ if (mode === '--history') {
 } else {
   const files =
     mode === '--all'
-      ? git('ls-files', '-z').split('\0').filter(Boolean)
+      ? git('ls-files', '--full-name', '-z').split('\0').filter(Boolean)
       : git('diff', '--cached', '--name-only', '--diff-filter=ACMR', '-z').split('\0').filter(Boolean);
   for (const f of files) {
     checkName(f, findings);

@@ -9,9 +9,9 @@ test-results
 *.local
 
 # Supabase local state and secrets
-supabase/.temp
-supabase/.branches
-supabase/.env
+**/supabase/.temp
+**/supabase/.branches
+**/supabase/.env
 
 # Editor / OS
 .DS_Store
