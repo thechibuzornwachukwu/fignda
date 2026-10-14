@@ -119,6 +119,7 @@
     {
       "place": "The atlas shelf",
       "method": "hidden-words",
+      "eye": true,
       "thing": "A card from the suggestions box. It is a message passed in plain sight, and it came from the Open Eye.",
       "text": "That last disco very loud. Rich ideas, though. The sun cuts in by ten.",
       "words": [

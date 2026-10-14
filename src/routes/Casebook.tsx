@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
 import { chapterProgress } from '../engine/chapter';
+import { openEyeFile } from '../engine/openEye';
 import { CASEBOOK, chapters, interludes } from '../games/chapters';
 import { loadChapterStars } from '../lib/chapterStore';
 import { caseClosed, coldSealed } from '../lib/cold';
@@ -26,6 +27,8 @@ export function Casebook() {
       return { chapter, state, sealed: closed && coldSealed(chapter), solved: chapterProgress(chapter, loadChapterStars(chapter.id)).solved, between };
     });
   }, []);
+  // The file opens once there is something in it.
+  const eyes = useMemo(() => openEyeFile(chapters, interludes, (id, n) => (loadChapterStars(id)[n] ?? 0) > 0).filter((e) => e.read).length, []);
   if (rows.length === 0) return null;
   const written = rows.length;
   // Art never blocks the path: a later case can be released first, so the file still shut is the lowest number missing.
@@ -34,9 +37,17 @@ export function Casebook() {
 
   return (
     <section className={styles.book} aria-labelledby={headId} data-casebook={CASEBOOK.id}>
-      <h2 id={headId} className={styles.banner}>
-        {CASEBOOK.name}
-      </h2>
+      <div className={styles.head}>
+        <h2 id={headId} className={styles.banner}>
+          {CASEBOOK.name}
+        </h2>
+        {eyes > 0 && (
+          <Link to="/open-eye" className={styles.eyeLink} data-eye-link>
+            <Icon icon={Eye} size={16} />
+            The Open Eye
+          </Link>
+        )}
+      </div>
       <ol className={styles.files}>
         {rows.map(({ chapter, state, sealed, solved, between }) => {
           const steps = chapter.steps.length;
@@ -110,6 +121,15 @@ export function Casebook() {
           </li>
         )}
       </ol>
+      {/* Every case written: the next casebook is the next file on the path, shut, with no date until it is written. */}
+      {written >= CASEBOOK.cases && (
+        <div className={styles.file} data-state="unwritten" data-next-book>
+          <span className={styles.shut}>
+            <Icon icon={Lock} size={18} label="Not written yet" />
+          </span>
+          <span className={styles.name}>Casebook 2</span>
+        </div>
+      )}
     </section>
   );
 }

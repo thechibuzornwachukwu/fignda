@@ -14,12 +14,12 @@ describe('buildPath', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('a case is the passages of its puzzle in order with a sums clue after every second of 3, then the unmasking', () => {
+  it('a pack is the passages of its puzzle in order with a sums clue after every second of 3, and no unmasking: it is a drill', () => {
     for (const c of path.cases) {
       const cut = passages(built(c.id)).length;
       expect(c.clues.map((s) => s.n)).toEqual(caseOrder(cut));
       expect(c.clues.every((s) => s.puzzle === c.id)).toBe(true);
-      expect(c.clues[c.clues.length - 1]!.id).toBe(`${c.id}~40`);
+      expect(c.clues.some((s) => s.n === 40)).toBe(false);
       expect(c.clues[0]!.id).toBe(`${c.id}~1`);
     }
     // No list to read backwards by, so no Mirror clue here.
@@ -89,11 +89,14 @@ describe('clueStates', () => {
     expect(s.next).toBe(path.cases[1]!.clues[0]!.id);
   });
 
-  it('every passage done is not the case: the unmasking is still to play', () => {
-    const s = states(first.clues.slice(0, -1).map((c) => c.id));
-    expect(s.next).toBe(`${first.id}~40`);
-    expect(s.left[0]).toBe(1);
-    expect(s.casesDone[0]).toBe(false);
+  it('every clue done closes the pack: a drill has no unmasking still to play', () => {
+    const s = states(first.clues.map((c) => c.id));
+    expect(s.casesDone[0]).toBe(true);
+    expect(s.left[0]).toBe(0);
+  });
+
+  it('an unmasking played before packs were drills still closes its pack', () => {
+    expect(states([`${first.id}~40`]).casesDone[0]).toBe(true);
   });
 
   it('a clue finished out of order shows done and does not move the next', () => {

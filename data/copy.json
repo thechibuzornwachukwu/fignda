@@ -312,6 +312,10 @@
     "Look again in that corner of the room.",
     "Something there is not where it belongs."
   ],
+  "eyeEmpty": [
+    "Every message to the Open Eye you read is filed here. The first is in your case.",
+    "Messages passed in plain sight end up here, once you have read them."
+  ],
   "caseLocked": [
     "That file opens when the case before it is closed.",
     "One case at a time. The one before this is still open."

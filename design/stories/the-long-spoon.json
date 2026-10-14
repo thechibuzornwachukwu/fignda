@@ -133,6 +133,7 @@
     {
       "place": "The hall notice board",
       "method": "hidden-words",
+      "eye": true,
       "thing": "A notice nobody remembers pinning up: a room to let, oddly worded. It is a message passed in plain sight, to the Open Eye.",
       "text": "Room to let. Last let 2 years ago. Estate road, quiet. The light is on a meter. A tub, urn and stove are included. Ask Phoebe for entry.",
       "words": [

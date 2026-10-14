@@ -126,18 +126,7 @@ test.describe('desktop', () => {
     await expect(page.getByText('0 / 30').first()).toBeVisible();
   });
 
-  test('the last sitting leads to the whole puzzle, and a passage that does not exist opens the puzzle', async ({ page }) => {
-    await page.goto('/play/bnote/2');
-    await expect(page.getByRole('list', { name: /clue 2 of \d+/ })).toBeVisible();
-    await page.getByRole('button', { name: "I'm done" }).click();
-    // Each clue leads to the next until the last one before the whole puzzle.
-    const pop = page.locator('[data-clue-done]');
-    for (let i = 0; i < 3 && (await pop.getByRole('link', { name: 'The unmasking' }).count()) === 0; i++) {
-      await pop.getByRole('link', { name: 'Next clue' }).click();
-      await page.getByRole('button', { name: "I'm done" }).click();
-    }
-    await pop.getByRole('link', { name: 'The unmasking' }).click();
-    await expect(page).toHaveURL(/\/play\/bnote\/40$/);
+  test('a clue that does not exist opens the puzzle, and a puzzle that is not ours opens the cases', async ({ page }) => {
     await page.goto('/play/bnote/9');
     await expect(page).toHaveURL(/\/play\/bnote$/);
     await page.goto('/play/no-such-game/1');

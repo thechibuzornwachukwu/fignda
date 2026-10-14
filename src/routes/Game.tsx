@@ -13,13 +13,13 @@ import { dailyInfo, dailyLabel } from '../games/daily';
 import { registry } from '../games/registry';
 import { dayHidLine, playFacts, rareLine, recordLines, skillLines, starsUpLine, todayHoldsLine } from '../games/resultLines';
 import { isCleanRead, scoreOf, secondsOf, useGameSession, type Session } from '../games/session';
-import { CaseClosed, CasePiece, SecretSlots } from '../components/CaseFile';
+import { CaseClosed } from '../components/CaseFile';
 import { GuestWall } from '../components/GuestWall';
 import { clueId, clueKind } from '../engine/journey';
 import { UNMASK_TRIES } from '../engine/unmask';
 import { ClueDone } from '../components/ClueDone';
 import { Partner } from '../components/Partner';
-import { HINT_OF, mixedSquad } from '../engine/partners';
+import { HINT_OF } from '../engine/partners';
 import { caseFile, doneClues, nextClueTo } from '../games/caseFile';
 import { guestBlocked, markGuestPlayed, playKey } from '../lib/guestLimit';
 import { loadPartner } from '../lib/partner';
@@ -52,6 +52,9 @@ import { useStreak } from '../lib/useStreak';
 import { GameResults } from './GameResults';
 import { GameReveal } from './GameReveal';
 import styles from './Game.module.css';
+
+/** The clock, read when the player acts, never while drawing. */
+const now = (): number => Date.now();
 
 export function GameById() {
   const { id = '' } = useParams();
@@ -309,7 +312,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
     const broke = recordPlay({
       pack: daily || inCatalogue ? def.category : null,
       // A sitting is a few words: its time is no record for the pack.
-      cleanSecs: cleanRead && !part ? secondsOf(fs, fs.endAt ?? Date.now()) : null,
+      cleanSecs: cleanRead && !part ? secondsOf(fs, fs.endAt ?? now()) : null,
       dailyFound: daily ? mine.length : null,
       longest: wordy ? playFacts(puzzle, fs.found, fs.wrongs, fs.hints).longest : null,
     });
@@ -357,7 +360,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
   }, [unmask, finished, def.id, s.startAt]);
   // The text result: paste it in a chat. Phones open the share sheet (WhatsApp is one tap), desktops copy.
   const sendText = async (): Promise<string> => {
-    const secs = secondsOf(s, s.endAt ?? Date.now());
+    const secs = secondsOf(s, s.endAt ?? now());
     const base = shareGame(def, puzzle.difficulty, dailyN, part).path;
     const text = achievement?.text ?? shareText({
       title: def.title,
@@ -403,42 +406,16 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
     : 0;
   const starsUp = !!ended?.starsUp;
   const starLine = useMemo(() => starsUpLine(stars, starsUp, copy.pick), [stars, starsUp]);
-  // The case this clue belongs to: a passage gives a piece of the secret, the whole puzzle closes the case.
-  // A game with stars is a clue done, the same rule the path reads by.
-  // In a room the squad shares the secret: every word anyone finds counts toward it, and the finish gives
-  // the last piece. Catalogue puzzles only.
-  const squadFile = useMemo(
-    () => (inRoom ? caseFile(def.id, doneClues(), { found: foundCount, total, finished }) : undefined),
-    [inRoom, def.id, foundCount, total, finished],
-  );
-  // Slots filled since the last look pop in.
-  const slotsNow = squadFile?.slots ?? null;
-  const slotsKey = slotsNow ? slotsNow.join(',') : '';
-  const [seenSlots, setSeenSlots] = useState<{ key: string; slots: string[] | null; fresh: number[] }>({ key: slotsKey, slots: slotsNow, fresh: [] });
-  if (seenSlots.key !== slotsKey) {
-    const before = seenSlots.slots;
-    setSeenSlots({ key: slotsKey, slots: slotsNow, fresh: (slotsNow ?? []).flatMap((ch, i) => (ch && before && !before[i] ? [i] : [])) });
-  }
-  const freshSlots = seenSlots.fresh;
-  const squadLine = useMemo(() => (inRoom ? copy.pick('squadSecret') : ''), [inRoom]);
-  const caseNode = useMemo(() => {
-    if (finished && squadFile) {
-      if (squadFile.closed) return <CaseClosed id={def.id} secret={squadFile.word} mixed={mixedSquad([loadPartner().current, ...peers.filter((p) => p.id !== roomId).map((p) => p.partner)])} />;
-      const read = squadFile.slots.filter(Boolean).length;
-      return <CasePiece slots={squadFile.slots} fresh={[]} piece="" say={copy.pick('squadShort', { n: read, t: squadFile.slots.length })} />;
-    }
-    if (!finished || !starred) return null;
-    const file = caseFile(def.id, new Set([...doneClues(), gameKey]));
-    if (!file) return null;
-    if (!part || unmask) return <CaseClosed id={def.id} secret={file.word} />;
-    const piece = file.piece(part.n);
-    return <CasePiece slots={file.slots} fresh={piece.slots} piece={piece.text} />;
-  }, [finished, starred, def.id, gameKey, part, unmask, squadFile, peers, roomId]);
+  // A pack is a drill the Open Eye sets its pupils (BUILD_PLAN set 4c): no culprit, no secret and no unmasking,
+  // so a clue's result says what was found and leads on, and nothing more.
+  const caseNode = null;
   // Where a finished clue leads: the next clue, the unmasking, or from the unmasking the next case.
   const onward = useMemo(() => {
     if (!part || !finished) return undefined;
     if (unmask) return { to: nextClueTo() ?? '/play', label: copy.pick('unmaskNext') };
-    return { to: `/play/${def.id}/${part.next}`, label: clueKind(part.next) === 'unmask' ? 'The unmasking' : 'Next clue' };
+    // The last clue of a drill leads to the next clue on the path, in the next pack.
+    if (!part.next) return { to: nextClueTo() ?? '/play', label: 'Next clue' };
+    return { to: `/play/${def.id}/${part.next}`, label: 'Next clue' };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [part, finished, unmask, def.id, s.startAt]);
   // On a case, a method is a real thing somebody left behind. One reason a clue, the same on every visit.
@@ -494,7 +471,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
     if (!guestToday) return;
     let alive = true;
     const cur = gRef.current.s;
-    const secs = secondsOf(cur, cur.endAt ?? Date.now());
+    const secs = secondsOf(cur, cur.endAt ?? now());
     fetchDailyPlace(dailyN!, scoreOf(cur, gRef.current.total, true, secs), secs)
       .then((p) => alive && setPlace(p))
       .catch(() => {});
@@ -579,12 +556,6 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
       </div>
 
       {inRoom && <RoomBar gameId={def.id} code={roomCode} peers={peers} status={roomStatus} me={myStats} you={{ id: roomId, handle: myHandle, partner: loadPartner().current }} path={sharePath({ id: def.id, code: def.id.startsWith('c-') ? def.id.slice(2).toUpperCase() : undefined })} />}
-      {squadFile && !finished && (
-        <p className={styles.squad} data-squad-secret>
-          <SecretSlots slots={squadFile.slots} fresh={freshSlots} />
-          <span>{squadLine}</span>
-        </p>
-      )}
 
       {challenge && !inRoom && (
         <Challenge

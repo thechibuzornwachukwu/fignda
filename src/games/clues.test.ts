@@ -2,16 +2,16 @@ import { buildPath, caseOrder, clueKind, MIRROR_N, SUMS_FROM, UNMASK_N } from '.
 import { HINT_OF, mixedSquad, PARTNERS } from '../engine/partners';
 import { POOLS } from '../copy';
 import { ALPHABET, bankOf, givenOf, UNMASK_DECOYS, UNMASK_TRIES, unmaskClue, unmaskGiven, unmaskName, unmaskSlots, withinTries } from '../engine/unmask';
-import { caseFile, secretOf } from './caseFile';
+import { secretOf } from './caseFile';
 import { culpritName, games, getPassage, getPuzzle, MIRROR_WORDS } from './catalog';
 import { familyOf, registry } from './registry';
 
 describe('the rhythm of a case', () => {
-  it('is word, word, number, word, then Mirror, then the unmasking', () => {
+  it('is word, word, number, word, then Mirror, and no unmasking: a pack is a drill', () => {
     expect(caseOrder(1)).toEqual([0]);
-    expect(caseOrder(2)).toEqual([1, 2, 21, 40]);
-    expect(caseOrder(3, true)).toEqual([1, 2, 21, 3, 31, 40]);
-    expect(caseOrder(6)).toEqual([1, 2, 21, 3, 4, 5, 22, 6, 40]);
+    expect(caseOrder(2)).toEqual([1, 2, 21]);
+    expect(caseOrder(3, true)).toEqual([1, 2, 21, 3, 31]);
+    expect(caseOrder(6)).toEqual([1, 2, 21, 3, 4, 5, 22, 6]);
     expect([0, 1, 19, 21, 29, 31, 40].map(clueKind)).toEqual(['whole', 'words', 'words', 'sums', 'sums', 'mirror', 'unmask']);
     expect(familyOf('unmask')).toBe('verbal');
     expect(familyOf('buried-sums')).toBe('quantitative');
@@ -82,9 +82,8 @@ describe('edges', () => {
     const long = caseOrder(40, true);
     expect(long.filter((n) => clueKind(n) === 'words')).toHaveLength(19);
     expect(new Set(long).size).toBe(long.length);
-    expect(long.filter((n) => n !== UNMASK_N).at(-1)).toBe(MIRROR_N);
-    expect(Math.max(...long)).toBe(UNMASK_N);
-    expect(long.at(-1)).toBe(UNMASK_N);
+    expect(long.includes(UNMASK_N)).toBe(false);
+    expect(long.at(-1)).toBe(MIRROR_N);
     expect(clueKind(30)).toBe('sums');
     expect(clueKind(20)).toBe('words');
   });
@@ -195,13 +194,7 @@ describe('the unmasking', () => {
     expect(withinTries(p, [])).toEqual([]);
   });
 
-  it('closes the case: the last piece of the secret comes with it, as it does with the whole puzzle', () => {
-    const id = games.find((g) => getPassage(g.id, UNMASK_N))!.id;
-    const count = getPassage(id, 1)!.part.count;
-    const passages = Array.from({ length: count }, (_, i) => `${id}~${i + 1}`);
-    expect(caseFile(id, new Set(passages))!.closed).toBe(false);
-    expect(caseFile(id, new Set([...passages, `${id}~${UNMASK_N}`]))!.closed).toBe(true);
-    expect(caseFile(id, new Set([id]))!.closed).toBe(true);
-    expect(caseFile(id, new Set(passages))!.piece(UNMASK_N).text).not.toBe('');
+  it('is no longer a clue: no pack has one, so an old link to one opens no unmasking', () => {
+    for (const g of games) expect(getPassage(g.id, UNMASK_N)).toBeUndefined();
   });
 });

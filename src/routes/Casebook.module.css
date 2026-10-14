@@ -3,6 +3,27 @@
   flex-direction: column;
   gap: var(--space-3);
 }
+/* The banner, with the way into the Open Eye file at its right. */
+.head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+}
+.eyeLink {
+  composes: small from '../styles/type.module.css';
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1h);
+  min-height: var(--space-10);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--board);
+  color: var(--board-ink);
+  font-weight: 700;
+  text-decoration: none;
+}
 .banner {
   composes: h2 from '../styles/type.module.css';
   margin: 0;

@@ -164,6 +164,7 @@
     {
       "place": "The notice board",
       "method": "hidden-words",
+      "eye": true,
       "thing": "This morning's card on the hall notice board. It carries a line in plain sight, to the Open Eye.",
       "text": "Walk up Lane 4, past the rich old yew. Fair is fair.",
       "words": [

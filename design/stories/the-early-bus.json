@@ -113,6 +113,7 @@
     {
       "place": "The cab",
       "method": "hidden-words",
+      "eye": true,
       "thing": "A postcard kept behind the sun visor. It is a message passed in plain sight, to the Open Eye, and he kept the copy.",
       "text": "Half light suits the hotel evening shift. Come, Etta, the music locker is open.",
       "words": [
