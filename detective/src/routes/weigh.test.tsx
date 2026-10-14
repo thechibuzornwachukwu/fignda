@@ -88,7 +88,7 @@ describe('which account fits', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
     expect(screen.getByRole('button', { name: 'Card 2 of 3' })).toHaveAttribute('aria-current', 'true');
     fireEvent.click(screen.getByRole('button', { name: 'Next' }));
-    expect(screen.getByRole('link', { name: 'Back to cases' })).toHaveAttribute('href', '/play');
+    expect(screen.getByRole('link', { name: 'Back to cases' })).toHaveAttribute('href', '/cases');
     fireEvent.click(screen.getByRole('button', { name: 'Card 1 of 3' }));
     expect(screen.getByRole('button', { name: 'Next' })).toBeInTheDocument();
   });

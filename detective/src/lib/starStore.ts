@@ -2,7 +2,7 @@ import { storage } from './storage';
 
 export type Stars = 0 | 1 | 2 | 3;
 
-/** Best stars per catalogue puzzle in this browser. A replay can only raise them. */
+/** Best stars per board in this browser. A replay can only raise them. */
 const KEY = 'lantern-stars';
 
 export function loadStars(): Record<string, Stars> {

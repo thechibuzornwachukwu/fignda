@@ -18,13 +18,6 @@
   line-height: 1;
   color: var(--ink-display);
 }
-.clock {
-  font-size: clamp(48px, 7vw, 96px);
-  font-weight: 800;
-  letter-spacing: -0.05em;
-  line-height: 0.85;
-  font-variant-numeric: tabular-nums;
-}
 .resultTitle {
   font-family: var(--font-display);
   font-size: clamp(24px, 3.6vw, 46px);
@@ -32,13 +25,6 @@
   letter-spacing: -0.015em;
   line-height: 1.05;
   color: var(--ink-heading);
-}
-.stat {
-  font-size: clamp(36px, 5vw, 56px);
-  font-weight: 800;
-  letter-spacing: -0.04em;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
 }
 .h2 {
   font-family: var(--font-display);
@@ -56,12 +42,6 @@
   letter-spacing: 0;
   line-height: 1.2;
   color: var(--ink-heading);
-}
-.row {
-  font-size: clamp(24px, 3.2vw, 40px);
-  font-weight: 700;
-  letter-spacing: -0.035em;
-  line-height: 1.1;
 }
 .puzzle {
   font-size: clamp(20px, 2.3vw, 27px);

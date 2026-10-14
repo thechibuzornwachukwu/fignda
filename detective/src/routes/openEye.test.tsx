@@ -19,7 +19,7 @@ const open = (path: string) =>
     <MemoryRouter initialEntries={[path]}>
       <Routes>
         <Route path="open-eye" element={<OpenEye />} />
-        <Route path="play" element={<Casebook />} />
+        <Route path="cases" element={<Casebook />} />
       </Routes>
     </MemoryRouter>,
   );
@@ -71,11 +71,11 @@ describe('the Open Eye file, on screen', () => {
   });
 
   it('Cases leads to it once there is something in it, and a closed casebook shows the next one shut', () => {
-    const first = open('/play');
+    const first = open('/cases');
     expect(first.container.querySelector('[data-eye-link]')).toBeNull();
     first.unmount();
     keep(Object.fromEntries(chapters.map((c) => [c.id, all])));
-    const { container } = open('/play');
+    const { container } = open('/cases');
     expect(screen.getByRole('link', { name: 'The Open Eye' })).toHaveAttribute('href', '/open-eye');
     expect(container.querySelector('[data-next-book]')).toHaveTextContent('Casebook 2');
   });

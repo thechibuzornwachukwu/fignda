@@ -28,7 +28,9 @@ function SlowLoad() {
 
 function Layout() {
   const { pathname } = useLocation();
-  useEffect(() => window.scrollTo(0, 0), [pathname]);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
   return (
     <>
       {/* A step has the whole screen: its own way back is the way out. */}

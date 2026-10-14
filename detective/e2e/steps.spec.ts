@@ -117,9 +117,9 @@ test('the line-up: 2 wrong names and the mask comes off anyway', async ({ page }
 
 test('a new player lands in the brief, and finds the case again on Cases', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('link', { name: 'Open your first case' }).first().click();
+  await page.getByRole('main').getByRole('link', { name: 'Open your case' }).click();
   await expect(page).toHaveURL(/\/case\/the-long-spoon$/);
-  await page.goto('/play');
+  await page.goto('/cases');
   const card = page.locator('[data-chapter="the-long-spoon"]');
   await expect(card.getByRole('heading', { name: 'The long spoon' })).toBeVisible();
   await expect(card.getByRole('link', { name: 'Open the brief' })).toHaveAttribute('href', '/case/the-long-spoon');
@@ -130,21 +130,21 @@ test('half way through, the landing page and Cases say carry on, and a closed ca
   await page.goto('/');
   // The Play button leads straight to the step that is open.
   await expect(page.getByRole('main').getByRole('link', { name: 'Carry on your case' })).toHaveAttribute('href', '/case/the-long-spoon/3');
-  await page.goto('/play');
+  await page.goto('/cases');
   await expect(page.locator('[data-chapter]').getByRole('img', { name: 'Step 3 of 6' })).toBeVisible();
   await expect(page.locator('[data-chapter]').getByRole('link', { name: 'Carry on', exact: true })).toBeVisible();
   // Closed, the next case in the casebook is the one that is open.
   await page.evaluate(() => localStorage.setItem('lantern-chapters', JSON.stringify({ 'the-long-spoon': { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3, 7: 3 } })));
-  await page.goto('/play');
+  await page.goto('/cases');
   await expect(page.locator('[data-chapter="the-open-box"]').getByRole('link', { name: 'Open the brief' })).toHaveAttribute('href', '/case/the-open-box');
   await page.evaluate(() => {
     const all = { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3, 7: 3 };
     localStorage.setItem('lantern-chapters', JSON.stringify({ 'the-long-spoon': all, 'the-open-box': all, 'the-early-bus': all, 'the-year-that-is-missing': all, 'the-light-in-the-hall': all, 'the-2-signs': all, 'the-other-spoon': all, 'who-carries-the-cards': all }));
   });
-  await page.goto('/play');
+  await page.goto('/cases');
   await expect(page.locator('[data-chapter]')).toHaveCount(0);
   await page.goto('/');
-  await expect(page.getByRole('link', { name: /your (first )?case/ })).toHaveCount(0);
+  await expect(page.getByRole('main').getByRole('link', { name: 'See your cases' })).toHaveAttribute('href', '/cases');
 });
 
 // Cases 2 and 3 (SPEC section 6, Which account fits, Could it be done). A case opens when the one before is closed.
@@ -195,7 +195,7 @@ test('which account fits: a wrong pick shows what strikes it out, and the right 
   await expect(page.locator('[data-found]')).not.toBeInViewport();
   await page.getByRole('button', { name: 'Next' }).click();
   await expect(page.locator('[data-after]')).toBeInViewport();
-  await expect(page.getByRole('link', { name: 'Back to cases' })).toHaveAttribute('href', '/play');
+  await expect(page.getByRole('link', { name: 'Back to cases' })).toHaveAttribute('href', '/cases');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   // Closed stays closed, and the brief leads to its ending.
   await page.goto('/case/the-open-box');
@@ -239,15 +239,14 @@ test('the trail: each find is pinned to a place, and the walk ends on its lead',
   await expect(page.getByRole('link', { name: 'Weigh the accounts' })).toHaveAttribute('href', '/case/the-year-that-is-missing/6');
 });
 
-test('Cases is the casebook: closed files fold, the open one leads in, and practice is at the foot', async ({ page }) => {
+test('Cases is the casebook: closed files fold, and the open one leads in', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 700 });
   await seedCases(page, { 'the-long-spoon': ALL, 'the-open-box': { 1: 3 } });
-  await page.goto('/play');
+  await page.goto('/cases');
   await expect(page.getByRole('heading', { level: 2, name: 'Lantern Row' })).toBeVisible();
   await expect(page.locator('[data-file="the-long-spoon"]')).toHaveAttribute('data-state', 'closed');
   await expect(page.locator('[data-file][data-state="locked"]')).toHaveCount(6);
   await expect(page.locator('[data-next-file]')).toHaveCount(0);
-  await expect(page.getByRole('heading', { level: 2, name: 'Practice' })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
   // A closed case can be worked cold: its own stars, an empty board, and no tip-off.
   await page.locator('[data-file="the-long-spoon"] [data-cold]').click();
@@ -261,7 +260,7 @@ test('Cases is the casebook: closed files fold, the open one leads in, and pract
 
 test('the interlude opens once case 4 is closed, and is 1 board', async ({ page }) => {
   await seedCases(page, { 'the-long-spoon': ALL, 'the-open-box': ALL, 'the-early-bus': ALL, 'the-year-that-is-missing': ALL });
-  await page.goto('/play');
+  await page.goto('/cases');
   await page.getByRole('link', { name: 'The bookmark' }).click();
   await expect(page).toHaveURL(/\/interlude\/the-bookmark$/);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('The bookmark');

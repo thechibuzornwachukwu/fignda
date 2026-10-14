@@ -2,7 +2,7 @@ import { storage } from './storage';
 import type { Stars } from './starStore';
 
 /**
- * Best stars per step of a written chapter, in this browser. Kept apart from the catalogue's stars. Signed in, a
+ * Best stars per step of a written chapter, in this browser. Signed in, a
  * step is checked by the server when it is finished, and steps done on another device come down on sign in.
  */
 const KEY = 'lantern-chapters';

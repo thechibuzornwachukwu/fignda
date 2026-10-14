@@ -4,11 +4,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--space-10);
-}.title {
-  composes: resultTitle from '../styles/type.module.css';
-  margin: 0;
-}.back:hover {
-  color: var(--fg);
 }
 .section,
 .danger {
@@ -27,7 +22,7 @@
 }
 .help {
   margin: 0;
-  font-size: 14px;
+  composes: small from '../styles/type.module.css';
   font-weight: 500;
   line-height: 1.5;
   color: var(--muted);
@@ -46,7 +41,7 @@
 .note {
   margin: 0;
   min-height: 1.2em;
-  font-size: 14px;
+  composes: small from '../styles/type.module.css';
   font-weight: 500;
   color: var(--muted);
 }
@@ -63,14 +58,12 @@
   border-bottom: 1px solid var(--line);
 }
 .facts dt {
-  font-size: 14px;
   font-weight: 600;
   color: var(--subtle);
 }
 .facts dd {
   margin: 0;
   min-width: 0;
-  font-size: 15px;
   font-weight: 600;
   text-align: right;
   overflow-wrap: anywhere;

@@ -63,5 +63,5 @@ test('a case that is not written leads back to cases', async ({ page }) => {
   await page.goto('/case/nothing');
   await expect(page.locator('[data-brief="missing"]')).toBeVisible();
   await page.getByRole('link', { name: 'Back to cases' }).click();
-  await expect(page).toHaveURL(/\/play$/);
+  await expect(page).toHaveURL(/\/cases$/);
 });

@@ -20,7 +20,7 @@ const open = (path: string) =>
   render(
     <MemoryRouter initialEntries={[path]}>
       <Routes>
-        <Route path="play" element={<Casebook />} />
+        <Route path="cases" element={<Casebook />} />
         <Route path="case/:id" element={<Brief />} />
         <Route path="case/:id/:n" element={<Step />} />
         <Route path="cold/:id" element={<Brief />} />
@@ -34,7 +34,7 @@ beforeEach(() => localStorage.clear());
 
 describe('the casebook on Cases', () => {
   it('a new player: the first file is open, the rest are shut, and the next one is not written', () => {
-    const { container } = open('/play');
+    const { container } = open('/cases');
     expect(screen.getByRole('heading', { level: 2, name: 'Lantern Row' })).toBeInTheDocument();
     expect(container.querySelector('[data-chapter]')).toHaveAttribute('data-chapter', 'the-long-spoon');
     expect(screen.getByRole('img', { name: '6 steps' })).toBeInTheDocument();
@@ -47,7 +47,7 @@ describe('the casebook on Cases', () => {
 
   it('half way: the steps are marks, closed files fold to a row, and the way in is Carry on', () => {
     keep({ 'the-long-spoon': all, 'the-open-box': { 1: 3, 2: 2 } });
-    const { container } = open('/play');
+    const { container } = open('/cases');
     expect(container.querySelector('[data-file="the-long-spoon"]')).toHaveAttribute('data-state', 'closed');
     expect(container.querySelector('[data-chapter]')).toHaveAttribute('data-chapter', 'the-open-box');
     expect(screen.getByRole('img', { name: 'Step 3 of 6' })).toBeInTheDocument();
@@ -58,7 +58,7 @@ describe('the casebook on Cases', () => {
 
   it('every written case closed: no file is open, and the interlude can be read', () => {
     keep(Object.fromEntries(chapters.map((c) => [c.id, all])));
-    const { container } = open('/play');
+    const { container } = open('/cases');
     expect(container.querySelector('[data-chapter]')).toBeNull();
     expect(screen.getByRole('link', { name: 'The bookmark' })).toHaveAttribute('href', '/interlude/the-bookmark');
   });
@@ -93,7 +93,7 @@ describe('a cold case', () => {
     expect(screen.getByRole('img', { name: 'Gold seal' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'The board' })).toHaveAttribute('href', '/cold/the-long-spoon');
     first.unmount();
-    const { container } = open('/play');
+    const { container } = open('/cases');
     expect(container.querySelector('[data-file="the-long-spoon"] [data-seal]')).toBeInTheDocument();
   });
 });
@@ -127,10 +127,10 @@ describe('an interlude', () => {
     expect(interludes.map((i) => i.id)).toEqual(['the-bookmark', 'the-envelope']);
     expect(screen.getByRole('heading', { level: 1, name: 'The bookmark' })).toBeInTheDocument();
     expect(container.querySelector('[data-marks]')).toBeNull();
-    expect(screen.getByRole('link', { name: 'Cases' })).toHaveAttribute('href', '/play');
+    expect(screen.getByRole('link', { name: 'Cases' })).toHaveAttribute('href', '/cases');
     fireEvent.click(screen.getByRole('button', { name: "I'm done" }));
     expect(container.querySelector('[data-fact]')).toHaveTextContent('Hall. Glow. Key. Dark.');
-    expect(screen.getByRole('link', { name: 'Back to cases' })).toHaveAttribute('href', '/play');
+    expect(screen.getByRole('link', { name: 'Back to cases' })).toHaveAttribute('href', '/cases');
     expect(kept()['the-bookmark']![1]).toBe(1);
   });
 });

@@ -89,7 +89,7 @@ describe('Brief', () => {
     expect(screen.getByRole('heading', { level: 1, name: 'The long spoon' })).toBeInTheDocument();
     expect(container.querySelector('[data-case-board]')).toBeInTheDocument();
     expect(screen.getByText(/Tonight at 6 is the 20th cook-off final/)).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Cases' })).toHaveAttribute('href', '/play');
+    expect(screen.getByRole('link', { name: 'Cases' })).toHaveAttribute('href', '/cases');
     expect(screen.getByRole('link', { name: 'Go to the store room' })).toHaveAttribute('href', '/case/the-long-spoon/1');
   });
 
@@ -97,6 +97,6 @@ describe('Brief', () => {
     const { container } = open('/case/nothing');
     expect(container.querySelector('[data-brief="missing"]')).toBeInTheDocument();
     expect(container.querySelector('[data-case-board]')).toBeNull();
-    expect(screen.getByRole('link', { name: 'Back to cases' })).toHaveAttribute('href', '/play');
+    expect(screen.getByRole('link', { name: 'Back to cases' })).toHaveAttribute('href', '/cases');
   });
 });

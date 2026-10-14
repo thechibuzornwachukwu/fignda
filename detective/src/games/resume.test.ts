@@ -101,7 +101,7 @@ describe('the kept game', () => {
     expect(loadResume('nigeria', 1_050_000)).not.toBeNull();
   });
 
-  it('never drops a game in normal play: the whole catalogue and its passages fit', () => {
+  it('never drops a game in normal play: every case and its passages fit', () => {
     for (let i = 0; i < 80; i++) saveResume(`g${i}`, left(1_000_000, i));
     for (let i = 0; i < 80; i++) expect(loadResume(`g${i}`, 2_000_000)).not.toBeNull();
   });

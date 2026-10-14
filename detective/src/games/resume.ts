@@ -8,7 +8,7 @@ import type { SavedSession } from './session';
 /** One small record per puzzle, so a pick rewrites that game and nothing else. */
 const PREFIX = 'lantern-resume-';
 /**
- * A guard on storage, not a rule of play: more than the whole catalogue and its passages, so a player never
+ * A guard on storage, not a rule of play: more than every case and its passages, so a player never
  * meets it. Past it, the game left longest ago goes first.
  */
 export const RESUME_MAX = 100;

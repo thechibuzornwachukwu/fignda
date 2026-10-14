@@ -54,14 +54,14 @@ test('no flash: stored theme is set before first paint', async ({ page }) => {
 test('Manrope is the loaded font', async ({ page }) => {
   await page.goto('/');
   await page.evaluate(() => document.fonts.ready);
-  expect(await page.evaluate(() => document.fonts.check('800 18px Manrope'))).toBe(true);
+  expect(await page.evaluate(async () => (await document.fonts.load('400 18px Manrope', 'Lantern')).length > 0)).toBe(true);
   const family = await page.evaluate(() => getComputedStyle(document.body).fontFamily);
   expect(family).toContain('Manrope');
 });
 
 test('headings are Bungee, in the softer ink', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'dark' });
-  await page.goto('/play');
+  await page.goto('/cases');
   // Bungee is only requested once a heading is on the page.
   await expect(page.locator('h1')).toBeVisible();
   await page.evaluate(() => document.fonts.ready);

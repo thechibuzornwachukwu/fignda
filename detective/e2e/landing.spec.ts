@@ -1,111 +1,74 @@
 import { expect, test, type Page } from '@playwright/test';
 
-const DEMO = ['amos', 'atom', 'data', 'rome', 'gold'];
+// The landing page and the way around: the dock on a phone, the header on a wide screen, and settings.
 
-async function letters(page: Page): Promise<string> {
-  await page.locator('[aria-label="Demo sentence"] [data-li]').first().waitFor();
-  return page.evaluate(() =>
-    Array.from(document.querySelectorAll<HTMLElement>('[aria-label="Demo sentence"] [data-li]'))
-      .map((el) => el.textContent ?? '')
-      .join('')
-      .toLowerCase(),
-  );
+const ALL = { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3, 7: 3 };
+const CASES = ['the-long-spoon', 'the-open-box', 'the-early-bus', 'the-year-that-is-missing', 'the-light-in-the-hall', 'the-2-signs', 'the-other-spoon', 'who-carries-the-cards'];
+
+async function seed(page: Page, kept: Record<string, Record<number, number>>) {
+  await page.addInitScript((k) => {
+    if (sessionStorage.getItem('seeded')) return;
+    sessionStorage.setItem('seeded', '1');
+    localStorage.setItem('lantern-chapters', JSON.stringify(k));
+  }, kept);
 }
+const noSideScroll = (page: Page) => page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth);
 
-async function dragWord(page: Page, S: string, word: string) {
-  const i = S.indexOf(word);
-  expect(i, word).toBeGreaterThanOrEqual(0);
-  // Scroll the word into view first, as a player would.
-  await page.locator(`[data-li="${i + word.length - 1}"]`).scrollIntoViewIfNeeded();
-  await page.locator(`[data-li="${i}"]`).scrollIntoViewIfNeeded();
-  const at = async (li: number) => {
-    const b = (await page.locator(`[data-li="${li}"]`).boundingBox())!;
-    return { x: b.x + b.width / 2, y: b.y + b.height / 2 };
-  };
-  const from = await at(i);
-  const to = await at(i + word.length - 1);
-  await page.mouse.move(from.x, from.y);
-  await page.mouse.down();
-  await page.mouse.move(to.x, to.y, { steps: 6 });
-  await page.mouse.up();
-}
-
-const cta = (page: Page) => page.getByRole('link', { name: 'That was the warm up. Now find 26.' });
-const list = (page: Page) => page.getByRole('complementary', { name: 'Hidden above' });
-
-test('demo completes by drag and links to the hard puzzle', async ({ page }) => {
+test('a new player: the name, the first board, and 1 tap to the first brief', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText(/Do you have\s*what it takes\?/);
-  const S = await letters(page);
-  await expect(cta(page)).toHaveCount(0);
-
-  for (const [n, w] of DEMO.entries()) {
-    await dragWord(page, S, w);
-    await expect(list(page)).toContainText(`${n + 1} / 5`);
-  }
-
-  await expect(cta(page)).toBeVisible();
-  await expect(cta(page)).toHaveAttribute('href', '/play/nigeria');
-  await expect(page.getByRole('button', { name: 'Play again' })).toBeVisible();
-  await cta(page).click();
-  await expect(page).toHaveURL(/\/play\/nigeria$/);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Find 26 Nigerian names');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Lantern Row');
+  await expect(page.locator('[data-case-board]')).toBeVisible();
+  await page.getByRole('main').getByRole('link', { name: 'Open your case' }).click();
+  await expect(page).toHaveURL(/\/case\/the-long-spoon$/);
 });
 
-test('hint cycles Ask for a tip-off, Show it, Play again', async ({ page }) => {
+test('half way: the landing page leads straight to the step that is open', async ({ page }) => {
+  await seed(page, { 'the-long-spoon': { 1: 3, 2: 2 } });
   await page.goto('/');
-  const S = await letters(page);
-  const hint = page.locator('#how').getByRole('button', { name: /Ask for a tip-off|Show it|Play again/ });
-
-  for (const w of DEMO) {
-    await expect(hint).toHaveText('Ask for a tip-off');
-    await hint.click();
-    await expect(page.locator(`[data-li="${S.indexOf(w)}"]`)).toHaveAttribute('data-hint', 'true');
-    await expect(hint).toHaveText('Show it');
-    await hint.click();
-    await expect(page.getByRole('status').filter({ hasText: 'was hiding there.' })).toBeVisible();
-  }
-
-  await expect(list(page)).toContainText('5 / 5');
-  await expect(cta(page)).toBeVisible();
-  await expect(hint).toHaveText('Play again');
-  await hint.click();
-  await expect(list(page)).toContainText('0 / 5');
-  await expect(cta(page)).toHaveCount(0);
+  await expect(page.getByRole('main').getByRole('link', { name: 'Carry on your case' })).toHaveAttribute('href', '/case/the-long-spoon/3');
 });
 
-test('sections and anchors', async ({ page }) => {
-  await page.goto('/#about');
-  await expect(page.getByRole('heading', { name: 'About' })).toBeInViewport();
-  await expect(page.getByRole('heading', { name: 'Pick a topic' })).toBeVisible();
-  await page.getByRole('link', { name: /Nigerian names\s*26 words · Hard/ }).click();
-  await expect(page).toHaveURL(/\/play\/nigeria$/);
+test('every case closed: the way in is the casebook, and it ends on the next one shut', async ({ page }) => {
+  await seed(page, Object.fromEntries(CASES.map((c) => [c, ALL])));
+  await page.goto('/');
+  await page.getByRole('main').getByRole('link', { name: 'See your cases' }).click();
+  await expect(page).toHaveURL(/\/cases$/);
+  await expect(page.locator('[data-next-book]')).toContainText('Casebook 2');
+  await expect(page.locator('[data-chapter]')).toHaveCount(0);
 });
 
-test.describe('touch', () => {
-  test.use({ hasTouch: true, isMobile: true, viewport: { width: 375, height: 740 } });
+test.describe('on a phone', () => {
+  test.use({ viewport: { width: 320, height: 700 }, hasTouch: true });
 
-  test('demo by two taps, no horizontal scroll', async ({ page }) => {
-    await page.goto('/');
-    // A first visit on a phone opens on one guided find. Skipped, the player is alone with the demo.
-    await page.getByRole('button', { name: 'Skip the guide' }).tap();
-    await expect(page.getByText('Swipe across the letters, or tap the first and then the last.', { exact: false })).toBeVisible();
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-    expect(overflow).toBeLessThanOrEqual(0);
-    const S = await letters(page);
-    const i = S.indexOf('amos');
-    await page.locator(`[data-li="${i}"]`).tap();
-    await page.locator(`[data-li="${i + 3}"]`).tap();
-    await expect(list(page)).toContainText('1 / 5');
+  test('the dock: Cases, Open Eye, Play, Ranks with no account set up, Settings', async ({ page }) => {
+    await page.goto('/cases');
+    const dock = page.getByRole('navigation', { name: 'Tabs' });
+    await expect(dock.getByRole('link')).toHaveText(['Cases', 'Open Eye', 'Play', 'Ranks', 'Settings']);
+    await expect(dock.getByRole('link', { name: 'Open your case' })).toHaveAttribute('href', '/case/the-long-spoon');
+    expect(await noSideScroll(page)).toBe(true);
+    // No account to rank: Ranks goes back to the cases.
+    await dock.getByRole('link', { name: 'Ranks' }).click();
+    await expect(page).toHaveURL(/\/cases$/);
+  });
+
+  test('a step has the whole screen: no dock', async ({ page }) => {
+    await page.goto('/case/the-long-spoon/1');
+    await expect(page.getByRole('navigation', { name: 'Tabs' })).toHaveCount(0);
   });
 });
 
-test('a guest on the landing page never loads the auth client', async ({ page }) => {
-  const calls: string[] = [];
-  page.on('request', (r) => {
-    if (r.url().includes(':54321') || r.url().includes('supabase')) calls.push(r.url());
-  });
-  await page.goto('/');
-  await page.waitForLoadState('networkidle');
-  expect(calls).toEqual([]);
+test('settings: any of the 4 pets, free, and it is the pet on every screen', async ({ page }) => {
+  await page.goto('/settings');
+  await expect(page.locator('[data-pet]')).toHaveCount(4);
+  await page.locator('[data-pet="robot"]').click();
+  await expect(page.locator('[data-pet="robot"]')).toHaveAttribute('aria-pressed', 'true');
+  await page.goto('/open-eye');
+  await expect(page.locator('[data-partner="robot"]').first()).toBeVisible();
+});
+
+test('an address that is not a page goes home, and a case that is not written says so', async ({ page }) => {
+  await page.goto('/play/bible');
+  await expect(page).toHaveURL(/\/$/);
+  await page.goto('/case/no-such-case');
+  await expect(page.locator('[data-brief="missing"]')).toBeVisible();
 });
