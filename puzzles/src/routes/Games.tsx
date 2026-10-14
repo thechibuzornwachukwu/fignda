@@ -10,7 +10,6 @@ import { useStreak, type Streak } from '../lib/useStreak';
 import { TextLink } from '../components/TextLink';
 import { useAuth } from '../lib/auth';
 import { keepUnlocked, useUnlocks } from '../lib/useUnlocks';
-import { Casebook } from './Casebook';
 import { CustomTopic } from './CustomTopic';
 import { GameInvites } from './GameInvites';
 import { Journey } from './Journey';
@@ -54,10 +53,7 @@ export function Games() {
 
       <GameInvites />
 
-      <Casebook />
-
-      {/* Practice: the packs with no chapter, as a shelf at the foot, off the path of cases. */}
-      <Journey title="Practice" />
+      <Journey />
 
       {auth.enabled && open.make && (
         <p className={styles.more}>

@@ -25,18 +25,8 @@ describe('page metadata', () => {
     expect(p.body).toContain('This is a most remarkable puzzle');
   });
 
-  it('a case page gives the brief and the way in, and nothing of the evidence or the ending', () => {
-    const p = pageFor('/case/the-long-spoon', O);
-    expect(p.title).toBe('The long spoon · A case · Gazecraft');
-    expect(p.canonical).toBe('/case/the-long-spoon');
-    expect(p.noindex).toBeFalsy();
-    expect(p.body).toContain('Tonight at 6 is the 20th cook-off final');
-    expect(p.body).toContain('href="/case/the-long-spoon"');
-    // Who did it, and how it ends, are for the player to find.
-    expect(allCopy(p)).not.toMatch(/Theo|photographer|soldering|MARLOW|planed her off/);
-    // A step is part of its case, not a page of its own.
-    expect(pageFor('/case/the-long-spoon/3', O)).toMatchObject({ canonical: '/case/the-long-spoon', noindex: true });
-    expect(pageFor('/case/nothing', O).noindex).toBe(true);
+  it('a written case is not a page here: its address is not indexed', () => {
+    expect(pageFor('/case/the-long-spoon', O).noindex).toBe(true);
   });
 
   it('there is no daily: an old link to one, or to its answers, is the cases and is not indexed', () => {
@@ -60,7 +50,7 @@ describe('page metadata', () => {
   });
 
   it('copy follows the brand rules: no em dashes, no exclamation marks', () => {
-    const paths = ['/', '/play', '/play/bible', '/case/the-long-spoon', '/leaderboard', '/players', '/privacy'];
+    const paths = ['/', '/play', '/play/bible', '/leaderboard', '/players', '/privacy'];
     for (const path of paths) {
       const c = allCopy(pageFor(path, O));
       expect(c, path).not.toMatch(/\u2014/);
@@ -72,7 +62,7 @@ describe('page metadata', () => {
   it('the home description carries the promise, and no public page claims a result', () => {
     expect(pageFor('/', O).description).toContain('Slow down. Look closer.');
     expect(pageFor('/', O).description.length).toBeLessThanOrEqual(160);
-    for (const path of ['/', '/play', '/play/general', '/play/science', '/case/the-long-spoon', '/leaderboard', '/players', '/privacy']) {
+    for (const path of ['/', '/play', '/play/general', '/play/science', '/leaderboard', '/players', '/privacy']) {
       const p = pageFor(path, O);
       // Puzzle paragraphs are the game, not a claim about it.
       expect([p.title, p.description, p.imageAlt, JSON.stringify(p.jsonLd)].join(' '), path).not.toMatch(BANNED_CLAIMS);
@@ -90,10 +80,10 @@ describe('page metadata', () => {
 });
 
 describe('sitemap and llms.txt', () => {
-  it('lists main pages, every case and every puzzle, never a daily and never profiles', () => {
+  it('lists main pages and every puzzle, never a daily and never profiles', () => {
     const paths = sitemapPaths().map((u) => u.path);
     expect(paths).toContain('/play/bible');
-    expect(paths).toContain('/case/the-long-spoon');
+    expect(paths.some((p) => p.startsWith('/case/'))).toBe(false);
     expect(paths.filter((p) => p.startsWith('/d/'))).toEqual([]);
     expect(paths.some((p) => p.startsWith('/u/'))).toBe(false);
   });
@@ -103,7 +93,7 @@ describe('sitemap and llms.txt', () => {
     expect(t.startsWith('# Gazecraft')).toBe(true);
     expect(t).toContain(`${O}/play/bible`);
     expect(t).toContain('Is Gazecraft free?');
-    expect(t).toContain(`${O}/case/the-long-spoon`);
+    expect(t).not.toContain('/case/');
     expect(t).not.toMatch(/\bdaily\b|\bdailies\b/i);
     expect(t).not.toMatch(/[\u2014!]/);
   });

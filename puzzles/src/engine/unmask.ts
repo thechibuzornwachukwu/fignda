@@ -1,5 +1,5 @@
 // Unmask: the last clue of a case. The player picks letters to spell out who the culprit is. Pure.
-// It is the end of a chapter, so it is made to be won: the first letter of each word is given, and the letters
+// It is the end of a case, so it is made to be won: the first letter of each word is given, and the letters
 // to pick from are a small bank, the name's own and a few that are not in it.
 // The board is the alphabet: a pick is one letter, an answer is a letter the player must find. So the shell,
 // the play log and the server's replay treat it as they treat every other game.

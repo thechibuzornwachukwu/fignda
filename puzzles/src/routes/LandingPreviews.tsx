@@ -4,7 +4,7 @@ import { Letter } from '../components/Letter';
 import { ProgressLine } from '../components/ProgressLine';
 import { TextLink } from '../components/TextLink';
 import { score } from '../engine/score';
-import { chapters } from '../games/chapters';
+import { games } from '../games/catalog';
 import type { GameDef } from '../games/catalog';
 import { registry } from '../games/registry';
 import styles from './LandingPreviews.module.css';
@@ -103,13 +103,13 @@ export function HeroArt() {
 const WEEK = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const RUN = 5;
 
-/** A written case and a week of working it: a step a day and the run grows. */
+/** A case and a week of working it: a clue a day and the run grows. */
 function CasePreview() {
-  const chapter = chapters[0];
+  const first = games[0];
   return (
     <div className={styles.preview} aria-hidden="true">
-      <span className={styles.kicker}>{chapter ? `A case · ${chapter.steps.length} steps` : 'A case'}</span>
-      <span className={styles.previewTitle}>{chapter?.title ?? 'A case to work'}</span>
+      <span className={styles.kicker}>A case</span>
+      <span className={styles.previewTitle}>{first?.title ?? 'A case to work'}</span>
       <div className={styles.week}>
         {WEEK.map((d, i) => (
           <span key={i} className={styles.day}>

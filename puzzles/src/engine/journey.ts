@@ -23,10 +23,9 @@ export const clueKind = (n: number): ClueKind =>
   n === 0 ? 'whole' : n === UNMASK_N ? 'unmask' : n === MIRROR_N ? 'mirror' : n >= SUMS_FROM && n < MIRROR_N ? 'sums' : 'words';
 
 /**
- * The clues of a pack in the order they are played, by number. The rhythm is fixed: word, word, number, word.
- * So a sums clue follows passages 2, 5, 8 and so on. Then the Mirror clue, when the pack has one. A pack is a drill
- * (BUILD_PLAN set 4c): it has no unmasking, and ends on its last clue. An unmasking played before drills is still
- * kept and still closes its pack. A puzzle that is not cut is a pack of 1 clue: the whole puzzle.
+ * The clues of a case in the order they are played, by number. The rhythm is fixed: word, word, number, word.
+ * So a sums clue follows passages 2, 5, 8 and so on. Then the Mirror clue, when the case has one, and last the
+ * unmasking. A puzzle that is not cut is a case of 1 clue: the whole puzzle.
  */
 export function caseOrder(passageCount: number, mirror = false): number[] {
   if (passageCount < 2) return [0];
@@ -36,7 +35,7 @@ export function caseOrder(passageCount: number, mirror = false): number[] {
     if (i % 3 === 2 && SUMS_FROM + (i - 2) / 3 < MIRROR_N) out.push(SUMS_FROM + (i - 2) / 3);
   }
   if (mirror) out.push(MIRROR_N);
-  return out;
+  return [...out, UNMASK_N];
 }
 
 /** One sitting. `n` is the clue's number (`clueKind`). */

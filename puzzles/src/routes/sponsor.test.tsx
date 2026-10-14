@@ -48,7 +48,7 @@ describe('With NAME', () => {
 
   it('shows on a case card on the path, under the title', () => {
     const { container } = showGames();
-    const path = screen.getByRole('region', { name: 'Practice' });
+    const path = screen.getByRole('region', { name: 'Your path' });
     const marks = [...container.querySelectorAll('[data-case-sponsor]')];
     expect(marks).toHaveLength(games.length - 1);
     for (const m of marks) expect(m.textContent).toBe('With Chi Farms');

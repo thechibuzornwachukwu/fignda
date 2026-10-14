@@ -121,18 +121,6 @@ export async function fetchDailyRank(day: number, handle: string): Promise<MyRan
   return (data as MyRank[])[0] ?? null;
 }
 
-export type CaseRow = { rank: number; handle: string; score: number; stars: number; steps: number };
-
-/** The board of a written case: each player's best checked score on each step, added up. Most points first. */
-export async function fetchChapterBoard(chapter: string): Promise<CaseRow[]> {
-  const { data, error } = await (await client()).rpc('chapter_board', { p_chapter: chapter });
-  if (error) throw error;
-  const rows = Array.isArray(data) ? (data as Array<Record<string, unknown>>) : [];
-  return rows
-    .filter((r) => typeof r.handle === 'string')
-    .map((r, i) => ({ rank: i + 1, handle: r.handle as string, score: Number(r.score) || 0, stars: Number(r.stars) || 0, steps: Number(r.steps) || 0 }));
-}
-
 /** Best verified play per player on one puzzle. */
 export async function fetchGameBoard(gameId: string, limit = 20): Promise<BoardRow[]> {
   const { data, error } = await (await client()).rpc('game_board', { p_game: gameId, p_limit: limit });
@@ -491,13 +479,6 @@ export async function fetchProgress(): Promise<Array<{ clue_id: string; stars: n
   const { data, error } = await (await client()).rpc('my_progress');
   if (error) throw error;
   return (data ?? []) as Array<{ clue_id: string; stars: number }>;
-}
-
-/** Your steps of written chapters done on any device, with the best stars of each. */
-export async function fetchChapterProgress(): Promise<Array<{ chapter: string; step: number; stars: number }>> {
-  const { data, error } = await (await client()).rpc('my_chapter_progress');
-  if (error) throw error;
-  return (data ?? []) as Array<{ chapter: string; step: number; stars: number }>;
 }
 
 /** A player's lifetime points, clues included, as the server counts them. Null when there is no such player. */

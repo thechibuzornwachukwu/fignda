@@ -3,30 +3,19 @@
 // bundle). Facts only: nothing here claims numbers we do not have.
 
 import gamesFile from '../../data/games.json';
-import twoSigns from '../../design/stories/the-2-signs.json';
-import lightInTheHall from '../../design/stories/the-light-in-the-hall.json';
-import otherSpoon from '../../design/stories/the-other-spoon.json';
-import earlyBus from '../../design/stories/the-early-bus.json';
-import longSpoon from '../../design/stories/the-long-spoon.json';
-import openBox from '../../design/stories/the-open-box.json';
-import missingYear from '../../design/stories/the-year-that-is-missing.json';
-import cards from '../../design/stories/who-carries-the-cards.json';
-import type { Chapter } from '../engine/chapter';
 import { pick } from '../copy';
 import { buildHiddenWords } from '../engine/hiddenWords';
 import { sponsorOf } from '../engine/sponsor';
 
 type Game = { id: string; category: string; title: string; noun: string; text: string; dict: string[]; sponsor?: unknown };
 const data = gamesFile as unknown as { games: Game[]; dailyPool: string[]; filters: string[] };
-/** Every written case. A new file in `design/stories` is added here: a test fails until it is. */
-export const CASES: readonly Chapter[] = [longSpoon, openBox, earlyBus, missingYear, lightInTheHall, twoSigns, otherSpoon, cards] as unknown as Chapter[];
 /** Curated order for lists: follows the filter tabs, so no single topic leads. */
 const games = [...data.games].sort((a, b) => data.filters.indexOf(a.category) - data.filters.indexOf(b.category));
 
 export const SITE = 'Gazecraft';
 export const TAGLINE = 'Find it. Figure it out.';
 export const PITCH =
-  'A free detective game, played a few minutes at a time. Something was taken and somebody did it. Work the case a step at a time: read what was left behind, find the words hiding in plain sight, clear the suspects and name who is left.';
+  'A free puzzle game, played a few minutes at a time. Words and numbers are hiding in plain sight. Find them a clue at a time, close the case and unmask who hid them.';
 
 export type ProfileSummary = {
   handle: string;
@@ -177,29 +166,6 @@ function gamePage(origin: string, g: Game): Page {
   };
 }
 
-/** A written case: its title, what is missing, and the way in. Nothing of its evidence or its ending. */
-function casePage(origin: string, c: Chapter): Page {
-  const description = `${c.brief[0] ?? c.item.line} ${c.steps.length} steps, from the brief to the ending.`;
-  return {
-    title: `${c.title} · A case · ${SITE}`,
-    description,
-    image: '/og/default.png',
-    imageAlt: `${c.title}, a case on ${SITE}`,
-    canonical: `/case/${c.id}`,
-    jsonLd: [
-      {
-        '@context': 'https://schema.org',
-        '@type': 'Game',
-        name: c.title,
-        description,
-        url: `${origin}/case/${c.id}`,
-        isAccessibleForFree: true,
-      },
-    ],
-    body: `<h1>${esc(c.title)}</h1>${c.brief.map((l) => `<p>${esc(l)}</p>`).join('')}<p><a href="/case/${c.id}">Open the case</a>.</p>`,
-  };
-}
-
 export function profilePage(origin: string, p: ProfileSummary): Page {
   const stats = `${p.current_streak} day run · ${p.perfect} perfect`;
   return {
@@ -247,22 +213,14 @@ export function pageFor(path: string, origin: string): Page {
     return g ? gamePage(origin, g) : home(origin);
   }
 
-  const story = clean.match(/^\/case\/([a-z0-9-]{2,40})(\/\d{1,2})?$/);
-  if (story) {
-    const c = CASES.find((x) => x.id === story[1]);
-    // A step is part of its case: it is not a page of its own.
-    return c ? { ...casePage(origin, c), noindex: !!story[2] } : { ...home(origin), canonical: clean, noindex: true };
-  }
-
   // There is no daily any more. An old link to one, or to its answers, is the cases.
   if (/^\/d\/\d{1,6}(\/answers)?$/.test(clean)) return { ...home(origin), canonical: '/play', noindex: true };
 
   if (clean === '/play') {
     const list = games.map((g) => `<li><a href="/play/${g.id}">${esc(question(g))}</a></li>`).join('');
-    const cases = CASES.map((c) => `<li><a href="/case/${c.id}">${esc(c.title)}</a></li>`).join('');
-    return simple('/play', 'Cases · Gazecraft', `Work a case a step at a time, then ${games.length} more to practise on. Every answer is in plain sight. You will still miss some.`, `<ul>${cases}${list}</ul>`);
+    return simple('/play', 'Cases · Gazecraft', `${games.length} cases, a clue at a time. Every answer is in plain sight. You will still miss some.`, `<ul>${list}</ul>`);
   }
-  if (clean === '/leaderboard') return simple('/leaderboard', 'Ranks · Gazecraft', 'Who has worked the open case on Gazecraft, by the points their steps earned.', '');
+  if (clean === '/leaderboard') return simple('/leaderboard', 'Ranks · Gazecraft', 'The best scores on the case you are on, on Gazecraft.', '');
   if (clean === '/players') return simple('/players', 'Players · Gazecraft', 'Find players to follow on Gazecraft: longest runs, most points and new players.', '');
   if (clean === '/privacy') return simple('/privacy', 'Privacy · Gazecraft', 'What Gazecraft keeps, why, and how to delete it.', '');
 
@@ -275,7 +233,6 @@ export function sitemapPaths(): Array<{ path: string; daily?: boolean }> {
   return [
     { path: '/' },
     { path: '/play' },
-    ...CASES.map((c) => ({ path: `/case/${c.id}` })),
     ...games.map((g) => ({ path: `/play/${g.id}` })),
     { path: '/leaderboard' },
     { path: '/players' },
@@ -294,9 +251,8 @@ export function llmsTxt(origin: string): string {
     '',
     '## Key pages',
     `- [Home](${origin}/): what Gazecraft is and a playable example`,
-    `- [Cases](${origin}/play): the open case, and puzzles to practise on`,
-    ...CASES.map((c) => `- [${c.title}](${origin}/case/${c.id}): a case in ${c.steps.length} steps. ${c.brief[0] ?? ''}`),
-    `- [Ranks](${origin}/leaderboard): who has worked the open case, by points`,
+    `- [Cases](${origin}/play): every case, a clue at a time`,
+    `- [Ranks](${origin}/leaderboard): the best scores on the case you are on`,
     `- [Players](${origin}/players): find players to follow`,
     `- [Privacy](${origin}/privacy): what is stored and how to delete it`,
     '',

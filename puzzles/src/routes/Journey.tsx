@@ -4,6 +4,7 @@ import { Award, Check, Lock, UsersRound } from 'lucide-react';
 import { avatarFor } from '../avatar/draw';
 import { guestSeed } from '../avatar/guest';
 import { Avatar } from '../components/Avatar';
+import { Culprit, SecretSlots } from '../components/CaseFile';
 import { Icon } from '../components/Icon';
 import { Partner } from '../components/Partner';
 import { Ring } from '../components/Ring';
@@ -11,6 +12,7 @@ import { Stars } from '../components/Stars';
 import { clampStars } from '../components/starsLabel';
 import { pick } from '../copy';
 import { buildPath, clueId, clueKind, clueStates, UNMASK_N, type CatalogueItem, type ClueState, type Path } from '../engine/journey';
+import { caseFile } from '../games/caseFile';
 import { games, getGameDef, MIRROR_WORDS, sponsorFor } from '../games/catalog';
 import { useAuth } from '../lib/auth';
 import { PROGRESS_EVENT } from '../lib/progress';
@@ -44,7 +46,7 @@ const SWAY = [0, 1, 2, 1, 0, -1, -2, -1] as const;
 const AVATAR = { clue: 56, big: 68, finished: 56 } as const;
 
 type ClueView = { id: string; to: string; name: string; state: ClueState; stars: 0 | 1 | 2 | 3; big: boolean; shift: number };
-type CaseView = { id: string; title: string; clues: ClueView[]; state: 'done' | 'open' | 'locked'; stars: 0 | 1 | 2 | 3; count: string; line: string; /** "With NAME", on a sponsored case. */ sponsor: string };
+type CaseView = { id: string; title: string; clues: ClueView[]; state: 'done' | 'open' | 'locked'; stars: 0 | 1 | 2 | 3; count: string; line: string; /** "With NAME", on a sponsored case. */ sponsor: string; /** The case being worked: its opening line and the secret so far. */ open: string; slots: string[] };
 
 const EMPTY: Path = { cases: [] };
 
@@ -105,14 +107,15 @@ export function Journey({ catalogue = games, path, done, stars, title = 'Your pa
         big: i === mine.length - 1,
         shift: SWAY[i % SWAY.length]!,
       }));
+      // The secret so far, for the case being worked. None for a puzzle that is not in the catalogue.
+      const file = state === 'open' ? caseFile(c.id, finished) : undefined;
       cases.push({
         id: c.id,
         title,
         clues,
         state,
-        // A drill is closed by its last clue, by the whole puzzle, or by an unmasking played before drills: the
-        // best of the whole puzzle, the old unmasking, and the stars its clues earned, on the whole.
-        stars: state === 'done' ? (Math.max(starOf(c.id), starOf(clueId(c.id, UNMASK_N)), Math.round(clues.reduce((n, x) => n + x.stars, 0) / Math.max(1, clues.length))) as 0 | 1 | 2 | 3) : 0,
+        // A case is closed by its unmasking, or by the whole puzzle: the better of the 2.
+        stars: state === 'done' ? (Math.max(starOf(c.id), starOf(clueId(c.id, UNMASK_N))) as 0 | 1 | 2 | 3) : 0,
         count: state === 'done' ? '' : pick(left === 1 ? 'clueLeft' : 'cluesLeft', { n: left }),
         line: state === 'done' ? pick('caseDone', { c: title }) : '',
         sponsor: (() => {
@@ -120,6 +123,8 @@ export function Journey({ catalogue = games, path, done, stars, title = 'Your pa
           const who = def && sponsorFor(def)?.name;
           return who ? pick('sponsorWith', { name: who }) : '';
         })(),
+        open: file ? pick('caseOpen', { n: clues.length }) : '',
+        slots: file?.slots ?? [],
       });
     });
     const total = standing.clues.length;
@@ -163,7 +168,7 @@ export function Journey({ catalogue = games, path, done, stars, title = 'Your pa
                 </h3>
                 {c.state !== 'done' && <p className={styles.caseCount}>{c.count}</p>}
                 {c.sponsor && <p className={styles.caseCount} data-case-sponsor>{c.sponsor}</p>}
-                {c.stars > 0 && <Stars value={c.stars} pop={c.id === cameFrom || clueId(c.id, UNMASK_N) === cameFrom || c.clues[c.clues.length - 1]?.id === cameFrom} />}
+                {c.stars > 0 && <Stars value={c.stars} pop={c.id === cameFrom || clueId(c.id, UNMASK_N) === cameFrom} />}
               </div>
               {c.state === 'done' && (
                 <p className={styles.badge} data-case-badge>
@@ -185,6 +190,16 @@ export function Journey({ catalogue = games, path, done, stars, title = 'Your pa
                 </p>
               )}
             </header>
+
+            {c.state === 'open' && c.slots.length > 0 && (
+              <div className={styles.file} data-case-file>
+                <Culprit id={c.id} size={48} state="masked" />
+                <div className={styles.fileText}>
+                  <p className={styles.fileLine}>{c.open}</p>
+                  <SecretSlots slots={c.slots} />
+                </div>
+              </div>
+            )}
 
             {c.state === 'open' && (
               <div className={styles.track} style={{ '--count': n } as CSSProperties}>

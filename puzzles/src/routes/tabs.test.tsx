@@ -37,7 +37,7 @@ vi.mock('../lib/api', async (original) => {
     'myCircles',
     'fetchCircleBoard',
     'fetchDailyBoard',
-    'fetchChapterBoard',
+    'fetchGameBoard',
     'fetchDailyRank',
     'fetchFollowingBoard',
     'suggestedPlayers',
@@ -73,7 +73,7 @@ function emptyWorld() {
     myCircles: ok([]),
     fetchCircleBoard: ok([]),
     fetchDailyBoard: ok([]),
-    fetchChapterBoard: ok([]),
+    fetchGameBoard: ok([]),
     fetchDailyRank: ok(null),
     fetchFollowingBoard: ok([]),
     suggestedPlayers: ok([]),
@@ -111,12 +111,11 @@ const title = () => screen.getByRole('heading', { level: 1 }).textContent;
 beforeEach(() => emptyWorld());
 
 describe('Games', () => {
-  it('a first visit shows the crew, the case that is open and the path, and no daily and no list of games', async () => {
+  it('a first visit shows the crew and the path, and no daily and no list of games', async () => {
     open('/play');
     expect(title()).toBe('Cases');
     expect(screen.queryByRole('link', { name: /Daily #\d+/ })).toBeNull();
-    expect(screen.getByRole('link', { name: 'Open the brief' })).toHaveAttribute('href', '/case/the-long-spoon');
-    expect(within(screen.getByRole('region', { name: 'Practice' })).getAllByRole('link').length).toBeGreaterThan(0);
+    expect(within(screen.getByRole('region', { name: 'Your path' })).getAllByRole('link').length).toBeGreaterThan(0);
     expect(screen.queryByRole('region', { name: 'All games' })).toBeNull();
     expect(screen.getByRole('link', { name: /Change your detective, pet and gear/ })).toHaveAttribute('href', '/me');
     // Give the any-topic check time to answer: it still must not show.
@@ -135,7 +134,7 @@ describe('Games', () => {
     open('/play');
     expect(screen.queryByRole('link', { name: 'Make a puzzle' })).toBeNull();
     expect(screen.queryByText('Play today')).toBeNull();
-    expect(screen.getByRole('region', { name: 'Practice' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Your path' })).toBeInTheDocument();
     expectNoHoles();
   });
 
@@ -150,7 +149,7 @@ describe('Games', () => {
     open('/play?f=Nothing');
     expect(title()).toBe('Cases');
     expect(screen.queryByRole('group', { name: 'Filter games' })).toBeNull();
-    expect(screen.getByRole('region', { name: 'Practice' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Your path' })).toBeInTheDocument();
   });
 
   it('the direct link shows any topic before it is unlocked, and keeps it', async () => {
@@ -188,31 +187,30 @@ describe('Games', () => {
     world.api.myGameInvites = fail;
     open('/play');
     await Promise.resolve();
-    expect(screen.getByRole('region', { name: 'Practice' })).toBeInTheDocument();
+    expect(screen.getByRole('region', { name: 'Your path' })).toBeInTheDocument();
     expectNoHoles();
   });
 });
 
 describe('Leaders', () => {
-  it('Ranks is the board of the open case: who has worked it, by points, with steps and stars', async () => {
+  it('Ranks is the board of the case the player is on: its best scores, and the way to play it', async () => {
     world.me = ADA;
-    world.api.fetchChapterBoard = ok([
-      { rank: 1, handle: 'bisi', score: 1650, stars: 14, steps: 6 },
-      { rank: 2, handle: 'ada', score: 900, stars: 1, steps: 2 },
+    world.api.fetchGameBoard = ok([
+      { rank: 1, handle: 'bisi', score: 1650, secs: 95, found: 12, total: 12 },
+      { rank: 2, handle: 'ada', score: 900, secs: 300, found: 8, total: 12 },
     ]);
     open('/leaderboard');
     expect(title()).toBe('Ranks');
-    const board = await screen.findByRole('list', { name: 'Case board' });
+    const board = await screen.findByRole('list', { name: 'Top scores' });
     const rows = within(board).getAllByRole('listitem');
-    expect(rows.map((r) => r.textContent)).toEqual(['01@bisi6/614 stars1,650', '02@adaYou2/61 star900']);
-    expect(screen.getByRole('heading', { level: 2, name: 'The long spoon' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Open the case' })).toHaveAttribute('href', '/case/the-long-spoon');
+    expect(rows.map((r) => r.textContent)).toEqual(['01@bisi12/121:351,650', '02@adaYou8/125:00900']);
+    expect(screen.getByRole('link', { name: 'Play it' }).getAttribute('href')).toMatch(/^\/play\/[a-z0-9-]+$/);
     expectNoHoles();
   });
 
   it('there is no daily on Ranks: no day, no switch, no way to one', async () => {
     open('/leaderboard?day=3&board=following');
-    await screen.findByRole('heading', { level: 2, name: 'The long spoon' });
+    await screen.findByText('Nobody is on it yet. Finish the whole puzzle signed in and you are.');
     expect(document.body.textContent).not.toMatch(/daily|dailies|Today ·/i);
     expect(screen.queryByRole('button', { name: 'Previous day' })).toBeNull();
     expect(screen.queryByRole('radiogroup')).toBeNull();
@@ -221,27 +219,27 @@ describe('Leaders', () => {
 
   it('a guest sees the board and the way to get on it', async () => {
     open('/leaderboard');
-    expect(await screen.findByText('Nobody is on it yet. Finish a step signed in and you are.')).toBeInTheDocument();
+    expect(await screen.findByText('Nobody is on it yet. Finish the whole puzzle signed in and you are.')).toBeInTheDocument();
     expect(screen.getByText(/Guest scores stay on this device/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/signin?next=%2Fleaderboard');
     expectNoHoles();
   });
 
   it('a board that did not load says so, and a reply that is not a list is an empty board', async () => {
-    world.api.fetchChapterBoard = fail;
+    world.api.fetchGameBoard = fail;
     open('/leaderboard');
     expect(await screen.findByText('The board did not load. Try again in a moment.')).toBeInTheDocument();
     cleanup();
-    world.api.fetchChapterBoard = ok(null);
+    world.api.fetchGameBoard = ok(null);
     open('/leaderboard');
-    expect(await screen.findByText('Nobody is on it yet. Finish a step signed in and you are.')).toBeInTheDocument();
+    expect(await screen.findByText('Nobody is on it yet. Finish the whole puzzle signed in and you are.')).toBeInTheDocument();
     expectNoHoles();
   });
 
   it('loading shows rows of the board, not a blank', () => {
-    world.api.fetchChapterBoard = () => new Promise(() => {});
+    world.api.fetchGameBoard = () => new Promise(() => {});
     open('/leaderboard');
-    expect(screen.getByRole('heading', { level: 2, name: 'The long spoon' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Play it' })).toBeInTheDocument();
     expect(document.querySelector('[aria-busy="true"], [data-skeleton]')).not.toBeNull();
   });
 });

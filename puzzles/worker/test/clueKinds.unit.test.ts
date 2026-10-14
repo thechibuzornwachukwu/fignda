@@ -64,13 +64,11 @@ describe('a Mirror clue on the server', () => {
 });
 
 describe('the unmasking on the server', () => {
-  // A pack is a drill now (BUILD_PLAN set 4c): it has no unmasking, so none is a clue. The rule it was replayed by
-  // is kept, for the boards an unmasking was played on.
-  const made = unmaskClue(culpritName('bnote'), 'bnote');
-  const name = buildUnmask({ text: made.text, dict: [...made.dict] });
+  const seen = getPassage('bnote', 40)!.def;
+  const name = buildUnmask({ text: seen.text, dict: seen.dict });
 
-  it('is no longer a clue of a pack', () => {
-    expect(getPassage('bnote', 40)).toBeUndefined();
+  it('is the clue the player saw: the same name, given letters and bank', () => {
+    expect(unmaskClue(culpritName('bnote'), 'bnote')).toEqual({ text: seen.text, dict: seen.dict });
   });
   const tap = (word: string, from = 1): PlayEvent[] => [...word].map((ch, i) => ({ a: ALPHABET.indexOf(ch), b: ALPHABET.indexOf(ch), t: (from + i) * 1000 }));
   const run = (events: PlayEvent[]) => replay(name, log(withinTries(name, events)), false, EVALUATE.unmask);

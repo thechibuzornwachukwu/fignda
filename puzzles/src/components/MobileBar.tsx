@@ -14,7 +14,7 @@ type Props = {
   message: string;
   /** The player's pet, in the mood of the last thing that happened. It stands beside the line it says. */
   pet?: ReactNode;
-  /** Left out on a cold case: there are no tip-offs. */
+  /** Left out where there are no tip-offs. */
   onHint?: () => void;
   onDone: () => void;
 };

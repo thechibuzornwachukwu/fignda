@@ -280,62 +280,6 @@
     "Filed under the Open Eye. One more message that never arrived unread.",
     "Filed under the Open Eye. Whoever it was for knows less today."
   ],
-  "stepLocked": [
-    "That step opens when the one before it is done.",
-    "One step at a time. The one before this is still open."
-  ],
-  "stepNotCleared": [
-    "{who} is not cleared yet. 2 stars or more does it. Play it again when you like.",
-    "Not enough to clear {who}. 2 stars or more does it."
-  ],
-  "lineupSoon": [
-    "This step is not written yet. Everything you found is on the board.",
-    "Nothing to work here yet. The board has all you found."
-  ],
-  "lineupWrong": [
-    "Not {name}. Look at who is still standing.",
-    "{name} does not fit all 3. Try once more."
-  ],
-  "accountsOut": [
-    "2 have fallen. The one left is the one that stands.",
-    "Both of those fall. That leaves 1."
-  ],
-  "claimWrong": [
-    "That does not hold. Set each fact against what was said.",
-    "Not quite. Only 1 of the 2 facts settles it."
-  ],
-  "claimOut": [
-    "Out of tries. Here is how it stands.",
-    "No tries left. This is what the facts say."
-  ],
-  "sweepHint": [
-    "Look again in that corner of the room.",
-    "Something there is not where it belongs."
-  ],
-  "eyeEmpty": [
-    "Every message to the Open Eye you read is filed here. The first is in your case.",
-    "Messages passed in plain sight end up here, once you have read them."
-  ],
-  "caseLocked": [
-    "That file opens when the case before it is closed.",
-    "One case at a time. The one before this is still open."
-  ],
-  "chapterNew": [
-    "A new case. {n} steps, from the brief to the ending.",
-    "A case to work: {n} steps, and a board to fill."
-  ],
-  "chapterOn": [
-    "Step {n} of {t}. The board has what you found.",
-    "You are on step {n} of {t}."
-  ],
-  "chapterKeep": [
-    "That detective is yours. Pick a look and a pet for the next case.",
-    "You closed it as a guest. Make the detective yours."
-  ],
-  "briefMissing": [
-    "That case is not on file. The ones that are sit on the path.",
-    "Nothing is filed under that name. The path has every open case."
-  ],
   "caseOpen": [
     "Something was hidden here. Each clue gives up a piece of its name.",
     "A secret in {n} pieces. Each clue gives up one.",

@@ -165,7 +165,7 @@ export function avatarFor(seed: string): Avatar {
 }
 
 /**
- * A character we wrote, from a seed: a suspect in a chapter. A starter is neutral because a hash must never decide
+ * A character we wrote, from a seed: a culprit in a case. A starter is neutral because a hash must never decide
  * how a player presents. Here we decide, so the hair is one usually worn with that look.
  */
 export function characterFor(seed: string, look: Look): Avatar {

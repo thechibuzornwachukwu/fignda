@@ -97,7 +97,6 @@
   color: var(--fg);
 }
 
-
 .list {
   display: flex;
   flex-direction: column;
@@ -122,33 +121,4 @@
   border-radius: var(--radius-pill);
   background: var(--surface);
   -webkit-tap-highlight-color: transparent;
-}
-/* The written chapter that is open, above the path. */
-.chapter {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-3) var(--space-5);
-  padding: var(--space-4) var(--space-5);
-  border: 1px solid var(--line-3);
-  border-radius: var(--radius-xl);
-  background: var(--surface);
-  box-shadow: 0 var(--ledge) 0 var(--line-3);
-}
-.chapterText {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  min-width: 0;
-}
-.chapterTitle {
-  composes: h3 from '../styles/type.module.css';
-  margin: 0;
-  overflow-wrap: anywhere;
-}
-.chapterLine {
-  composes: small from '../styles/type.module.css';
-  margin: 0;
-  color: var(--muted);
 }

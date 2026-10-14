@@ -1,14 +1,13 @@
 // Writes design/sheet/current.html and current.png: the whole look of the game on 1 page. The pets in every mood,
-// a few players, every choice once, the cast of each written case, the elements, the seasons and the crime scenes.
+// a few players, every choice once, the elements and the seasons.
 // Every drawing comes from the code that draws it in the game, so the sheet never drifts from what ships. Not
 // every combination of a player's look. Run: npm run sheet:render
 
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
-import { avatarSvg, characterFor, DEFAULT_AVATAR, PARTS } from '../../src/avatar/draw';
-import { faceSeed, type Chapter } from '../../src/engine/chapter';
+import { avatarSvg, DEFAULT_AVATAR, PARTS } from '../../src/avatar/draw';
 import { appIcon, bubble, caseCard, mark, pawDivider, rankBadge, RANKS, stamp, wordmark } from '../brand/elements';
 import { CAST, character, INK, MOODS, WHO } from '../characters/characters';
 import { G, ramp, SEASONS } from './seasons';
@@ -58,16 +57,6 @@ const sample = (key: string, i: number) => ({
 });
 const choices = PARTS.map((p) => row(p.names.map((name, i) => cell(avatarSvg(sample(p.key, i), 56), name)), `${p.title} (${p.names.length})`)).join('');
 
-// ---- The cast of each written case, drawn as its board draws them
-const storyDir = join(root, 'design', 'stories');
-const chapters = readdirSync(storyDir)
-  .filter((f) => f.endsWith('.json'))
-  .map((f) => JSON.parse(readFileSync(join(storyDir, f), 'utf8')) as Chapter)
-  .sort((a, b) => (a.number ?? 0) - (b.number ?? 0));
-const cast = chapters
-  .map((c) => row(c.suspects.map((s) => cell(avatarSvg(characterFor(faceSeed(c, s.who), s.look), 96), s.name, s.who.replace(/^the /, ''))), `Case ${c.number}: ${c.title}`))
-  .join('');
-
 // ---- Elements
 const elements =
   row(RANKS.map((r, i) => cell(rankBadge(i, 110), r)), 'Ranks') +
@@ -85,30 +74,6 @@ const tile = (key: string) => `<svg viewBox="0 0 64 64" width="72" height="72" s
 const seasons =
   SEASONS.map(([name, when, , things]) => row(things.map(([key, label]) => cell(tile(key), label)), `${name} · ${when}`)).join('') +
   `<h3>Snow through December</h3><div class="row">${ramp}</div>`;
-
-// ---- Crime scenes: every room drawn so far, from design/sketches, in ink as the scenes are drawn.
-const sketch = (name: string) => readFileSync(join(root, 'design', 'sketches', `${name}.html`), 'utf8').match(/<svg[\s\S]*<\/svg>/)![0];
-const scene = (svg: string) => svg.replace('width="1200" height="900"', 'width="560" height="420"');
-// Each sketch has its own ids (its wobble filter), so several on 1 page are kept apart.
-const own = (svg: string, n: string) =>
-  svg
-    .replace(/id="([\w-]+)"/g, `id="$1-${n}"`)
-    .replace(/url\(#([\w-]+)\)/g, `url(#$1-${n})`)
-    .replace(/href="#([\w-]+)"/g, `href="#$1-${n}"`);
-const hall = sketch('the-hall');
-// By torchlight is the same room in the dark, with 1 circle of light: no second drawing.
-const torch = scene(hall)
-  .replace('<defs>', '<defs><mask id="beam"><rect width="1200" height="900" fill="#fff"/><circle cx="930" cy="560" r="190" fill="#000"/></mask>')
-  .replace('</svg>', '<rect width="1200" height="900" fill="#0d0d0e" opacity="0.86" mask="url(#beam)"/></svg>');
-const scenes = row([
-  cell(scene(own(hall, 'a')), 'The hall', 'Case 5 · Sweep the room'),
-  cell(own(torch, 'b'), 'The hall, by torchlight', 'the same drawing, dimmed'),
-  cell(scene(own(sketch('the-hall-layers'), 'c')), 'The hall, in layers', 'Look under it'),
-  cell(scene(own(sketch('the-hall-plan'), 'd')), 'Floor plan of the hall', 'Walk it through, Line of sight'),
-  cell(scene(own(sketch('the-traces'), 'e')), 'Traces', 'Which came first'),
-  cell(scene(own(sketch('the-sale-room'), 'f')), 'The sale room', 'Case 7 · the torn page'),
-  cell(scene(own(sketch('the-room-once'), 'g')), 'The committee room, seen once', 'Walk it back, the room'),
-]);
 
 const html = `<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><title>Gazecraft sheet</title>
@@ -129,11 +94,9 @@ ${section('The logo', logo)}
 ${section('The pets', pets)}
 ${section('The player', people)}
 ${section('Every choice, once', choices)}
-${section('The cast of Lantern Row', cast)}
 ${section('Elements', elements)}
 ${section('Shared', shared)}
 ${section('Seasons on the path', seasons)}
-${section('Crime scenes', scenes)}
 </body></html>`;
 
 writeFileSync(join(here, 'current.html'), html);

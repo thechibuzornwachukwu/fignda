@@ -35,7 +35,7 @@ test.describe('phone tab bar', () => {
     const tabs = page.getByRole('navigation', { name: 'Tabs' });
     await expect(tabs).toBeVisible();
     await expect(tabs.getByRole('link')).toHaveText(['Cases', 'You', 'Play', 'Squad', 'Ranks']);
-    await expect(tabs.getByRole('link', { name: 'Open your case' })).toHaveAttribute('href', '/case/the-long-spoon');
+    await expect(tabs.getByRole('link', { name: 'Play the next clue' })).toHaveAttribute('href', /^\/play\/[a-z0-9-]+\/1$/);
     await expect(tabs.getByRole('link', { name: 'Cases' })).toHaveAttribute('aria-current', 'page');
     await expect(page.getByRole('navigation', { name: 'Main' })).toBeHidden();
     await tabs.getByRole('link', { name: 'Ranks' }).click();
@@ -248,12 +248,5 @@ test.describe('play together', () => {
     const i = S.indexOf('amost');
     await clickPair(host, i, i + 3);
     await expect(guest.getByRole('status').filter({ hasText: /Chidi (found|got) Amos|Amos, spotted by Chidi/ }).first()).toBeAttached();
-  });
-
-  test('dailies have no Play together', async ({ page }) => {
-    await page.goto('/play');
-    await page.getByRole('link', { name: /Daily/ }).first().click();
-    await page.locator('[data-li]').first().waitFor();
-    await expect(page.getByRole('button', { name: 'Play together' })).toHaveCount(0);
   });
 });

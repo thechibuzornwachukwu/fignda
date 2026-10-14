@@ -5,9 +5,9 @@ import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
 import { formatTime } from '../engine/time';
 import { getGameDef } from '../games/catalog';
-import { fetchGameBoard, fetchTogetherBoard, type BoardRow, type MyRank, type TeamRow, fetchChapterBoard, type CaseRow } from '../lib/api';
-import { openCase } from '../lib/firstCase';
-import { chapters } from '../games/chapters';
+import { fetchGameBoard, fetchTogetherBoard, type BoardRow, type MyRank, type TeamRow } from '../lib/api';
+import { nextClueTo } from '../games/caseFile';
+import { games } from '../games/catalog';
 import { PageHeader } from '../components/PageHeader';
 import { PartnerNote } from '../components/PartnerNote';
 import { SkeletonList } from '../components/Skeleton';
@@ -55,37 +55,39 @@ function Board({ rows, me, myHandle, empty, emptyTitle }: { rows: BoardRow[]; me
   );
 }
 
-/**
- * The board of a written case: who has worked it, by the points their steps earned. It is what Ranks is.
- */
+/** The case the player is on: the puzzle of the next clue on the path, or the first one. */
+function openPuzzle(): string | null {
+  const to = nextClueTo();
+  return to?.split('/')[2] ?? games[0]?.id ?? null;
+}
+
+/** The board of the case the player is on: the best verified play per player on its whole puzzle. It is what Ranks is. */
 function CaseRanks({ myHandle }: { myHandle?: string }) {
-  const chapter = useMemo(() => openCase()?.chapter ?? chapters[0], []);
-  const id = chapter?.id ?? null;
-  const [state, setState] = useState<{ id: string; rows: CaseRow[] | 'error' } | null>(null);
+  const id = useMemo(() => openPuzzle(), []);
+  const g = id ? getGameDef(id) : undefined;
+  const [state, setState] = useState<{ id: string; rows: BoardRow[] | 'error' } | null>(null);
   useEffect(() => {
     if (!id) return;
     let alive = true;
-    fetchChapterBoard(id)
+    fetchGameBoard(id)
       .then((rows) => alive && setState({ id, rows: Array.isArray(rows) ? rows : [] }))
       .catch(() => alive && setState({ id, rows: 'error' }));
     return () => {
       alive = false;
     };
   }, [id]);
-  if (!chapter) return null;
+  if (!id || !g) return null;
   const rows = state?.id === id ? state.rows : null;
-  const steps = chapter.steps.length;
   return (
-    <section className={styles.section} aria-labelledby="case-title" data-case-ranks={chapter.id}>
+    <section className={styles.section} aria-labelledby="case-title" data-case-ranks={id}>
       <div className={styles.head}>
         <div className={styles.headText}>
-          <span className={styles.kicker}>Case · {steps} steps</span>
           <h2 id="case-title" className={styles.h2}>
-            {chapter.title}
+            {g.title}
           </h2>
         </div>
-        <Button to={`/case/${chapter.id}`} variant="secondary" size="sm">
-          Open the case
+        <Button to={`/play/${id}`} variant="secondary" size="sm">
+          Play it
         </Button>
       </div>
       {rows == null && <SkeletonList rows={5} avatar={28} />}
@@ -94,30 +96,7 @@ function CaseRanks({ myHandle }: { myHandle?: string }) {
           <p>The board did not load. Try again in a moment.</p>
         </PartnerNote>
       )}
-      {Array.isArray(rows) && rows.length === 0 && (
-        <PartnerNote layout="screen" title="The board is open" className={styles.empty}>
-          <p>Nobody is on it yet. Finish a step signed in and you are.</p>
-        </PartnerNote>
-      )}
-      {Array.isArray(rows) && rows.length > 0 && (
-        <ol className={styles.board} aria-label="Case board">
-          {rows.map((r) => (
-            <li key={r.handle} className={styles.row} data-mine={r.handle === myHandle || undefined}>
-              <span className={styles.rank}>{String(r.rank).padStart(2, '0')}</span>
-              <Link to={`/u/${r.handle}`} className={styles.handle}>
-                <Avatar handle={r.handle} size={28} />
-                @{r.handle}
-                {r.handle === myHandle && <span className={styles.you}>You</span>}
-              </Link>
-              <span className={styles.found}>
-                {Math.min(r.steps, steps)}/{steps}
-              </span>
-              <span className={styles.time}>{r.stars === 1 ? '1 star' : `${r.stars} stars`}</span>
-              <span className={styles.score}>{r.score.toLocaleString('en-US')}</span>
-            </li>
-          ))}
-        </ol>
-      )}
+      {Array.isArray(rows) && <Board rows={rows} me={null} myHandle={myHandle} emptyTitle="The board is open" empty="Nobody is on it yet. Finish the whole puzzle signed in and you are." />}
     </section>
   );
 }
@@ -136,7 +115,7 @@ function GuestNote({ next }: { next: string }) {
   );
 }
 
-/** /leaderboard. Ranks is the board of the open case. */
+/** /leaderboard. Ranks is the board of the case the player is on. */
 export function Leaderboard() {
   const auth = useAuth();
   if (!auth.enabled) return <Navigate to="/play" replace />;

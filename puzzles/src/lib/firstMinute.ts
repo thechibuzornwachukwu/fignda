@@ -28,15 +28,13 @@ export const markGuideSeen = (): void => void storage.set(GUIDED_KEY, '1');
 export const markDemoDone = (): void => void storage.set(DEMO_KEY, '1');
 
 /**
- * Whether this browser has finished anything yet: the demo, a game, a daily or a step of a written chapter. A first time visitor has not.
+ * Whether this browser has finished anything yet: the demo, a game, or a daily. A first time visitor has not.
  * Storage that is empty, blocked or broken reads as a first visit.
  */
 export function hasPlayed(): boolean {
   if (storage.get(DEMO_KEY) === '1') return true;
   const finished = storage.getJSON<unknown>('gazecraft-finished');
   if (Array.isArray(finished) && finished.some((id) => typeof id === 'string')) return true;
-  const worked = storage.getJSON<unknown>('gazecraft-chapters');
-  if (worked && typeof worked === 'object' && Object.values(worked).some((steps) => steps && typeof steps === 'object' && Object.keys(steps).length > 0)) return true;
   try {
     for (let i = 0; i < window.localStorage.length; i++) {
       if (window.localStorage.key(i)?.startsWith('gazecraft-daily-')) return true;

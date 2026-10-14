@@ -34,10 +34,9 @@ src/games/       registry: type -> { build, check, Board }
 src/avatar/      player characters: shapes, parts (append only lists), draw, store
 src/components/  Logo Icon Button TextLink FilterTabs GameRow Puzzle Letter WordList
                  ProgressLine BigClock MobileBar ShareSheet ShareCard Segmented Toggle
-                 ThemeToggle Header Footer Dialog Skeleton PartnerNote CaseBoard StepResult Medals
-src/routes/      Landing Games Game Brief Step LineUp SignIn Account
+                 ThemeToggle Header Footer Dialog Skeleton PartnerNote Medals
+src/routes/      Landing Games Game SignIn Account
 src/lib/         supabase, api, storage
-design/stories/  one file a chapter, checked by src/engine/chapter.ts
 worker/          /api/generate /api/plays /api/og
 supabase/        migrations, RLS
 ```

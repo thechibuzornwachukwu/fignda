@@ -69,7 +69,7 @@ export function Landing() {
               pull them out.
             </p>
             <div className={styles.actions}>
-              <Button to={play.to}>{play.kind === 'case' ? (play.to.split('/').length > 3 ? 'Carry on your case' : fresh ? 'Open your first case' : 'Open the new case') : play.kind === 'clue' ? (fresh ? 'Play your first clue' : 'Play the next clue') : 'See your cases'}</Button>
+              <Button to={play.to}>{play.kind === 'clue' ? (fresh ? 'Play your first clue' : 'Play the next clue') : 'See your cases'}</Button>
               {!playFirst && (
                 <Button to="/#how" variant="secondary">
                   Try it here

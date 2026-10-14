@@ -82,9 +82,8 @@
   --stage-ring: rgba(20, 20, 22, 0.14); --stage-ink: #141416; --stage-chip: rgba(255, 255, 255, 0.7);
   --stage-ring-dark: rgba(255, 255, 255, 0.18); --stage-ink-dark: #f4f4f5; --stage-chip-dark: rgba(255, 255, 255, 0.12);
   --swatch-tick: #ffffff; /* with mix-blend-mode: difference it reads on any swatch */
-  /* The case board: cork, paper and photos. A thing, so it is the same in both themes. */
-  --board: #2b241d; --board-edge: #4a3a2a; --board-ink: #e8dfd0; --paper: #f3ead9; --photo: #fbfaf6; --paper-ink: #1b1b1f; --paper-muted: #5c5c64; --pin: #c2462f;
-  --board-tilt: 2deg; --pin-dot: 12px; --face-max: 104px; /* How far a pin leans, the pin's head, and the widest a suspect's photo runs */
+  /* Ink on a struck medal. A thing, so it is the same in both themes. */
+  --paper-ink: #1b1b1f;
   /* Medals: the metal a tier is struck in, with the darker rim that gives it weight. A thing, so the same in both themes. */
   --medal-bronze: #c98a4b; --medal-bronze-rim: #8f5a26; --medal-silver: #cfd3da; --medal-silver-rim: #8d93a0; --medal-gold: #e9b93c; --medal-gold-rim: #a97b12;
   --medal-jade: #5fc29a; --medal-jade-rim: #2f7d5f; --medal-onyx: #1c1c1f;

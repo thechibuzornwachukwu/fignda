@@ -208,43 +208,28 @@ describe('the dock’s Play button', () => {
       </MemoryRouter>,
     );
   const play = () => screen.getByRole('navigation', { name: 'Tabs' }).querySelector('[data-play]')!;
-  const all = { 1: 3, 2: 3, 3: 3, 4: 3, 5: 3, 6: 3, 7: 3 };
-  const closeCases = () => localStorage.setItem('gazecraft-chapters', JSON.stringify({ 'the-long-spoon': all, 'the-open-box': all, 'the-early-bus': all, 'the-year-that-is-missing': all, 'the-light-in-the-hall': all, 'the-2-signs': all, 'the-other-spoon': all, 'who-carries-the-cards': all }));
-
-  it('order is Cases, You, Play, Squad, Ranks, and Play opens the case that is open', () => {
+  it('order is Cases, You, Play, Squad, Ranks, and Play opens the next clue', () => {
     dock();
     expect(within(screen.getByRole('navigation', { name: 'Tabs' })).getAllByRole('link').map((a) => a.textContent)).toEqual(['Cases', 'You', 'Play', 'Squad', 'Ranks']);
-    expect(play().getAttribute('data-play')).toBe('case');
-    expect(play().getAttribute('href')).toBe('/case/the-long-spoon');
-    expect(play()).toHaveAccessibleName('Open your case');
-  });
-
-  it('half way through a case, Play is the step that is open', () => {
-    localStorage.setItem('gazecraft-chapters', JSON.stringify({ 'the-long-spoon': { 1: 3, 2: 2 } }));
-    dock();
-    expect(play().getAttribute('href')).toBe('/case/the-long-spoon/3');
-    expect(play()).toHaveAccessibleName('Carry on your case');
+    expect(play().getAttribute('data-play')).toBe('clue');
+    expect(play().getAttribute('href')).toMatch(/^\/play\/[a-z0-9-]+\/1$/);
+    expect(play()).toHaveAccessibleName('Play the next clue');
   });
 
   it('it never leads to a daily, played or not, and broken storage is never a dead button', () => {
     localStorage.setItem(`gazecraft-daily-${dayNo()}`, '{broken');
-    localStorage.setItem('gazecraft-chapters', '{broken');
+    localStorage.setItem('gazecraft-finished', '{broken');
     dock();
-    expect(play().getAttribute('href')).toBe('/case/the-long-spoon');
+    expect(play().getAttribute('href')).toMatch(/^\/play\/[a-z0-9-]+\/1$/);
   });
   it('guests have a You tab of their own, not a sign in link', () => {
     dock();
     expect(screen.getByRole('link', { name: 'You' })).toHaveAttribute('href', '/me');
   });
 
-  it('every written case closed: Play is the next clue, and with every case closed it is a tick back to Cases', () => {
-    closeCases();
-    const first = dock();
-    expect(play().getAttribute('data-play')).toBe('clue');
-    expect(play().getAttribute('href')).toMatch(/^\/play\/[a-z0-9-]+\/1$/);
-    first.unmount();
+  it('with every case closed it is a tick back to Cases', () => {
     localStorage.setItem('gazecraft-finished', JSON.stringify(games.map((g) => g.id)));
-    act(() => void dock());
+    dock();
     expect(play().getAttribute('data-play')).toBe('done');
     expect(play().getAttribute('href')).toBe('/play');
     expect(play()).toHaveAttribute('data-done', 'true');

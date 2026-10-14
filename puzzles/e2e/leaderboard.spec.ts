@@ -1,16 +1,15 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
-test('Ranks is the board of the open case, with a sign in prompt for a guest and no daily', async ({ page }) => {
+test('Ranks is the board of the case the player is on, with a sign in prompt for a guest and no daily', async ({ page }) => {
   await page.goto('/leaderboard');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Ranks');
-  await expect(page.locator('[data-case-ranks="the-long-spoon"]')).toBeVisible();
-  await expect(page.getByRole('heading', { level: 2, name: 'The long spoon' })).toBeVisible();
+  await expect(page.locator('[data-case-ranks]')).toBeVisible();
   await expect(page.getByText('Guest scores stay on this device and are never ranked.')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Previous day' })).toHaveCount(0);
   await expect(page.getByText(/Daily #\d+/)).toHaveCount(0);
-  await page.getByRole('link', { name: 'Open the case' }).click();
-  await expect(page).toHaveURL(/\/case\/the-long-spoon$/);
+  await page.getByRole('link', { name: 'Play it' }).click();
+  await expect(page).toHaveURL(/\/play\/[a-z0-9-]+$/);
   // An old link to a puzzle's board still opens.
   await page.goto('/leaderboard/bible');
   await expect(page.getByRole('link', { name: 'Play The classic' })).toBeVisible();
@@ -18,7 +17,7 @@ test('Ranks is the board of the open case, with a sign in prompt for a guest and
 
 test('an old link to a day, or to a daily, opens what is there now', async ({ page }) => {
   await page.goto('/leaderboard?day=3&board=following');
-  await expect(page.getByRole('heading', { level: 2, name: 'The long spoon' })).toBeVisible();
+  await expect(page.locator('[data-case-ranks]')).toBeVisible();
   await page.goto('/d/5');
   await expect(page).toHaveURL(/\/play$/);
   await page.goto('/d/5/answers');

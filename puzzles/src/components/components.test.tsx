@@ -111,7 +111,7 @@ describe('Header', () => {
     expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/signin?next=%2Fplay');
     expect(screen.getByRole('button', { name: /Switch to/ })).toBeInTheDocument();
     // The same Play as the dock: it knows what is next. The case that is open.
-    expect(screen.getByRole('link', { name: 'Open your case' })).toHaveAttribute('href', '/case/the-long-spoon');
+    expect(screen.getByRole('link', { name: 'Play the next clue' }).getAttribute('href')).toMatch(/^\/play\/[a-z0-9-]+(\/\d+)?$/);
   });
 
   it('on the landing page: its own sections and one way in', () => {

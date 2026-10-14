@@ -36,7 +36,7 @@ test.describe('the journey', () => {
   test('a new guest: the first clue is next with their avatar on it, the rest are locked', async ({ page }) => {
     await open(page);
     await expect(journey(page)).toHaveAttribute('data-journey', 'going');
-    await expect(journey(page).getByRole('heading', { level: 2, name: 'Practice' })).toBeVisible();
+    await expect(journey(page).getByRole('heading', { level: 2, name: 'Your path' })).toBeVisible();
     const states = await statesOf(page);
     expect(states.length).toBeGreaterThan(1);
     expect(states[0]).toBe('next');
@@ -54,22 +54,38 @@ test.describe('the journey', () => {
     await expect(locked.locator('[aria-disabled="true"]')).toContainText(/Locked\..*Finish .+ to open this\./);
   });
 
-  test('a pack is a drill: no culprit, no secret, and a clue result says what was found and leads on', async ({ page }) => {
+  test('the open case shows its file, a clue fills a piece of the secret, and the unmasking closes the case', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await open(page);
     const [id] = await caseIds(page);
-    await expect(journey(page).locator('[data-case-file]')).toHaveCount(0);
-    await expect(journey(page).locator('[data-culprit]')).toHaveCount(0);
+    const file = journey(page).locator('[data-case-file]');
+    await expect(file).toHaveCount(1);
+    await expect(file.locator('[data-culprit="masked"]')).toBeVisible();
+    await expect(file.getByRole('img', { name: /^The secret: 0 of \d+ letters found\.$/ })).toBeVisible();
 
+    // Clue 1: its result shows the piece it gave.
     await journey(page).getByRole('link').click();
     await page.getByRole('button', { name: "I'm done" }).click();
-    await expect(page.locator('[data-clue-done]')).toBeVisible();
-    await expect(page.locator('[data-case-piece]')).toHaveCount(0);
+    // The popup at the finish shows the piece, and so does the result under it.
+    const piece = page.locator('[data-clue-done] [data-case-piece]');
+    await expect(piece.locator('[data-slot="on"]').first()).toBeVisible();
+    await expect(piece).toContainText(/piece/);
+    const held = await piece.locator('[data-slot="on"]').count();
 
-    // The whole puzzle closes the pack, and reveals nobody.
+    // Back on the path the same letters are in the file.
+    await page.goto('/play');
+    await expect(journey(page).locator('[data-case-file] [data-slot="on"]')).toHaveCount(held);
+
+    // The whole puzzle: the mask is off, the stamp is down, the secret reads whole.
     await page.goto(`/play/${id}`);
     await page.getByRole('button', { name: "I'm done" }).click();
-    await expect(page.locator('[data-case-closed]')).toHaveCount(0);
+    const closed = page.locator('[data-case-closed]');
+    await expect(closed.getByRole('heading', { name: 'Case closed' })).toBeVisible();
+    await expect(closed.getByRole('img', { name: /^The secret: [A-Z]+\.$/ })).toBeVisible();
+    await expect(closed.locator('[data-slot="off"]')).toHaveCount(0);
+    await expect(closed).toContainText(/open eye/);
+    expect(await closed.locator('[data-culprit] svg').last().evaluate((el) => getComputedStyle(el).opacity)).toBe('0');
+
     await page.goto('/play');
     await expect(journey(page).locator(`[data-case="${id}"]`)).toHaveAttribute('data-state', 'done');
   });
