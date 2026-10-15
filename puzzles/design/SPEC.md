@@ -191,6 +191,8 @@ All but the last are counted by the game as it is played, per puzzle per UTC day
 
 **People to follow:** first section of `/players`. Up to 12 registered players, never you or anyone you follow. Row stat: "Followed by N you follow", else "N plays", else "New here". Signed in rows carry a Follow / Following button (h36, pressed = `--fg` fill); guests get a Sign in line. Search rows carry the same button.
 
+**Skill pays:** the Worker tags a verified whole-puzzle play with the skills its replay showed (`skillCodes`, `plays.skills`): Clean read, No-hint perfect, Long word (9 letters or more), Deep find (across 3 gaps or more). Each is a badge, given once, and shown first among the medals. A clean read adds 100 points to the tally, once a puzzle (`CLEAN_BONUS`, the same in `player_points`). Every badge popup is tested at 320, 375, 768 and 1280 wide (`e2e/medal-popups.spec.ts`).
+
 **Rest days:** 1 a week, earned by playing 5 of the last 7, free and never asked for (`src/engine/rest.ts`, the same rule as `rest_run` in the database). A single missed day after 5 of the 7 before it keeps the run alive and is not counted in it. The week ring draws it dashed. Friend streaks follow the same rule.
 
 **Pack colours:** each pack is drawn in its own hue (`--pack-*` tokens, one per category, `packHue` in `src/lib/packHue.ts`): a thing, so the same in both themes, always with `--paper-ink` on it. The pack being played and the packs done are cards filled with it, with a ledge of the same hue, deeper. A pack not reached yet is flat with an edge of it. On a puzzle, the marks of the puzzles done in its pack are its hue. Lime stays for found and is never a pack's colour.

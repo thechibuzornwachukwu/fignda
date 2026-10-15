@@ -43,7 +43,10 @@ export function longestRun(days: ReadonlySet<number>): number {
   return best;
 }
 
-/** Same rule as the database (player_points): a replayed puzzle counts its best score only. */
+/** What a clean read adds to the tally, once a puzzle. The database adds the same (player_points). */
+export const CLEAN_BONUS = 100;
+
+/** Same rule as the database (player_points): a replayed puzzle counts its best score only, and a clean read 100 more. */
 export function pointsOf(plays: readonly PlayRow[]): number {
   let total = 0;
   const best = new Map<string, number>();
@@ -53,7 +56,8 @@ export function pointsOf(plays: readonly PlayRow[]): number {
     else best.set(p.game_id, Math.max(best.get(p.game_id) ?? 0, p.score));
   }
   for (const v of best.values()) total += v;
-  return total;
+  const clean = new Set(plays.filter((p) => p.verified !== false && p.clean === true).map((p) => p.game_id));
+  return total + clean.size * CLEAN_BONUS;
 }
 
 /** Same rule as the database (clean_reads_of): a puzzle read cleanly more than once counts once. */

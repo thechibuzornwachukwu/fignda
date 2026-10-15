@@ -175,6 +175,7 @@
 .offstage {
   position: fixed;
   top: 0;
-  left: -200vw;
+  /* Its right edge at the screen's left edge: wholly off screen at any width, however wide the card. */
+  right: 100%;
   pointer-events: none;
 }

@@ -103,7 +103,7 @@ export function MedalsHarness() {
           })}
         </div>
       ))}
-      <Medals codes={['first_game', 'streak_7', 'cases_1', 'cases_5']} counts={{ run: 12, cases: 7, points: 640 }} all />
+      <Medals codes={['first_game', 'streak_7', 'cases_1', 'cases_5', 'clean_read', 'long_word']} counts={{ run: 12, cases: 7, points: 640 }} all />
       <MedalCard medal={medalsOf(['streak_7', 'streak_30']).find((m) => m.key === 'run')!} name="Ada Obi" handle="ada" link="fignda.pages.dev/u/ada" />
     </div>
   );

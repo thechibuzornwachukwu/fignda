@@ -174,9 +174,9 @@ describe('You holds everything about you', () => {
     world.badges = ['first_game'];
     show();
     const badges = await screen.findByRole('region', { name: 'Badges' });
-    await waitFor(() => expect(within(badges).getAllByRole('listitem')).toHaveLength(4));
+    await waitFor(() => expect(within(badges).getAllByRole('listitem')).toHaveLength(8));
     expect(within(badges).getByRole('button', { name: /^First puzzle\. Earned\./ })).toBeInTheDocument();
-    expect(within(badges).getAllByRole('button', { name: /Not earned yet\./ })).toHaveLength(3);
+    expect(within(badges).getAllByRole('button', { name: /Not earned yet\./ })).toHaveLength(7);
     // A medal says what it is. Nothing under it explains it.
     expect(badges.textContent).not.toMatch(/Not earned|Finish a|Reach |in a row/);
     expect(badges).toHaveAttribute('id', 'badges');
@@ -197,7 +197,7 @@ describe('You holds everything about you', () => {
     world.badges = null as unknown as string[];
     show();
     const badges = await screen.findByRole('region', { name: 'Badges' });
-    await waitFor(() => expect(within(badges).getAllByRole('listitem')).toHaveLength(4));
+    await waitFor(() => expect(within(badges).getAllByRole('listitem')).toHaveLength(8));
     expect(badges.querySelector('[data-skeleton]')).toBeNull();
   });
 });

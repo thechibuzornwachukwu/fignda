@@ -15,6 +15,7 @@ import pools from '../../data/copy.json';
 import mirrorFile from '../../data/mirrorWords.json';
 import iconTable from '../../data/topicIcons.json';
 import { readsBadly } from '../../src/engine/giveaway';
+import { skillCodes } from '../../src/engine/skill';
 import type { AiGenerate, AiMeta } from './ai';
 import { GUEST_KEY_RE, JOB, JOB_COLS, isDead, jobOut, ownerKey, refunds, withHeartbeat, type JobRow, type JobTiming } from './jobs';
 import { PUSH_ENDPOINT, type PushSend } from './push';
@@ -663,8 +664,10 @@ async function plays(req: Request, deps: Deps) {
     log,
     // Which words, for "only 8% found this word".
     found_keys: r.finds.map((f) => f.k),
-    // Clean read, from the replay. It adds nothing to the score.
+    // Clean read, from the replay. It adds to the tally (player_points), never to the score.
     clean: r.clean,
+    // The skills this play showed: each is a badge, given by the database (award_badges).
+    skills: skillCodes({ puzzle, found: r.finds.map((f) => ({ key: f.k })), wrongs: r.wrongs, hints: r.hints }),
   });
   if (ins.error) {
     if (ins.error.code === '23505') throw new HttpError(409, 'already_played');

@@ -21,6 +21,11 @@ const CASES = [1, 5, 10, 25];
 
 /** Every badge, in the order a profile shows them. Codes are stored; never rename one. */
 export const BADGES: ReadonlyArray<{ code: string; label: string; how: string }> = [
+  // Skill badges first (BUILD_PLAN set 3b).
+  { code: 'clean_read', label: 'Clean read', how: 'Find every word, with no tip-off and no wrong pick.' },
+  { code: 'no_hint_perfect', label: 'No-hint perfect', how: 'Find every word with no tip-off.' },
+  { code: 'long_word', label: 'Long word', how: 'Find a word of 9 letters or more.' },
+  { code: 'deep_find', label: 'Deep find', how: 'Find a word that runs across 3 or more gaps.' },
   { code: 'first_game', label: 'First puzzle', how: 'Finish a puzzle signed in.' },
   ...STREAKS.map((n) => ({ code: `streak_${n}`, label: `${n} day run`, how: `Finish a puzzle ${n} days in a row.` })),
   ...CASES.map((n) => ({ code: `cases_${n}`, label: n === 1 ? 'First pack done' : `${n} packs done`, how: n === 1 ? 'Finish a pack signed in.' : `Finish ${n} packs.` })),

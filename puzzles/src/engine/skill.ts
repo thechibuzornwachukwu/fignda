@@ -39,3 +39,9 @@ export function skillsOf({ puzzle, found, wrongs, hints }: PlayInput): Skills {
     noHintPerfect: total > 0 && mine.length === total && hints === 0,
   };
 }
+
+/** The skills a play showed, as the badge codes the database keeps (`plays.skills`, award_badges). */
+export function skillCodes(play: PlayInput): string[] {
+  const s = skillsOf(play);
+  return [s.cleanRead && 'clean_read', s.noHintPerfect && 'no_hint_perfect', s.longWord && 'long_word', s.deepFind && 'deep_find'].filter((c): c is string => !!c);
+}
