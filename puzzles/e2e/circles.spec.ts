@@ -156,10 +156,10 @@ test('detective pieces are earned: locked until a case is closed, then they can 
 
   // In sight, and not for choosing. Each says how it is earned.
   const badge = editor.getByRole('button', { name: /^Detective kit: Badge/ });
-  await expect(badge).toHaveAccessibleName('Detective kit: Badge. Locked. Close 1 case.');
+  await expect(badge).toHaveAccessibleName('Detective kit: Star pin. Locked. Finish 1 pack.');
   await expect(badge).toHaveAttribute('aria-disabled', 'true');
-  await expect(editor.getByRole('button', { name: 'Detective kit: Detective hat. Locked. Reach the rank of Keen.' })).toBeVisible();
-  await expect(editor.getByRole('button', { name: 'Outfit: Detective coat. Locked. Reach the rank of Sharp.' })).toBeVisible();
+  await expect(editor.getByRole('button', { name: 'Detective kit: Crown. Locked. Reach the rank of Keen.' })).toBeVisible();
+  await expect(editor.getByRole('button', { name: 'Outfit: Bomber jacket. Locked. Reach the rank of Sharp.' })).toBeVisible();
   await expect(editor.locator('[data-locked]')).toHaveCount(5);
   await badge.click({ force: true });
   await expect(editor.getByRole('region', { name: 'Detective kit' })).toContainText('None');
@@ -176,7 +176,7 @@ test('detective pieces are earned: locked until a case is closed, then they can 
   await expect(editor.locator('[data-locked]')).toHaveCount(4);
   await earned.click();
   await expect(earned).toHaveAttribute('aria-pressed', 'true');
-  await expect(editor.getByRole('region', { name: 'Detective kit' })).toContainText('Badge');
+  await expect(editor.getByRole('region', { name: 'Detective kit' })).toContainText('Star pin');
 });
 
 test('partners: a guest picks one on the first screen, it shows at the end of a game, and Settings shows who is held', async ({ page }) => {
@@ -220,13 +220,13 @@ test('You is a stage: tap a partner or a piece of gear to try it, and one button
   // Gear: locked pieces say how they are earned. A case closed here opens the badge, and one button wears it.
   const gear = page.getByRole('region', { name: 'Detective gear' });
   await expect(gear.getByRole('button')).toHaveCount(6);
-  await gear.getByRole('button', { name: 'Badge. Locked. Close 1 case.' }).click();
-  await expect(stage.locator('[data-stage-line]')).toHaveText('Locked. Close 1 case.');
+  await gear.getByRole('button', { name: 'Star pin. Locked. Finish 1 pack.' }).click();
+  await expect(stage.locator('[data-stage-line]')).toHaveText('Locked. Finish 1 pack.');
   await page.evaluate(() => localStorage.setItem('gazecraft-finished', JSON.stringify(['bnote'])));
   await page.reload();
-  await gear.getByRole('button', { name: 'Badge. Yours.' }).click();
-  await stage.getByRole('button', { name: 'Wear the badge' }).click();
-  await expect(gear.getByRole('button', { name: 'Badge. On you.' })).toBeVisible();
+  await gear.getByRole('button', { name: 'Star pin. Yours.' }).click();
+  await stage.getByRole('button', { name: 'Wear the star pin' }).click();
+  await expect(gear.getByRole('button', { name: 'Star pin. On you.' })).toBeVisible();
   await expect(stage.locator('[data-stage-line]')).toHaveCount(0);
 
   // No sideways scroll on a phone: the rows swipe, the page does not.

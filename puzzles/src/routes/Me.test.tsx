@@ -78,11 +78,11 @@ describe('You, as a guest', () => {
 
   it('gear with nothing earned: every piece locked and said so, No gear on, and nothing to press', () => {
     show();
-    const gear = screen.getByRole('region', { name: 'Detective gear' });
+    const gear = screen.getByRole('region', { name: 'Gear' });
     expect(within(gear).getAllByRole('button')).toHaveLength(6);
     expect(within(gear).getByRole('button', { name: 'No gear. On you.' })).toHaveAttribute('aria-pressed', 'true');
     expect(gear.querySelectorAll('[data-locked]')).toHaveLength(5);
-    fireEvent.click(within(gear).getByRole('button', { name: 'Detective coat. Locked. Reach the rank of Sharp.' }));
+    fireEvent.click(within(gear).getByRole('button', { name: 'Bomber jacket. Locked. Reach the rank of Sharp.' }));
     expect(line()).toBe('Locked. Reach the rank of Sharp.');
     expect(within(stage()).queryByRole('button', { name: /^Wear / })).toBeNull();
   });
@@ -90,9 +90,9 @@ describe('You, as a guest', () => {
   it('a case closed here opens the badge, and wearing it is kept in this browser', async () => {
     localStorage.setItem('gazecraft-finished', JSON.stringify([games[0]!.id]));
     show();
-    fireEvent.click(screen.getByRole('button', { name: 'Badge. Yours.' }));
-    fireEvent.click(within(stage()).getByRole('button', { name: 'Wear the badge' }));
-    await screen.findByRole('button', { name: 'Badge. On you.' });
+    fireEvent.click(screen.getByRole('button', { name: 'Star pin. Yours.' }));
+    fireEvent.click(within(stage()).getByRole('button', { name: 'Wear the star pin' }));
+    await screen.findByRole('button', { name: 'Star pin. On you.' });
     expect(localStorage.getItem('gazecraft-guest-avatar')).toMatch(/d1/);
     // And it comes off again.
     fireEvent.click(screen.getByRole('button', { name: 'No gear. Plain.' }));
@@ -142,10 +142,10 @@ describe('You, signed in', () => {
     world.saveOk = false;
     localStorage.setItem('gazecraft-finished', JSON.stringify([games[0]!.id]));
     show();
-    fireEvent.click(await screen.findByRole('button', { name: 'Badge. Yours.' }));
-    fireEvent.click(within(stage()).getByRole('button', { name: 'Wear the badge' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Star pin. Yours.' }));
+    fireEvent.click(within(stage()).getByRole('button', { name: 'Wear the star pin' }));
     expect(await screen.findByText('That did not save. Try again.')).toBeInTheDocument();
-    expect(within(stage()).getByRole('button', { name: 'Wear the badge' })).toBeInTheDocument();
+    expect(within(stage()).getByRole('button', { name: 'Wear the star pin' })).toBeInTheDocument();
     expect(world.saved).toEqual([]);
     expect(screen.getByRole('button', { name: 'No gear. On you.' })).toBeInTheDocument();
   });
@@ -188,7 +188,7 @@ describe('You holds everything about you', () => {
     show();
     await act(async () => {});
     expect(screen.queryByRole('heading', { name: 'Badges' })).toBeNull();
-    expect(screen.getByRole('heading', { name: 'Detective gear' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Gear' })).toBeInTheDocument();
   });
 
   it('badges on their way are a skeleton, and a lookup that fails leaves the medals to aim for', async () => {

@@ -94,7 +94,6 @@ One set at a time. Each set is small, works on its own and leaves the live game 
 
 The owner's word, 14 Oct 2026: the puzzle game has no story line, and nothing about criminals or thieves. Simple, not beige.
 
-- [ ] **Set 1c. The character.** Detective gear (the badge, the magnifier and the rest) goes. "Your detective" is "You". Earned pieces become plain things worth wearing.
 - [ ] **Set 1d. Simple, not beige.** Once the story is out, every screen is looked at again for colour and weight: one board, one action, nothing grey for its own sake.
 
 ### 2. Sell now
@@ -103,6 +102,7 @@ The owner's word, 14 Oct 2026: the puzzle game has no story line, and nothing ab
 
 ### 3. Pets
 
+- [ ] **Set 3n. Bond things.** At 3 and 10 packs together a pet gains something plain of its own, drawn for all 4 pets in every mood. Today both tiers are drawn plain, since the glass and the monocle left with the story.
 - [ ] **Set 3m. Pet outfits.** A pet can wear things: a row of outfits per pet on You, tried on the stage like gear, drawn for all 4 pets in every mood. A few are earned, the rest are bought once Paystack is in. Cosmetic only. Needs the art first.
 
 ### 6. Make, one feature

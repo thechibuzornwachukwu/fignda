@@ -33,10 +33,10 @@ const num = (n: number) => n.toLocaleString('en-US');
 const cap = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
 const indexOf = (key: 'kit' | 'outfit', name: string) => (PARTS.find((p) => p.key === key)!.names as readonly string[]).indexOf(name);
 
-/** Detective gear, in the order it is offered: nothing, then every earned piece. */
+/** Gear, in the order it is offered: nothing, then every earned piece. */
 const GEAR = [{ part: 'kit' as const, name: 'none', need: undefined }, ...EARNED];
 /** Where on the drawing a piece of gear is worn: the card shows that part close up. The rest are shown whole. */
-const GEAR_VIEW: Record<string, string | undefined> = { badge: '12 50 72 72', 'magnifying glass': '12 50 72 72', 'detective coat': '12 50 72 72', 'detective hat': '6 -2 84 84' };
+const GEAR_VIEW: Record<string, string | undefined> = { 'star pin': '12 50 72 72', headphones: '6 10 84 84', 'bomber jacket': '12 50 72 72', crown: '6 -2 84 84' };
 type Gear = (typeof GEAR)[number];
 /** What is being tried on the stage, before it is chosen. */
 type Trying = { kind: 'partner'; id: PartnerId } | { kind: 'gear'; gear: Gear } | null;
@@ -45,7 +45,7 @@ const wearing = (parts: Parts, g: Gear) => parts[g.part] === indexOf(g.part, g.n
 const wear = (parts: Parts, g: Gear): Parts => ({ ...parts, [g.part]: indexOf(g.part, g.name) });
 
 /**
- * /me. Everything about the player. Their detective and partner on a stage, and under it the partners and the detective gear as rows
+ * /me. Everything about the player. Their character and pet on a stage, and under it the pets and the gear as rows
  * to swipe, then the week and their medals. Tap one to try it on the stage; one button under the stage chooses it. Guests too: what they choose
  * is kept in the browser and moves to the account on sign in.
  */
@@ -227,7 +227,7 @@ export function Me() {
 
       <section className={styles.section} aria-labelledby="me-gear">
         <h2 id="me-gear" className={styles.h2}>
-          Detective gear
+          Gear
         </h2>
         <ul className={styles.row}>
           {GEAR.map((g) => {
@@ -286,7 +286,7 @@ export function Me() {
         ) : (
           auth.enabled && (
             <>
-              Your detective and pet are kept in this browser. <TextLink to="/welcome?from=%2Fme">Sign in to keep them everywhere</TextLink>
+              Your character and pet are kept in this browser. <TextLink to="/welcome?from=%2Fme">Sign in to keep them everywhere</TextLink>
             </>
           )
         )}

@@ -12,9 +12,10 @@ rmSync(out, { recursive: true, force: true });
 mkdirSync(out, { recursive: true });
 let files = 0;
 for (const p of PARTNERS) {
-  const base = { who: p.id as Who, hat: true, coat: true, view: 'bust', back: CREAM, size: 240 } as const;
-  // Bond tiers: plain, then with the magnifying glass, then with the monocle too (BOND_AT in the engine).
-  const tiers = [{ tag: '', dress: {} }, { tag: '-1', dress: { glass: true } }, { tag: '-2', dress: { glass: true, monocle: true } }];
+  const base = { who: p.id as Who, view: 'bust', back: CREAM, size: 240 } as const;
+  // Bond tiers (BOND_AT in the engine). No story: no hat, coat, glass or monocle, so every tier is drawn plain
+  // until the pets have plain things of their own to gain (BUILD_PLAN set 3).
+  const tiers = [{ tag: '', dress: {} }, { tag: '-1', dress: {} }, { tag: '-2', dress: {} }];
   for (const t of tiers) {
     for (const mood of MOODS) {
       writeFileSync(join(out, `${p.id}-${mood}${t.tag}.svg`), character({ ...base, ...t.dress, mood }));

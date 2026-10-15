@@ -23,9 +23,9 @@ describe('avatar parts are append only', () => {
     mark: ['none', 'freckles', 'pimples', 'beauty mark', 'blush', 'tribal marks', 'tribal marks across', 'single mark'],
     item: ['none', 'toothpick', 'chewing stick', 'rose'],
     tie: ['none', 'scrunchie', 'headband'],
-    outfit: ['tee', 'agbada', 'kaftan', 'dashiki', 'ankara', 'buba and beads', 'suit', 'hoodie', 'jersey', 'turtleneck', 'hero cape', 'wizard robe', 'space suit', 'high collar shirt', 'detective coat'],
+    outfit: ['tee', 'agbada', 'kaftan', 'dashiki', 'ankara', 'buba and beads', 'suit', 'hoodie', 'jersey', 'turtleneck', 'hero cape', 'wizard robe', 'space suit', 'high collar shirt', 'bomber jacket'],
     festive: ['none', 'santa hat', 'antlers', 'witch hat', 'pumpkin', 'ghost', 'hearts', 'party hat', 'naija', 'snow', 'crown', 'bunny ears', 'clown'],
-    kit: ['none', 'badge', 'magnifying glass', 'detective hat', 'full kit'],
+    kit: ['none', 'star pin', 'headphones', 'crown', 'gold set'],
   };
 
   it.each(PARTS.map((p) => [p.key, p.letter] as const))('%s keeps its saved order', (key) => {

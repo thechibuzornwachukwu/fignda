@@ -123,7 +123,7 @@ function Editor({ seed, code, look, onSave, onLook, onClose }: EditorProps) {
   // Hair opens on the family the current style belongs to.
   const [family, setFamily] = useState<HairFamily>(() => HAIR_STYLES[parts.hair]!.family);
   const dirty = avatarCode(parts) !== saved;
-  // What the detective pieces are earned against: cases closed in this browser, and points from the account.
+  // What the extras are earned against: packs done in this browser, and points from the account.
   const [points, setPoints] = useState(0);
   useEffect(() => {
     let alive = true;

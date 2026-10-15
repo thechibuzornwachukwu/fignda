@@ -17,8 +17,8 @@ export const torso = (fill: string, rx = 31): Shape => ellipse({ cx: 48, cy: 101
  */
 const scoop = (k: Kit, depth: number): Shape => p(`M41 79.5q7 ${depth} 14 0v-3h-14z`, { fill: k.skin });
 
-const TRENCH = '#b08d57';
-const TRENCH_DARK = '#8c6d3f';
+const BOMBER = '#2f6fdf';
+const BOMBER_DARK = '#1f4fa8';
 
 export const OUTFIT_STYLES: readonly Outfit[] = [
   { name: 'tee', draw: (k) => [torso(k.body), scoop(k, 5)] },
@@ -124,17 +124,17 @@ export const OUTFIT_STYLES: readonly Outfit[] = [
     ],
   },
   {
-    // Earned, not chosen (see ../earned.ts): a belted trench coat, collar up, over a dark shirt.
-    name: 'detective coat',
+    // Earned, not chosen (see ../earned.ts): a bright bomber jacket, collar up, over a dark shirt.
+    name: 'bomber jacket',
     draw: (k) => [
-      torso(TRENCH, 33),
+      torso(BOMBER, 33),
       p('M41 79.5l7 12 7-12z', { fill: INK }),
       scoop(k, 3),
-      p('M41 76l-6 9 11 9.5-3.5-10z', { fill: TRENCH, stroke: TRENCH_DARK, 'stroke-width': 0.9, 'stroke-linejoin': 'round' }),
-      p('M55 76l6 9-11 9.5 3.5-10z', { fill: TRENCH, stroke: TRENCH_DARK, 'stroke-width': 0.9, 'stroke-linejoin': 'round' }),
-      line('M48 94.5v12', TRENCH_DARK, 1),
-      c(44.5, 98.5, 1, TRENCH_DARK),
-      c(51.5, 98.5, 1, TRENCH_DARK),
+      p('M41 76l-6 9 11 9.5-3.5-10z', { fill: BOMBER, stroke: BOMBER_DARK, 'stroke-width': 0.9, 'stroke-linejoin': 'round' }),
+      p('M55 76l6 9-11 9.5 3.5-10z', { fill: BOMBER, stroke: BOMBER_DARK, 'stroke-width': 0.9, 'stroke-linejoin': 'round' }),
+      line('M48 94.5v12', BOMBER_DARK, 1),
+      c(44.5, 98.5, 1, BOMBER_DARK),
+      c(51.5, 98.5, 1, BOMBER_DARK),
     ],
   },
 ];
