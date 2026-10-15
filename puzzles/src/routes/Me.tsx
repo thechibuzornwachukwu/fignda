@@ -26,6 +26,9 @@ import { useStreak } from '../lib/useStreak';
 import { useUnlocks } from '../lib/useUnlocks';
 import { CharacterEditor } from './AvatarDesigner';
 import { Week } from './Games';
+import { Ring, type RingPart } from '../components/Ring';
+import { Segmented } from '../components/Segmented';
+import { GOALS, loadGoal, puzzlesToday, saveGoal, type GoalKey } from '../lib/goal';
 import { Medals } from '../components/Medals';
 import styles from './Me.module.css';
 
@@ -269,6 +272,8 @@ export function Me() {
       {/* How the week went: a fact about you, so it lives here and not in the way of playing. */}
       <Week run={run} />
 
+      <DailyGoal />
+
       {showBadges && (
         <section id="badges" className={styles.section} aria-labelledby="me-badges">
           <h2 id="me-badges" className={styles.h2}>
@@ -306,5 +311,33 @@ export function Me() {
         onClose={() => setEditing(false)}
       />
     </div>
+  );
+}
+
+/** Today against the goal the player picked: a ring of 1, 2 or 4 parts that fill as puzzles are finished. */
+function DailyGoal() {
+  const [goal, setGoal] = useState(loadGoal);
+  const done = puzzlesToday();
+  const parts = Array.from({ length: goal.n }, (_, i): RingPart => (i < done ? 'done' : 'empty'));
+  const label = `${Math.min(done, goal.n)} of ${goal.n} today`;
+  return (
+    <section className={styles.goal} aria-labelledby="me-goal" data-goal={goal.key}>
+      <h2 id="me-goal" className={styles.h2}>
+        Today
+      </h2>
+      <div className={styles.goalRow}>
+        <Ring parts={parts} label={label} size={40} />
+        <Segmented
+          label="Puzzles a day"
+          hideLabel
+          options={GOALS.map((g) => [g.key, g.name] as const)}
+          value={goal.key}
+          onChange={(k: GoalKey) => {
+            saveGoal(k);
+            setGoal(GOALS.find((g) => g.key === k)!);
+          }}
+        />
+      </div>
+    </section>
   );
 }

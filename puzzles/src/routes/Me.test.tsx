@@ -237,3 +237,14 @@ describe('the dock’s Play button', () => {
     expect(play()).toHaveAttribute('data-done', 'true');
   });
 });
+
+describe('the goal on You', () => {
+  it('a ring of as many parts as the goal, filled by today, and the switch changes it', () => {
+    show();
+    const goal = screen.getByRole('region', { name: 'Today' });
+    expect(within(goal).getByRole('img', { name: '0 of 2 today' })).toBeInTheDocument();
+    fireEvent.click(within(goal).getByRole('radio', { name: 'Serious' }));
+    expect(within(goal).getByRole('img', { name: '0 of 4 today' })).toBeInTheDocument();
+    expect(localStorage.getItem('gazecraft-goal')).toBe('serious');
+  });
+});
