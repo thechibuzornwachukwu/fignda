@@ -1,8 +1,7 @@
 import { isoDate } from '../engine/daily';
 
 /**
- * One day on the week ring. `rest` is a day off that the run survives. The server will decide which days are
- * rest days; nothing in the browser grants one, so today every day is `done` or `empty`.
+ * One day on the week ring. `rest` is a day off that the run survives (`restDays` in src/engine/rest.ts).
  */
 export type DayState = 'done' | 'rest' | 'empty';
 

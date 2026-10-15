@@ -3,8 +3,7 @@ import { dayNo } from '../engine/daily';
 import { fetchDailyDays, localDailies } from './api';
 import { useAuth } from './auth';
 import { loadPlayDays } from './playDays';
-import { longestRun } from './profileStats';
-import { dailyStats } from './streak';
+import { longestWithRest, restDays, runWithRest } from '../engine/rest';
 import { daysThisMonth, weekParts, type DayState } from './week';
 
 export type Streak = {
@@ -43,14 +42,14 @@ export function useStreak(tick: unknown = 0): Streak {
   return useMemo(() => {
     const today = dayNo();
     const days = new Set([...localDailies(400).map((d) => d.day_no), ...loadPlayDays(), ...(signedIn ? server : [])]);
-    const { streak, played } = dailyStats(days, today);
+    const streak = runWithRest(days, today);
     return {
       streak,
-      best: longestRun(days),
+      best: longestWithRest(days, today),
       playedToday: days.has(today),
-      played,
-      // Rest days are the server's to grant. Until it does, none are passed.
-      week: weekParts(days, today),
+      played: [...days].filter((d) => Number.isInteger(d) && d >= 1 && d <= today).length,
+      // Rest days: the same rule the server runs (src/engine/rest.ts).
+      week: weekParts(days, today, restDays(days, today)),
       month: daysThisMonth(days, today),
     };
     // `tick` is the reason to recount.
