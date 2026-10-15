@@ -56,7 +56,7 @@ This is a business. Running costs are near zero, so the first sale is profit. No
 | Season takeover | A holiday pack and the seasonal dress, "with NAME" | Brands | After set 5c |
 | Supporter | One payment: no ads ever, a badge | Players | Needs Paystack |
 | Plus, by the month | More puzzles in Make, private rooms, extra outfits | Players | Needs Paystack, set 6e |
-| Pet outfits | Outfits for the player's pet. Cosmetic only | Players | Needs Paystack, set 3m |
+| Pet outfits | Outfits for the player's pet. Cosmetic only | Players | Needs Paystack, set 7m |
 | Special outfits | For the player's own character. Cosmetic only | Players | Needs Paystack |
 | Pet unlock | The points to unlock another pet. Bought points unlock pets only and never count for rank, boards or leagues | Players | Needs Paystack |
 | Licence | The game under a school's or a publisher's own name | Schools, publishers, media houses | After private boards are proven |
@@ -92,10 +92,15 @@ Never for sale: hints, extra tries, time, or anything that touches a score; stre
 One set at a time. Each set is small, works on its own and leaves the live game whole. After each set: lint, typecheck, unit tests and the browser tests pass.
 
 
-### 3. Pets
+### 3. Points, ranks and rewards (server)
 
-- [ ] **Set 3n. Bond things.** At 3 and 10 packs together a pet gains something plain of its own, drawn for all 4 pets in every mood. Today both tiers are drawn plain, since the glass and the monocle left with the story.
-- [ ] **Set 3m. Pet outfits.** A pet can wear things: a row of outfits per pet on You, tried on the stage like gear, drawn for all 4 pets in every mood. A few are earned, the rest are bought once Paystack is in. Cosmetic only. Needs the art first.
+All decided on the server from verified plays. One currency: lifetime points set rank and never drop, weekly points set the league and reset on Monday. No boosts, paid or free.
+
+- [ ] **Set 3a. Rest day:** 1 a week, earned by playing 5 of the last 7, used by itself, free. The same for friend streaks.
+- [ ] **Set 3b. Skill pays:** a clean read and a rare find add to the tally. Skill badges shown first: Clean read, No-hint perfect, Long word, Deep find, Rare eye.
+- [ ] **Set 3e. A goal the player picks** (Light, Regular, Keen: 1, 2 or 4 sittings a day), apart from the run.
+- [ ] **Set 3f. Personal records** copied to the server, with best week.
+- [ ] **Set 3g. Leagues:** tables of about 20, 5 tiers, top 5 up, bottom 5 down. Weekly points come only from first clears, so nobody wins by grinding on Sunday night. No message about dropping, a player can leave, fewer than 5 players moves nobody down.
 
 ### 6. Make, one feature
 "Any topic" goes away. It is Make with the system making the choices the player did not make. Engine and server parts exist: `hideForMe`, `topicIcon`, `giveaway`, `safetyCheck`, the job endpoints.
@@ -109,15 +114,10 @@ One set at a time. Each set is small, works on its own and leaves the live game 
 - [ ] **Set 6g. Quality:** reject with `readsBadly` or hidden profanity before the player sees it. Google first for signed in players. Log the provider and the seconds on `games`.
 - Edge cases across the sets: one letter, only spaces, a real person's name, emoji in every form, Pidgin, 5,000 characters, the same topic twice, the session expiring mid way, the daily free limit reached.
 
-### 7. Points, ranks and rewards (server)
+### 7. Pets
 
-All decided on the server from verified plays. One currency: lifetime points set rank and never drop, weekly points set the league and reset on Monday. No boosts, paid or free.
-
-- [ ] **Set 7a. Rest day:** 1 a week, earned by playing 5 of the last 7, used by itself, free. The same for friend streaks.
-- [ ] **Set 7b. Skill pays:** a clean read and a rare find add to the tally. Skill badges shown first: Clean read, No-hint perfect, Long word, Deep find, Rare eye.
-- [ ] **Set 7e. A goal the player picks** (Light, Regular, Keen: 1, 2 or 4 sittings a day), apart from the run.
-- [ ] **Set 7f. Personal records** copied to the server, with best week.
-- [ ] **Set 7g. Leagues:** tables of about 20, 5 tiers, top 5 up, bottom 5 down. Weekly points come only from first clears, so nobody wins by grinding on Sunday night. No message about dropping, a player can leave, fewer than 5 players moves nobody down.
+- [ ] **Set 7n. Bond things.** At 3 and 10 packs together a pet gains something plain of its own, drawn for all 4 pets in every mood. Today both tiers are drawn plain, since the glass and the monocle left with the story.
+- [ ] **Set 7m. Pet outfits.** A pet can wear things: a row of outfits per pet on You, tried on the stage like gear, drawn for all 4 pets in every mood. A few are earned, the rest are bought once Paystack is in. Cosmetic only. Needs the art first.
 
 ### 8. Data and privacy (GDPR, Nigeria's NDPA)
 

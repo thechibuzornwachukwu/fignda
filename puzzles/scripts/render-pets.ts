@@ -14,7 +14,7 @@ let files = 0;
 for (const p of PARTNERS) {
   const base = { who: p.id as Who, view: 'bust', back: CREAM, size: 240 } as const;
   // Bond tiers (BOND_AT in the engine). No story: no hat, coat, glass or monocle, so every tier is drawn plain
-  // until the pets have plain things of their own to gain (BUILD_PLAN set 3).
+  // until the pets have plain things of their own to gain (BUILD_PLAN set 7).
   const tiers = [{ tag: '', dress: {} }, { tag: '-1', dress: {} }, { tag: '-2', dress: {} }];
   for (const t of tiers) {
     for (const mood of MOODS) {
