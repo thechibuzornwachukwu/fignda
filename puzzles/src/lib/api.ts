@@ -1,5 +1,6 @@
 // Data calls. Everything here runs as the signed-in user; RLS decides what is allowed.
 
+import { readLeague, type League } from './league';
 import type { SavedSession } from '../games/session';
 import type { PlayRow } from './profileStats';
 import { storage } from './storage';
@@ -766,6 +767,23 @@ async function loadCustomGame(code: string): Promise<CustomGame | null> {
   const { data, error } = await sb.rpc('get_game_by_code', { p_code: code });
   const g = !error && Array.isArray(data) ? data[0] : null;
   return g ? { id: g.id, title: g.title, noun: g.noun, text: g.text, dict: g.dict, code: g.share_code } : null;
+}
+
+/** The signed in player's league table this week, seated on first look (`my_league`). Null: they left. */
+export async function fetchMyLeague(): Promise<League | null> {
+  const { data, error } = await (await client()).rpc('my_league');
+  if (error) throw error;
+  return readLeague(data);
+}
+
+export async function leaveLeague(): Promise<void> {
+  const { error } = await (await client()).rpc('leave_league');
+  if (error) throw error;
+}
+
+export async function joinLeague(): Promise<void> {
+  const { error } = await (await client()).rpc('join_league');
+  if (error) throw error;
 }
 
 /** The signed in player's records, worked out from their verified plays (`my_records`). */

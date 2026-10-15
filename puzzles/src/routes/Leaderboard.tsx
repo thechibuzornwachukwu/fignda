@@ -1,11 +1,13 @@
-import { useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, ChevronsUp } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
 import { formatTime } from '../engine/time';
 import { getGameDef } from '../games/catalog';
-import { fetchGameBoard, fetchTogetherBoard, type BoardRow, type MyRank, type TeamRow } from '../lib/api';
+import { fetchGameBoard, fetchMyLeague, fetchTogetherBoard, joinLeague, leaveLeague, type BoardRow, type MyRank, type TeamRow } from '../lib/api';
+import { goesUp, tierName, type League } from '../lib/league';
+import { TextLink } from '../components/TextLink';
 import { nextClueTo } from '../games/path';
 import { games } from '../games/catalog';
 import { PageHeader } from '../components/PageHeader';
@@ -118,13 +120,101 @@ function GuestNote({ next }: { next: string }) {
 /** /leaderboard. Ranks is the board of the case the player is on. */
 export function Leaderboard() {
   const auth = useAuth();
+  const [params, setParams] = useSearchParams();
   if (!auth.enabled) return <Navigate to="/play" replace />;
+  const signedIn = !!auth.profile;
+  // Signed in, Ranks opens on the league; the board of the pack is one tap away. A guest has the pack's board.
+  const board = signedIn && params.get('board') !== 'pack' ? 'league' : 'pack';
   return (
     <div className={styles.page}>
       <PageHeader title="Ranks" />
-      <CaseRanks myHandle={auth.profile?.handle} />
+      {signedIn && (
+        <div className={styles.switch}>
+          <Segmented
+            label="Board"
+            hideLabel
+            options={[
+              ['league', 'League'],
+              ['pack', 'This pack'],
+            ]}
+            value={board}
+            onChange={(v) => setParams(v === 'pack' ? { board: 'pack' } : {}, { replace: true })}
+          />
+        </div>
+      )}
+      {board === 'league' ? <LeagueBoard /> : <CaseRanks myHandle={auth.profile?.handle} />}
       <GuestNote next="/leaderboard" />
     </div>
+  );
+}
+
+type LeagueLoad = { status: 'loading' } | { status: 'error' } | { status: 'left' } | { status: 'ready'; league: League };
+
+/**
+ * This week's league table (BUILD_PLAN set 3g): up to 20 players, ranked by points from first clears. The top 5
+ * carry an up mark: they go up a tier when the week ends. Nothing marks the bottom. A player can leave, and join again.
+ */
+function LeagueBoard() {
+  const [load, setLoad] = useState<LeagueLoad>({ status: 'loading' });
+  const [busy, setBusy] = useState(false);
+  const read = useCallback(() => {
+    fetchMyLeague()
+      .then((league) => setLoad(league ? { status: 'ready', league } : { status: 'left' }))
+      .catch(() => setLoad({ status: 'error' }));
+  }, []);
+  useEffect(read, [read]);
+  const act = async (fn: () => Promise<void>) => {
+    setBusy(true);
+    await fn().catch(() => undefined);
+    setBusy(false);
+    setLoad({ status: 'loading' });
+    read();
+  };
+
+  if (load.status === 'loading') return <SkeletonList rows={8} avatar={28} />;
+  if (load.status === 'error') {
+    return (
+      <PartnerNote moment="error" layout="screen" className={styles.empty}>
+        <p>The league did not load. Try again in a moment.</p>
+      </PartnerNote>
+    );
+  }
+  if (load.status === 'left') {
+    return (
+      <PartnerNote layout="screen" title="Out of the league" className={styles.empty}>
+        <Button onClick={() => act(joinLeague)} disabled={busy}>
+          Join the league
+        </Button>
+      </PartnerNote>
+    );
+  }
+  const { league } = load;
+  return (
+    <section className={styles.section} aria-labelledby="league-title" data-league={tierName(league.tier).toLowerCase()}>
+      <h2 id="league-title" className={styles.h2}>
+        {tierName(league.tier)} league
+      </h2>
+      <ol className={styles.board} aria-label="This week">
+        {league.rows.map((r) => {
+          const up = goesUp(r, league.tier);
+          return (
+            <li key={r.handle} className={styles.leagueRow} data-mine={r.me || undefined} data-up={up || undefined}>
+              <span className={styles.rank}>{String(r.place).padStart(2, '0')}</span>
+              <Link to={`/u/${r.handle}`} className={styles.handle}>
+                <Avatar handle={r.handle} size={28} />
+                @{r.handle}
+                {r.me && <span className={styles.you}>You</span>}
+              </Link>
+              <span className={styles.upMark}>{up && <Icon icon={ChevronsUp} size={16} label="Goes up" />}</span>
+              <span className={styles.score}>{r.points.toLocaleString('en-US')}</span>
+            </li>
+          );
+        })}
+      </ol>
+      <p className={styles.leave}>
+        <TextLink onClick={() => act(leaveLeague)}>Leave the league</TextLink>
+      </p>
+    </section>
   );
 }
 

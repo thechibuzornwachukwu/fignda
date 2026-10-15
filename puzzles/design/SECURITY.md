@@ -38,6 +38,8 @@ Risks: leaked keys, faked scores, AI endpoint abuse, injected text in shared con
 | daily_candidates (view) | service role only | none |
 | puzzle_counts | none; the owner reads totals through `sponsor_report()` | Worker only, through `count_event()` |
 
+- `league_players`, `league_seats`, `league_weeks` (leagues): no policies and no grants. A player reads their own table through `my_league()` (handles, names and weekly points of the players at it), and leaves or joins through `leave_league()` / `join_league()`; tiers change only in `close_league_weeks()`, service role only, run by the Worker's hourly job.
+- `export_my_data()` and `my_records()`: the caller's own rows only.
 - Email lives only in `auth.users`.
 - Handle: unique, 2 to 20, `[a-z0-9._]`, reserved list (admin, gazecraft, fignda, support, root, help).
 - Unique index `(user_id, day_no)` on daily plays.

@@ -420,6 +420,11 @@ async function finishJob(deps: Deps, row: JobRow, claim: string, t: JobTiming): 
   }
 }
 
+/** Hourly cron: every league week that has ended is closed, once: up and down (close_league_weeks). */
+export async function closeLeagueWeeks(deps: Deps): Promise<void> {
+  await deps.db.rpc('close_league_weeks');
+}
+
 /** Hourly cron: jobs older than 2 days are deleted. */
 export async function pruneJobs(deps: Deps): Promise<void> {
   await deps.db.rpc('prune_generate_jobs');

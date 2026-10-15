@@ -38,6 +38,9 @@ vi.mock('../lib/api', async (original) => {
     'fetchCircleBoard',
     'fetchDailyBoard',
     'fetchGameBoard',
+    'fetchMyLeague',
+    'joinLeague',
+    'leaveLeague',
     'fetchDailyRank',
     'fetchFollowingBoard',
     'suggestedPlayers',
@@ -74,6 +77,9 @@ function emptyWorld() {
     fetchCircleBoard: ok([]),
     fetchDailyBoard: ok([]),
     fetchGameBoard: ok([]),
+    fetchMyLeague: ok(null),
+    joinLeague: ok(undefined),
+    leaveLeague: ok(undefined),
     fetchDailyRank: ok(null),
     fetchFollowingBoard: ok([]),
     suggestedPlayers: ok([]),
@@ -195,11 +201,12 @@ describe('Games', () => {
 describe('Leaders', () => {
   it('Ranks is the board of the case the player is on: its best scores, and the way to play it', async () => {
     world.me = ADA;
+    world.api.fetchMyLeague = ok(null);
     world.api.fetchGameBoard = ok([
       { rank: 1, handle: 'bisi', score: 1650, secs: 95, found: 12, total: 12 },
       { rank: 2, handle: 'ada', score: 900, secs: 300, found: 8, total: 12 },
     ]);
-    open('/leaderboard');
+    open('/leaderboard?board=pack');
     expect(title()).toBe('Ranks');
     const board = await screen.findByRole('list', { name: 'Top scores' });
     const rows = within(board).getAllByRole('listitem');
@@ -432,5 +439,49 @@ describe('A player\'s page', () => {
     expect(await screen.findByRole('heading', { name: '@ada' })).toBeInTheDocument();
     expect(document.body.textContent).not.toMatch(/Playing since/);
     expectNoHoles();
+  });
+});
+
+describe('the league on Ranks', () => {
+  const LEAGUE = {
+    tier: 1,
+    players: 7,
+    rows: [
+      { place: 1, handle: 'bisi', name: 'Bisi', points: 2400, me: false },
+      { place: 2, handle: 'ada', name: 'Ada', points: 900, me: true },
+      { place: 6, handle: 'chidi', name: 'Chidi', points: 0, me: false },
+    ],
+  };
+
+  it('signed in, Ranks opens on the league: the tier, the table, the top 5 marked up and nothing marked down', async () => {
+    world.me = ADA;
+    world.api.fetchMyLeague = ok(LEAGUE);
+    open('/leaderboard');
+    expect(await screen.findByRole('heading', { level: 2, name: 'Silver league' })).toBeInTheDocument();
+    const rows = within(screen.getByRole('list', { name: 'This week' })).getAllByRole('listitem');
+    expect(rows.map((r) => r.hasAttribute('data-up'))).toEqual([true, true, false]);
+    expect(rows[1]).toHaveAttribute('data-mine');
+    expect(document.body.textContent).not.toMatch(/down|drop|relegat/i);
+    expect(screen.getByRole('radio', { name: 'League' })).toHaveAttribute('aria-checked', 'true');
+    expectNoHoles();
+  });
+
+  it('a player who left sees the way back in, and a league that did not load says so', async () => {
+    world.me = ADA;
+    world.api.fetchMyLeague = ok(null);
+    open('/leaderboard');
+    expect(await screen.findByRole('button', { name: 'Join the league' })).toBeInTheDocument();
+    cleanup();
+    world.api.fetchMyLeague = fail;
+    open('/leaderboard');
+    expect(await screen.findByText('The league did not load. Try again in a moment.')).toBeInTheDocument();
+  });
+
+  it('a guest has the board of the pack and no league', async () => {
+    world.api.fetchMyLeague = ok(LEAGUE);
+    open('/leaderboard');
+    await screen.findByText(/Guest scores stay on this device/);
+    expect(screen.queryByRole('radio', { name: 'League' })).toBeNull();
+    expect(screen.queryByRole('heading', { name: /league/ })).toBeNull();
   });
 });

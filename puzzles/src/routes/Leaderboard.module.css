@@ -260,3 +260,19 @@
     justify-self: end;
   }
 }
+
+/* The league: place, player, the up mark for the top 5, points. Nothing marks the bottom. */
+.leagueRow {
+  composes: row;
+  grid-template-columns: 3ch minmax(0, 1fr) auto 7ch;
+}
+.leagueRow[data-up] .rank {
+  color: var(--fg);
+}
+.upMark {
+  display: inline-flex;
+  color: var(--accent-ink);
+}
+.leave {
+  margin: var(--space-4) 0 0;
+}

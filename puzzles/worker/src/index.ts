@@ -1,6 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { makeAi, type WorkersAi } from './ai';
-import { handle, pruneJobs, sendReminders, type Deps } from './app';
+import { closeLeagueWeeks, handle, pruneJobs, sendReminders, type Deps } from './app';
 import { makePush } from './push';
 import { makeSafety } from './safety';
 
@@ -75,6 +75,6 @@ export default {
   // Hourly (wrangler.toml [triggers]): the daily reminder, and old generate jobs are cleared out.
   async scheduled(_event: unknown, env: Env, ctx: Ctx): Promise<void> {
     const deps = depsOf(env);
-    ctx.waitUntil(Promise.allSettled([sendReminders(deps), pruneJobs(deps)]));
+    ctx.waitUntil(Promise.allSettled([sendReminders(deps), pruneJobs(deps), closeLeagueWeeks(deps)]));
   },
 };
