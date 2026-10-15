@@ -66,6 +66,7 @@ Never for sale: hints, extra tries, time, or anything that touches a score; stre
 
 ## Owner
 
+- [ ] Add the contact line to the pitch (https://claude.ai/code/artifact/6f192f99-4099-4177-b67e-ef36ca74b316), then share it from its Share menu.
 - [ ] Set up Google sign in in Supabase. A 6 digit email code is the hardest step for a new player, and one tap removes it. Likely worth more than any change to guest mode.
 - [ ] Decide: the name (suggested: keep Gazecraft. Free as .com and .game on 9 Oct 2026, registry check only: gazecraft, keensleuth, sleuthtrail, cluestop, plainsleuth, loupequest).
 - [ ] Decide: what is sold to a church, a school or a wedding now. The price list sells a puzzle on the buyer's subject.
@@ -90,10 +91,6 @@ Never for sale: hints, extra tries, time, or anything that touches a score; stre
 
 One set at a time. Each set is small, works on its own and leaves the live game whole. After each set: lint, typecheck, unit tests and the browser tests pass.
 
-
-### 2. Sell now
-
-- [ ] **Set 2a.** A one page pitch with the price list.
 
 ### 3. Pets
 
