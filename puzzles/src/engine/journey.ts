@@ -1,7 +1,7 @@
 // The path on the Games tab: one case per catalogue puzzle, easy to hard, and where the player stands on it.
 // A case is a run of clues: the puzzle's passages in reading order, a sums clue after every second one of 3
-// (word, word, number, word), a Mirror clue where the text hides one, then the unmasking: the culprit's name,
-// guessed a letter at a time. The whole puzzle is still played, in a room or from a link, and closes its case too.
+// (word, word, number, word), then a Mirror clue where the text hides one. The whole puzzle is still played, in a
+// room or from a link, and closes its pack too.
 // Answers and difficulty come from the engine, never from the catalogue file.
 
 import { answerDepth } from './depth';
@@ -13,19 +13,17 @@ export type CatalogueItem = { id: string; category: string; text: string; dict: 
 
 /**
  * A clue's number says what it is, and it is what the account keeps the clue under, so it never moves:
- * 0 the whole puzzle, 1 to 19 a passage, 21 to 29 a sums clue, 31 the Mirror clue, 40 the unmasking.
+ * 0 the whole puzzle, 1 to 19 a passage, 21 to 29 a sums clue, 31 the Mirror clue.
  */
 export const SUMS_FROM = 21;
 export const MIRROR_N = 31;
-export const UNMASK_N = 40;
-export type ClueKind = 'whole' | 'words' | 'sums' | 'mirror' | 'unmask';
-export const clueKind = (n: number): ClueKind =>
-  n === 0 ? 'whole' : n === UNMASK_N ? 'unmask' : n === MIRROR_N ? 'mirror' : n >= SUMS_FROM && n < MIRROR_N ? 'sums' : 'words';
+export type ClueKind = 'whole' | 'words' | 'sums' | 'mirror';
+export const clueKind = (n: number): ClueKind => (n === 0 ? 'whole' : n === MIRROR_N ? 'mirror' : n >= SUMS_FROM && n < MIRROR_N ? 'sums' : 'words');
 
 /**
- * The clues of a case in the order they are played, by number. The rhythm is fixed: word, word, number, word.
- * So a sums clue follows passages 2, 5, 8 and so on. Then the Mirror clue, when the case has one, and last the
- * unmasking. A puzzle that is not cut is a case of 1 clue: the whole puzzle.
+ * The clues of a pack in the order they are played, by number. The rhythm is fixed: word, word, number, word.
+ * So a sums clue follows passages 2, 5, 8 and so on. Then the Mirror clue, when the pack has one. A pack ends on its
+ * last clue. A puzzle that is not cut is a pack of 1 clue: the whole puzzle.
  */
 export function caseOrder(passageCount: number, mirror = false): number[] {
   if (passageCount < 2) return [0];
@@ -35,12 +33,12 @@ export function caseOrder(passageCount: number, mirror = false): number[] {
     if (i % 3 === 2 && SUMS_FROM + (i - 2) / 3 < MIRROR_N) out.push(SUMS_FROM + (i - 2) / 3);
   }
   if (mirror) out.push(MIRROR_N);
-  return [...out, UNMASK_N];
+  return out;
 }
 
 /** One sitting. `n` is the clue's number (`clueKind`). */
 export type Clue = { id: string; puzzle: string; n: number };
-/** A case is one puzzle: `id` is the puzzle's. Its last clue is the unmasking. */
+/** A pack is one puzzle: `id` is the puzzle's. */
 export type Case = { id: string; clues: Clue[] };
 export type Path = { cases: Case[] };
 
@@ -104,8 +102,7 @@ export type Standing = {
  * Where the player stands. Clues open in order: the first one not done is `next`, everything after it is locked,
  * and finishing `next` opens the one after. A clue finished out of order still shows done.
  * `done` holds clue ids. A puzzle's own id in it means the whole puzzle was played, so every clue of its case is
- * done: a score from before the puzzle was cut counts. The unmasking done closes the case the same way, as it
- * does on the server. Ids that are not on the path are ignored.
+ * done: a score from before the puzzle was cut counts. Ids that are not on the path are ignored.
  * `exists`, when given, lists the puzzles still in the catalogue: a case outside it is left out and blocks nothing.
  */
 export function clueStates(path: Path, done: Iterable<string>, exists?: ReadonlySet<string>): Standing {
@@ -116,7 +113,7 @@ export function clueStates(path: Path, done: Iterable<string>, exists?: Readonly
     for (const s of c.clues) {
       if (exists && !exists.has(s.puzzle)) continue;
       let state: ClueState = 'done';
-      if (!finished.has(s.id) && !finished.has(s.puzzle) && !finished.has(clueId(s.puzzle, UNMASK_N))) {
+      if (!finished.has(s.id) && !finished.has(s.puzzle)) {
         if (next === null) {
           next = s.id;
           state = 'next';

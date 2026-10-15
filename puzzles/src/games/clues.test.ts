@@ -1,19 +1,16 @@
-import { buildPath, caseOrder, clueKind, MIRROR_N, SUMS_FROM, UNMASK_N } from '../engine/journey';
+import { buildPath, caseOrder, clueKind, MIRROR_N, SUMS_FROM } from '../engine/journey';
 import { HINT_OF, mixedSquad, PARTNERS } from '../engine/partners';
-import { POOLS } from '../copy';
-import { ALPHABET, bankOf, givenOf, UNMASK_DECOYS, UNMASK_TRIES, unmaskClue, unmaskGiven, unmaskName, unmaskSlots, withinTries } from '../engine/unmask';
-import { caseFile, secretOf } from './caseFile';
-import { culpritName, games, getPassage, getPuzzle, MIRROR_WORDS } from './catalog';
+import { games, getPassage, getPuzzle, MIRROR_WORDS } from './catalog';
 import { familyOf, registry } from './registry';
 
-describe('the rhythm of a case', () => {
-  it('is word, word, number, word, then Mirror, then the unmasking', () => {
+describe('the rhythm of a pack', () => {
+  it('is word, word, number, word, then Mirror, and nothing after it', () => {
     expect(caseOrder(1)).toEqual([0]);
-    expect(caseOrder(2)).toEqual([1, 2, 21, 40]);
-    expect(caseOrder(3, true)).toEqual([1, 2, 21, 3, 31, 40]);
-    expect(caseOrder(6)).toEqual([1, 2, 21, 3, 4, 5, 22, 6, 40]);
-    expect([0, 1, 19, 21, 29, 31, 40].map(clueKind)).toEqual(['whole', 'words', 'words', 'sums', 'sums', 'mirror', 'unmask']);
-    expect(familyOf('unmask')).toBe('verbal');
+    expect(caseOrder(2)).toEqual([1, 2, 21]);
+    expect(caseOrder(3, true)).toEqual([1, 2, 21, 3, 31]);
+    expect(caseOrder(6)).toEqual([1, 2, 21, 3, 4, 5, 22, 6]);
+    expect([0, 1, 19, 21, 29, 31, 40].map(clueKind)).toEqual(['whole', 'words', 'words', 'sums', 'sums', 'mirror', 'words']);
+    expect(familyOf('hidden-words')).toBe('verbal');
     expect(familyOf('buried-sums')).toBe('quantitative');
     expect(familyOf('mirror')).toBe('verbal');
   });
@@ -48,10 +45,6 @@ describe('the rhythm of a case', () => {
     expect(sums).toBeGreaterThanOrEqual(path.cases.length);
     expect(mirrors).toBeGreaterThan(0);
   });
-
-  it('gives a case the secret it had before the new clues joined: a piece per passage and one for the unmasking', () => {
-    for (const g of games) expect(secretOf(g.id)!.pieces.length).toBe((getPassage(g.id, 1)?.part.count ?? 0) + 1);
-  });
 });
 
 describe('what a pet does', () => {
@@ -82,9 +75,8 @@ describe('edges', () => {
     const long = caseOrder(40, true);
     expect(long.filter((n) => clueKind(n) === 'words')).toHaveLength(19);
     expect(new Set(long).size).toBe(long.length);
-    expect(long.filter((n) => n !== UNMASK_N).at(-1)).toBe(MIRROR_N);
-    expect(Math.max(...long)).toBe(UNMASK_N);
-    expect(long.at(-1)).toBe(UNMASK_N);
+    expect(Math.max(...long)).toBe(MIRROR_N);
+    expect(long.at(-1)).toBe(MIRROR_N);
     expect(clueKind(30)).toBe('sums');
     expect(clueKind(20)).toBe('words');
   });
@@ -115,93 +107,9 @@ describe('edges', () => {
   });
 });
 
-describe('the unmasking', () => {
-  const board = (text: string) => registry.unmask.build({ id: 'x', type: 'unmask', category: 'c', title: 't', noun: 'letters', difficulty: 'Easy', expectedAnswers: [], dict: [], text });
-  const at = (ch: string) => ALPHABET.indexOf(ch);
-  const none = new Set<string>();
-
-  it('the name to spell is who the culprit is, without "the"', () => {
-    expect(unmaskName('the choir leader')).toBe('CHOIR LEADER');
-    expect(unmaskName('  The neighbour from 2 doors down ')).toBe('NEIGHBOUR FROM 2 DOORS DOWN');
-    for (const g of games) {
-      const clue = getPassage(g.id, UNMASK_N);
-      if (!clue) continue;
-      expect(clue.def.text).toBe(unmaskName(culpritName(g.id)));
-      expect(clue.def.text).toMatch(/^[A-Z0-9 ]{3,}$/);
-      expect(clue.part.next).toBe(0);
-    }
-  });
-
-  it('an answer is each letter of the name, once, and a pick is one letter of the alphabet', () => {
-    const p = board('BUS DRIVER');
-    expect(p.answers.map((a) => a.key).join('')).toBe('bdeirsuv');
-    expect(registry.unmask.check(p, at('r'), at('r'), none)).toEqual({ kind: 'hit', key: 'r', label: 'R', span: [17, 17] });
-    expect(registry.unmask.check(p, at('r'), at('r'), new Set(['r'])).kind).toBe('already');
-    expect(registry.unmask.check(p, at('z'), at('z'), none).kind).toBe('wrong');
-    // A drag across 2 letters, or a place past Z, is no pick.
-    expect(registry.unmask.check(p, 0, 1, none).kind).toBe('ignore');
-    expect(registry.unmask.check(p, 26, 26, none).kind).toBe('ignore');
-    // A hint points at a letter that is in the name.
-    expect(registry.unmask.hint(p, none)).toEqual({ key: 'b', at: 1 });
-    expect(registry.unmask.hint(p, new Set(p.answers.map((a) => a.key)))).toBeNull();
-    expect(registry.unmask.tries).toBe(UNMASK_TRIES);
-  });
-
-  it('it is made to be won: the first letter of each word is given, and the bank is the missing letters and 6 that are not in the name', () => {
-    expect(unmaskGiven('BUS DRIVER')).toBe('bd');
-    // 7 would be left to find, so the letter the name uses most is given too.
-    expect(unmaskGiven('CHOIR LEADER')).toBe('cel');
-    expect(unmaskGiven('')).toBe('');
-    expect(POOLS.culpritHint).toHaveLength(POOLS.culpritWho.length);
-    for (const who of POOLS.culpritWho) {
-      const clue = unmaskClue(who, 'bible');
-      expect(clue).toEqual(unmaskClue(who, 'bible'));
-      const name = clue.text.toLowerCase();
-      const given = givenOf(clue);
-      const bank = [...bankOf(clue)];
-      const built = registry.unmask.build({ id: 'x', type: 'unmask', category: 'c', title: 't', noun: 'letters', difficulty: 'Easy', expectedAnswers: [], text: clue.text, dict: [...clue.dict] });
-      const wanted = built.answers.map((a) => a.key);
-      // Every letter still to find is in the bank, no given letter is, and nothing is there twice.
-      for (const ch of wanted) expect(bank, `${who}: ${ch}`).toContain(ch);
-      for (const ch of given) expect(bank).not.toContain(ch);
-      expect(new Set(bank).size).toBe(bank.length);
-      expect(bank.filter((ch) => !name.includes(ch))).toHaveLength(UNMASK_DECOYS);
-      expect(bank.join('')).toBe([...bank].sort().join(''));
-      // Something is left to find, and it is short work: 6 letters at most.
-      expect(wanted.length, who).toBeGreaterThanOrEqual(2);
-      expect(wanted.length, who).toBeLessThanOrEqual(6);
-      // Every word opens with its letter.
-      const slots = unmaskSlots(clue.text, new Set(), given);
-      clue.text.split(' ').reduce((at, w) => (/[A-Z]/.test(w[0]!) && expect(slots[at]).toBe(w[0]), at + w.length + 1), 0);
-    }
-    // Only picking every letter that is not in the name uses all the tries.
-    expect(UNMASK_DECOYS).toBe(UNMASK_TRIES);
-    expect(unmaskClue('the baker', 'bible').dict).not.toEqual(unmaskClue('the baker', 'lagos').dict);
-  });
-
-  it('shows the name as it stands: found letters, blanks, and anything that is not a letter', () => {
-    expect(unmaskSlots('BUS GO', new Set(['o']), 'bg')).toEqual(['B', '', '', ' ', 'G', 'O']);
-    expect(unmaskSlots('BUS 2 GO', new Set(['b', 'o']))).toEqual(['B', '', '', ' ', '2', ' ', '', 'O']);
-    expect(unmaskSlots('', none)).toEqual([]);
-  });
-
-  it('picks after the last try do not count', () => {
-    const p = board('BAKER');
-    const wrong = [...'zxqjvw'].map((ch) => ({ a: at(ch), b: at(ch) }));
-    const right = [...'baker'].map((ch) => ({ a: at(ch), b: at(ch) }));
-    expect(withinTries(p, [...right, ...wrong])).toHaveLength(11);
-    expect(withinTries(p, [...wrong, ...right])).toHaveLength(6);
-    expect(withinTries(p, [...wrong.slice(0, 5), ...right, wrong[5]!, ...wrong])).toHaveLength(11);
-    expect(withinTries(p, [])).toEqual([]);
-  });
-
-  it('closes the case: the last piece of the secret comes with it, as it does with the whole puzzle', () => {
-    const id = games.find((g) => getPassage(g.id, UNMASK_N))!.id;
-    const count = getPassage(id, 1)!.part.count;
-    const passages = Array.from({ length: count }, (_, i) => `${id}~${i + 1}`);
-    expect(caseFile(id, new Set(passages))!.closed).toBe(false);
-    expect(caseFile(id, new Set([...passages, `${id}~${UNMASK_N}`]))!.closed).toBe(true);
-    expect(caseFile(id, new Set([id]))!.closed).toBe(true);
-    expect(caseFile(id, new Set(passages))!.piece(UNMASK_N).text).not.toBe('');
+describe('no story', () => {
+  it('no pack has an unmasking, and no clue number past the Mirror opens anything', () => {
+    for (const g of games) for (const n of [32, 39, 40]) expect(getPassage(g.id, n)).toBeUndefined();
+    expect(Object.keys(registry).sort()).toEqual(['buried-sums', 'hidden-words', 'mirror']);
   });
 });

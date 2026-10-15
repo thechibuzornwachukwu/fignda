@@ -36,13 +36,6 @@ export type PuzzleProps = {
   variant?: 'text' | 'tiles';
   /** Sums: what a run must add up to. Shown above the tiles with a running total of the selection. */
   target?: number;
-  /** For a board that is not this one (`UnmaskBoard`): the text as written, every index picked so far, and the case. */
-  text?: string;
-  picked?: readonly number[];
-  caseId?: string;
-  /** The unmasking: the letters given at the start, and the letters to pick from. */
-  given?: string;
-  bank?: string;
 };
 
 type Sel = { a: number; b: number };

@@ -6,7 +6,6 @@
 //   parts/hair.ts      hair and headwear, one entry per style
 //   parts/outfits.ts   outfits, one entry per outfit
 //   parts/face.ts      eyes, mouths, facial hair, skin marks, extras, mouth items, hair ties, mood presets
-//   parts/disguises.ts what a culprit wears until their case is closed; a layer of its own, never saved
 //   parts/kit.ts       detective pieces a player earns (badge, magnifying glass, hat); see earned.ts
 //   parts/festive.ts   seasonal and themed touches (Santa hat, hearts, Naija colours), drawn on top
 //   draw.ts (here)     the choices an avatar is made of, its saved code, and the layer order
@@ -20,7 +19,6 @@
 // avatars use it so they never change how someone presents. It limits nothing a player picks by hand.
 
 import { EXTRA_STYLES, EYE_STYLES, FACE_HAIR_STYLES, HAIR_TIE_NAMES, headband, MARK_STYLES, MOUTH_ITEM_STYLES, MOUTH_STYLES, scrunchie } from './parts/face';
-import { DISGUISE_STYLES } from './parts/disguises';
 import { EARNED } from './earned';
 import { FESTIVE_STYLES } from './parts/festive';
 import { KIT_STYLES } from './parts/kit';
@@ -165,7 +163,7 @@ export function avatarFor(seed: string): Avatar {
 }
 
 /**
- * A character we wrote, from a seed: a culprit in a case. A starter is neutral because a hash must never decide
+ * A character we wrote, from a seed. A starter is neutral because a hash must never decide
  * how a player presents. Here we decide, so the hair is one usually worn with that look.
  */
 export function characterFor(seed: string, look: Look): Avatar {
@@ -229,11 +227,6 @@ export function drawAvatar(a: Avatar): Shape[] {
     KIT_STYLES[a.kit]!.draw(k),
   ];
   return layers.flat();
-}
-
-/** A disguise for this avatar, as a layer of its own to draw on top of it. Nothing for a position that is not in the list. */
-export function drawDisguise(a: Avatar, disguise: number): Shape[] {
-  return DISGUISE_STYLES[disguise]?.draw(kitFor(a)) ?? [];
 }
 
 /** SVG attribute names to React prop names (stroke-width to strokeWidth). */

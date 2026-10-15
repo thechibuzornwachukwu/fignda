@@ -5,20 +5,14 @@ import rawHolidays from '../../data/holidays.json';
 import { dailyGameId, holidayOn, type Calendar, type Holiday } from '../engine/daily';
 import rawMirror from '../../data/mirrorWords.json';
 import { buildHiddenWords, type Difficulty, type HiddenWordsPuzzle } from '../engine/hiddenWords';
-import { DISGUISE_STYLES } from '../avatar/parts/disguises';
-import { POOLS } from '../copy';
 import { caseOrder, clueKind, SUMS_FROM } from '../engine/journey';
 import { mirrorClue } from '../engine/mirror';
-import { culpritOf } from '../engine/secret';
 import { sumsClue, sumsTarget } from '../engine/sums';
-import { unmaskClue } from '../engine/unmask';
 import { passages } from '../engine/passages';
 import { sponsorOf, type Sponsor } from '../engine/sponsor';
 
-export type GameType = 'hidden-words' | 'buried-sums' | 'mirror' | 'unmask';
+export type GameType = 'hidden-words' | 'buried-sums' | 'mirror';
 
-/** Who the culprit of a case turns out to be: a line from the `culpritWho` pool, the same on every device and on the server. */
-export const culpritName = (id: string): string => POOLS.culpritWho[culpritOf(id, DISGUISE_STYLES.length, POOLS.culpritWho.length).who] ?? '';
 
 /** The everyday words Mirror reads by. */
 export const MIRROR_WORDS: ReadonlySet<string> = new Set((rawMirror as { words: string }).words.split(' '));
@@ -64,7 +58,7 @@ export const sponsorFor = (def: Pick<GameDef, 'id' | 'sponsor'>): Sponsor | unde
 /**
  * One sitting of a catalogue puzzle. `n` is the clue's number (`clueKind`) and `count` how many passages the
  * puzzle has. `at` of `of` is where the clue stands in its case, counted from 1, and `next` the clue played
- * after it (0 when it is the last: the unmasking).
+ * after it (0 when it is the last).
  */
 export type Part = { n: number; count: number; at: number; of: number; next: number };
 
@@ -73,7 +67,7 @@ const parts = new Map<string, Map<number, { def: GameDef; part: Part }>>();
 /**
  * Clue `n` of a puzzle's case as a game of its own. A passage is the same puzzle with the passage as its text.
  * A sums clue is a row of digits the engine makes from the clue's own name, and the Mirror clue is a stretch of
- * the puzzle read right to left, and the unmasking is the culprit's name to spell. Memoised, so the same object
+ * the puzzle read right to left. Memoised, so the same object
  * comes back each time. None when the puzzle is not cut, or its case has no such clue.
  */
 export function getPassage(id: string, n: number): { def: GameDef; part: Part } | undefined {
@@ -95,9 +89,6 @@ export function getPassage(id: string, n: number): { def: GameDef; part: Part } 
       else if (kind === 'sums') {
         const made = sumsClue(`${id}~${k}`, k - SUMS_FROM);
         list!.set(k, { def: { ...def, type: 'buried-sums', noun: `runs that add up to ${sumsTarget(made)}`, text: made.text, dict: [...made.dict], expectedAnswers: [] }, part });
-      } else if (kind === 'unmask') {
-        const made = unmaskClue(culpritName(id), id);
-        list!.set(k, { def: { ...def, type: 'unmask', noun: 'letters', text: made.text, dict: [...made.dict], expectedAnswers: [] }, part });
       } else if (mirror) {
         list!.set(k, { def: { ...def, type: 'mirror', noun: 'words that read right to left', text: mirror.text, dict: [...mirror.dict], expectedAnswers: [] }, part });
       }

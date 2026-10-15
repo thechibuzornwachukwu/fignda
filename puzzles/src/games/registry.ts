@@ -9,8 +9,6 @@ import { hintAnswer, type HintKind } from '../engine/hint';
 import { buildMirror } from '../engine/mirror';
 import { revealParts, type RevealPart } from '../engine/reveal';
 import { buildSums, sumsTarget } from '../engine/sums';
-import { bankOf, buildUnmask, givenOf, UNMASK_TRIES } from '../engine/unmask';
-import { UnmaskBoard } from '../components/UnmaskBoard';
 import type { GameDef, GameType } from './catalog';
 
 export type { Evaluation };
@@ -29,9 +27,7 @@ export type GameModule<P> = {
   family: Family;
   build(def: GameDef): P;
   /** Letter count and chars for the board. */
-  boardProps(p: P): Pick<PuzzleProps, 'chars' | 'letters'> & Partial<Pick<PuzzleProps, 'variant' | 'target' | 'text' | 'given' | 'bank'>>;
-  /** Wrong picks allowed. The game ends on the last one. None: wrong picks never end a game. */
-  tries?: number;
+  boardProps(p: P): Pick<PuzzleProps, 'chars' | 'letters'> & Partial<Pick<PuzzleProps, 'variant' | 'target'>>;
   answers(p: P): readonly AnswerInfo[];
   /** Evaluate a finished selection. Matching lives in the engine, never in UI. */
   check(p: P, a: number, b: number, found: ReadonlySet<string>): Evaluation;
@@ -97,15 +93,6 @@ export const registry: Record<GameType, GameModule<Built>> = {
     ...spans({ family: 'quantitative', build: (def) => buildSums(def), evaluate: EVALUATE['buried-sums'], listOrder: byPlace }),
     // Digits as tiles, with the target and a running total above them.
     boardProps: (p) => ({ chars: p.chars, letters: p.S.length, variant: 'tiles', target: sumsTarget(p) }),
-  },
-  unmask: {
-    ...spans({ family: 'verbal', build: (def) => buildUnmask(def), evaluate: EVALUATE.unmask, listOrder: byPlace }),
-    boardProps: (p) => ({ chars: p.chars, letters: p.S.length, text: p.text, given: givenOf(p), bank: bankOf(p) }),
-    tries: UNMASK_TRIES,
-    // Nothing to step through after: the name is told when the mask comes off. A hint points at a key.
-    missed: () => [],
-    reveal: () => [],
-    Board: UnmaskBoard,
   },
 };
 

@@ -43,11 +43,6 @@
     "Wrong total. Try another run",
     "Not the target. Keep adding"
   ],
-  "wrongUnmask": [
-    "Not in the name. A try gone",
-    "No. That letter is not there",
-    "Wrong letter. One try fewer"
-  ],
   "wrongDaily": [
     "Not that one. 10 off.",
     "Not quite. 10 off.",
@@ -263,9 +258,6 @@
     "A key log. Some entries add up to the target.",
     "A till roll. Some sales add up to the target."
   ],
-  "reasonUnmask": [
-    "A smudged signature. Some letters are still clear."
-  ],
   "interceptBrief": [
     "Today's intercept. Pinned up at a bus stop, and meant for the Open Eye.",
     "Today's intercept. Folded into a library book, and meant for the Open Eye.",
@@ -280,71 +272,6 @@
     "Filed under the Open Eye. One more message that never arrived unread.",
     "Filed under the Open Eye. Whoever it was for knows less today."
   ],
-  "caseOpen": [
-    "Something was hidden here. Each clue gives up a piece of its name.",
-    "A secret in {n} pieces. Each clue gives up one.",
-    "Somebody hid something and left in a hurry. Collect the pieces."
-  ],
-  "pieceFound": [
-    "A piece of the secret: {p}.",
-    "{p}. One more piece of the secret.",
-    "The clue gave up a piece: {p}."
-  ],
-  "squadSecret": [
-    "One secret for the whole squad. Every find gives up more of it.",
-    "The squad shares this secret. Each word found fills it in."
-  ],
-  "squadShort": [
-    "The squad read {n} of {t} letters. Find more of the words and the mask comes off.",
-    "{n} of {t} letters read. The culprit keeps the mask this time."
-  ],
-  "squadMixed": [
-    "{n} pets on this case, no two the same.",
-    "Every pet in this squad is a different one. {n} of them."
-  ],
-  "culpritWho": [
-    "the baker",
-    "the choir leader",
-    "the tailor",
-    "the bus driver",
-    "the librarian",
-    "the gardener",
-    "the drummer",
-    "the caretaker",
-    "the photographer",
-    "the usher",
-    "the stall owner",
-    "the coach",
-    "the art teacher",
-    "the neighbour from 2 doors down"
-  ],
-  "culpritHint": [
-    "Up before dawn, with flour on both sleeves.",
-    "Counts everyone in before the first note.",
-    "Carries a tape measure and a mouth full of pins.",
-    "Knows every stop on the route by heart.",
-    "Asks for quiet, and knows where every book lives.",
-    "Soil under the nails and a watering can close by.",
-    "Keeps time with 2 sticks.",
-    "Holds the keys to every door in the building.",
-    "Asks everybody to hold still and smile.",
-    "Shows people to their seats.",
-    "Sells from a table at the market.",
-    "Blows a whistle and picks the team.",
-    "Paint on the apron, chalk on both hands.",
-    "Lives close by. Very close by."
-  ],
-  "confession": [
-    "It was {who}. \"I hid the {secret}. It was meant to be a surprise.\"",
-    "Under the disguise: {who}. \"The {secret} was with me all along. I wanted to see who would notice.\"",
-    "It was {who}. \"Yes, I hid the {secret}. I was proud of that hiding place.\"",
-    "Unmasked: {who}. \"I took the {secret} for a joke. You were quicker than I thought.\""
-  ],
-  "callingCard": [
-    "Left behind, as always: a card with one open eye.",
-    "The same card again. One open eye, no name.",
-    "And the card with the open eye. Somebody else is behind these."
-  ],
   "cluesLeft": [
     "{n} clues left"
   ],
@@ -355,14 +282,6 @@
     "{c}: case closed.",
     "Every clue in {c}, found.",
     "Case closed: {c}."
-  ],
-  "unmaskOut": [
-    "Out of tries. The mask comes off anyway.",
-    "No tries left. Here is who it was."
-  ],
-  "unmaskNext": [
-    "Next case",
-    "On to the next case"
   ],
   "starsOf": [
     "{n} of 3 stars"

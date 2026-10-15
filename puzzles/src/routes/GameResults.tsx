@@ -22,8 +22,6 @@ type Props = {
   onText: () => Promise<string>;
   /** A sitting: where the next one is. It leads the actions and takes the accent from Share. */
   next?: { to: string; label: string };
-  /** The unmasking: the reveal is the result. No pet beside the title (the reveal has one) and no line under it. */
-  plain?: boolean;
   /** Where this game's board lives, if it has one. */
   boardPath?: string;
   guest: boolean;
@@ -49,8 +47,6 @@ type Props = {
   done?: string;
   /** A sponsored puzzle: "With NAME" and, when there is one, the sponsor's link and its site name. */
   sponsor?: { line: string; url?: string; host?: string; /** The link was opened. */ onVisit?: () => void };
-  /** A clue of a case: the piece it gave, or the unmasking when it closed the case. */
-  caseFile?: ReactNode;
   /** Extra actions under the result (the reminder ask). */
   children?: ReactNode;
 };
@@ -58,7 +54,7 @@ type Props = {
 /** Lines worth a paragraph: no blanks, none twice. */
 const lines = (l?: readonly string[]) => [...new Set((l ?? []).filter((x) => typeof x === 'string' && x.trim() !== ''))];
 
-export function GameResults({ plain = false, title, line, score, found, total, secs, canReplay, onReplay, onShare, onText, next, boardPath, guest, guestLine, guestAction, streak, rare, stars, starsUp, skills, records, day, done, sponsor, caseFile, children }: Props) {
+export function GameResults({ title, line, score, found, total, secs, canReplay, onReplay, onShare, onText, next, boardPath, guest, guestLine, guestAction, streak, rare, stars, starsUp, skills, records, day, done, sponsor, children }: Props) {
   const { pathname } = useLocation();
   const [note, setNote] = useState('');
   const [more, setMore] = useState(false);
@@ -68,19 +64,18 @@ export function GameResults({ plain = false, title, line, score, found, total, s
       <div className={styles.head}>
         <div className={styles.titleRow}>
           {/* The partner at the end of a game: pleased, and more so when every word was found. */}
-          {!plain && <Partner moment={total > 0 && found === total ? 'found' : 'done'} size={56} />}
+          <Partner moment={total > 0 && found === total ? 'found' : 'done'} size={56} />
           <h2 id="results-title" className={styles.title}>
             {title}
           </h2>
         </div>
-        {!plain && line && <p className={styles.line}>{line}</p>}
+        {line && <p className={styles.line}>{line}</p>}
         {earned > 0 && (
           <p className={styles.stars}>
             <Stars value={earned} size={20} pop={!!starsUp} />
             {starsUp && <span>{starsUp}</span>}
           </p>
         )}
-        {caseFile}
         {sponsor?.line && (
           <p className={styles.with}>
             {sponsor.line}

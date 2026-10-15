@@ -6,7 +6,7 @@ import { Icon } from '../components/Icon';
 import { formatTime } from '../engine/time';
 import { getGameDef } from '../games/catalog';
 import { fetchGameBoard, fetchTogetherBoard, type BoardRow, type MyRank, type TeamRow } from '../lib/api';
-import { nextClueTo } from '../games/caseFile';
+import { nextClueTo } from '../games/path';
 import { games } from '../games/catalog';
 import { PageHeader } from '../components/PageHeader';
 import { PartnerNote } from '../components/PartnerNote';

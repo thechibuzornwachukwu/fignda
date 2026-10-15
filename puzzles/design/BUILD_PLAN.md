@@ -95,7 +95,6 @@ One set at a time. Each set is small, works on its own and leaves the live game 
 
 The owner's word, 14 Oct 2026: the puzzle game has no story line, and nothing about criminals or thieves. Simple, not beige.
 
-- [ ] **Set 1a. The unmasking goes.** A pack ends on its whole puzzle. Out: culprits and disguises, the secret word and its pieces, the unmasking board and its type, the Worker's unmasking replay, the confession, calling card and culprit lines, the 6 tries.
 - [ ] **Set 1b. The words on screen.** Every case, clue, detective, suspect, evidence, intercept and Open Eye line in the copy pools, the SPEC and the screens goes or becomes plain: a pack, a puzzle. The dock and the page titles get plain names.
 - [ ] **Set 1c. The character.** Detective gear (the badge, the magnifier and the rest) goes. "Your detective" is "You". Earned pieces become plain things worth wearing.
 - [ ] **Set 1d. Simple, not beige.** Once the story is out, every screen is looked at again for colour and weight: one board, one action, nothing grey for its own sake.

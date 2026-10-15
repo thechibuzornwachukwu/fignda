@@ -11,9 +11,6 @@ import { buildMirror, mirrorClue } from '../../src/engine/mirror';
 import { passages } from '../../src/engine/passages';
 import { starsFor } from '../../src/engine/stars';
 import { buildSums, sumsClue } from '../../src/engine/sums';
-import { buildUnmask, unmaskClue, withinTries } from '../../src/engine/unmask';
-import { culpritOf } from '../../src/engine/secret';
-import { DISGUISE_STYLES } from '../../src/avatar/parts/disguises';
 import pools from '../../data/copy.json';
 import mirrorFile from '../../data/mirrorWords.json';
 import iconTable from '../../data/topicIcons.json';
@@ -607,19 +604,15 @@ async function plays(req: Request, deps: Deps) {
 
   if (game.type === 'game' && game.clue != null) {
     // A clue of a case, made by the same engine the client makes it with and replayed as a game of its own:
-    // a passage, a row of sums, the Mirror clue or the unmasking, by its number. Alone only, catalogue only. It is kept apart
+    // a passage, a row of sums or the Mirror clue, by its number. Alone only, catalogue only. It is kept apart
     // from `plays`, so no board changes.
     if (room) throw new HttpError(400, 'bad_request');
     const cut = g.data.kind === 'curated' ? passages(puzzle) : [];
     const mirror = cut.length < 2 ? null : mirrorClue(puzzle, MIRROR_WORDS);
     if (!caseOrder(cut.length, !!mirror).includes(game.clue) || game.clue === 0) throw new HttpError(404, 'unknown_clue');
     const kind = clueKind(game.clue);
-    // The unmasking: the culprit's name, worked out here from the case as the client works it out. Picks after
-    // the last try are not counted.
-    const name = kind === 'unmask' ? buildUnmask(unmaskClue(pools.culpritWho[culpritOf(gameId, DISGUISE_STYLES.length, pools.culpritWho.length).who] ?? '', gameId)) : null;
-    const c = name
-      ? replay(name, { ...log, events: withinTries(name, log.events) }, false, EVALUATE.unmask)
-      : kind === 'sums'
+    const c =
+      kind === 'sums'
         ? replay(buildSums(sumsClue(`${gameId}~${game.clue}`, game.clue - SUMS_FROM)), log, false, EVALUATE['buried-sums'])
         : kind === 'mirror'
           ? replay(buildMirror(mirror!), log, false, EVALUATE.mirror)

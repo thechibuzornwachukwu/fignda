@@ -15,7 +15,7 @@ import { Partner } from '../components/Partner';
 import { SkeletonPills } from '../components/Skeleton';
 import { TextLink } from '../components/TextLink';
 import { nextAt, partnerName, PARTNERS, standingOf, type PartnerId } from '../engine/partners';
-import { doneClues } from '../games/caseFile';
+import { doneClues } from '../games/path';
 import { games } from '../games/catalog';
 import { fetchBadges, saveAvatar, saveLook } from '../lib/api';
 import { useAuth } from '../lib/auth';

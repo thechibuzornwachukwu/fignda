@@ -141,13 +141,8 @@ test.describe('play together', () => {
     await expect(host.locator(`[data-li="${i}"]`)).toHaveAttribute('data-state', 'found');
     await expect(host.getByRole('status').filter({ hasText: /Amos/ }).first()).toBeAttached();
 
-    // One secret for the squad: empty at the start on both screens, with one line about it.
-    for (const p of [host, guest]) {
-      const secret = p.locator('[data-squad-secret]');
-      await expect(secret).toBeVisible();
-      await expect(secret.getByRole('img', { name: /^The secret: \d+ of \d+ letters found\.$/ })).toBeVisible();
-      await expect(secret).toContainText(/squad/);
-    }
+    // No secret for the squad: a room plays the puzzle and nothing else.
+    for (const p of [host, guest]) await expect(p.locator('[data-squad-secret]')).toHaveCount(0);
 
     // A late joiner receives everything found so far.
     const late = await context.newPage();

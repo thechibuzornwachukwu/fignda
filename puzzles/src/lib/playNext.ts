@@ -1,7 +1,7 @@
 // The Play button always knows what is next (BUILD_PLAN, Screens). One rule for the dock, the wide header, the
 // landing page and the end of the first minute.
 
-import { nextClueTo } from '../games/caseFile';
+import { nextClueTo } from '../games/path';
 
 export type PlayNext = { to: string; name: string; kind: 'clue' | 'done' };
 

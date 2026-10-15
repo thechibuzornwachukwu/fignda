@@ -2,7 +2,7 @@
 // seed, so the same clue is the same row on every device and on the server, and there is always another one.
 
 import type { Answer, HiddenWordsDef, HiddenWordsPuzzle } from './hiddenWords';
-import { hashOf, seeded } from './secret';
+import { hashOf, seeded } from './seed';
 import type { Char } from './text';
 
 /** How long a row is and how many runs it hides. A case's first sums clue is level 0, and they grow from there. */

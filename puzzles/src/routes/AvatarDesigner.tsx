@@ -10,7 +10,7 @@ import { Avatar } from '../components/Avatar';
 import { Button } from '../components/Button';
 import { Dialog } from '../components/Dialog';
 import { Icon } from '../components/Icon';
-import { doneClues } from '../games/caseFile';
+import { doneClues } from '../games/path';
 import { games } from '../games/catalog';
 import { fetchPoints, saveAvatar, saveLook } from '../lib/api';
 import { keepLook, loadLook } from '../lib/firstMinute';

@@ -13,14 +13,12 @@ import { dailyInfo, dailyLabel } from '../games/daily';
 import { registry } from '../games/registry';
 import { dayHidLine, playFacts, rareLine, recordLines, skillLines, starsUpLine, todayHoldsLine } from '../games/resultLines';
 import { isCleanRead, scoreOf, secondsOf, useGameSession, type Session } from '../games/session';
-import { CaseClosed, CasePiece, SecretSlots } from '../components/CaseFile';
 import { GuestWall } from '../components/GuestWall';
 import { clueId, clueKind } from '../engine/journey';
-import { UNMASK_TRIES } from '../engine/unmask';
 import { ClueDone } from '../components/ClueDone';
 import { Partner } from '../components/Partner';
-import { HINT_OF, mixedSquad } from '../engine/partners';
-import { caseFile, doneClues, nextClueTo } from '../games/caseFile';
+import { HINT_OF } from '../engine/partners';
+import { doneClues, nextClueTo } from '../games/path';
 import { guestBlocked, markGuestPlayed, playKey } from '../lib/guestLimit';
 import { loadPartner } from '../lib/partner';
 import { starsFor } from '../engine/stars';
@@ -52,6 +50,9 @@ import { useStreak } from '../lib/useStreak';
 import { GameResults } from './GameResults';
 import { GameReveal } from './GameReveal';
 import styles from './Game.module.css';
+
+/** The clock, read when the player acts, never while drawing. */
+const now = (): number => Date.now();
 
 export function GameById() {
   const { id = '' } = useParams();
@@ -129,8 +130,6 @@ function Gated(props: ScreenProps) {
 function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** A sitting: `def` is the puzzle with one passage as its text. */ part?: Part }) {
   const mod = registry[def.type];
   const puzzle = useMemo(() => mod.build(def), [mod, def]);
-  // The last clue of a case: the culprit's name, a letter at a time. It has its own board and no list.
-  const unmask = def.type === 'unmask';
   // Words are what records and skill lines are about. A run of digits or a letter is not one.
   const wordy = def.type === 'hidden-words' || def.type === 'mirror';
   const listRef = useRef<WordListHandle>(null);
@@ -259,7 +258,6 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
   }, [part, finished, signedIn, inRoom, roomCode, s.endAt, s.startAt, s.log, s.sent, daily, dailyN, def.id]);
 
   const foundCount = s.found.length;
-  const triesLeft = Math.max(0, UNMASK_TRIES - s.wrongs);
   // The clues of this case, for the row of marks at the top. Read once a visit: it does not change mid clue.
   const trail = useMemo(() => {
     if (!part) return [];
@@ -309,7 +307,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
     const broke = recordPlay({
       pack: daily || inCatalogue ? def.category : null,
       // A sitting is a few words: its time is no record for the pack.
-      cleanSecs: cleanRead && !part ? secondsOf(fs, fs.endAt ?? Date.now()) : null,
+      cleanSecs: cleanRead && !part ? secondsOf(fs, fs.endAt ?? now()) : null,
       dailyFound: daily ? mine.length : null,
       longest: wordy ? playFacts(puzzle, fs.found, fs.wrongs, fs.hints).longest : null,
     });
@@ -340,26 +338,11 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
     return foundRows.concat(rest);
   }, [answers, s.found, daily, finished, mod, puzzle, foundSet]);
 
-  // A closed case is shared as what was done: which case, with how many stars. Never the culprit's name (it is the same
-  // for every player) and never a count of letters.
-  const achievement = useMemo(() => {
-    if (!unmask || !finished) return undefined;
-    const earned = starsFor({ finished: true, found: s.found.length, total, hints: s.hints, wrongs: s.wrongs });
-    const base = shareUrl(`/play/${def.id}/1`);
-    return {
-      kicker: `Case closed · ${def.category}`,
-      title: 'Culprit unmasked',
-      line: `${def.title} · ${earned} of 3 stars`,
-      cta: 'Can you close it?',
-      text: `Gazecraft · Case closed: ${def.title}\nI unmasked the culprit. ${earned} of 3 stars.\nCan you close it? ${base}`,
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [unmask, finished, def.id, s.startAt]);
   // The text result: paste it in a chat. Phones open the share sheet (WhatsApp is one tap), desktops copy.
   const sendText = async (): Promise<string> => {
-    const secs = secondsOf(s, s.endAt ?? Date.now());
+    const secs = secondsOf(s, s.endAt ?? now());
     const base = shareGame(def, puzzle.difficulty, dailyN, part).path;
-    const text = achievement?.text ?? shareText({
+    const text = shareText({
       title: def.title,
       daily: dailyN,
       found: s.found.length,
@@ -403,50 +386,19 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
     : 0;
   const starsUp = !!ended?.starsUp;
   const starLine = useMemo(() => starsUpLine(stars, starsUp, copy.pick), [stars, starsUp]);
-  // The case this clue belongs to: a passage gives a piece of the secret, the whole puzzle closes the case.
-  // A game with stars is a clue done, the same rule the path reads by.
-  // In a room the squad shares the secret: every word anyone finds counts toward it, and the finish gives
-  // the last piece. Catalogue puzzles only.
-  const squadFile = useMemo(
-    () => (inRoom ? caseFile(def.id, doneClues(), { found: foundCount, total, finished }) : undefined),
-    [inRoom, def.id, foundCount, total, finished],
-  );
-  // Slots filled since the last look pop in.
-  const slotsNow = squadFile?.slots ?? null;
-  const slotsKey = slotsNow ? slotsNow.join(',') : '';
-  const [seenSlots, setSeenSlots] = useState<{ key: string; slots: string[] | null; fresh: number[] }>({ key: slotsKey, slots: slotsNow, fresh: [] });
-  if (seenSlots.key !== slotsKey) {
-    const before = seenSlots.slots;
-    setSeenSlots({ key: slotsKey, slots: slotsNow, fresh: (slotsNow ?? []).flatMap((ch, i) => (ch && before && !before[i] ? [i] : [])) });
-  }
-  const freshSlots = seenSlots.fresh;
-  const squadLine = useMemo(() => (inRoom ? copy.pick('squadSecret') : ''), [inRoom]);
-  const caseNode = useMemo(() => {
-    if (finished && squadFile) {
-      if (squadFile.closed) return <CaseClosed id={def.id} secret={squadFile.word} mixed={mixedSquad([loadPartner().current, ...peers.filter((p) => p.id !== roomId).map((p) => p.partner)])} />;
-      const read = squadFile.slots.filter(Boolean).length;
-      return <CasePiece slots={squadFile.slots} fresh={[]} piece="" say={copy.pick('squadShort', { n: read, t: squadFile.slots.length })} />;
-    }
-    if (!finished || !starred) return null;
-    const file = caseFile(def.id, new Set([...doneClues(), gameKey]));
-    if (!file) return null;
-    if (!part || unmask) return <CaseClosed id={def.id} secret={file.word} />;
-    const piece = file.piece(part.n);
-    return <CasePiece slots={file.slots} fresh={piece.slots} piece={piece.text} />;
-  }, [finished, starred, def.id, gameKey, part, unmask, squadFile, peers, roomId]);
-  // Where a finished clue leads: the next clue, the unmasking, or from the unmasking the next case.
+  // Where a finished clue leads: the next clue of the pack, or after its last, the first of the next pack.
   const onward = useMemo(() => {
     if (!part || !finished) return undefined;
-    if (unmask) return { to: nextClueTo() ?? '/play', label: copy.pick('unmaskNext') };
-    return { to: `/play/${def.id}/${part.next}`, label: clueKind(part.next) === 'unmask' ? 'The unmasking' : 'Next clue' };
+    if (!part.next) return { to: nextClueTo() ?? '/play', label: 'Next clue' };
+    return { to: `/play/${def.id}/${part.next}`, label: 'Next clue' };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [part, finished, unmask, def.id, s.startAt]);
+  }, [part, finished, def.id, s.startAt]);
   // On a case, a method is a real thing somebody left behind. One reason a clue, the same on every visit.
   const reason = useMemo(() => {
     if (!part) return '';
-    const pool = copy.POOLS[unmask ? 'reasonUnmask' : def.type === 'buried-sums' ? 'reasonSums' : def.type === 'mirror' ? 'reasonMirror' : 'reasonWords'];
+    const pool = copy.POOLS[def.type === 'buried-sums' ? 'reasonSums' : def.type === 'mirror' ? 'reasonMirror' : 'reasonWords'];
     return `${pool[part.n % pool.length]} `;
-  }, [part, unmask, def.type]);
+  }, [part, def.type]);
   // The daily is a quick case: a message to the Open Eye, intercepted that day. One brief a day, the same for everybody.
   const briefLine = daily && dailyN != null ? copy.POOLS.interceptBrief[dailyN % copy.POOLS.interceptBrief.length]! : '';
   const factLine = daily && dailyN != null ? copy.POOLS.interceptFact[dailyN % copy.POOLS.interceptFact.length]! : '';
@@ -494,7 +446,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
     if (!guestToday) return;
     let alive = true;
     const cur = gRef.current.s;
-    const secs = secondsOf(cur, cur.endAt ?? Date.now());
+    const secs = secondsOf(cur, cur.endAt ?? now());
     fetchDailyPlace(dailyN!, scoreOf(cur, gRef.current.total, true, secs), secs)
       .then((p) => alive && setPlace(p))
       .catch(() => {});
@@ -539,17 +491,8 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
             Cases
           </Link>
           <span className={styles.metaEnd}>
-            {/* The unmasking keeps its top bare: the way back, and the tries left. */}
-            {unmask ? (
-              <span className={styles.tries} role="img" aria-label={triesLeft === 1 ? '1 try left' : `${triesLeft} tries left`} data-tries={triesLeft}>
-                {Array.from({ length: UNMASK_TRIES }, (_, i) => (
-                  <span key={i} className={styles.pip} data-spent={i >= triesLeft || undefined} />
-                ))}
-              </span>
-            ) : (
-              part ? (
-                // A case as a row of marks, one a clue: done, this one, and those to come. A sums clue is square
-                // and the unmasking is the big one at the end, so the row reads as the case it is.
+            {part ? (
+                // A pack as a row of marks, one a clue: done, this one, and those to come. A sums clue is square.
                 <ol className={styles.trail} aria-label={`${def.category}, clue ${part.at} of ${part.of}`} data-trail>
                   {trail.map((c) => (
                     <li key={c.n} className={styles.mark} data-kind={c.kind} data-state={c.state} aria-hidden="true" />
@@ -560,8 +503,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
                   {holiday ? `${holiday} · ` : ''}
                   {def.category} · {puzzle.difficulty}
                 </span>
-              )
-            )}
+              )}
             {auth.enabled && !daily && !part && !inRoom && !finished && (
               <button type="button" className={styles.together} onClick={() => navigate(`?room=${newRoomCode()}`)}>
                 <Icon icon={UsersRound} size={16} />
@@ -570,8 +512,8 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
             )}
           </span>
         </div>
-        <div className={unmask && finished ? styles.sr : styles.titleRow}>
-          <h1 className={styles.title}>{unmask ? 'Who is behind the mask?' : daily ? `Find the hidden ${def.noun}` : `Find ${total} ${def.noun}`}</h1>
+        <div className={styles.titleRow}>
+          <h1 className={styles.title}>{daily ? `Find the hidden ${def.noun}` : `Find ${total} ${def.noun}`}</h1>
           <BigClock startAt={s.startAt} endAt={s.endAt} />
         </div>
         {briefLine && !finished && <p className={styles.holds} data-intercept>{briefLine}</p>}
@@ -579,12 +521,6 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
       </div>
 
       {inRoom && <RoomBar gameId={def.id} code={roomCode} peers={peers} status={roomStatus} me={myStats} you={{ id: roomId, handle: myHandle, partner: loadPartner().current }} path={sharePath({ id: def.id, code: def.id.startsWith('c-') ? def.id.slice(2).toUpperCase() : undefined })} />}
-      {squadFile && !finished && (
-        <p className={styles.squad} data-squad-secret>
-          <SecretSlots slots={squadFile.slots} fresh={freshSlots} />
-          <span>{squadLine}</span>
-        </p>
-      )}
 
       {challenge && !inRoom && (
         <Challenge
@@ -594,8 +530,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
         />
       )}
 
-      {/* The unmasking shows its progress in the name itself and its tries at the top. */}
-      {!unmask && <div className={styles.progress}>
+      <div className={styles.progress}>
         <div className={styles.stats}>
           <span className={styles.tally}>
             {!hideProgress && <Ring value={progress} label="Found" />}
@@ -604,7 +539,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
           {leftLine && <span className={styles.left}>{leftLine}</span>}
           <span>{s.hints === 1 ? '1 tip-off' : `${s.hints} tip-offs`}</span>
         </div>
-      </div>}
+      </div>
 
       {finished && (
         <GameResults
@@ -619,14 +554,12 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
           onShare={() => setSharing(true)}
           onText={sendText}
           next={onward}
-          plain={unmask}
           boardPath={part || !auth.enabled ? undefined : daily ? `/leaderboard?day=${dailyN}` : inRoom && getGameDef(def.id) ? `/leaderboard/${def.id}?board=together` : undefined}
           guest={!signedIn}
           guestLine={guestLine}
           guestAction={askLook ? 'Choose your look' : undefined}
           streak={streakLine}
           rare={rare}
-          caseFile={caseNode}
           stars={stars}
           starsUp={starLine}
           skills={lines}
@@ -641,15 +574,11 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
         </GameResults>
       )}
 
-      {/* A finished unmasking leaves only the reveal: the keys have nothing more to say. */}
-      {!(unmask && finished) && <div className={styles.columns}>
+      <div className={styles.columns}>
         <div className={styles.main}>
-          {/* The unmasking explains itself: its line is kept for screen readers only. */}
-          <p id={instructionId} className={unmask ? styles.sr : styles.instruction}>
+          <p id={instructionId} className={styles.instruction}>
             {reason}
-            {unmask
-              ? 'Read the line under the culprit, then pick the missing letters. A wrong one costs a try, and you have 6.'
-              : def.type === 'buried-sums'
+            {def.type === 'buried-sums'
               ? coarse
                 ? 'Swipe across digits in a row. Or tap the first digit of a run, then the last.'
                 : 'Drag across digits in a row. A run is 2 or more digits that add up to the target.'
@@ -671,14 +600,11 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
             onTapStart={g.tapStart}
             onDragStart={g.dragStart}
             describedBy={instructionId}
-            picked={unmask ? (s.log?.events ?? []).filter((e) => e.a === e.b).map((e) => e.a) : undefined}
-            caseId={def.id}
           />
           {!finished && (
             <div className={styles.actions}>
               <TextLink onClick={g.hint}>Ask for a tip-off</TextLink>
-              {/* The unmasking has no giving up: it ends when the name is spelled or the tries are gone. */}
-              {!unmask && <TextLink onClick={g.finish}>I'm done</TextLink>}
+              <TextLink onClick={g.finish}>I'm done</TextLink>
               <span className={styles.says} aria-hidden="true">
                 {pet}
                 <span className={styles.msg}>{s.msg}</span>
@@ -690,21 +616,21 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
           </div>
         </div>
 
-        {!unmask && <WordList
+        <WordList
           ref={listRef}
           title={finished ? 'Answers' : 'Hidden above'}
           count={count}
           rows={rows}
           moreHiding={daily && !finished}
-        />}
-      </div>}
+        />
+      </div>
 
       {finished && (
         <ShareSheet
           open={sharing}
           onClose={() => setSharing(false)}
           onShared={() => countEvent(def.id, 'share')}
-          game={{ ...shareGame(def, puzzle.difficulty, dailyN, part), vs: part ? undefined : auth.profile?.handle, sponsor, achievement }}
+          game={{ ...shareGame(def, puzzle.difficulty, dailyN, part), vs: part ? undefined : auth.profile?.handle, sponsor }}
           result={{
             answers: puzzle.answers.map((a) => {
               const f = s.found.find((x) => x.key === a.key);
@@ -722,17 +648,14 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
         <ClueDone
           open={popup === s.startAt}
           onClose={() => setPopup(null)}
-          title={unmask && foundCount < total ? copy.pick('unmaskOut') : (s.resultTitle ?? '')}
+          title={s.resultTitle ?? ''}
           stars={stars}
-          line={unmask ? `${foundCount} of ${total} letters, ${s.wrongs} wrong` : `${foundCount} of ${total} found`}
-          closed={unmask}
+          line={`${foundCount} of ${total} found`}
           next={onward}
-        >
-          {unmask ? <CaseClosed id={def.id} secret={caseFile(def.id, new Set([...doneClues(), gameKey]))?.word ?? ''} grand /> : caseNode}
-        </ClueDone>
+        />
       )}
 
-      {!finished && !unmask && (
+      {!finished && (
         <MobileBar
           count={count}
           progress={hideProgress ? null : progress}

@@ -9,7 +9,6 @@ import { forgetGuestSeed, GUEST_SEED_KEY } from '../avatar/guest';
 import { setAvatarCode } from '../avatar/store';
 import { POOLS } from '../copy';
 import { buildPath, type Path } from '../engine/journey';
-import { caseFile, secretOf } from '../games/caseFile';
 import { games, MIRROR_WORDS } from '../games/catalog';
 import { Journey, JOURNEY_AT_KEY, type JourneyGame } from './Journey';
 
@@ -61,30 +60,11 @@ describe('Journey', () => {
     expect(text(container)).toContain(`0 of ${all.length} clues`);
   });
 
-  it('the case being worked shows its file: the culprit in disguise, an opening line, and the secret so far', () => {
+  it('a pack is a drill: no culprit in disguise, no secret, no file', () => {
     const { container } = show({ done: [ids[0]!] });
-    const files = container.querySelectorAll('[data-case-file]');
-    expect(files).toHaveLength(1);
-    const file = box(container, first.id).querySelector<HTMLElement>('[data-case-file]')!;
-    expect(file.querySelector('[data-culprit="masked"]')).not.toBeNull();
-    expect(fills(POOLS.caseOpen, file.querySelector('p')!.textContent!)).toBe(true);
-    const want = caseFile(first.id, new Set([ids[0]!]))!;
-    expect(want.slots.filter(Boolean).length).toBeGreaterThan(0);
-    expect([...file.querySelectorAll('[data-slot]')].map((s) => s.textContent)).toEqual(want.slots);
-    expect(within(file).getByRole('img', { name: `The secret: ${want.slots.filter(Boolean).length} of ${want.word.length} letters found.` })).toBeInTheDocument();
-    // The word is never on the page before the case is closed.
-    expect(text(container)).not.toContain(secretOf(first.id)!.word);
-  });
-
-  it('a closed case and a locked case show no file, and a puzzle that is not ours has none', () => {
-    const { container } = show({ done: [first.id] });
-    expect(box(container, first.id).querySelector('[data-case-file]')).toBeNull();
-    expect(box(container, path.cases[2]!.id).querySelector('[data-case-file]')).toBeNull();
-    expect(box(container, second.id).querySelector('[data-case-file]')).not.toBeNull();
-    const mine: JourneyGame = { id: 'mine', category: 'A', title: 'Mine', text: 'Pat omitted a most odd note.', dict: ['atom'] };
-    const other = show({ catalogue: [mine] });
-    expect(other.container.querySelector('[data-case="mine"]')).not.toBeNull();
-    expect(other.container.querySelector('[data-case-file]')).toBeNull();
+    expect(container.querySelector('[data-case-file]')).toBeNull();
+    expect(container.querySelector('[data-culprit]')).toBeNull();
+    expect(container.querySelector('[data-slot]')).toBeNull();
   });
 
   it('a case says how many clues are left, never how long', () => {
@@ -132,18 +112,14 @@ describe('Journey', () => {
     expect(later.querySelector('[data-case-lock]')!.textContent).toBe(`Locked. Finish ${titleOf(first.id)} to open this.`);
   });
 
-  it('the last clue of a case is the unmasking: the big one, and says so', () => {
-    const last = `${first.id}~40`;
+  it('the last clue of a pack is the big one, and says so: there is no unmasking after it', () => {
+    const last = first.clues[first.clues.length - 1]!.id;
     const { container } = show();
     const big = [...container.querySelectorAll('[data-big]')].map((el) => el.getAttribute('data-clue'));
     expect(big).toEqual([last]);
-    expect(clue(container, last).textContent).toContain('Unmasking. Locked. The last clue of the case.');
+    expect(clue(container, last).textContent).toContain('The last clue of the case.');
     expect(clue(container, ids[0]!).textContent).not.toContain('last clue');
-
-    const there = show({ done: ids.slice(0, -1) });
-    const link = within(clue(there.container, last)).getByRole('link');
-    expect(link).toHaveAttribute('href', `/play/${first.id}/40`);
-    expect(link.textContent).toContain('Unmasking. Next clue. The last clue of the case. Play.');
+    expect(container.querySelector(`[data-clue="${first.id}~40"]`)).toBeNull();
   });
 
   it('a whole-puzzle score from before closes the case, passages and all', () => {
@@ -245,8 +221,9 @@ describe('Journey', () => {
   });
 
   it('a case just closed: the avatar drops onto the next case, and the closed one pops its stars', () => {
-    localStorage.setItem(JOURNEY_AT_KEY, `${first.id}~40`);
-    const { container } = show({ done: ids, stars: { [`${first.id}~40`]: 3 } });
+    const last = first.clues[first.clues.length - 1]!.id;
+    localStorage.setItem(JOURNEY_AT_KEY, last);
+    const { container } = show({ done: ids, stars: Object.fromEntries(first.clues.map((c) => [c.id, 3])) });
     expect(clue(container, second.clues[0]!.id).querySelector('[data-hop]')!.getAttribute('data-hop')).toBe('drop');
     expect(box(container, first.id).querySelector('[data-stars]')!.hasAttribute('data-pop')).toBe(true);
   });

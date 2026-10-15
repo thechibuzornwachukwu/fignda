@@ -155,40 +155,6 @@
   }
 }
 
-/* A room: the secret the squad is filling in together. */
-.squad {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: var(--space-2) var(--space-3);
-  margin: var(--space-3) 0 0;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--muted);
-  overflow-wrap: anywhere;
-}
-
-/* The unmasking: the tries left, at the top right. One pip a try, hollow once spent. */
-.tries {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1h);
-}
-.pip {
-  width: var(--space-3);
-  height: var(--space-3);
-  border-radius: var(--radius-pill);
-  background: var(--fg);
-  transition:
-    transform var(--dur-slow) var(--ease-out),
-    background-color var(--dur-slow) var(--ease-std);
-}
-.pip[data-spent] {
-  background: transparent;
-  box-shadow: inset 0 0 0 2px var(--line-3);
-  transform: scale(0.8);
-}
-
 /* A case at the top right of a clue: one mark a clue. SPEC section 6, Sitting. */
 .trail {
   display: inline-flex;

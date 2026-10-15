@@ -65,7 +65,7 @@ export const isFinished = (s: SavedSession) => s.endAt != null;
 
 type Ctx = { now: number; total: number; daily: boolean; copy: Copy; /** A number game: a wrong run is told in its own words. */ sums?: boolean; /** The unmasking: a wrong letter is a try gone. */ unmask?: boolean };
 
-export function applyPick(s: Session, ev: Evaluation, { now, total, daily, copy, sums = false, unmask = false }: Ctx): Session {
+export function applyPick(s: Session, ev: Evaluation, { now, total, daily, copy, sums = false }: Ctx): Session {
   if (isFinished(s)) return s;
   switch (ev.kind) {
     case 'hit': {
@@ -100,7 +100,7 @@ export function applyPick(s: Session, ev: Evaluation, { now, total, daily, copy,
     case 'wrong':
       return daily
         ? { ...s, streak: 0, misses: s.misses + 1, wrongs: s.wrongs + 1, msg: copy.pick('wrongDaily') }
-        : { ...s, streak: 0, wrongs: s.wrongs + 1, msg: copy.pick(unmask ? 'wrongUnmask' : sums ? 'wrongSums' : 'wrong') };
+        : { ...s, streak: 0, wrongs: s.wrongs + 1, msg: copy.pick(sums ? 'wrongSums' : 'wrong') };
     case 'ignore':
       return { ...s, msg: '' };
   }
@@ -303,16 +303,14 @@ export function useGameSession<P>({ mod, puzzle, dailyN, resumeId: resumeAs, sha
       chime();
     }
     const now = Date.now();
-    const picked = applyPick(cur, ev, { now, total, daily, copy, sums: mod.family === 'quantitative', unmask: mod.tries != null });
+    const picked = applyPick(cur, ev, { now, total, daily, copy, sums: mod.family === 'quantitative' });
     const logged = isLogged(ev)
       ? withLog(picked, cur, (l) => ({ ...l, events: [...l.events, { a, b, t: now - cur.startAt }] }))
       : picked;
-    // Out of tries: the game ends on the wrong pick that used the last one.
-    const next = mod.tries != null && logged.wrongs >= mod.tries ? applyFinish(logged, now, total, copy) : logged;
-    commit(next);
+    commit(logged);
     if (ev.kind === 'hit') onHitRef.current?.(a, b);
-    if (isFinished(next)) {
-      onFinishRef.current?.(next);
+    if (isFinished(logged)) {
+      onFinishRef.current?.(logged);
       window.setTimeout(scrollToTop, durationMs('--dur-slower'));
     }
   };
