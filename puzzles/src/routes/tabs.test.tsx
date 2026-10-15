@@ -113,11 +113,11 @@ beforeEach(() => emptyWorld());
 describe('Games', () => {
   it('a first visit shows the crew and the path, and no daily and no list of games', async () => {
     open('/play');
-    expect(title()).toBe('Cases');
+    expect(title()).toBe('Packs');
     expect(screen.queryByRole('link', { name: /Daily #\d+/ })).toBeNull();
     expect(within(screen.getByRole('region', { name: 'Your path' })).getAllByRole('link').length).toBeGreaterThan(0);
     expect(screen.queryByRole('region', { name: 'All games' })).toBeNull();
-    expect(screen.getByRole('link', { name: /Change your detective, pet and gear/ })).toHaveAttribute('href', '/me');
+    expect(screen.getByRole('link', { name: /Change your look and your pet/ })).toHaveAttribute('href', '/me');
     // Give the any-topic check time to answer: it still must not show.
     await Promise.resolve();
     expect(screen.queryByLabelText('Or any topic')).toBeNull();
@@ -147,7 +147,7 @@ describe('Games', () => {
 
   it('an old filter in the address changes nothing: there is no list to filter', () => {
     open('/play?f=Nothing');
-    expect(title()).toBe('Cases');
+    expect(title()).toBe('Packs');
     expect(screen.queryByRole('group', { name: 'Filter games' })).toBeNull();
     expect(screen.getByRole('region', { name: 'Your path' })).toBeInTheDocument();
   });
@@ -249,7 +249,7 @@ describe('Players', () => {
     open('/players');
     expect(title()).toBe('Squad');
     expect(await screen.findByText('Nobody else has joined yet. Invite a friend and they will show up here.')).toBeInTheDocument();
-    expect(await screen.findByText("No streaks yet. Finish a step or a clue today to start one.")).toBeInTheDocument();
+    expect(await screen.findByText("No streaks yet. Finish a puzzle today to start one.")).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/signin?next=%2Fplayers');
     expect(screen.queryByRole('region', { name: 'Friend streaks' })).toBeNull();
     // Points wait for a first verified play.

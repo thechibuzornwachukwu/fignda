@@ -119,7 +119,7 @@ export const stamp = (label: string, ink: string, size = 200): string => {
   `<g transform="translate(100 56) scale(.2) translate(-120 -100)" opacity=".9">${cat}</g></g></svg>`;
 };
 
-export const RANKS = ['Rookie', 'Detective', 'Inspector', 'Chief'] as const;
+export const RANKS = ['Starter', 'Keen', 'Sharp', 'Master'] as const;
 
 /** A rank badge: a shield, one more bar per rank, the cat's eyes at the top once you are Chief. */
 export function rankBadge(level: number, size = 120): string {

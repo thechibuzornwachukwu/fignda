@@ -11,7 +11,7 @@ test.describe('header by context', () => {
     await page.locator('header').getByRole('link', { name: 'Play', exact: true }).click();
     await expect(page).toHaveURL(/\/play$/);
     const nav = page.getByRole('navigation', { name: 'Main' });
-    await expect(nav).toHaveText(/Cases\s*Squad\s*Ranks/);
+    await expect(nav).toHaveText(/Packs\s*Squad\s*Ranks/);
     await expect(page.getByRole('navigation', { name: 'On this page' })).toHaveCount(0);
   });
 });
@@ -45,7 +45,7 @@ test.describe('quick return on a phone', () => {
       await page.goto(path);
       await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
       await expect(page.locator('header')).toHaveCount(0);
-      await expect(page.getByRole('link', { name: 'Cases' })).toBeVisible();
+      await expect(page.getByRole('link', { name: 'Packs' })).toBeVisible();
       expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth), path).toBeLessThanOrEqual(0);
     }
     // App screens: the dock is the navigation, so there is no bar above the title.
@@ -77,9 +77,9 @@ test.describe('quick return on a phone', () => {
     expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
   });
 
-  test('on a puzzle the nav row steps aside and the way back to Cases stays', async ({ page }) => {
+  test('on a puzzle the nav row steps aside and the way back to Packs stays', async ({ page }) => {
     await page.goto('/play/bible');
     await expect(page.getByRole('navigation', { name: 'Main' })).toBeHidden();
-    await expect(page.getByRole('link', { name: /Cases/ }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: /Packs/ }).first()).toBeVisible();
   });
 });

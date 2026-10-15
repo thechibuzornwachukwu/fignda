@@ -10,9 +10,9 @@ export type Need = { cases: number } | { rank: Rank };
 export const EARNED: ReadonlyArray<{ part: 'kit' | 'outfit'; name: string; need: Need }> = [
   { part: 'kit', name: 'badge', need: { cases: 1 } },
   { part: 'kit', name: 'magnifying glass', need: { cases: 5 } },
-  { part: 'kit', name: 'detective hat', need: { rank: 'Detective' } },
+  { part: 'kit', name: 'detective hat', need: { rank: 'Keen' } },
   { part: 'kit', name: 'full kit', need: { cases: 10 } },
-  { part: 'outfit', name: 'detective coat', need: { rank: 'Inspector' } },
+  { part: 'outfit', name: 'detective coat', need: { rank: 'Sharp' } },
 ];
 
 /** Where a player stands: cases closed, and lifetime points (which set the rank). */

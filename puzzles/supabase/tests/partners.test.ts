@@ -98,7 +98,7 @@ describe('choose_partner', () => {
     expect(await Promise.all([null, -1, 0, 2999, 3000, 8999, 9000, 19999, 20000, 10_000_000].map(slots))).toEqual([1, 1, 1, 1, 2, 2, 3, 3, 4, 4]);
   });
 
-  it('Agent 404 can be the first partner, and the 4th opens at 20,000 points', async () => {
+  it('404 can be the first partner, and the 4th opens at 20,000 points', async () => {
     const first = await makeUser('partner');
     expect((await choose(first, 'robot')).data).toEqual([{ current: 'robot', owned: ['robot'] }]);
     const u = await makeUser('partner');

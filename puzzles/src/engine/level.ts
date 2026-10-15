@@ -5,7 +5,7 @@ const GROWTH = 1.2;
 const TIDY = 10;
 
 /** Ranks, 5 levels each. The last rank has no end. */
-export const RANKS = ['Rookie', 'Detective', 'Inspector', 'Chief'] as const;
+export const RANKS = ['Starter', 'Keen', 'Sharp', 'Master'] as const;
 export const LEVELS_PER_RANK = 5;
 
 export type Rank = (typeof RANKS)[number];

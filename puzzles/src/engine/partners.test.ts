@@ -5,11 +5,11 @@ import { BOND_AT, bondTier, nextBondAt, parseBonds, DEFAULT_PARTNER, MOOD, nextA
 const root = join(__dirname, '..', '..');
 
 describe('the partners', () => {
-  it('4 are in the game, Detective X first and the default, and the robot is Agent 404', () => {
+  it('4 are in the game, Mochi first and the default, and the robot is 404', () => {
     expect(PARTNERS.map((p) => p.id)).toEqual(['cat', 'dino', 'dog', 'robot']);
-    expect(PARTNERS.map((p) => p.name)).toEqual(['Detective X', 'Detective Tobs', 'Detective Puff', 'Agent 404']);
+    expect(PARTNERS.map((p) => p.name)).toEqual(['Mochi', 'Tobs', 'Puff', '404']);
     expect(DEFAULT_PARTNER).toBe('cat');
-    expect(partnerName('dog')).toBe('Detective Puff');
+    expect(partnerName('dog')).toBe('Puff');
     // Its name stays clear of the film.
   });
 
@@ -27,8 +27,8 @@ describe('the partners', () => {
         expect(svg).not.toMatch(/<script|onload=|href=/i);
       }
     }
-    // Agent 404 shows 404 when stumped.
-    expect(readFileSync(join(root, 'public', 'pets', 'robot-stumped.svg'), 'utf8')).toContain('Agent 404');
+    // 404 shows 404 when stumped.
+    expect(readFileSync(join(root, 'public', 'pets', 'robot-stumped.svg'), 'utf8')).toContain('404');
   });
 });
 

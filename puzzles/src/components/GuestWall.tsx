@@ -18,7 +18,7 @@ export function GuestWall() {
       <Button variant="accent" to={`/welcome?from=${encodeURIComponent(pathname)}`}>
         Sign in
       </Button>
-      <TextLink to="/play">Back to cases</TextLink>
+      <TextLink to="/play">Back to packs</TextLink>
     </div>
   );
 }

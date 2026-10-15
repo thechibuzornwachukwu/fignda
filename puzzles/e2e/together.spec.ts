@@ -30,13 +30,13 @@ async function clickPair(page: Page, a: number, b: number) {
 test.describe('phone tab bar', () => {
   test.use({ viewport: { width: 375, height: 740 }, hasTouch: true, isMobile: true });
 
-  test('app pages get Cases, You, Play, Squad, Ranks; landing and puzzles do not', async ({ page }) => {
+  test('app pages get Packs, You, Play, Squad, Ranks; landing and puzzles do not', async ({ page }) => {
     await page.goto('/play');
     const tabs = page.getByRole('navigation', { name: 'Tabs' });
     await expect(tabs).toBeVisible();
-    await expect(tabs.getByRole('link')).toHaveText(['Cases', 'You', 'Play', 'Squad', 'Ranks']);
-    await expect(tabs.getByRole('link', { name: 'Play the next clue' })).toHaveAttribute('href', /^\/play\/[a-z0-9-]+\/1$/);
-    await expect(tabs.getByRole('link', { name: 'Cases' })).toHaveAttribute('aria-current', 'page');
+    await expect(tabs.getByRole('link')).toHaveText(['Packs', 'You', 'Play', 'Squad', 'Ranks']);
+    await expect(tabs.getByRole('link', { name: 'Play the next puzzle' })).toHaveAttribute('href', /^\/play\/[a-z0-9-]+\/1$/);
+    await expect(tabs.getByRole('link', { name: 'Packs' })).toHaveAttribute('aria-current', 'page');
     await expect(page.getByRole('navigation', { name: 'Main' })).toBeHidden();
     await tabs.getByRole('link', { name: 'Ranks' }).click();
     await expect(page).toHaveURL(/\/leaderboard$/);
@@ -80,7 +80,7 @@ test.describe('phone tab bar', () => {
     await page.evaluate(() => new Promise((done) => requestAnimationFrame(() => requestAnimationFrame(done))));
     await scrollTo(600);
     await expect(tabs).toHaveAttribute('data-tucked', 'true');
-    await tabs.getByRole('link', { name: 'Cases' }).focus();
+    await tabs.getByRole('link', { name: 'Packs' }).focus();
     await expect(tabs).not.toHaveAttribute('data-tucked', 'true');
   });
 

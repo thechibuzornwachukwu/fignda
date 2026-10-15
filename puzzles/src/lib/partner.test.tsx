@@ -37,7 +37,7 @@ beforeEach(() => {
 });
 
 describe('a guest', () => {
-  it('starts with Detective X, unchosen, and holds 1: another pick swaps it', async () => {
+  it('starts with Mochi, unchosen, and holds 1: another pick swaps it', async () => {
     expect(loadPartner()).toEqual({ current: 'cat', owned: ['cat'], points: 0, bonds: {} });
     expect(partnerChosen()).toBe(false);
     expect(await choosePartner('dog', false)).toBe(true);

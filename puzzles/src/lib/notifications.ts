@@ -21,9 +21,9 @@ const CASES = [1, 5, 10, 25];
 
 /** Every badge, in the order a profile shows them. Codes are stored; never rename one. */
 export const BADGES: ReadonlyArray<{ code: string; label: string; how: string }> = [
-  { code: 'first_game', label: 'First step', how: 'Finish a step signed in.' },
-  ...STREAKS.map((n) => ({ code: `streak_${n}`, label: `${n} day run`, how: `Finish a clue ${n} days in a row.` })),
-  ...CASES.map((n) => ({ code: `cases_${n}`, label: n === 1 ? 'First case closed' : `${n} cases closed`, how: n === 1 ? 'Close a case signed in.' : `Close ${n} cases.` })),
+  { code: 'first_game', label: 'First puzzle', how: 'Finish a puzzle signed in.' },
+  ...STREAKS.map((n) => ({ code: `streak_${n}`, label: `${n} day run`, how: `Finish a puzzle ${n} days in a row.` })),
+  ...CASES.map((n) => ({ code: `cases_${n}`, label: n === 1 ? 'First pack done' : `${n} packs done`, how: n === 1 ? 'Finish a pack signed in.' : `Finish ${n} packs.` })),
   ...POINTS.map((n) => ({ code: `points_${n}`, label: `${n.toLocaleString('en-US')} points`, how: `Reach ${n.toLocaleString('en-US')} points.` })),
 ];
 

@@ -14,16 +14,16 @@ describe('medals', () => {
     expect(m.map((x) => x.key)).toEqual(['run', 'cases', 'points', 'first']);
     expect(m.every((x) => x.tier === -1 && x.metal === null)).toBe(true);
     expect(m.map((x) => x.face)).toEqual(['7', '1', '1K', '1']);
-    expect(m.map((x) => x.name)).toEqual(['7 day run', 'First case', '1K points', 'First step']);
+    expect(m.map((x) => x.name)).toEqual(['7 day run', 'First pack', '1K points', 'First puzzle']);
   });
 
   it('a medal is worn at the highest tier earned, in the metal of that tier', () => {
     const m = of(['streak_7', 'streak_30', 'cases_1', 'points_1000', 'points_5000', 'points_10000', 'points_25000', 'points_50000', 'points_100000', 'first_game', 'perfect_daily', 'nope']);
     expect(m.run).toMatchObject({ tier: 1, metal: 'silver', face: '30', name: '30 day run' });
-    expect(m.cases).toMatchObject({ tier: 0, metal: 'bronze', face: '1', name: 'First case' });
+    expect(m.cases).toMatchObject({ tier: 0, metal: 'bronze', face: '1', name: 'First pack' });
     // More tiers than metals: the last metal holds.
     expect(m.points).toMatchObject({ tier: 5, metal: 'onyx', face: '100K', name: '100K points' });
-    expect(m.first).toMatchObject({ tier: 0, metal: 'bronze', name: 'First step' });
+    expect(m.first).toMatchObject({ tier: 0, metal: 'bronze', name: 'First puzzle' });
   });
 
   it('with a count it says how far to the next tier, and at the top tier there is nothing to count', () => {

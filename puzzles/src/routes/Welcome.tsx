@@ -193,7 +193,7 @@ function CharacterStep({ heading, onKeep, foot }: { heading: HeadingRef; onKeep:
           Change it
         </Button>
       </div>
-      {/* The partner who works every case beside them. One tap, free. Left alone, it is Detective X. */}
+      {/* The pet who plays beside them. One tap, free. Left alone, it is Mochi. */}
       <fieldset className={styles.partners}>
         <legend className={styles.partnerAsk}>And your pet. Pick 1, change it any time.</legend>
         {PARTNERS.map((p) => (

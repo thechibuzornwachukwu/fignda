@@ -103,13 +103,13 @@ export function HeroArt() {
 const WEEK = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 const RUN = 5;
 
-/** A case and a week of working it: a clue a day and the run grows. */
-function CasePreview() {
+/** A pack and a week of playing it: a puzzle a day and the run grows. */
+function PackPreview() {
   const first = games[0];
   return (
     <div className={styles.preview} aria-hidden="true">
-      <span className={styles.kicker}>A case</span>
-      <span className={styles.previewTitle}>{first?.title ?? 'A case to work'}</span>
+      <span className={styles.kicker}>A pack</span>
+      <span className={styles.previewTitle}>{first?.title ?? 'A pack to play'}</span>
       <div className={styles.week}>
         {WEEK.map((d, i) => (
           <span key={i} className={styles.day}>
@@ -187,10 +187,10 @@ export function Features() {
   return (
     <ul className={styles.features}>
       <li className={styles.wide}>
-        <CasePreview />
-        <h3 className={styles.h3}>A case to work</h3>
-        <p className={styles.body}>A brief, a board and steps that each end on a lead. Work a step a day and your run grows.</p>
-        <TextLink to="/play">See the cases</TextLink>
+        <PackPreview />
+        <h3 className={styles.h3}>A pack to play</h3>
+        <p className={styles.body}>Short puzzles, one after another. Play one a day and your run grows.</p>
+        <TextLink to="/play">See the packs</TextLink>
       </li>
       <li className={styles.narrow}>
         <TogetherPreview />

@@ -49,7 +49,7 @@ export function Games() {
   return (
     <div className={styles.screen}>
       {/* One thing to do, then the path. Who is on the case sits small in the corner, and leads to the stage. */}
-      <PageHeader title="Cases" action={<Crew />} />
+      <PageHeader title="Packs" action={<Crew />} />
 
       <GameInvites />
 
@@ -75,7 +75,7 @@ function Crew() {
   const { profile } = useAuth();
   const starter = useMemo(() => guestAvatar(), []);
   return (
-    <Link to="/me" className={styles.crew} data-crew aria-label="Change your detective, pet and gear">
+    <Link to="/me" className={styles.crew} data-crew aria-label="Change your look and your pet">
       {profile ? <Avatar handle={profile.handle} size={36} /> : <Avatar parts={starter} size={36} />}
       <Partner moment="empty" size={36} />
     </Link>

@@ -105,13 +105,13 @@ describe('Header', () => {
     at('/play');
     const nav = screen.getByRole('navigation', { name: 'Main' });
     // The dock's places, in the dock's order.
-    expect(nav).toHaveTextContent('CasesSquadRanks');
+    expect(nav).toHaveTextContent('PacksSquadRanks');
     expect(nav).not.toHaveTextContent('How it works');
-    expect(screen.getByRole('link', { name: 'Cases' }).className).toContain('active');
+    expect(screen.getByRole('link', { name: 'Packs' }).className).toContain('active');
     expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/signin?next=%2Fplay');
     expect(screen.getByRole('button', { name: /Switch to/ })).toBeInTheDocument();
     // The same Play as the dock: it knows what is next. The case that is open.
-    expect(screen.getByRole('link', { name: 'Play the next clue' }).getAttribute('href')).toMatch(/^\/play\/[a-z0-9-]+(\/\d+)?$/);
+    expect(screen.getByRole('link', { name: 'Play the next puzzle' }).getAttribute('href')).toMatch(/^\/play\/[a-z0-9-]+(\/\d+)?$/);
   });
 
   it('on the landing page: its own sections and one way in', () => {

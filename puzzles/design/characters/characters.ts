@@ -360,11 +360,11 @@ function robot(d: Dress): string {
 const HAND_LENS = { glass: 'magnifying glass', monocle: 'monocle' } as const;
 
 export const CAST: Record<Who, Member> = {
-  cat: { name: 'Cat', called: 'Detective X', tools: HAND_LENS, draw: cat, eyes: [50, 50, 140], fur: CAT, eye: [155, 116, 29] },
-  dino: { name: 'Dino', called: 'Detective Tobs', tools: HAND_LENS, draw: dino, eyes: [46, 38, 148], fur: REX, eye: [152, 96, 29] },
-  dog: { name: 'Dog', called: 'Detective Puff', tools: HAND_LENS, draw: dog, eyes: [50, 44, 140], fur: DOG, eye: [146, 118, 21] },
+  cat: { name: 'Cat', called: 'Mochi', tools: HAND_LENS, draw: cat, eyes: [50, 50, 140], fur: CAT, eye: [155, 116, 29] },
+  dino: { name: 'Dino', called: 'Tobs', tools: HAND_LENS, draw: dino, eyes: [46, 38, 148], fur: REX, eye: [152, 96, 29] },
+  dog: { name: 'Dog', called: 'Puff', tools: HAND_LENS, draw: dog, eyes: [50, 44, 140], fur: DOG, eye: [146, 118, 21] },
   // A robot does not hold a glass to its screen. It scans, and it zooms.
-  robot: { name: 'Robot', called: 'Agent 404', tools: { glass: 'scanner', monocle: 'zoom' }, draw: robot, eyes: [52, 42, 136], fur: STEEL, eye: [148, 108, 24] },
+  robot: { name: 'Robot', called: '404', tools: { glass: 'scanner', monocle: 'zoom' }, draw: robot, eyes: [52, 42, 136], fur: STEEL, eye: [148, 108, 24] },
 };
 
 let uid = 0;

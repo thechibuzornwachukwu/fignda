@@ -33,8 +33,8 @@ describe('characters', () => {
 
   it('a wave is happy unless told otherwise, and an unknown mood is the default', () => {
     const face = (o: Parameters<typeof character>[0]) => character(o).replace(/ch\d+/g, '');
-    expect(character({ who: 'cat', wave: true })).toContain('aria-label="Detective X, happy, waving"');
-    expect(character({ who: 'cat', wave: true, mood: 'stumped' })).toContain('aria-label="Detective X, stumped, waving"');
+    expect(character({ who: 'cat', wave: true })).toContain('aria-label="Mochi, happy, waving"');
+    expect(character({ who: 'cat', wave: true, mood: 'stumped' })).toContain('aria-label="Mochi, stumped, waving"');
     expect(face({ who: 'dog', mood: 'furious' as Mood })).toBe(face({ who: 'dog' }));
   });
 
@@ -135,10 +135,10 @@ describe('brand elements', () => {
 
   it('a rank outside the 4 is the nearest of them', () => {
     for (let i = 0; i < RANKS.length; i++) expect(rankBadge(i)).toContain(`aria-label="${RANKS[i]}"`);
-    expect(rankBadge(-3)).toContain('aria-label="Rookie"');
-    expect(rankBadge(99)).toContain('aria-label="Chief"');
-    expect(rankBadge(NaN)).toContain('aria-label="Rookie"');
-    expect(rankBadge(1.6)).toContain('aria-label="Inspector"');
+    expect(rankBadge(-3)).toContain('aria-label="Starter"');
+    expect(rankBadge(99)).toContain('aria-label="Master"');
+    expect(rankBadge(NaN)).toContain('aria-label="Starter"');
+    expect(rankBadge(1.6)).toContain('aria-label="Sharp"');
     for (const r of [-3, 0, 3, 99, NaN]) sound(rankBadge(r));
   });
 

@@ -389,19 +389,10 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
   // Where a finished clue leads: the next clue of the pack, or after its last, the first of the next pack.
   const onward = useMemo(() => {
     if (!part || !finished) return undefined;
-    if (!part.next) return { to: nextClueTo() ?? '/play', label: 'Next clue' };
-    return { to: `/play/${def.id}/${part.next}`, label: 'Next clue' };
+    if (!part.next) return { to: nextClueTo() ?? '/play', label: 'Next puzzle' };
+    return { to: `/play/${def.id}/${part.next}`, label: 'Next puzzle' };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [part, finished, def.id, s.startAt]);
-  // On a case, a method is a real thing somebody left behind. One reason a clue, the same on every visit.
-  const reason = useMemo(() => {
-    if (!part) return '';
-    const pool = copy.POOLS[def.type === 'buried-sums' ? 'reasonSums' : def.type === 'mirror' ? 'reasonMirror' : 'reasonWords'];
-    return `${pool[part.n % pool.length]} `;
-  }, [part, def.type]);
-  // The daily is a quick case: a message to the Open Eye, intercepted that day. One brief a day, the same for everybody.
-  const briefLine = daily && dailyN != null ? copy.POOLS.interceptBrief[dailyN % copy.POOLS.interceptBrief.length]! : '';
-  const factLine = daily && dailyN != null ? copy.POOLS.interceptFact[dailyN % copy.POOLS.interceptFact.length]! : '';
   // Variable days. Before today's daily: what it holds, never how much. After it: today against a usual day.
   const holdsLine = useMemo(
     () => (isToday && !finished ? todayHoldsLine(dayProfile(puzzle), copy.pick) : ''),
@@ -488,7 +479,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
         <div className={styles.meta}>
           <Link to="/play" className={styles.back}>
             <Icon icon={ArrowLeft} size={16} />
-            Cases
+            Packs
           </Link>
           <span className={styles.metaEnd}>
             {part ? (
@@ -516,7 +507,6 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
           <h1 className={styles.title}>{daily ? `Find the hidden ${def.noun}` : `Find ${total} ${def.noun}`}</h1>
           <BigClock startAt={s.startAt} endAt={s.endAt} />
         </div>
-        {briefLine && !finished && <p className={styles.holds} data-intercept>{briefLine}</p>}
         {holdsLine && <p className={styles.holds}>{holdsLine}</p>}
       </div>
 
@@ -564,7 +554,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
           starsUp={starLine}
           skills={lines}
           records={ended?.records}
-          day={[factLine, dayLine].filter(Boolean).join(' ')}
+          day={dayLine}
           done={doneLine}
           sponsor={sponsor && { ...sponsor, onVisit: () => countEvent(def.id, 'click') }}
         >
@@ -577,7 +567,6 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
       <div className={styles.columns}>
         <div className={styles.main}>
           <p id={instructionId} className={styles.instruction}>
-            {reason}
             {def.type === 'buried-sums'
               ? coarse
                 ? 'Swipe across digits in a row. Or tap the first digit of a run, then the last.'

@@ -1,12 +1,12 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { LEVELS_PER_RANK, RANKS, rankOf, gapAt, levelFor } from './level';
 
 describe('levelFor', () => {
   it('level 1 at 0, level 2 at 500', () => {
-    expect(levelFor(0)).toEqual({ level: 1, into: 0, need: 500, rank: 'Rookie' });
+    expect(levelFor(0)).toEqual({ level: 1, into: 0, need: 500, rank: 'Starter' });
     expect(levelFor(499)).toMatchObject({ level: 1, into: 499 });
-    expect(levelFor(500)).toEqual({ level: 2, into: 0, need: 600, rank: 'Rookie' });
+    expect(levelFor(500)).toEqual({ level: 2, into: 0, need: 600, rank: 'Starter' });
   });
 
   it('each gap is about 20% longer, in tidy tens', () => {
@@ -37,7 +37,7 @@ describe('levelFor', () => {
 
   it('ranks of 5 levels, the last one open ended', () => {
     expect([1, 5, 6, 10, 11, 16, 21, 25, 26, 99].map(rankOf)).toEqual([
-      'Rookie', 'Rookie', 'Detective', 'Detective', 'Inspector', 'Chief', 'Chief', 'Chief', 'Chief', 'Chief',
+      'Starter', 'Starter', 'Keen', 'Keen', 'Sharp', 'Master', 'Master', 'Master', 'Master', 'Master',
     ]);
     expect(RANKS).toHaveLength(4);
   });
@@ -50,8 +50,12 @@ describe('levelFor', () => {
 
 describe('ranks on the server', () => {
   it('rank_of in the database starts each rank at the same points the engine does', () => {
-    const sql = readFileSync(join(__dirname, '..', '..', 'supabase', 'migrations', '20261010000500_cases.sql'), 'utf8');
-    const body = sql.slice(sql.indexOf('create function public.rank_of'), sql.indexOf('create function public.points_of'));
+    // The last migration that defines rank_of is the one the database runs.
+    const dir = join(__dirname, '..', '..', 'supabase', 'migrations');
+    const last = readdirSync(dir).filter((f) => readFileSync(join(dir, f), 'utf8').includes('function public.rank_of(')).sort().at(-1)!;
+    const sql = readFileSync(join(dir, last), 'utf8');
+    const from = sql.indexOf('function public.rank_of(');
+    const body = sql.slice(from, sql.indexOf('$$;', from));
     const inSql = [...body.matchAll(/>= (\d+) then '([A-Za-z ]+)'/g)].map((m) => [m[2], Number(m[1])] as const).reverse();
     // Points at which each rank after the first begins: every gap of the levels below it.
     const starts = RANKS.slice(1).map((rank, i) => {

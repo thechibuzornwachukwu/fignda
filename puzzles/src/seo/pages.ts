@@ -15,7 +15,7 @@ const games = [...data.games].sort((a, b) => data.filters.indexOf(a.category) - 
 export const SITE = 'Gazecraft';
 export const TAGLINE = 'Find it. Figure it out.';
 export const PITCH =
-  'A free puzzle game, played a few minutes at a time. Words and numbers are hiding in plain sight. Find them a clue at a time, close the case and unmask who hid them.';
+  'A free puzzle game, played a few minutes at a time. Words and numbers are hiding in plain sight. Find them a puzzle at a time.';
 
 export type ProfileSummary = {
   handle: string;
@@ -114,7 +114,7 @@ function home(origin: string): Page {
     ],
     body:
       `<h1>${SITE}. ${TAGLINE}</h1><p>${esc(PITCH)}</p>` +
-      `<h2>How to play</h2><ol><li>Open a case and read its brief.</li><li>Read the paragraph.</li><li>Drag across the letters of each hidden word. They can run across spaces and punctuation.</li></ol>` +
+      `<h2>How to play</h2><ol><li>Open a pack.</li><li>Read the paragraph.</li><li>Drag across the letters of each hidden word. They can run across spaces and punctuation.</li></ol>` +
       `<p>Example: in "Pat omitted nothing", the letters "Pat omitted" hide ATOM.</p>` +
       `<h2>Puzzles</h2><ul>${list}</ul>` +
       faqHtml(),
@@ -218,9 +218,9 @@ export function pageFor(path: string, origin: string): Page {
 
   if (clean === '/play') {
     const list = games.map((g) => `<li><a href="/play/${g.id}">${esc(question(g))}</a></li>`).join('');
-    return simple('/play', 'Cases · Gazecraft', `${games.length} cases, a clue at a time. Every answer is in plain sight. You will still miss some.`, `<ul>${list}</ul>`);
+    return simple('/play', 'Packs · Gazecraft', `${games.length} packs, a puzzle at a time. Every answer is in plain sight. You will still miss some.`, `<ul>${list}</ul>`);
   }
-  if (clean === '/leaderboard') return simple('/leaderboard', 'Ranks · Gazecraft', 'The best scores on the case you are on, on Gazecraft.', '');
+  if (clean === '/leaderboard') return simple('/leaderboard', 'Ranks · Gazecraft', 'The best scores on the pack you are on, on Gazecraft.', '');
   if (clean === '/players') return simple('/players', 'Players · Gazecraft', 'Find players to follow on Gazecraft: longest runs, most points and new players.', '');
   if (clean === '/privacy') return simple('/privacy', 'Privacy · Gazecraft', 'What Gazecraft keeps, why, and how to delete it.', '');
 
@@ -251,8 +251,8 @@ export function llmsTxt(origin: string): string {
     '',
     '## Key pages',
     `- [Home](${origin}/): what Gazecraft is and a playable example`,
-    `- [Cases](${origin}/play): every case, a clue at a time`,
-    `- [Ranks](${origin}/leaderboard): the best scores on the case you are on`,
+    `- [Packs](${origin}/play): every pack, a puzzle at a time`,
+    `- [Ranks](${origin}/leaderboard): the best scores on the pack you are on`,
     `- [Players](${origin}/players): find players to follow`,
     `- [Privacy](${origin}/privacy): what is stored and how to delete it`,
     '',

@@ -47,7 +47,7 @@ const show = () =>
       <Me />
     </MemoryRouter>,
   );
-const stage = () => screen.getByRole('region', { name: 'Your detective and your pet' });
+const stage = () => screen.getByRole('region', { name: 'You and your pet' });
 const line = () => stage().querySelector('[data-stage-line]')?.textContent ?? '';
 const ADA: Profile = { id: 'u1', name: 'Ada', handle: 'ada', avatar: null };
 
@@ -70,9 +70,9 @@ describe('You, as a guest', () => {
     expect(within(stage()).queryByRole('progressbar')).toBeNull();
     expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/welcome?from=%2Fme');
     expect(screen.queryByRole('link', { name: 'Settings' })).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: /^Agent 404\./ }));
-    expect(within(stage()).getByText('Agent 404')).toBeInTheDocument();
-    fireEvent.click(within(stage()).getByRole('button', { name: 'Select Agent 404' }));
+    fireEvent.click(screen.getByRole('button', { name: /^404\./ }));
+    expect(within(stage()).getByText('404')).toBeInTheDocument();
+    fireEvent.click(within(stage()).getByRole('button', { name: 'Select 404' }));
     return waitFor(() => expect(JSON.parse(localStorage.getItem(PARTNER_KEY)!)).toMatchObject({ current: 'robot', owned: ['robot'] }));
   });
 
@@ -82,8 +82,8 @@ describe('You, as a guest', () => {
     expect(within(gear).getAllByRole('button')).toHaveLength(6);
     expect(within(gear).getByRole('button', { name: 'No gear. On you.' })).toHaveAttribute('aria-pressed', 'true');
     expect(gear.querySelectorAll('[data-locked]')).toHaveLength(5);
-    fireEvent.click(within(gear).getByRole('button', { name: 'Detective coat. Locked. Reach the rank of Inspector.' }));
-    expect(line()).toBe('Locked. Reach the rank of Inspector.');
+    fireEvent.click(within(gear).getByRole('button', { name: 'Detective coat. Locked. Reach the rank of Sharp.' }));
+    expect(line()).toBe('Locked. Reach the rank of Sharp.');
     expect(within(stage()).queryByRole('button', { name: /^Wear / })).toBeNull();
   });
 
@@ -117,11 +117,11 @@ describe('You, signed in', () => {
     world.mine = { current: 'cat', owned: ['cat'], points: 1240, bonds: { cat: 4 } };
     show();
     expect(screen.getByRole('link', { name: 'Settings' })).toHaveAttribute('href', '/settings');
-    await screen.findByRole('button', { name: 'Detective X. With you, 4 cases.' });
+    await screen.findByRole('button', { name: 'Mochi. With you, 4 packs.' });
     expect(line()).toBe('');
     expect(within(stage()).getByRole('progressbar')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Detective X. With you, 4 cases.' })).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Detective Tobs. Locked. 3,000 points.' }));
+    expect(screen.getByRole('button', { name: 'Mochi. With you, 4 packs.' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Tobs. Locked. 3,000 points.' }));
     expect(line()).toBe('Locked. 1,760 points to go.');
     expect(within(stage()).queryByRole('button', { name: /^Select / })).toBeNull();
   });
@@ -130,10 +130,10 @@ describe('You, signed in', () => {
     world.profile = ADA;
     world.mine = { current: 'dog', owned: ['cat', 'dino', 'dog', 'robot'], points: 25000, bonds: { dog: 12, cat: 1 } };
     show();
-    await screen.findByRole('button', { name: 'Detective X. Yours, 1 case.' });
+    await screen.findByRole('button', { name: 'Mochi. Yours, 1 pack.' });
     expect(line()).toBe('');
     expect(screen.getByRole('region', { name: 'Pets' }).querySelectorAll('[data-locked]')).toHaveLength(0);
-    expect(screen.getByRole('button', { name: 'Detective X. Yours, 1 case.' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Mochi. Yours, 1 pack.' })).toBeInTheDocument();
   });
 
   it('a save that fails says so, keeps what was being tried, and changes nothing', async () => {
@@ -175,7 +175,7 @@ describe('You holds everything about you', () => {
     show();
     const badges = await screen.findByRole('region', { name: 'Badges' });
     await waitFor(() => expect(within(badges).getAllByRole('listitem')).toHaveLength(4));
-    expect(within(badges).getByRole('button', { name: /^First step\. Earned\./ })).toBeInTheDocument();
+    expect(within(badges).getByRole('button', { name: /^First puzzle\. Earned\./ })).toBeInTheDocument();
     expect(within(badges).getAllByRole('button', { name: /Not earned yet\./ })).toHaveLength(3);
     // A medal says what it is. Nothing under it explains it.
     expect(badges.textContent).not.toMatch(/Not earned|Finish a|Reach |in a row/);
@@ -212,10 +212,10 @@ describe('the dock’s Play button', () => {
   const play = () => screen.getByRole('navigation', { name: 'Tabs' }).querySelector('[data-play]')!;
   it('order is Cases, You, Play, Squad, Ranks, and Play opens the next clue', () => {
     dock();
-    expect(within(screen.getByRole('navigation', { name: 'Tabs' })).getAllByRole('link').map((a) => a.textContent)).toEqual(['Cases', 'You', 'Play', 'Squad', 'Ranks']);
+    expect(within(screen.getByRole('navigation', { name: 'Tabs' })).getAllByRole('link').map((a) => a.textContent)).toEqual(['Packs', 'You', 'Play', 'Squad', 'Ranks']);
     expect(play().getAttribute('data-play')).toBe('clue');
     expect(play().getAttribute('href')).toMatch(/^\/play\/[a-z0-9-]+\/1$/);
-    expect(play()).toHaveAccessibleName('Play the next clue');
+    expect(play()).toHaveAccessibleName('Play the next puzzle');
   });
 
   it('it never leads to a daily, played or not, and broken storage is never a dead button', () => {

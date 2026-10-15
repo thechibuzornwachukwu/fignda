@@ -40,7 +40,7 @@ describe('earned pieces', () => {
   });
 
   it('says how to earn each, in digits and short sentences', () => {
-    expect(EARNED.map((e) => howTo(e.need))).toEqual(['Close 1 case.', 'Close 5 cases.', 'Reach the rank of Detective.', 'Close 10 cases.', 'Reach the rank of Inspector.']);
+    expect(EARNED.map((e) => howTo(e.need))).toEqual(['Close 1 case.', 'Close 5 cases.', 'Reach the rank of Keen.', 'Close 10 cases.', 'Reach the rank of Sharp.']);
   });
 });
 

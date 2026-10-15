@@ -100,7 +100,7 @@ test('make a puzzle: every word is checked as you type', async ({ page }) => {
   await newPlayer(page, 'Maker');
   // The link on the games screen appears after 5 plays. The address always works.
   await page.goto('/play');
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Cases');
+  await expect(page.getByRole('heading', { level: 1 })).toHaveText('Packs');
   await expect(page.getByRole('link', { name: 'Make a puzzle' })).toHaveCount(0);
   await page.goto('/make');
   await expect(page).toHaveURL(/\/make$/);

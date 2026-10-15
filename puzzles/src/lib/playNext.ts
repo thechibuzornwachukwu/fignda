@@ -8,5 +8,5 @@ export type PlayNext = { to: string; name: string; kind: 'clue' | 'done' };
 /** The next clue on the path. Nothing left at all: the way back to the cases. */
 export function playNext(): PlayNext {
   const clue = nextClueTo();
-  return clue ? { to: clue, name: 'Play the next clue', kind: 'clue' } : { to: '/play', name: 'All played. See your cases', kind: 'done' };
+  return clue ? { to: clue, name: 'Play the next puzzle', kind: 'clue' } : { to: '/play', name: 'All played. See your packs', kind: 'done' };
 }

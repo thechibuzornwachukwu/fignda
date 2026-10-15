@@ -13,9 +13,9 @@ const short = (n: number): string => (n >= 1000 ? `${n / 1000}K` : String(n));
 
 export const MEDAL_KINDS: readonly Kind[] = [
   { key: 'run', tiers: [7, 30, 50, 100, 365], code: (n) => `streak_${n}`, name: (n) => `${n} day run` },
-  { key: 'cases', tiers: [1, 5, 10, 25], code: (n) => `cases_${n}`, name: (n) => (n === 1 ? 'First case' : `${n} cases`) },
+  { key: 'cases', tiers: [1, 5, 10, 25], code: (n) => `cases_${n}`, name: (n) => (n === 1 ? 'First pack' : `${n} packs`) },
   { key: 'points', tiers: [1000, 5000, 10000, 25000, 50000, 100000], code: (n) => `points_${n}`, name: (n) => `${short(n)} points` },
-  { key: 'first', tiers: [1], code: () => 'first_game', name: () => 'First step' },
+  { key: 'first', tiers: [1], code: () => 'first_game', name: () => 'First puzzle' },
 ];
 
 export type Medal = {

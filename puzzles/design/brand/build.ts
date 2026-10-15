@@ -29,7 +29,7 @@ const keep = (name: string, svg: string): string => {
 type Bio = { name: string; meaning: string; role: string; nature: string; story: string; wants: string; quirk: string; weak: string; line: string; never: string; use: string };
 const VOICE: Record<Who, Bio> = {
   cat: {
-    name: 'Detective X',
+    name: 'Mochi',
     meaning: 'Nobody knows what the X stands for.',
     role: 'The lead, and the logo',
     nature: 'Dry and sure of itself. Says little. Already knows.',
@@ -42,7 +42,7 @@ const VOICE: Record<Who, Bio> = {
     use: 'The default pet. The icon, emails, anything that speaks for Gazecraft.',
   },
   dino: {
-    name: 'Detective Tobs',
+    name: 'Tobs',
     meaning: 'From tobi, Yoruba for big. Tobs is not.',
     role: "A player's choice",
     nature: 'All heart, short arms. Tries hard, means well.',
@@ -55,7 +55,7 @@ const VOICE: Record<Who, Bio> = {
     use: 'Younger players. Cases set in the past.',
   },
   dog: {
-    name: 'Detective Puff',
+    name: 'Puff',
     meaning: 'After puff-puff, the round fried dough from home.',
     role: "A player's choice",
     nature: 'Glad you came. Pleased with every find.',
@@ -68,11 +68,11 @@ const VOICE: Record<Who, Bio> = {
     use: 'First days, streaks, anything that welcomes.',
   },
   robot: {
-    name: 'Agent 404',
+    name: '404',
     meaning: 'Nobody gave it a badge. It printed one.',
     role: "A player's choice",
     nature: 'Exact. Counts everything, misses nothing.',
-    story: 'Agent 404 was put together in Computer Village from a trader\'s calculator and a radio that only got one station. It can count the letters in a paragraph faster than you can blink. It cannot see the word hiding in them until somebody shows it, and it thinks that is the cleverest thing people do.',
+    story: '404 was put together in Computer Village from a trader\'s calculator and a radio that only got one station. It can count the letters in a paragraph faster than you can blink. It cannot see the word hiding in them until somebody shows it, and it thinks that is the cleverest thing people do.',
     wants: 'To understand how you noticed. It writes down your answer every time.',
     quirk: 'Says the number first. Scans where the others look. Shows 404 when it is lost, and three dots while it works.',
     weak: 'Cannot round up. 7 of 8 is 7 of 8.',
@@ -103,7 +103,7 @@ const COLOURS: Array<[string, string, string]> = [
   ['Gold', '#e0a526', 'Buckles, monocles, ranks'],
 ];
 
-const DO = ['Let Detective X speak for Gazecraft.', 'Give each character tools that suit it. A robot scans. It does not hold a glass to a screen.', 'Give each moment its one mood.', 'Keep the watermark between 6% and 14%.', 'Keep lime for what is found, and for the eyes.', 'Use a light tile behind a character on a dark screen.'];
+const DO = ['Let Mochi speak for Gazecraft.', 'Give each character tools that suit it. A robot scans. It does not hold a glass to a screen.', 'Give each moment its one mood.', 'Keep the watermark between 6% and 14%.', 'Keep lime for what is found, and for the eyes.', 'Use a light tile behind a character on a dark screen.'];
 const DONT = ['Redraw, recolour or stretch the cat.', 'Put the watermark under puzzle text a player must read closely.', 'Use a character as decoration with nothing to say.', 'Show two characters reacting at once.', 'Let a character promise a result: no memory, focus or brain claims.'];
 
 // ------------------------------------------------------------------ Pieces
@@ -261,7 +261,7 @@ ${wordmark('currentColor', 44)}
 <section>
   <p class="num">4</p>
   <h2>The cast</h2>
-  <p class="sub">Four pets and the player. A pet is the player's own and comes along on every case: a new player picks 1, free, and can switch to another once it is unlocked with points. Detective X leads, and is the logo. Each has tools of its own: the animals hold a magnifying glass and wear a monocle, and Agent 404 scans and zooms.</p>
+  <p class="sub">Four pets and the player. A pet is the player's own and comes along on every case: a new player picks 1, free, and can switch to another once it is unlocked with points. Mochi leads, and is the logo. Each has tools of its own: the animals hold a magnifying glass and wear a monocle, and 404 scans and zooms.</p>
   ${WHO.map(castCard).join('\n')}
   <div class="cast">
     <div class="on cream">${row([you({ back: 3, skin: 4, hair: 33, eyes: 1 }), you({ back: 2, skin: 5, hair: 26, face: 1 }), you({ back: 5, skin: 1, hair: 8, eyes: 1 })].map((s) => fig(s)), 'tight')}</div>

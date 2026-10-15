@@ -145,7 +145,7 @@ export function Me() {
     <div className={styles.page}>
       <PageHeader title="You" action={profile ? <IconLink to="/settings" icon={Settings} label="Settings" /> : auth.enabled ? <TextLink to="/welcome?from=%2Fme">Sign in</TextLink> : undefined} />
 
-      <section className={styles.stage} aria-label="Your detective and your pet" data-trying={trying?.kind}>
+      <section className={styles.stage} aria-label="You and your pet" data-trying={trying?.kind}>
         <div className={styles.cast}>
           <figure className={styles.figure}>
             <span className={styles.portrait}>
@@ -191,7 +191,7 @@ export function Me() {
             const locked = how === 'locked' && !!profile;
             const at = nextAt(partner);
             const closed = partner.bonds[p.id] ?? 0;
-            const bond = closed === 0 ? '' : closed === 1 ? ', 1 case' : `, ${closed} cases`;
+            const bond = closed === 0 ? '' : closed === 1 ? ', 1 pack' : `, ${closed} packs`;
             const state = on ? `With you${bond}` : how === 'own' ? `Yours${bond}` : locked && at != null ? `${num(at)} points` : 'Tap to try';
             return (
               <li key={p.id}>

@@ -19,7 +19,7 @@ test('the rhythm: after 2 word clues comes a sums clue, played with the same tap
   await page.goto('/play/bnote/2');
   await expect(page.getByRole('list', { name: /clue 2 of \d+/ })).toBeVisible();
   await page.getByRole('button', { name: "I'm done" }).click();
-  await page.locator('[data-clue-done]').getByRole('link', { name: 'Next clue' }).click();
+  await page.locator('[data-clue-done]').getByRole('link', { name: 'Next puzzle' }).click();
   await expect(page).toHaveURL(/\/play\/bnote\/21$/);
   await expect(page.getByRole('list', { name: /clue 3 of \d+/ })).toBeVisible();
 
@@ -52,7 +52,7 @@ test('the rhythm: after 2 word clues comes a sums clue, played with the same tap
   }
   // All 3 found ends the clue. It gives stars and leads on.
   await expect(page.locator('[aria-labelledby="results-title"]')).toBeVisible();
-  await expect(page.locator('[data-clue-done]').getByRole('link', { name: 'Next clue' })).toBeVisible();
+  await expect(page.locator('[data-clue-done]').getByRole('link', { name: 'Next puzzle' })).toBeVisible();
   await expect(page.locator('[data-case-closed]')).toHaveCount(0);
 });
 
@@ -76,7 +76,7 @@ test('a Mirror clue: words that read right to left, found from either end', asyn
   await page.getByRole('button', { name: "I'm done" }).click();
   await expect(page.locator('[aria-labelledby="results-title"]')).toBeVisible();
   // The Mirror clue is the last of its drill: it leads on to the next pack, never to an unmasking.
-  const on = page.locator('[data-clue-done]').getByRole('link', { name: 'Next clue' });
+  const on = page.locator('[data-clue-done]').getByRole('link', { name: 'Next puzzle' });
   await expect(on).toBeVisible();
   await expect(on).not.toHaveAttribute('href', /\/play\/bible\//);
 });
@@ -140,7 +140,7 @@ test.describe('edges', () => {
     await page.goto('/play/bnote/21');
     const runs = await runsOn(page);
     await page.getByRole('button', { name: 'Ask for a tip-off' }).click();
-    // A new player's pet is Detective X: the earliest run.
+    // A new player's pet is Mochi: the earliest run.
     await expect(page.locator(`[data-li="${runs[0]![0]}"]`)).toHaveAttribute('data-hint', 'true');
     await expect(page.getByText('1 tip-off')).toBeVisible();
     // Asked again with the hand still there: no second charge.
@@ -234,7 +234,7 @@ test('a clue done opens a popup once: stars, the count, and the way on', async (
   await expect(pop.locator('[data-stars]')).toHaveAttribute('data-stars', '1');
   // Less than 3 stars: no paper.
   await expect(pop.locator('[data-burst]')).toHaveCount(0);
-  await pop.getByRole('link', { name: 'Next clue' }).click();
+  await pop.getByRole('link', { name: 'Next puzzle' }).click();
   await expect(page).toHaveURL(/\/play\/bnote\/2$/);
   // The result opened again has no popup.
   await page.goto('/play/bnote/1');
@@ -287,7 +287,7 @@ test.describe('the top of a clue', () => {
       await page.locator('[data-trail]').waitFor();
       expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(0);
       const trail = (await page.locator('[data-trail]').boundingBox())!;
-      const back = (await page.getByRole('link', { name: 'Cases' }).boundingBox())!;
+      const back = (await page.getByRole('link', { name: 'Packs' }).boundingBox())!;
       expect(trail.x).toBeGreaterThanOrEqual(back.x + back.width);
       expect(trail.x + trail.width).toBeLessThanOrEqual(width);
       // One row.

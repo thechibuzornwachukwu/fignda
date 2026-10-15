@@ -49,7 +49,7 @@ describe('GameResults', () => {
     });
     expect(lines).toEqual(['The ones you missed are shaded below.', 'New best here: 3 of 3 stars.']);
     expect(screen.getByRole('button', { name: 'Share' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Cases' })).toHaveAttribute('href', '/play');
+    expect(screen.getByRole('link', { name: 'Packs' })).toHaveAttribute('href', '/play');
     expect(screen.queryByText('Score')).toBeNull();
     expect(screen.queryByRole('button', { name: 'Play again' })).toBeNull();
     expect(screen.queryByRole('button', { name: 'Copy result' })).toBeNull();
@@ -149,8 +149,8 @@ describe('GameResults', () => {
 
 describe('GameResults on a sitting', () => {
   it('leads with the way on, which takes the one accent from Share', () => {
-    show({ next: { to: '/play/bible/3', label: 'Next clue' } });
-    const next = screen.getByRole('link', { name: 'Next clue' });
+    show({ next: { to: '/play/bible/3', label: 'Next puzzle' } });
+    const next = screen.getByRole('link', { name: 'Next puzzle' });
     expect(next).toHaveAttribute('href', '/play/bible/3');
     const actions = next.parentElement!;
     expect(actions.firstElementChild).toBe(next);
@@ -159,14 +159,14 @@ describe('GameResults on a sitting', () => {
     expect(screen.getByRole('button', { name: 'Share' })).toBeInTheDocument();
     expect(actions.children).toHaveLength(2);
     // The way back to Cases steps behind More.
-    expect(screen.queryByRole('link', { name: 'Cases' })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Packs' })).toBeNull();
     more();
-    expect(screen.getByRole('link', { name: 'Cases' })).toHaveAttribute('href', '/play');
+    expect(screen.getByRole('link', { name: 'Packs' })).toHaveAttribute('href', '/play');
   });
 
   it('with no next sitting, Share keeps the accent', () => {
     show();
-    expect(screen.queryByRole('link', { name: 'Next clue' })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Next puzzle' })).toBeNull();
     expect(screen.getByRole('button', { name: 'Share' }).className).toMatch(/accent/i);
   });
 });

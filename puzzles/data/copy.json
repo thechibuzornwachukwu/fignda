@@ -178,13 +178,13 @@
     "{name} is in. Find them together."
   ],
   "remind": [
-    "Your case is open. Pick it up where you left it.",
-    "A step is waiting on the board.",
-    "The board has a gap. Come and fill it."
+    "Your next puzzle is waiting.",
+    "A puzzle is waiting on the path.",
+    "Come back and find a few more."
   ],
   "remindStreak": [
-    "{n} days so far. Your case is open.",
-    "You are on {n} days. A step is waiting.",
+    "{n} days so far. Your next puzzle is waiting.",
+    "You are on {n} days. A puzzle is waiting.",
     "{n} days so far. Today is next."
   ],
   "remindFriend": [
@@ -192,8 +192,8 @@
     "{name} found theirs. Go find yours."
   ],
   "streakKeep": [
-    "{n} days so far. Your case is open.",
-    "You are on {n} days. A step is waiting."
+    "{n} days so far. Your next puzzle is waiting.",
+    "You are on {n} days. A puzzle is waiting."
   ],
   "streakDay": [
     "{n} days in a row.",
@@ -220,7 +220,7 @@
   "doneToday": [
     "That is today done. See you tomorrow.",
     "Done for today. The next one lands at midnight.",
-    "Today's intercept is filed. Go and enjoy your day."
+    "That is today done. Go and enjoy your day."
   ],
   "leftCount": [
     "{n} left"
@@ -235,53 +235,28 @@
     "{n} of {t} finished"
   ],
   "journeyCount": [
-    "{n} of {t} clues"
+    "{n} of {t} puzzles"
   ],
   "journeyLocked": [
     "Finish {title} to open this."
   ],
   "journeyDone": [
-    "Every case on the path is closed. Play any one again for more stars.",
-    "The whole path, walked. Any case can be played again."
+    "Every pack on the path is done. Play any one again for more stars.",
+    "The whole path, walked. Any pack can be played again."
   ],
   "journeyEmpty": [
-    "No cases on the path yet. Today's intercept is open."
-  ],
-  "reasonWords": [
-    "A coded notice. The words hide in plain sight.",
-    "A typewriter ribbon. It kept every key struck and no spaces."
-  ],
-  "reasonMirror": [
-    "A blotter. It kept the note back to front."
-  ],
-  "reasonSums": [
-    "A key log. Some entries add up to the target.",
-    "A till roll. Some sales add up to the target."
-  ],
-  "interceptBrief": [
-    "Today's intercept. Pinned up at a bus stop, and meant for the Open Eye.",
-    "Today's intercept. Folded into a library book, and meant for the Open Eye.",
-    "Today's intercept. Chalked on a market wall, and meant for the Open Eye.",
-    "Today's intercept. Left under a windscreen wiper, and meant for the Open Eye.",
-    "Today's intercept. Read out as a radio notice, and meant for the Open Eye.",
-    "Today's intercept. Printed in the small ads, and meant for the Open Eye.",
-    "Today's intercept. Slipped into a parish bulletin, and meant for the Open Eye."
-  ],
-  "interceptFact": [
-    "Filed under the Open Eye. This one was read before it got there.",
-    "Filed under the Open Eye. One more message that never arrived unread.",
-    "Filed under the Open Eye. Whoever it was for knows less today."
+    "No packs on the path yet."
   ],
   "cluesLeft": [
-    "{n} clues left"
+    "{n} puzzles left"
   ],
   "clueLeft": [
-    "1 clue left"
+    "1 puzzle left"
   ],
   "caseDone": [
-    "{c}: case closed.",
-    "Every clue in {c}, found.",
-    "Case closed: {c}."
+    "{c}: done.",
+    "Every puzzle in {c}, found.",
+    "{c}, done."
   ],
   "starsOf": [
     "{n} of 3 stars"
@@ -358,7 +333,7 @@
     "With {name}"
   ],
   "guestLook": [
-    "That detective is yours. Pick a look and a pet to work the next clue with you.",
+    "That result is yours. Pick a look and a pet to play the next puzzle with you.",
     "Your first result. Now choose who you are, and the pet beside you."
   ],
   "sayErrorCat": [
@@ -379,18 +354,18 @@
   ],
   "sayClosedCat": [
     "It was there the whole time.",
-    "Closed. Signed with an X."
+    "Done. Signed with a paw."
   ],
   "sayClosedDino": [
-    "We got them. I roared, quietly.",
-    "Case closed. I found the long one first."
+    "We did it. I roared, quietly.",
+    "Done. I found the long one first."
   ],
   "sayClosedDog": [
-    "You closed it. I knew you would.",
-    "Every clue. What a good day."
+    "You did it. I knew you would.",
+    "Every word. What a good day."
   ],
   "sayClosedRobot": [
-    "1 case closed. I wrote down how you did it.",
-    "Every clue read. 0 left in this case."
+    "1 pack done. I wrote down how you did it.",
+    "Every word read. 0 left in this pack."
   ]
 }

@@ -66,12 +66,11 @@ Never for sale: hints, extra tries, time, or anything that touches a score; stre
 
 ## Owner
 
-- [ ] Decide: the pets' names. Detective X, Detective Tobs, Detective Puff and Agent 404 carry the old story. Suggested: Mochi, Tobs, Puff and 404.
 - [ ] Set up Google sign in in Supabase. A 6 digit email code is the hardest step for a new player, and one tap removes it. Likely worth more than any change to guest mode.
 - [ ] Decide: the name (suggested: keep Gazecraft. Free as .com and .game on 9 Oct 2026, registry check only: gazecraft, keensleuth, sleuthtrail, cluestop, plainsleuth, loupequest).
 - [ ] Decide: what is sold to a church, a school or a wedding now. The price list sells a puzzle on the buyer's subject.
 - [ ] Prices for the models above. None is set. Pets open at 3,000, 9,000 and 20,000 points for now (`PARTNER_POINTS` and `partner_slots`): confirm or change.
-- [ ] The robot is named Agent 404. A trademark search on that name has not been run.
+- [ ] The robot is named 404. A trademark search on that name has not been run.
 - [ ] A list of 20 people to ask first: brands, schools, churches, event planners.
 - [ ] What a sponsor may and may not write.
 - [ ] Reset the database password (Supabase, Database, Settings). It was shared in chat and is still the live one.
@@ -95,7 +94,6 @@ One set at a time. Each set is small, works on its own and leaves the live game 
 
 The owner's word, 14 Oct 2026: the puzzle game has no story line, and nothing about criminals or thieves. Simple, not beige.
 
-- [ ] **Set 1b. The words on screen.** Every case, clue, detective, suspect, evidence, intercept and Open Eye line in the copy pools, the SPEC and the screens goes or becomes plain: a pack, a puzzle. The dock and the page titles get plain names.
 - [ ] **Set 1c. The character.** Detective gear (the badge, the magnifier and the rest) goes. "Your detective" is "You". Earned pieces become plain things worth wearing.
 - [ ] **Set 1d. Simple, not beige.** Once the story is out, every screen is looked at again for colour and weight: one board, one action, nothing grey for its own sake.
 

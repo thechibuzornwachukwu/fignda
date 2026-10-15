@@ -68,7 +68,7 @@ test('circles page: guests are asked to sign in, and it is accessible', async ({
 test('design your character: pick parts, save, and it shows as you', async ({ page }) => {
   const handle = await newPlayer(page, 'Dayo');
   await page.goto('/me');
-  await expect(page.getByRole('region', { name: 'Your detective and your pet' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'You and your pet' })).toBeVisible();
   await page.getByRole('button', { name: 'Edit character' }).click();
   const editor = page.getByRole('dialog', { name: 'Edit your character' });
   const tab = (name: string) => editor.getByRole('tab', { name, exact: true });
@@ -158,8 +158,8 @@ test('detective pieces are earned: locked until a case is closed, then they can 
   const badge = editor.getByRole('button', { name: /^Detective kit: Badge/ });
   await expect(badge).toHaveAccessibleName('Detective kit: Badge. Locked. Close 1 case.');
   await expect(badge).toHaveAttribute('aria-disabled', 'true');
-  await expect(editor.getByRole('button', { name: 'Detective kit: Detective hat. Locked. Reach the rank of Detective.' })).toBeVisible();
-  await expect(editor.getByRole('button', { name: 'Outfit: Detective coat. Locked. Reach the rank of Inspector.' })).toBeVisible();
+  await expect(editor.getByRole('button', { name: 'Detective kit: Detective hat. Locked. Reach the rank of Keen.' })).toBeVisible();
+  await expect(editor.getByRole('button', { name: 'Outfit: Detective coat. Locked. Reach the rank of Sharp.' })).toBeVisible();
   await expect(editor.locator('[data-locked]')).toHaveCount(5);
   await badge.click({ force: true });
   await expect(editor.getByRole('region', { name: 'Detective kit' })).toContainText('None');
@@ -182,12 +182,12 @@ test('detective pieces are earned: locked until a case is closed, then they can 
 test('partners: a guest picks one on the first screen, it shows at the end of a game, and Settings shows who is held', async ({ page }) => {
   await page.goto('/welcome');
   const pick = page.getByRole('group', { name: /your pet/i });
-  await expect(pick.getByRole('button')).toHaveText(['Detective X', 'Detective Tobs', 'Detective Puff', 'Agent 404']);
-  // Left alone, it is Detective X.
-  await expect(pick.getByRole('button', { name: 'Detective X' })).toHaveAttribute('aria-pressed', 'true');
-  await pick.getByRole('button', { name: 'Detective Puff' }).click();
-  await expect(pick.getByRole('button', { name: 'Detective Puff' })).toHaveAttribute('aria-pressed', 'true');
-  await expect(pick.getByRole('button', { name: 'Detective X' })).toHaveAttribute('aria-pressed', 'false');
+  await expect(pick.getByRole('button')).toHaveText(['Mochi', 'Tobs', 'Puff', '404']);
+  // Left alone, it is Mochi.
+  await expect(pick.getByRole('button', { name: 'Mochi' })).toHaveAttribute('aria-pressed', 'true');
+  await pick.getByRole('button', { name: 'Puff' }).click();
+  await expect(pick.getByRole('button', { name: 'Puff' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(pick.getByRole('button', { name: 'Mochi' })).toHaveAttribute('aria-pressed', 'false');
   expect(await page.evaluate(() => JSON.parse(localStorage.getItem('gazecraft-partner')!).current)).toBe('dog');
   for (const img of await pick.locator('img').all()) expect(await img.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0)).toBe(true);
 
@@ -202,17 +202,17 @@ test('partners: a guest picks one on the first screen, it shows at the end of a 
 test('You is a stage: tap a partner or a piece of gear to try it, and one button chooses it', async ({ page }) => {
   await newPlayer(page, 'Tari');
   await page.goto('/me');
-  const stage = page.getByRole('region', { name: 'Your detective and your pet' });
+  const stage = page.getByRole('region', { name: 'You and your pet' });
   await expect(stage).toContainText('Tari');
-  await expect(stage).toContainText('Detective X');
+  await expect(stage).toContainText('Mochi');
   await expect(stage.locator('[data-stage-line]')).toHaveCount(0);
 
   // A locked partner can be tried on the stage, and says what opens it.
   const partners = page.getByRole('region', { name: 'Pets' });
   await expect(partners.getByRole('button')).toHaveCount(4);
-  await expect(partners.getByRole('button', { name: /^Agent 404\./ })).toBeVisible();
-  await partners.getByRole('button', { name: 'Detective Tobs. Locked. 3,000 points.' }).click();
-  await expect(stage).toContainText('Detective Tobs');
+  await expect(partners.getByRole('button', { name: /^404\./ })).toBeVisible();
+  await partners.getByRole('button', { name: 'Tobs. Locked. 3,000 points.' }).click();
+  await expect(stage).toContainText('Tobs');
   await expect(stage.locator('img[data-partner="dino"]')).toBeVisible();
   await expect(stage.locator('[data-stage-line]')).toHaveText('Locked. 3,000 points to go.');
   await expect(stage.getByRole('button', { name: /^Select / })).toHaveCount(0);

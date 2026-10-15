@@ -329,7 +329,7 @@ export function Profile() {
                   ? "Nothing yet. "
                   : `@${profile.handle} has no verified plays yet. `}
                 <Link to="/play" className={styles.inline}>
-                  {own ? "Open a case" : "Find a case"}
+                  {own ? "Play a puzzle" : "Find a puzzle"}
                 </Link>
                 .
               </p>

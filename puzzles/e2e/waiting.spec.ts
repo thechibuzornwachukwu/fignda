@@ -487,7 +487,7 @@ test.describe('slow page load', () => {
   test('a page that takes longer than 1 second to fetch shows the waiting screen, a fast one does not', async ({ page }) => {
     await watchForWaiting(page);
     await page.goto('/');
-    await expect(page.getByRole('link', { name: 'Play your first clue' }).first()).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Play your first puzzle' }).first()).toBeVisible();
     expect(await sawWaiting(page)).toBe(false);
 
     // Hold every script the next screen needs.
@@ -495,7 +495,7 @@ test.describe('slow page load', () => {
       await sleep(2200);
       await r.continue();
     });
-    await page.getByRole('link', { name: 'Play your first clue' }).first().click();
+    await page.getByRole('link', { name: 'Play your first puzzle' }).first().click();
     const w = waiting(page);
     await expect(w).toBeVisible();
     await expect(w.locator('svg')).toHaveAttribute('width', '88');

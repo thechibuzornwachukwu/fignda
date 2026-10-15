@@ -68,7 +68,7 @@ test.describe('desktop', () => {
     await expect(page.getByText('1 tip-off').first()).toBeVisible();
 
     // Another page inside the app, then back.
-    await page.getByRole('link', { name: 'Cases' }).last().click();
+    await page.getByRole('link', { name: 'Packs' }).last().click();
     await expect(page).toHaveURL(/\/play$/);
     await page.goBack();
     await expect(letter(page, a)).toHaveAttribute('data-state', 'found');
@@ -112,7 +112,7 @@ test.describe('desktop', () => {
 
     await page.getByRole('button', { name: "I'm done" }).click();
     // The finish opens a popup with the way on.
-    const next = page.locator('[data-clue-done]').getByRole('link', { name: 'Next clue' });
+    const next = page.locator('[data-clue-done]').getByRole('link', { name: 'Next puzzle' });
     await expect(next).toBeVisible();
     await expect(page.getByRole('link', { name: 'See the leaderboard' })).toHaveCount(0);
     await next.click();
@@ -121,7 +121,7 @@ test.describe('desktop', () => {
     await expect(page.getByRole('list', { name: /clue 3 of \d+/ })).toBeVisible();
     // The passage just left kept its result. The whole puzzle is another game, untouched.
     await page.goto('/play/bible/2');
-    await expect(page.getByRole('link', { name: 'Next clue' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Next puzzle' })).toBeVisible();
     await page.goto('/play/bible');
     await expect(page.getByText('0 / 30').first()).toBeVisible();
   });

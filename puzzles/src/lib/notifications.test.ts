@@ -45,7 +45,7 @@ describe('badges', () => {
   it('codes are unique and an unknown code still has a name', () => {
     expect(new Set(BADGES.map((b) => b.code)).size).toBe(BADGES.length);
     expect(badgeLabel('nope')).toBe('New badge');
-    expect(badgeLabel('first_game')).toBe('First step');
+    expect(badgeLabel('first_game')).toBe('First puzzle');
     // There is no daily, so no badge names one.
     expect(BADGES.map((b) => `${b.label} ${b.how}`).join(' ')).not.toMatch(/daily|dailies/i);
   });

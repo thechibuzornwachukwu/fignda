@@ -194,26 +194,26 @@ describe('points and ranks', () => {
     const u = await makeUser('pts');
     const handle = uniqueHandle('pt');
     await makeProfile(u, 'Points', handle);
-    expect(await pointsOf(handle)).toEqual({ points: 0, rank: 'Rookie' });
+    expect(await pointsOf(handle)).toEqual({ points: 0, rank: 'Starter' });
     await play(u, 'bnote', { score: 400 });
     await record(u, 'bible', 1, 2, 300);
     await record(u, 'bible', 1, 3, 250); // a worse replay adds nothing
     await record(u, 'bible', 2, 1, 100);
     await merge(u, [{ id: 'bible~3', stars: 3 }, { id: 'science', stars: 3 }]);
-    expect(await pointsOf(handle)).toEqual({ points: 800, rank: 'Rookie' });
+    expect(await pointsOf(handle)).toEqual({ points: 800, rank: 'Starter' });
   });
 
   it('a rank is worked out from points and never stored', async () => {
     const rank = async (n: number | null) => (await svc.rpc('rank_of', { p_points: n })).data;
     expect(await Promise.all([null, -5, 0, 3719, 3720, 12969, 12970, 36019, 36020, 10_000_000].map(rank))).toEqual([
-      'Rookie', 'Rookie', 'Rookie', 'Rookie', 'Detective', 'Detective', 'Inspector', 'Inspector', 'Chief', 'Chief',
+      'Starter', 'Starter', 'Starter', 'Starter', 'Keen', 'Keen', 'Sharp', 'Sharp', 'Master', 'Master',
     ]);
     const u = await makeUser('pts');
     const handle = uniqueHandle('pt');
     await makeProfile(u, 'Ranked', handle);
     await play(u, 'bnote', { score: 3000 });
     await record(u, 'bible', 1, 3, 720);
-    expect(await pointsOf(handle)).toEqual({ points: 3720, rank: 'Detective' });
+    expect(await pointsOf(handle)).toEqual({ points: 3720, rank: 'Keen' });
   });
 
   it('an unknown handle has no points row, and the answer names no one', async () => {

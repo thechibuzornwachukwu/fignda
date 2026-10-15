@@ -110,7 +110,7 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
               <Icon icon={ArrowRight} size={16} />
             </Button>
             <Button variant="secondary" to="/play">
-              Cases
+              Packs
             </Button>
           </>
         )}
@@ -159,7 +159,7 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
             )}
             {next && (
               <Button variant="secondary" to="/play">
-                Cases
+                Packs
               </Button>
             )}
           </div>

@@ -57,7 +57,7 @@ describe('Journey', () => {
     expect(container.querySelector('[data-journey]')!.getAttribute('data-journey')).toBe('going');
     expect(screen.getByRole('heading', { level: 2, name: 'Your path' })).toBeInTheDocument();
     expect(screen.getAllByRole('heading', { level: 3 }).map((h) => h.textContent)).toEqual(path.cases.map((c) => titleOf(c.id)));
-    expect(text(container)).toContain(`0 of ${all.length} clues`);
+    expect(text(container)).toContain(`0 of ${all.length} puzzles`);
   });
 
   it('a pack is a drill: no culprit in disguise, no secret, no file', () => {
@@ -69,8 +69,8 @@ describe('Journey', () => {
 
   it('a case says how many clues are left, never how long', () => {
     const { container } = show({ done: ids.slice(0, -1) });
-    expect(text(box(container, first.id))).toContain('1 clue left');
-    expect(text(box(container, second.id))).toContain(`${second.clues.length} clues left`);
+    expect(text(box(container, first.id))).toContain('1 puzzle left');
+    expect(text(box(container, second.id))).toContain(`${second.clues.length} puzzles left`);
     expect(text(container)).not.toMatch(/minute|\bmin\b|second/i);
   });
 
@@ -81,15 +81,15 @@ describe('Journey', () => {
 
     const doneLink = within(clue(container, a)).getByRole('link');
     expect(doneLink).toHaveAttribute('href', `/play/${long.id}/1`);
-    expect(doneLink).toHaveAccessibleName('Clue 1. Done. 3 of 3 stars. Play again.');
+    expect(doneLink).toHaveAccessibleName('Puzzle 1. Done. 3 of 3 stars. Play again.');
     expect(doneLink).not.toHaveAttribute('aria-current');
 
     const nextLink = within(clue(container, c)).getByRole('link');
     expect(nextLink).toHaveAttribute('href', `/play/${long.id}/21`);
     expect(nextLink).toHaveAttribute('aria-current', 'step');
-    expect(nextLink.textContent).toContain('Clue 3. Next clue.');
+    expect(nextLink.textContent).toContain('Puzzle 3. Next puzzle.');
     expect(container.querySelectorAll('[aria-current="step"]')).toHaveLength(1);
-    expect(text(container)).toContain(`2 of ${all.length} clues`);
+    expect(text(container)).toContain(`2 of ${all.length} puzzles`);
     expect(screen.getByRole('progressbar', { name: 'Path progress' })).toHaveAttribute('aria-valuenow', String(Math.round((2 / all.length) * 100)));
   });
 
@@ -101,8 +101,8 @@ describe('Journey', () => {
     const locked = clue(container, ids[1]!);
     expect(locked.querySelector('a')).toBeNull();
     const body = locked.querySelector('[aria-disabled="true"]')!;
-    expect(body.textContent).toContain('Clue 2. Locked.');
-    expect(body.textContent).toContain('Finish clue 1 to open this.');
+    expect(body.textContent).toContain('Puzzle 2. Locked.');
+    expect(body.textContent).toContain('Finish puzzle 1 to open this.');
     expect(locked.querySelector('svg.lucide-lock')).not.toBeNull();
 
     const later = box(container, second.id);
@@ -117,7 +117,7 @@ describe('Journey', () => {
     const { container } = show();
     const big = [...container.querySelectorAll('[data-big]')].map((el) => el.getAttribute('data-clue'));
     expect(big).toEqual([last]);
-    expect(clue(container, last).textContent).toContain('The last clue of the case.');
+    expect(clue(container, last).textContent).toContain('The last puzzle of the pack.');
     expect(clue(container, ids[0]!).textContent).not.toContain('last clue');
     expect(container.querySelector(`[data-clue="${first.id}~40"]`)).toBeNull();
   });
@@ -128,7 +128,7 @@ describe('Journey', () => {
     expect(box(container, first.id).querySelector('[data-clue]')).toBeNull();
     expect(states(container)[0]).toBe('next');
     expect(container.querySelector('[data-clue]')!.getAttribute('data-clue')).toBe(second.clues[0]!.id);
-    expect(text(container)).toContain(`${first.clues.length} of ${all.length} clues`);
+    expect(text(container)).toContain(`${first.clues.length} of ${all.length} puzzles`);
   });
 
   it('a closed case shows its badge with a line from the pool, its stars, and a link to play it again', () => {
@@ -141,7 +141,7 @@ describe('Journey', () => {
     expect(container.querySelectorAll('[data-case-badge]')).toHaveLength(1);
     const again = within(closed).getByRole('link');
     expect(again).toHaveAttribute('href', `/play/${first.id}`);
-    expect(again).toHaveAccessibleName(`${titleOf(first.id)}. Closed. Play again.`);
+    expect(again).toHaveAccessibleName(`${titleOf(first.id)}. Done. Play again.`);
     expect(within(closed).getByRole('img', { name: '3 of 3 stars' })).toBeInTheDocument();
     expect(text(closed)).not.toMatch(/clues? left/);
   });
@@ -178,7 +178,7 @@ describe('Journey', () => {
     expect(screen.queryByRole('heading', { level: 3, name: titleOf(first.id) })).toBeNull();
     expect(box(container, second.id).getAttribute('data-state')).toBe('open');
     expect(container.querySelector('[data-clue]')!.getAttribute('data-clue')).toBe(second.clues[0]!.id);
-    expect(text(container)).toContain(`0 of ${all.length - first.clues.length} clues`);
+    expect(text(container)).toContain(`0 of ${all.length - first.clues.length} puzzles`);
   });
 
   it('draws the line between clues: solid where walked, dotted ahead, hidden from screen readers', () => {
@@ -257,7 +257,7 @@ describe('Journey: empty and missing', () => {
     expect(container.querySelectorAll('[data-clue]')).toHaveLength(1);
     expect(container.querySelector('svg[preserveAspectRatio="none"]')).toBeNull();
     expect(clue(container, first.id).hasAttribute('data-big')).toBe(true);
-    expect(text(container)).toContain('1 clue left');
+    expect(text(container)).toContain('1 puzzle left');
   });
 
   it.each([
@@ -302,7 +302,7 @@ describe('Journey: empty and missing', () => {
     [a, b, c].forEach((id, i) => {
       expect(clue(container, id).getAttribute('data-state')).toBe('done');
       expect(clue(container, id).querySelector('[data-stars]')).toBeNull();
-      expect(within(clue(container, id)).getByRole('link')).toHaveAccessibleName(`Clue ${i + 1}. Done. Play again.`);
+      expect(within(clue(container, id)).getByRole('link')).toHaveAccessibleName(`Puzzle ${i + 1}. Done. Play again.`);
     });
     expect(text(container)).not.toMatch(/undefined|NaN|null/);
   });

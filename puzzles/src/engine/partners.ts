@@ -6,11 +6,11 @@ import type { HintKind } from './hint';
 
 /** The partners in the game, in the order they are offered. Ids are stored: never rename or reorder. */
 export const PARTNERS = [
-  { id: 'cat', name: 'Detective X' },
-  { id: 'dino', name: 'Detective Tobs' },
-  { id: 'dog', name: 'Detective Puff' },
+  { id: 'cat', name: 'Mochi' },
+  { id: 'dino', name: 'Tobs' },
+  { id: 'dog', name: 'Puff' },
   // The robot. It scans and zooms where the animals hold a glass and wear a monocle.
-  { id: 'robot', name: 'Agent 404' },
+  { id: 'robot', name: '404' },
 ] as const;
 
 export type PartnerId = (typeof PARTNERS)[number]['id'];
