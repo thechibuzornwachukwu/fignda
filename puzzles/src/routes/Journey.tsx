@@ -18,6 +18,7 @@ import { newRoomCode } from '../lib/room';
 import { loadFinished } from '../lib/shelves';
 import { loadStars } from '../lib/starStore';
 import { storage } from '../lib/storage';
+import { packHue } from '../lib/packHue';
 import styles from './Journey.module.css';
 
 export type JourneyGame = CatalogueItem & { title: string };
@@ -44,7 +45,7 @@ const SWAY = [0, 1, 2, 1, 0, -1, -2, -1] as const;
 const AVATAR = { clue: 56, big: 68, finished: 56 } as const;
 
 type ClueView = { id: string; to: string; name: string; state: ClueState; stars: 0 | 1 | 2 | 3; big: boolean; shift: number };
-type CaseView = { id: string; title: string; clues: ClueView[]; state: 'done' | 'open' | 'locked'; stars: 0 | 1 | 2 | 3; count: string; line: string; /** "With NAME", on a sponsored case. */ sponsor: string };
+type CaseView = { id: string; title: string; /** The pack's colour (`packHue`). */ hue: string; clues: ClueView[]; state: 'done' | 'open' | 'locked'; stars: 0 | 1 | 2 | 3; count: string; line: string; /** "With NAME", on a sponsored case. */ sponsor: string };
 
 const EMPTY: Path = { cases: [] };
 
@@ -108,6 +109,7 @@ export function Journey({ catalogue = games, path, done, stars, title = 'Your pa
       cases.push({
         id: c.id,
         title,
+        hue: packHue(getGameDef(c.id)?.category),
         clues,
         state,
         // A pack is done by its last clue or by the whole puzzle: the best of the whole puzzle, or the stars its
@@ -148,7 +150,7 @@ export function Journey({ catalogue = games, path, done, stars, title = 'Your pa
   const card = (c: CaseView) => {
         const n = c.clues.length;
         return (
-          <section key={c.id} className={styles.case} aria-labelledby={`${headId}-${c.id}`} data-case={c.id} data-state={c.state}>
+          <section key={c.id} className={styles.case} aria-labelledby={`${headId}-${c.id}`} data-case={c.id} data-state={c.state} style={{ '--pack': c.hue } as CSSProperties}>
             <header className={styles.caseHead}>
               <div className={styles.caseText}>
                 <h3 id={`${headId}-${c.id}`} className={styles.caseTitle}>

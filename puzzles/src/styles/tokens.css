@@ -84,6 +84,11 @@
   --swatch-tick: #ffffff; /* with mix-blend-mode: difference it reads on any swatch */
   /* Ink on a struck medal. A thing, so it is the same in both themes. */
   --paper-ink: #1b1b1f;
+  /* Pack hues: each pack is drawn in its own colour, a thing, so the same in both themes, always with
+     --paper-ink on it (every pair is 5:1 or more). Lime stays for found. */
+  --pack-naija: #3ec486; --pack-football: #4fd1dc; --pack-general: #6aa3ff; --pack-science: #9b8cff;
+  --pack-ai: #d48cff; --pack-health: #ff8bb0; --pack-bible: #f06a5a; --pack-names: #ff9f43;
+  --pack-history: #f2c94c; --pack-other: #6aa3ff;
   /* Medals: the metal a tier is struck in, with the darker rim that gives it weight. A thing, so the same in both themes. */
   --medal-bronze: #c98a4b; --medal-bronze-rim: #8f5a26; --medal-silver: #cfd3da; --medal-silver-rim: #8d93a0; --medal-gold: #e9b93c; --medal-gold-rim: #a97b12;
   --medal-jade: #5fc29a; --medal-jade-rim: #2f7d5f; --medal-onyx: #1c1c1f;

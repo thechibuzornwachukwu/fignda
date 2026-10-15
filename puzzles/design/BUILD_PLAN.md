@@ -90,11 +90,6 @@ Never for sale: hints, extra tries, time, or anything that touches a score; stre
 
 One set at a time. Each set is small, works on its own and leaves the live game whole. After each set: lint, typecheck, unit tests and the browser tests pass.
 
-### 1. No story
-
-The owner's word, 14 Oct 2026: the puzzle game has no story line, and nothing about criminals or thieves. Simple, not beige.
-
-- [ ] **Set 1d. Simple, not beige.** Once the story is out, every screen is looked at again for colour and weight: one board, one action, nothing grey for its own sake.
 
 ### 2. Sell now
 

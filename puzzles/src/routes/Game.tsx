@@ -1,4 +1,4 @@
-import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, UsersRound } from 'lucide-react';
 import { BigClock, Elapsed } from '../components/BigClock';
@@ -19,6 +19,7 @@ import { ClueDone } from '../components/ClueDone';
 import { Partner } from '../components/Partner';
 import { HINT_OF } from '../engine/partners';
 import { doneClues, nextClueTo } from '../games/path';
+import { packHue } from '../lib/packHue';
 import { guestBlocked, markGuestPlayed, playKey } from '../lib/guestLimit';
 import { loadPartner } from '../lib/partner';
 import { starsFor } from '../engine/stars';
@@ -474,7 +475,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
       : '');
 
   return (
-    <div className={styles.screen}>
+    <div className={styles.screen} style={{ '--pack': packHue(def.category) } as CSSProperties}>
       <div className={styles.top}>
         <div className={styles.meta}>
           <Link to="/play" className={styles.back}>

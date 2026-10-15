@@ -174,13 +174,8 @@
 .mark[data-kind='sums'] {
   border-radius: var(--radius-xs);
 }
-/* The unmasking, last and largest. */
-.mark[data-kind='unmask'] {
-  width: var(--space-4);
-  height: var(--space-4);
-}
 .mark[data-state='done'] {
-  background: var(--fg);
+  background: var(--pack, var(--fg));
   box-shadow: none;
 }
 /* The clue being played: longer, ringed in ink, so it reads without colour. */
@@ -188,9 +183,6 @@
   width: var(--space-6);
   background: var(--accent);
   box-shadow: inset 0 0 0 2px var(--fg);
-}
-.mark[data-kind='unmask'][data-state='here'] {
-  width: var(--space-6);
 }
 /* The pet beside the line it says. */
 .says {
