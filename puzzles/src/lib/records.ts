@@ -11,7 +11,8 @@ import { storage } from './storage';
 const KEY = 'gazecraft-records';
 
 export type LongWord = { word: string; len: number };
-export type Records = { clean: Record<string, number>; daily: number; long: LongWord | null };
+/** `week`: the best week's points, from the account (`my_records`); 0 until a signed in visit brings it. */
+export type Records = { clean: Record<string, number>; daily: number; long: LongWord | null; week: number };
 
 export type PlayFacts = {
   /** The pack this puzzle belongs to. Null for a player-made or any-topic puzzle. */
@@ -29,7 +30,7 @@ export type NewRecord =
   | { kind: 'daily'; found: number }
   | { kind: 'long'; word: string; len: number };
 
-export const emptyRecords = (): Records => ({ clean: {}, daily: 0, long: null });
+export const emptyRecords = (): Records => ({ clean: {}, daily: 0, long: null, week: 0 });
 
 const count = (v: unknown): v is number => typeof v === 'number' && Number.isInteger(v) && v >= 0;
 const isLong = (v: unknown): v is LongWord => {
@@ -42,12 +43,13 @@ const isLong = (v: unknown): v is LongWord => {
 export function parseRecords(v: unknown): Records {
   const out = emptyRecords();
   if (!v || typeof v !== 'object' || Array.isArray(v)) return out;
-  const { clean, daily, long } = v as Record<string, unknown>;
+  const { clean, daily, long, week } = v as Record<string, unknown>;
   if (clean && typeof clean === 'object' && !Array.isArray(clean)) {
     for (const [pack, secs] of Object.entries(clean)) if (pack && count(secs)) out.clean[pack] = secs;
   }
   if (count(daily)) out.daily = daily;
   if (isLong(long)) out.long = { word: long.word, len: long.len };
+  if (count(week)) out.week = week;
   return out;
 }
 
@@ -58,7 +60,7 @@ export function loadRecords(): Records {
 
 /** Pure: the records after this play, and which of them it beat. */
 export function applyRecords(cur: Records, play: PlayFacts): { next: Records; broke: NewRecord[] } {
-  const next: Records = { clean: { ...cur.clean }, daily: cur.daily, long: cur.long };
+  const next: Records = { clean: { ...cur.clean }, daily: cur.daily, long: cur.long, week: cur.week };
   const broke: NewRecord[] = [];
 
   if (play.pack && count(play.cleanSecs)) {
@@ -85,4 +87,19 @@ export function recordPlay(play: PlayFacts): NewRecord[] {
   const { next, broke } = applyRecords(cur, play);
   if (JSON.stringify(next) !== JSON.stringify(cur)) storage.setJSON(KEY, next);
   return broke;
+}
+
+/**
+ * The account's records (`my_records`) into this browser: the better of each is kept, so nothing goes down and
+ * a second device catches up. Nothing new is announced: a record is only new when a play beats it.
+ */
+export function mergeRecords(server: unknown): Records {
+  const cur = loadRecords();
+  const v = server && typeof server === 'object' && !Array.isArray(server) ? (server as Record<string, unknown>) : {};
+  const from = parseRecords({ clean: v.clean, long: v.long, week: v.best_week });
+  const next: Records = { clean: { ...cur.clean }, daily: cur.daily, long: cur.long, week: Math.max(cur.week, from.week) };
+  for (const [pack, secs] of Object.entries(from.clean)) if (next.clean[pack] == null || secs < next.clean[pack]!) next.clean[pack] = secs;
+  if (from.long && (!next.long || from.long.len > next.long.len)) next.long = from.long;
+  if (JSON.stringify(next) !== JSON.stringify(cur)) storage.setJSON(KEY, next);
+  return next;
 }

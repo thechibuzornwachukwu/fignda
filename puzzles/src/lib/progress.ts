@@ -2,7 +2,8 @@
 // puzzles. Signed in, those are kept level with the account: what a guest did here goes up, what was done on
 // another device comes down, and neither side ever loses anything.
 
-import { fetchProgress, mergeGuestProgress } from './api';
+import { fetchMyRecords, fetchProgress, mergeGuestProgress } from './api';
+import { mergeRecords } from './records';
 import { loadFinished, markFinished } from './shelves';
 import { loadStars, recordStars, type Stars } from './starStore';
 
@@ -46,6 +47,8 @@ export async function syncProgress(): Promise<boolean> {
   await mergeGuestProgress(localProgress()).catch(() => 0);
   const rows = await fetchProgress().catch(() => []);
   const changed = applyProgress(rows);
+  // Records from the account: the better of each is kept. A server without them yet answers nothing.
+  await fetchMyRecords().then(mergeRecords).catch(() => undefined);
   if (changed && typeof window !== 'undefined') window.dispatchEvent(new Event(PROGRESS_EVENT));
   return changed;
 }

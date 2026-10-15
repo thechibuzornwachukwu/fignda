@@ -15,6 +15,7 @@ vi.mock('./api', () => ({
     api.merged.push(items);
     return items.length;
   },
+  fetchMyRecords: async () => ({}),
   fetchProgress: async () => {
     if (api.failDown) throw new Error('offline');
     return api.rows;

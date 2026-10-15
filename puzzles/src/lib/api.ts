@@ -768,6 +768,13 @@ async function loadCustomGame(code: string): Promise<CustomGame | null> {
   return g ? { id: g.id, title: g.title, noun: g.noun, text: g.text, dict: g.dict, code: g.share_code } : null;
 }
 
+/** The signed in player's records, worked out from their verified plays (`my_records`). */
+export async function fetchMyRecords(): Promise<unknown> {
+  const { data, error } = await (await client()).rpc('my_records');
+  if (error) throw error;
+  return data;
+}
+
 /** Everything kept about the signed in player, as 1 JSON document (`export_my_data`). */
 export async function exportMyData(): Promise<unknown> {
   const { data, error } = await (await client()).rpc('export_my_data');

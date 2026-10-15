@@ -7,7 +7,7 @@ const play = (over: Partial<PlayFacts> = {}): PlayFacts => ({ pack: null, cleanS
 describe('applyRecords', () => {
   it('stores the first value of each kind quietly', () => {
     const { next, broke } = applyRecords(emptyRecords(), play({ pack: 'Bible', cleanSecs: 90, dailyFound: 7, longest: { word: 'Habakkuk', len: 8 } }));
-    expect(next).toEqual({ clean: { Bible: 90 }, daily: 7, long: { word: 'Habakkuk', len: 8 } });
+    expect(next).toEqual({ clean: { Bible: 90 }, daily: 7, long: { word: 'Habakkuk', len: 8 }, week: 0 });
     expect(broke).toEqual([]);
   });
 
@@ -50,7 +50,7 @@ describe('applyRecords', () => {
 
   it('a game with 0 found, ended at once, sets nothing and beats nothing', () => {
     expect(applyRecords(emptyRecords(), play({ pack: 'Bible', dailyFound: 0 }))).toEqual({ next: emptyRecords(), broke: [] });
-    const cur = { clean: { Bible: 90 }, daily: 7, long: { word: 'Amos', len: 4 } };
+    const cur = { clean: { Bible: 90 }, daily: 7, long: { word: 'Amos', len: 4 }, week: 0 };
     expect(applyRecords(cur, play({ pack: 'Bible', dailyFound: 0 }))).toEqual({ next: cur, broke: [] });
   });
 
@@ -61,9 +61,9 @@ describe('applyRecords', () => {
   });
 
   it('does not change the records it is given', () => {
-    const cur = { clean: { Bible: 90 }, daily: 7, long: null };
+    const cur = { clean: { Bible: 90 }, daily: 7, long: null, week: 0 };
     applyRecords(cur, play({ pack: 'Bible', cleanSecs: 10, dailyFound: 9 }));
-    expect(cur).toEqual({ clean: { Bible: 90 }, daily: 7, long: null });
+    expect(cur).toEqual({ clean: { Bible: 90 }, daily: 7, long: null, week: 0 });
   });
 });
 
@@ -75,8 +75,8 @@ describe('parseRecords', () => {
   it('drops every field that is malformed and keeps the rest', () => {
     expect(
       parseRecords({ clean: { Bible: 90, Football: 'fast', Music: -1, Film: null }, daily: '7', long: { word: 'Amos' }, extra: 1 }),
-    ).toEqual({ clean: { Bible: 90 }, daily: 0, long: null });
-    expect(parseRecords({ clean: [1], daily: 6, long: { word: ' ', len: 3 } })).toEqual({ clean: {}, daily: 6, long: null });
+    ).toEqual({ clean: { Bible: 90 }, daily: 0, long: null, week: 0 });
+    expect(parseRecords({ clean: [1], daily: 6, long: { word: ' ', len: 3 }, week: 0 })).toEqual({ clean: {}, daily: 6, long: null, week: 0 });
   });
 });
 
@@ -102,7 +102,7 @@ describe('records store', () => {
       { kind: 'clean', pack: 'Bible', secs: 70 },
       { kind: 'long', word: 'Habakkuk', len: 8 },
     ]);
-    expect(loadRecords()).toEqual({ clean: { Bible: 70 }, daily: 0, long: { word: 'Habakkuk', len: 8 } });
+    expect(loadRecords()).toEqual({ clean: { Bible: 70 }, daily: 0, long: { word: 'Habakkuk', len: 8 }, week: 0 });
   });
 
   it('writes nothing when nothing changed', () => {

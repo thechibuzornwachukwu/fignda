@@ -97,7 +97,6 @@ One set at a time. Each set is small, works on its own and leaves the live game 
 All decided on the server from verified plays. One currency: lifetime points set rank and never drop, weekly points set the league and reset on Monday. No boosts, paid or free.
 
 - [ ] **Set 3b. Rare finds:** a rare find adds to the tally, and a Rare eye badge. Needs word stats across every puzzle, not only the daily.
-- [ ] **Set 3f. Personal records** copied to the server, with best week.
 - [ ] **Set 3g. Leagues:** tables of about 20, 5 tiers, top 5 up, bottom 5 down. Weekly points come only from first clears, so nobody wins by grinding on Sunday night. No message about dropping, a player can leave, fewer than 5 players moves nobody down.
 
 ### 6. Make, one feature

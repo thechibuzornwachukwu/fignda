@@ -16,7 +16,8 @@ import { Journey } from './Journey';
 import styles from './Games.module.css';
 
 /** The last 7 days as a ring, the run, and the days played this month. Shown once there is a daily to count. */
-export function Week({ run }: { run: Streak }) {
+/** `best`: the best week's points (from the account), shown when there is one. */
+export function Week({ run, best = 0 }: { run: Streak; best?: number }) {
   const days = run.week.filter((d) => d === 'done').length;
   const weekLine = useMemo(() => pick('weekDays', { n: days }), [days]);
   const runLine = useMemo(() => pick('runMonth', { n: run.streak, m: run.month }), [run.streak, run.month]);
@@ -30,6 +31,7 @@ export function Week({ run }: { run: Streak }) {
       <p className={styles.weekText}>
         <span className={styles.weekLine}>{weekLine}</span>
         <span className={styles.dailySub}>{runLine}</span>
+        {best > 0 && <span className={styles.dailySub} data-best-week>Best week: {best.toLocaleString('en-US')} points.</span>}
       </p>
     </div>
   );

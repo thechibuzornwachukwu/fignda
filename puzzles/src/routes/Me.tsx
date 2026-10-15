@@ -26,6 +26,7 @@ import { useStreak } from '../lib/useStreak';
 import { useUnlocks } from '../lib/useUnlocks';
 import { CharacterEditor } from './AvatarDesigner';
 import { Week } from './Games';
+import { loadRecords } from '../lib/records';
 import { Ring, type RingPart } from '../components/Ring';
 import { Segmented } from '../components/Segmented';
 import { GOALS, loadGoal, puzzlesToday, saveGoal, type GoalKey } from '../lib/goal';
@@ -270,7 +271,7 @@ export function Me() {
       </section>
 
       {/* How the week went: a fact about you, so it lives here and not in the way of playing. */}
-      <Week run={run} />
+      <Week run={run} best={loadRecords().week} />
 
       <DailyGoal />
 
