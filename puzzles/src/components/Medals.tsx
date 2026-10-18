@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { Eye, Flag, Flame, FolderCheck, Layers, Lock, Ruler, Share2, Sparkles, Star, type LucideIcon } from 'lucide-react';
+import { Eye, Flag, Flame, Gem, FolderCheck, Layers, Lock, Ruler, Share2, Sparkles, Star, type LucideIcon } from 'lucide-react';
 import type { Avatar as AvatarParts } from '../avatar/draw';
 import { medalsOf, type Medal, type MedalCounts, type MedalKey } from '../lib/medals';
 import { cardToFile, deliver, shareUrlLabel } from '../lib/share';
@@ -9,7 +9,7 @@ import { Icon } from './Icon';
 import { MEDAL_CARD, MedalCard } from './MedalCard';
 import styles from './Medals.module.css';
 
-const GLYPH: Record<MedalKey, LucideIcon> = { clean: Sparkles, nohint: Eye, long: Ruler, deep: Layers, run: Flame, cases: FolderCheck, points: Star, first: Flag };
+const GLYPH: Record<MedalKey, LucideIcon> = { clean: Sparkles, nohint: Eye, long: Ruler, deep: Layers, rare: Gem, run: Flame, cases: FolderCheck, points: Star, first: Flag };
 
 /** One medal: a disc on a ribbon, struck with its tier, in the metal of that tier. Not earned: an outline and a lock. */
 export function MedalFace({ medal, size = 'md' }: { medal: Medal; size?: 'md' | 'lg' }) {

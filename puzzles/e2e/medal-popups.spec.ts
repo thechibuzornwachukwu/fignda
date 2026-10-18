@@ -13,7 +13,7 @@ for (const size of SIZES) {
     await page.setViewportSize(size);
     await page.goto('/__medals');
     const medals = page.locator('[data-medals] button[data-medal]');
-    await expect(medals).toHaveCount(8);
+    await expect(medals).toHaveCount(9);
     const n = await medals.count();
     for (let i = 0; i < n; i++) {
       const medal = medals.nth(i);

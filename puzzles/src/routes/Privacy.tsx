@@ -92,6 +92,15 @@ export function Privacy() {
       </section>
 
       <section className={styles.section}>
+        <h2 className={styles.h2}>How long we keep it</h2>
+        <ul className={styles.list}>
+          <li>The moves of a game, used to check it: 90 days. The score and the words you found stay.</li>
+          <li>Notifications: 90 days. Room invites: 1 day.</li>
+          <li>How many people found each word is kept as a count, with no name on it. It stays if you delete your account.</li>
+        </ul>
+      </section>
+
+      <section className={styles.section}>
         <h2 className={styles.h2}>Getting a copy</h2>
         <p>
           Download everything we keep about you from <Link to="/settings">Settings</Link>, as 1 file. Other players in it

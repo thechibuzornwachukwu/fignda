@@ -127,6 +127,22 @@ Risks: leaked keys, faked scores, AI endpoint abuse, injected text in shared con
 - Theme boot script as an external file (CSP).
 - Worker CORS: app origins only. `Retry-After` is the one exposed header.
 
+## Retention
+`prune_old_data()`, run by the Worker's hourly job:
+
+| What | Kept for | Then |
+|---|---|---|
+| A play's log (`plays.log`, `room_plays.log`) | 90 days | emptied; the score and words found stay |
+| Notifications | 90 days | deleted |
+| Room invites | 1 day | deleted |
+| Rate limit windows | 2 days | deleted |
+| Puzzle reports | 365 days | deleted; a hidden puzzle stays hidden |
+| Draft jobs (`generate_jobs`) | 2 days | deleted (`prune_generate_jobs`) |
+
+## Counts
+- `puzzle_players` and `word_finds`: how many players played each puzzle, and how many found each word. No player on them, no policies, no grants; written only by the `plays_count` trigger on a player's first checked play of a puzzle. A deleted account takes its plays and leaves the counts.
+- A rare word (`plays.rare_keys`) is worked out by the `plays_rare` trigger when a checked play is saved, from the counts as they stood, and never changes afterwards.
+
 ## Privacy
 - Collect email, name, handle. Cookieless analytics (Cloudflare Web Analytics).
 - The look ("Who are we dressing?") is optional and personal. It is kept off `profiles`, which everyone can read, in `profile_private`. No view or function reads it. It orders choices in the avatar editor and nothing else: never ranking, matching or ads. A guest's answer stays in the browser.

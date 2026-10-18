@@ -12,6 +12,8 @@ export type PlayRow = {
   verified?: boolean;
   /** Clean read, recorded by the server from the play log. Null on a public row while it is today's daily. */
   clean?: boolean | null;
+  /** The words of this play that were rare when it was saved. */
+  rare_keys?: string[] | null;
 };
 
 export type DayCell = { day: number; state: 'perfect' | 'played' | 'none' };
@@ -45,6 +47,8 @@ export function longestRun(days: ReadonlySet<number>): number {
 
 /** What a clean read adds to the tally, once a puzzle. The database adds the same (player_points). */
 export const CLEAN_BONUS = 100;
+/** What each rare word adds, once a word and puzzle. The database adds the same (player_points). */
+export const RARE_BONUS = 50;
 
 /** Same rule as the database (player_points): a replayed puzzle counts its best score only, and a clean read 100 more. */
 export function pointsOf(plays: readonly PlayRow[]): number {
@@ -57,7 +61,8 @@ export function pointsOf(plays: readonly PlayRow[]): number {
   }
   for (const v of best.values()) total += v;
   const clean = new Set(plays.filter((p) => p.verified !== false && p.clean === true).map((p) => p.game_id));
-  return total + clean.size * CLEAN_BONUS;
+  const rare = new Set(plays.filter((p) => p.verified !== false).flatMap((p) => (Array.isArray(p.rare_keys) ? p.rare_keys : []).map((k) => `${p.game_id}~${k}`)));
+  return total + clean.size * CLEAN_BONUS + rare.size * RARE_BONUS;
 }
 
 /** Same rule as the database (clean_reads_of): a puzzle read cleanly more than once counts once. */

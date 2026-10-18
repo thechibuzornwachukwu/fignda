@@ -92,12 +92,6 @@ Never for sale: hints, extra tries, time, or anything that touches a score; stre
 One set at a time. Each set is small, works on its own and leaves the live game whole. After each set: lint, typecheck, unit tests and the browser tests pass.
 
 
-### 3. Points, ranks and rewards (server)
-
-All decided on the server from verified plays. One currency: lifetime points set rank and never drop, weekly points set the league and reset on Monday. No boosts, paid or free.
-
-- [ ] **Set 3b. Rare finds:** a rare find adds to the tally, and a Rare eye badge. Needs word stats across every puzzle, not only the daily.
-
 ### 7. Pets and drawings
 
 - [ ] **Set 7o. 12 topic icons of our own** for home subjects (jollof, market, church choir and so on) in `src/components/icons/`, beside the lucide ones in `topicIcons.ts`.
@@ -108,8 +102,6 @@ All decided on the server from verified plays. One currency: lifetime points set
 
 Play with no account, and sponsors get numbers, never people.
 
-- [ ] How long play logs, jobs, reports and notifications are kept, written into `SECURITY.md` and deleted by the hourly job.
-- [ ] Find data kept as counts per word and per puzzle. A deleted account leaves the counts and takes the plays.
 - [ ] Private boards: a data agreement with the school or company, and an organiser who sees only its own members.
 - [ ] EU players under 16 checked before any marketing there.
 

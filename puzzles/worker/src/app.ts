@@ -428,6 +428,8 @@ export async function closeLeagueWeeks(deps: Deps): Promise<void> {
 /** Hourly cron: jobs older than 2 days are deleted. */
 export async function pruneJobs(deps: Deps): Promise<void> {
   await deps.db.rpc('prune_generate_jobs');
+  // Everything else with an end date (SECURITY.md, Retention).
+  await deps.db.rpc('prune_old_data');
 }
 
 function gameOut(g: { id: string; share_code: string; title: string; noun: string; text: string; dict: unknown }) {

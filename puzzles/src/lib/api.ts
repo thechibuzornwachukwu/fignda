@@ -69,7 +69,7 @@ export async function fetchProfileByHandle(handle: string): Promise<PublicProfil
   return data;
 }
 
-const PLAY_COLS = 'game_id, day_no, found, total, score, secs, created_at, clean';
+const PLAY_COLS = 'game_id, day_no, found, total, score, secs, created_at, clean, rare_keys';
 
 /** Verified plays anyone can see. Today's daily total is masked by the database. */
 export async function fetchPublicPlays(handle: string, limit = 400): Promise<PlayRow[]> {

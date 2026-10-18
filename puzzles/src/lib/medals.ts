@@ -1,7 +1,7 @@
 // Badges as medals (SPEC section 6, Medals). A badge code from the server is a tier of a medal: 1 medal a kind,
 // worn at the highest tier earned, with the way to the next. Pure.
 
-export type MedalKey = 'clean' | 'nohint' | 'long' | 'deep' | 'run' | 'cases' | 'points' | 'first';
+export type MedalKey = 'clean' | 'nohint' | 'long' | 'deep' | 'rare' | 'run' | 'cases' | 'points' | 'first';
 
 /** The metal a tier is struck in, lowest first. A medal with more tiers than metals stays in the last one. */
 export const METALS = ['bronze', 'silver', 'gold', 'jade', 'onyx'] as const;
@@ -17,6 +17,7 @@ export const MEDAL_KINDS: readonly Kind[] = [
   { key: 'nohint', tiers: [1], code: () => 'no_hint_perfect', name: () => 'No-hint perfect' },
   { key: 'long', tiers: [1], code: () => 'long_word', name: () => 'Long word' },
   { key: 'deep', tiers: [1], code: () => 'deep_find', name: () => 'Deep find' },
+  { key: 'rare', tiers: [1], code: () => 'rare_eye', name: () => 'Rare eye' },
   { key: 'run', tiers: [7, 30, 50, 100, 365], code: (n) => `streak_${n}`, name: (n) => `${n} day run` },
   { key: 'cases', tiers: [1, 5, 10, 25], code: (n) => `cases_${n}`, name: (n) => (n === 1 ? 'First pack' : `${n} packs`) },
   { key: 'points', tiers: [1000, 5000, 10000, 25000, 50000, 100000], code: (n) => `points_${n}`, name: (n) => `${short(n)} points` },

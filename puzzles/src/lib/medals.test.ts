@@ -9,12 +9,12 @@ describe('medals', () => {
     expect(tiers).toEqual(BADGES.map((b) => b.code).sort());
   });
 
-  it('nothing earned: 8 outlines, skills first, each showing its first tier', () => {
+  it('nothing earned: 9 outlines, skills first, each showing its first tier', () => {
     const m = medalsOf([]);
-    expect(m.map((x) => x.key)).toEqual(['clean', 'nohint', 'long', 'deep', 'run', 'cases', 'points', 'first']);
+    expect(m.map((x) => x.key)).toEqual(['clean', 'nohint', 'long', 'deep', 'rare', 'run', 'cases', 'points', 'first']);
     expect(m.every((x) => x.tier === -1 && x.metal === null)).toBe(true);
-    expect(m.map((x) => x.face)).toEqual(['1', '1', '1', '1', '7', '1', '1K', '1']);
-    expect(m.map((x) => x.name)).toEqual(['Clean read', 'No-hint perfect', 'Long word', 'Deep find', '7 day run', 'First pack', '1K points', 'First puzzle']);
+    expect(m.map((x) => x.face)).toEqual(['1', '1', '1', '1', '1', '7', '1', '1K', '1']);
+    expect(m.map((x) => x.name)).toEqual(['Clean read', 'No-hint perfect', 'Long word', 'Deep find', 'Rare eye', '7 day run', 'First pack', '1K points', 'First puzzle']);
   });
 
   it('a medal is worn at the highest tier earned, in the metal of that tier', () => {

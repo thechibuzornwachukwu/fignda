@@ -1,4 +1,4 @@
-import { profileStats, type PlayRow } from './profileStats';
+import { pointsOf, profileStats, type PlayRow } from './profileStats';
 
 const play = (over: Partial<PlayRow>): PlayRow => ({
   game_id: 'bible',
@@ -93,5 +93,14 @@ describe('clean reads', () => {
 
   it('is 0 for a new player', () => {
     expect(profileStats([], 10).cleanReads).toBe(0);
+  });
+});
+
+describe('points from skill and rare words', () => {
+  const row = (game_id: string, score: number, more: Partial<PlayRow> = {}): PlayRow =>
+    ({ game_id, day_no: null, found: 4, total: 4, score, secs: 60, created_at: '2026-10-18', verified: true, ...more }) as PlayRow;
+  it('a clean read adds 100 once a puzzle, and each rare word 50 once a word and puzzle, as the database does', () => {
+    const plays = [row("a", 500, { clean: true, rare_keys: ["amos"] }), row("a", 700, { clean: true, rare_keys: ["amos", "gold"] }), row("b", 300, { rare_keys: ["amos"] })];
+    expect(pointsOf(plays)).toBe(700 + 300 + 100 + 3 * 50);
   });
 });
