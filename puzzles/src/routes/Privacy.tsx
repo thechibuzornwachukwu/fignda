@@ -51,11 +51,11 @@ export function Privacy() {
       </section>
 
       <section className={styles.section}>
-        <h2 className={styles.h2}>Puzzles on any topic</h2>
+        <h2 className={styles.h2}>Drafts made for you</h2>
         <p>
-          When you ask for a puzzle on a topic of your own, the topic you type is sent to an AI service that writes the
+          When you ask Make for a draft on a topic, the topic you type is sent to an AI service that writes the
           paragraph. We use 3: OpenRouter, Google and Groq. Only the topic goes. Your name, email and account do not.
-          The puzzle that comes back is kept so its link works.
+          A draft is kept for a day, so the same topic can be answered at once. What you publish is yours.
         </p>
       </section>
 

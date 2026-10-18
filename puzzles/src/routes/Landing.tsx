@@ -139,7 +139,7 @@ export function Landing() {
                 </li>
               ))}
             </ol>
-            <TextLink to="/play#any-topic">Or type any topic</TextLink>
+            <TextLink to="/make">Or make your own</TextLink>
           </div>
           <ul className={styles.games}>
             {PICKS.map(([id, name]) => {

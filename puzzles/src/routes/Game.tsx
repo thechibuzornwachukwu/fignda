@@ -94,7 +94,7 @@ export function GameByCode() {
         g && {
           id: g.id,
           type: 'hidden-words',
-          category: 'Custom',
+          category: 'Player made',
           title: g.title,
           noun: g.noun,
           difficulty: 'Medium',

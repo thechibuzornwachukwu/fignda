@@ -513,27 +513,6 @@ export async function generateAvailable(): Promise<boolean> {
   }
 }
 
-/** `retryAfter`: seconds from the `Retry-After` header on a 429, when the server sent one. */
-export type GenerateResult = { ok: true; code: string } | { ok: false; error: string; retryAfter?: number };
-
-/** `signal` stops the request (Cancel, the 5 minute cap, leaving the page). A stopped request answers `aborted`. */
-export async function generatePuzzle(topic: string, signal?: AbortSignal): Promise<GenerateResult> {
-  try {
-    const r = await fetch(`${API}/generate`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...(await authHeader()) },
-      body: JSON.stringify({ topic }),
-      signal,
-    });
-    const body = (await r.json().catch(() => ({}))) as { code?: string; error?: string };
-    if (r.ok && body.code) return { ok: true, code: body.code };
-    const secs = Number(r.headers.get('Retry-After'));
-    return { ok: false, error: r.status === 429 ? 'rate_limited' : (body.error ?? `http_${r.status}`), ...(r.status === 429 && secs > 0 ? { retryAfter: secs } : {}) };
-  } catch {
-    return { ok: false, error: signal?.aborted ? 'aborted' : 'network' };
-  }
-}
-
 // Background making. The server answers at once with a job; the slow work happens inside `runGenerateJob`,
 // an ordinary long request. Ask `getGenerateJob` every 5 seconds. If it says `run`, nobody is working on the
 // job (the page that started it has gone): call `runGenerateJob` again.
@@ -648,7 +627,7 @@ async function postApi(path: string, body: unknown): Promise<{ ok: boolean; stat
 export type MadePuzzle = { ok: true; code: string } | { ok: false; error: string; words?: string[] };
 
 /** Publish your own puzzle. The server runs the engine over it again before saving. */
-export async function publishPuzzle(p: { title: string; noun: string; text: string; words: string[] }): Promise<MadePuzzle> {
+export async function publishPuzzle(p: { title: string; noun: string; text: string; words: string[]; icon?: string }): Promise<MadePuzzle> {
   const auth = await authHeader();
   if (!auth.Authorization) return { ok: false, error: 'sign_in_required' };
   try {
@@ -660,7 +639,7 @@ export async function publishPuzzle(p: { title: string; noun: string; text: stri
   }
 }
 
-export type MyPuzzle = { code: string; title: string; words: number; created_at: string; plays: number; ups: number; downs: number };
+export type MyPuzzle = { code: string; title: string; words: number; created_at: string; plays: number; ups: number; downs: number; icon?: string | null };
 
 export async function myPuzzles(): Promise<MyPuzzle[]> {
   const { data, error } = await (await client()).rpc('my_puzzles');
@@ -741,7 +720,7 @@ export const inviteToRoom = (handle: string, game: string, room: string) => post
 /** Nudge a streak friend who has not played today. One a day. */
 export const nudgeFriend = (handle: string) => postApi('/nudge', { handle });
 
-export type CustomGame = { id: string; title: string; noun: string; text: string; dict: string[]; code: string };
+export type CustomGame = { id: string; title: string; noun: string; text: string; dict: string[]; code: string; icon: string | null };
 
 const customGames = new Map<string, Promise<CustomGame | null>>();
 
@@ -766,7 +745,7 @@ async function loadCustomGame(code: string): Promise<CustomGame | null> {
   if (!sb || !/^[A-Za-z2-7]{8}$/.test(code)) return null;
   const { data, error } = await sb.rpc('get_game_by_code', { p_code: code });
   const g = !error && Array.isArray(data) ? data[0] : null;
-  return g ? { id: g.id, title: g.title, noun: g.noun, text: g.text, dict: g.dict, code: g.share_code } : null;
+  return g ? { id: g.id, title: g.title, noun: g.noun, text: g.text, dict: g.dict, code: g.share_code, icon: typeof g.icon === 'string' ? g.icon : null } : null;
 }
 
 /** The signed in player's league table this week, seated on first look (`my_league`). Null: they left. */

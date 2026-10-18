@@ -19,6 +19,8 @@ import { loadFinished } from '../lib/shelves';
 import { loadStars } from '../lib/starStore';
 import { storage } from '../lib/storage';
 import { packHue } from '../lib/packHue';
+import { iconForTopic } from '../engine/topicIcon';
+import { TopicIcon } from '../components/TopicIcon';
 import styles from './Journey.module.css';
 
 export type JourneyGame = CatalogueItem & { title: string };
@@ -45,7 +47,7 @@ const SWAY = [0, 1, 2, 1, 0, -1, -2, -1] as const;
 const AVATAR = { clue: 56, big: 68, finished: 56 } as const;
 
 type ClueView = { id: string; to: string; name: string; state: ClueState; stars: 0 | 1 | 2 | 3; big: boolean; shift: number };
-type CaseView = { id: string; title: string; /** The pack's colour (`packHue`). */ hue: string; clues: ClueView[]; state: 'done' | 'open' | 'locked'; stars: 0 | 1 | 2 | 3; count: string; line: string; /** "With NAME", on a sponsored case. */ sponsor: string };
+type CaseView = { id: string; title: string; /** The pack's colour (`packHue`). */ hue: string; /** Its topic icon (`iconForTopic`). */ icon: string; clues: ClueView[]; state: 'done' | 'open' | 'locked'; stars: 0 | 1 | 2 | 3; count: string; line: string; /** "With NAME", on a sponsored case. */ sponsor: string };
 
 const EMPTY: Path = { cases: [] };
 
@@ -110,6 +112,7 @@ export function Journey({ catalogue = games, path, done, stars, title = 'Your pa
         id: c.id,
         title,
         hue: packHue(getGameDef(c.id)?.category),
+        icon: iconForTopic(`${getGameDef(c.id)?.category ?? ''} ${title}`),
         clues,
         state,
         // A pack is done by its last clue or by the whole puzzle: the best of the whole puzzle, or the stars its
@@ -154,6 +157,7 @@ export function Journey({ catalogue = games, path, done, stars, title = 'Your pa
             <header className={styles.caseHead}>
               <div className={styles.caseText}>
                 <h3 id={`${headId}-${c.id}`} className={styles.caseTitle}>
+                  <TopicIcon name={c.icon} size={20} />
                   {c.state === 'done' ? (
                     <Link to={`/play/${c.id}`} className={styles.caseLink}>
                       {c.title}

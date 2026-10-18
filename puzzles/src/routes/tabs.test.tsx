@@ -124,9 +124,6 @@ describe('Games', () => {
     expect(within(screen.getByRole('region', { name: 'Your path' })).getAllByRole('link').length).toBeGreaterThan(0);
     expect(screen.queryByRole('region', { name: 'All games' })).toBeNull();
     expect(screen.getByRole('link', { name: /Change your look and your pet/ })).toHaveAttribute('href', '/me');
-    // Give the any-topic check time to answer: it still must not show.
-    await Promise.resolve();
-    expect(screen.queryByLabelText('Or any topic')).toBeNull();
     expect(screen.queryByRole('link', { name: 'Make a puzzle' })).toBeNull();
     expect(screen.queryByRole('link', { name: "See today's board" })).toBeNull();
     expect(screen.queryByText(/of the last 7 days/)).toBeNull();
@@ -158,12 +155,6 @@ describe('Games', () => {
     expect(screen.getByRole('region', { name: 'Your path' })).toBeInTheDocument();
   });
 
-  it('the direct link shows any topic before it is unlocked, and keeps it', async () => {
-    open('/play#any-topic');
-    expect(await screen.findByLabelText('Or any topic')).toBeInTheDocument();
-    expect(localStorage.getItem('gazecraft-unlocks')).toContain('make');
-  });
-
   it('Cases is the daily and the path: no week, no board link, and Make only once it is unlocked', () => {
     localStorage.setItem('gazecraft-finished', JSON.stringify([games[0]!.id]));
     open('/play');
@@ -172,11 +163,11 @@ describe('Games', () => {
     expect(screen.queryByRole('link', { name: 'Make a puzzle' })).toBeNull();
   });
 
-  it('5 plays bring Make a puzzle and any topic', async () => {
+  it('5 plays bring Make a puzzle, and there is no any-topic box: Make is the one way to make one', async () => {
     localStorage.setItem('gazecraft-finished', JSON.stringify(games.slice(0, 5).map((g) => g.id)));
     open('/play');
     expect(screen.getByRole('link', { name: 'Make a puzzle' })).toHaveAttribute('href', '/make');
-    expect(await screen.findByLabelText('Or any topic')).toBeInTheDocument();
+    expect(screen.queryByLabelText('Or any topic')).toBeNull();
   });
 
   it('a returning player on a new device sees what their stored plays unlock', async () => {

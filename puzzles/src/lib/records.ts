@@ -15,7 +15,7 @@ export type LongWord = { word: string; len: number };
 export type Records = { clean: Record<string, number>; daily: number; long: LongWord | null; week: number };
 
 export type PlayFacts = {
-  /** The pack this puzzle belongs to. Null for a player-made or any-topic puzzle. */
+  /** The pack this puzzle belongs to. Null for a player-made puzzle. */
   pack: string | null;
   /** Seconds, when the play was a clean read. Null when it was not. */
   cleanSecs: number | null;

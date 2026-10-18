@@ -1,5 +1,5 @@
-import { useEffect, useMemo } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { guestAvatar } from '../avatar/guest';
 import { Avatar } from '../components/Avatar';
 import { Partner } from '../components/Partner';
@@ -9,8 +9,7 @@ import { pick } from '../copy';
 import { useStreak, type Streak } from '../lib/useStreak';
 import { TextLink } from '../components/TextLink';
 import { useAuth } from '../lib/auth';
-import { keepUnlocked, useUnlocks } from '../lib/useUnlocks';
-import { CustomTopic } from './CustomTopic';
+import { useUnlocks } from '../lib/useUnlocks';
 import { GameInvites } from './GameInvites';
 import { Journey } from './Journey';
 import styles from './Games.module.css';
@@ -41,12 +40,6 @@ export function Games() {
   const auth = useAuth();
   const run = useStreak();
   const open = useUnlocks(run.played);
-  const { hash } = useLocation();
-  // A direct link always works: /play#any-topic shows the input, and it stays from then on.
-  const asked = hash === '#any-topic';
-  useEffect(() => {
-    if (asked) keepUnlocked(['make']);
-  }, [asked]);
 
   return (
     <div className={styles.screen}>
@@ -63,11 +56,6 @@ export function Games() {
         </p>
       )}
 
-      {(open.make || asked) && (
-        <div id="any-topic">
-          <CustomTopic />
-        </div>
-      )}
     </div>
   );
 }

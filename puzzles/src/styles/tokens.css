@@ -138,6 +138,7 @@
   --burst-reach: 150px;     /* How far the paper flies */
   /* The sums board, SPEC sections 6 and 9. */
   --sums-tile: 44px; --sums-tile-h: 52px;
+  --tap: 44px; /* The smallest thing a finger presses */
 }
 @media (prefers-reduced-motion: reduce) {
   :root {
