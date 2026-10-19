@@ -53,6 +53,7 @@ export function Games() {
       {auth.enabled && open.make && (
         <p className={styles.more}>
           <TextLink to="/make">Make a puzzle</TextLink>
+          <TextLink to="/made">Made by players</TextLink>
         </p>
       )}
 

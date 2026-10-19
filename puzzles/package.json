@@ -26,6 +26,7 @@
     "og:render": "node scripts/render-og.mjs",
     "sponsor:report": "tsx scripts/sponsor-report.ts",
     "funnel:report": "tsx scripts/funnel-report.ts",
+    "usage:report": "tsx scripts/usage-report.ts",
     "brand:render": "tsx scripts/render-brand.mjs",
     "push:keys": "node scripts/push-keys.mjs",
     "ai:bench": "tsx scripts/ai-bench.ts",

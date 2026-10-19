@@ -107,12 +107,9 @@ Play with no account, and sponsors get numbers, never people.
 
 ### 9. Smaller
 
-- [ ] Usage per feature per week from the database. Under 2% of weekly players after a month moves behind "More".
-- [ ] A public list of player-made puzzles.
 - [ ] Reminders by email, once SMTP is set.
 - [ ] Later, once there are players to help: a help centre on GitBook (how a puzzle works, tip-offs, circles, the account, privacy), linked from Settings and the footer. Advised to the owner. Check its free plan and whether it can sit on our own domain first.
 - [ ] Later, with it: email sequences on Loops, to teach a new player the game a little at a time (the first puzzle, a circle, a pet). Advised to the owner. It needs the domain and a yes from the player at sign up, it is a new company that receives email addresses, so the privacy page names it, and every email has a way out. No guilt and no word about what would be lost, as in reminders.
-- [ ] `e2e/onboarding.spec.ts`, and a count of new visitors who finish a puzzle and then sign in.
 
 ## Checks still owed
 

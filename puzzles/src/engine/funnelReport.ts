@@ -73,6 +73,9 @@ export function funnelLines(days: readonly FunnelDay[]): string[] {
   out.push(cols('Total', starts.toLocaleString('en-US'), sum('ends').toLocaleString('en-US'), pct(sum('ends'), starts), accounts.toLocaleString('en-US')), '');
   const rate = per100(accounts, starts);
   out.push(rate === null ? 'No game was started in these days, so there is no rate to give.' : `${rate} new accounts for every 100 games started.`);
+  // The plan's count: of the games played to the end, how many new accounts followed (BUILD_PLAN set 9).
+  const finished = per100(accounts, sum('ends'));
+  if (finished !== null) out.push(`${finished} new accounts for every 100 games finished.`);
   out.push('Games count everyone, guests included, from 10 Oct 2026. They are counted in the browser and not checked.');
   out.push('A player who starts 5 games is 5 starts, so this is a rate to compare week with week, not a share of people.');
   return out;

@@ -29,6 +29,7 @@ const Circle = lazy(() => import('./routes/Circles').then((m) => ({ default: m.C
 const Notifications = lazy(() => import('./routes/Notifications').then((m) => ({ default: m.Notifications })));
 const OwnerPuzzles = lazy(() => import('./routes/OwnerPuzzles').then((m) => ({ default: m.OwnerPuzzles })));
 const Make = lazy(() => import('./routes/Make').then((m) => ({ default: m.Make })));
+const Made = lazy(() => import('./routes/Made').then((m) => ({ default: m.Made })));
 const StreakInvite = lazy(() => import('./routes/StreakInvite').then((m) => ({ default: m.StreakInvite })));
 const Welcome = lazy(() => import('./routes/Welcome').then((m) => ({ default: m.Welcome })));
 const Privacy = lazy(() => import('./routes/Privacy').then((m) => ({ default: m.Privacy })));
@@ -104,6 +105,7 @@ export function App() {
         <Route path="c/:code" element={<Circle />} />
         <Route path="s/:code" element={<StreakInvite />} />
         <Route path="make" element={<Make />} />
+        <Route path="made" element={<Made />} />
         <Route path="owner/puzzles" element={<OwnerPuzzles />} />
         <Route path="notifications" element={<Notifications />} />
         <Route path="privacy" element={<Privacy />} />

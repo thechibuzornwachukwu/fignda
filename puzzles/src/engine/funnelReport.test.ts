@@ -70,6 +70,7 @@ describe('funnelLines', () => {
       'Total       1,200       900    75%        24',
       '',
       '2 new accounts for every 100 games started.',
+      '2.7 new accounts for every 100 games finished.',
       'Games count everyone, guests included, from 10 Oct 2026. They are counted in the browser and not checked.',
       'A player who starts 5 games is 5 starts, so this is a rate to compare week with week, not a share of people.',
     ]);

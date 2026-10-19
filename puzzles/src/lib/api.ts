@@ -748,6 +748,19 @@ async function loadCustomGame(code: string): Promise<CustomGame | null> {
   return g ? { id: g.id, title: g.title, noun: g.noun, text: g.text, dict: g.dict, code: g.share_code, icon: typeof g.icon === 'string' ? g.icon : null } : null;
 }
 
+export type PublicPuzzle = { code: string; title: string; icon: string | null; maker: string; words: number; plays: number; ups: number };
+
+/** Player-made puzzles, published and passed, most liked first (`public_puzzles`). Open to guests. */
+export async function fetchPublicPuzzles(limit = 50): Promise<PublicPuzzle[]> {
+  const sb = await getSupabase();
+  if (!sb) return [];
+  const { data, error } = await sb.rpc('public_puzzles', { p_limit: limit });
+  if (error) throw error;
+  return (Array.isArray(data) ? data : [])
+    .filter((r) => r && typeof r.code === 'string' && typeof r.maker === 'string')
+    .map((r) => ({ code: r.code, title: String(r.title ?? ''), icon: typeof r.icon === 'string' ? r.icon : null, maker: r.maker, words: Number(r.words) || 0, plays: Number(r.plays) || 0, ups: Number(r.ups) || 0 }));
+}
+
 /** The signed in player's league table this week, seated on first look (`my_league`). Null: they left. */
 export async function fetchMyLeague(): Promise<League | null> {
   const { data, error } = await (await client()).rpc('my_league');
