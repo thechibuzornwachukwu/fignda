@@ -5,7 +5,7 @@
 // 3.3 m (22 units), eyes 1.6 m up (11 units), a lamp 7 m, a street tree 15 m.
 
 import {
-  AmbientLight, BoxGeometry, DoubleSide, MeshToonMaterial, NearestFilter, DataTexture, RedFormat, type Material, BufferGeometry, CanvasTexture, Color, ConeGeometry, CylinderGeometry, DirectionalLight, Float32BufferAttribute, Fog, Group, HemisphereLight,
+  AmbientLight, BoxGeometry, DoubleSide, MeshBasicMaterial, MeshToonMaterial, NearestFilter, DataTexture, RedFormat, type Material, BufferGeometry, CanvasTexture, Color, ConeGeometry, CylinderGeometry, DirectionalLight, Float32BufferAttribute, Fog, Group, HemisphereLight,
   IcosahedronGeometry, LineBasicMaterial, LineSegments, Mesh, MeshStandardMaterial, Object3D, OrthographicCamera, PerspectiveCamera, PlaneGeometry, PointLight, Points, PointsMaterial,
   Scene, SphereGeometry, Sprite, SpriteMaterial, SRGBColorSpace, Texture, TorusGeometry, Vector3, type Camera,
 } from 'three';
@@ -31,6 +31,8 @@ export type View = 'plan' | 'iso' | 'front' | 'walk' | 'enter';
 export type Style = 'village' | 'storybook' | 'real';
 export type Options = { view?: View; hour?: number; date?: Date; weather?: Weather; walkX?: number; aspect?: number; style?: Style };
 let STYLE: Style = 'village';
+/** Snow lying on the roofs, when it has been snowing. */
+let SNOWED = false;
 let TOON: DataTexture | null = null;
 /** 3 bands of light, for the storybook look. */
 const toonRamp = () => {
@@ -151,6 +153,11 @@ function building(b: Block, night: boolean, seed: number): Group {
   const roof = roofGeometry({ ...b, at: [x - 1.5, y - 1.5, w + 3, h + 3] }, base + z);
   if (roof) {
     g.add(new Mesh(roof, STYLE === 'storybook' ? mat(tone(b.top), { side: DoubleSide }) : new MeshStandardMaterial({ map: tiles(tone(b.top)), roughness: 0.85, flatShading: true, side: DoubleSide })));
+    if (SNOWED) {
+      // Snow lies on every slope, a little proud of the tiles.
+      const lying = new Mesh(roof.clone().translate(0, 0.8, 0), new MeshStandardMaterial({ color: colour('#f4f6f8'), roughness: 0.9, side: DoubleSide }));
+      g.add(lying);
+    }
   } else {
     const top = new Mesh(box(w + 2, 1.6, h + 2), mat(tone(b.top)));
     top.position.set(x + w / 2, base + z + 0.6, y + h / 2);
@@ -365,13 +372,14 @@ function surface(t: Texture, w: number, h: number, per: number): Material {
 /** The street, its weather and its light. */
 export function buildStreet({ view = 'iso', hour = 15, date = new Date(Date.UTC(2026, 9, 19)), weather = 'clear', walkX = 300, aspect = 16 / 9, style = 'village' }: Options = {}): { scene: Scene; camera: Camera } {
   STYLE = style;
+  SNOWED = weather === 'snow';
   const scene = new Scene();
   const sun = sunAt(hour);
   const night = !sun.up;
   const grey = weather !== 'clear';
 
   // The sky and the air: blue by day, near black by night, grey under cloud.
-  const sky = night ? '#0d1119' : grey ? '#9aa0a3' : '#a9c7d8';
+  const sky = night ? '#0d1119' : weather === 'storm' ? '#6d7276' : grey ? '#9aa0a3' : '#a9c7d8';
   scene.background = colour(sky);
   const level = view === 'walk' || view === 'enter' || view === 'front';
   // Haze in the distance only seen from the street; from above the air is clear unless it is foggy.
@@ -550,7 +558,20 @@ export function buildStreet({ view = 'iso', hour = 15, date = new Date(Date.UTC(
     for (let k = 0; k < 7000; k++) pts.push(r() * 1400 - 100, r() * 160, r() * 1000 - 100);
     const pg = new BufferGeometry();
     pg.setAttribute('position', new Float32BufferAttribute(pts, 3));
-    scene.add(new Points(pg, new PointsMaterial({ color: colour('#ffffff'), size: 1.4 })));
+    // Round soft flakes, smaller with distance.
+    scene.add(new Points(pg, new PointsMaterial({ map: flakeTexture(), color: colour('#ffffff'), size: 1.1, sizeAttenuation: true, transparent: true, depthWrite: false, alphaTest: 0.05 })));
+    // Snow lying over the street and the fields, worn grey in the wheel lanes of the road.
+    const cover = new Mesh(new PlaneGeometry(5000, 5000), new MeshStandardMaterial({ color: colour('#eef1f4'), roughness: 0.95, transparent: true, opacity: 0.86 }));
+    cover.rotation.x = -Math.PI / 2;
+    cover.position.set(600, 1.2, 400);
+    cover.receiveShadow = true;
+    scene.add(cover);
+    for (const lane of [458, 482]) {
+      const slush = new Mesh(new PlaneGeometry(2800, 8), new MeshStandardMaterial({ color: colour('#8e9296'), roughness: 0.6, transparent: true, opacity: 0.7 }));
+      slush.rotation.x = -Math.PI / 2;
+      slush.position.set(0, 1.3, lane);
+      scene.add(slush);
+    }
   }
   if (weather === 'flood') {
     const water = new Mesh(new PlaneGeometry(5000, 5000), new MeshStandardMaterial({ color: colour('#6f6248'), roughness: 0.15, metalness: 0.1, transparent: true, opacity: 0.88 }));
@@ -559,7 +580,136 @@ export function buildStreet({ view = 'iso', hour = 15, date = new Date(Date.UTC(
     scene.add(water);
   }
 
+  // Clouds in the sky: a few white ones on a fair day, many grey ones under cloud.
+  {
+    const r = rng(77);
+    const n = grey ? 26 : 9;
+    for (let k = 0; k < n; k++) {
+      const c = new Sprite(new SpriteMaterial({ map: cloudTexture(grey), fog: false, depthWrite: false, transparent: true, opacity: grey ? 0.95 : 0.9 }));
+      const a = r() * Math.PI * 2;
+      const d = 1800 + r() * 1600;
+      c.position.set(600 + Math.cos(a) * d, 620 + r() * 420, 400 + Math.sin(a) * d);
+      c.scale.set(900 + r() * 700, 280 + r() * 160, 1);
+      scene.add(c);
+    }
+  }
+  // Birds cross the sky in the early morning and the early evening, on a fair day.
+  if (!grey && ((hour >= 6 && hour < 9) || (hour >= 16 && hour < 19))) {
+    const r = rng(61);
+    const bird = new MeshStandardMaterial({ color: colour('#2b2a28'), side: DoubleSide });
+    for (let k = 0; k < 9; k++) {
+      const geo = new BufferGeometry();
+      const w = 5 + r() * 3;
+      geo.setAttribute('position', new Float32BufferAttribute([-w, 1.5, 0, 0, 0, 0, 0, 0, 1.2, w, 1.5, 0, 0, 0, 0, 0, 0, 1.2], 3));
+      const b = new Mesh(geo, bird);
+      b.position.set(400 + r() * 400, 150 + r() * 70, 300 + r() * 200);
+      scene.add(b);
+    }
+  }
+  if (weather === 'storm') {
+    // A tornado on the fields east of the town, past the market, standing on the ground: a funnel narrow at the foot and broad where it
+    // leaves the cloud, twisted, brown with dust near the ground, a debris cloud churning round its foot.
+    const funnel = new Group();
+    const H = 470;
+    for (let k = 0; k < 24; k++) {
+      const f = k / 24;
+      const rad = 6 + 120 * f ** 2;
+      // Dark and ragged: grey above, brown with lifted dust toward the ground, thinner at the edges.
+      // Seen against the sky a funnel is a dark shape, not a lit one: it takes no light.
+      const ring = new Mesh(new CylinderGeometry(rad + 6, rad, H / 24 + 1, 14, 1, true), new MeshBasicMaterial({ color: colour(f < 0.3 ? '#4f4639' : '#3f4044'), transparent: true, opacity: 0.62 + f * 0.3, side: DoubleSide, fog: false }));
+      ring.position.set(Math.sin(f * 4) * 14, f * H, Math.cos(f * 3) * 8);
+      funnel.add(ring);
+    }
+    const r = rng(19);
+    for (let k = 0; k < 60; k++) {
+      const d = new Mesh(new SphereGeometry(4 + r() * 8, 6, 5), new MeshStandardMaterial({ color: colour(r() < 0.5 ? '#8f7d5f' : '#776a54'), roughness: 1, transparent: true, opacity: 0.6 }));
+      const a = r() * Math.PI * 2;
+      d.position.set(Math.cos(a) * (10 + r() * 50), r() * 40, Math.sin(a) * (10 + r() * 50));
+      funnel.add(d);
+    }
+    funnel.position.set(1650, 0, 360);
+    scene.add(funnel);
+    // The wall cloud it comes down from.
+    // The heavy cloud base it hangs from: dark cloud, low and wide, with no shine.
+    for (let k = 0; k < 9; k++) {
+      const c = new Sprite(new SpriteMaterial({ map: cloudTexture(true), color: colour('#6a6c70'), fog: false, depthWrite: false, transparent: true, opacity: 0.95 }));
+      c.position.set(1650 + (k - 4) * 180, H + 30 + (k % 3) * 25, 360 + ((k * 53) % 200) - 100);
+      c.scale.set(700, 230, 1);
+      scene.add(c);
+    }
+    // A strike of lightning on the fields to the north east, lighting the street for an instant.
+    const pts: number[] = [];
+    let [lx, ly, lz] = [900, 520, -260];
+    while (ly > 0) {
+      const [nx, ny, nz] = [lx + (r() - 0.5) * 60, ly - 40 - r() * 30, lz + (r() - 0.5) * 30];
+      pts.push(lx, ly, lz, nx, Math.max(0, ny), nz);
+      [lx, ly, lz] = [nx, ny, nz];
+    }
+    const bolt = new BufferGeometry();
+    bolt.setAttribute('position', new Float32BufferAttribute(pts, 3));
+    scene.add(new LineSegments(bolt, new LineBasicMaterial({ color: colour('#fffbe8') })));
+    const flash = new PointLight(colour('#e8eeff'), 60000, 1800, 1.2);
+    flash.position.set(900, 300, -200);
+    scene.add(flash);
+    // Papers, leaves and planks blown down the street.
+    const torn = new MeshStandardMaterial({ color: colour('#c9b48a'), side: DoubleSide });
+    for (let k = 0; k < 80; k++) {
+      const p = new Mesh(new PlaneGeometry(2 + r() * 4, 1.5 + r() * 3), torn);
+      p.position.set(r() * 1100, 4 + r() * 70, 380 + r() * 200);
+      p.rotation.set(r() * 3, r() * 3, r() * 3);
+      scene.add(p);
+    }
+  }
+
   return { scene, camera: cameraFor(view, aspect, walkX) };
+}
+
+/** A soft round snowflake. */
+function flakeTexture(): Texture {
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = 32;
+  const g = cv.getContext('2d')!;
+  const grad = g.createRadialGradient(16, 16, 1, 16, 16, 15);
+  grad.addColorStop(0, 'rgba(255,255,255,1)');
+  grad.addColorStop(0.5, 'rgba(255,255,255,0.8)');
+  grad.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 32, 32);
+  const t = new CanvasTexture(cv);
+  t.colorSpace = SRGBColorSpace;
+  return t;
+}
+
+/** A cloud: many soft puffs over a flat base, bright on top and a shade darker underneath, with no hard edge anywhere. */
+function cloudTexture(grey: boolean): Texture {
+  const cv = document.createElement('canvas');
+  cv.width = 512;
+  cv.height = 160;
+  const g = cv.getContext('2d')!;
+  const r = rng(grey ? 3 : 1);
+  const [lit, shade] = grey ? [[168, 170, 172], [118, 121, 124]] : [[255, 255, 255], [214, 221, 229]];
+  for (let k = 0; k < 46; k++) {
+    const x = 60 + r() * 392;
+    const y = 70 + r() * 50 - Math.sin(((x - 60) / 392) * Math.PI) * 40;
+    const rad = 26 + r() * 40;
+    const t = Math.min(1, Math.max(0, (y - 40) / 90));
+    const c = lit.map((v, i) => Math.round(v + (shade[i]! - v) * t));
+    const grad = g.createRadialGradient(x, y, 0, x, y, rad);
+    grad.addColorStop(0, `rgba(${c.join(',')},0.55)`);
+    grad.addColorStop(1, `rgba(${c.join(',')},0)`);
+    g.fillStyle = grad;
+    g.fillRect(x - rad, y - rad, rad * 2, rad * 2);
+  }
+  // A flat base: clouds float on a level.
+  g.globalCompositeOperation = 'destination-out';
+  const base = g.createLinearGradient(0, 118, 0, 140);
+  base.addColorStop(0, 'rgba(0,0,0,0)');
+  base.addColorStop(1, 'rgba(0,0,0,1)');
+  g.fillStyle = base;
+  g.fillRect(0, 118, 512, 42);
+  const t = new CanvasTexture(cv);
+  t.colorSpace = SRGBColorSpace;
+  return t;
 }
 
 /** The sky from street level: deep overhead, paler toward the horizon. */
