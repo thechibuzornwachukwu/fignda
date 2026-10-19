@@ -11,6 +11,7 @@ import {
 } from 'three';
 import { BINS, BLOCKS, CROWNS, LAMPS, SIGNS, STREET_NAME, TREES, moonPhase, sunAt, type Block, type TreeForm, type TreeKind, type Weather } from '../map/street';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
+import { bench, bollard, car, cycleRack, planter, postBox, shopfront, wires } from './furniture';
 import { brick, cobbles, fields, grass, lettering, moonFace, paving, plaster, rng, tarmac, tiles } from './textures';
 
 /** Real proportions from the maps' drawn ones: walls and roofs, and trees. */
@@ -117,11 +118,19 @@ function roofGeometry(b: Block, z: number): BufferGeometry | null {
   return g;
 }
 
+/** The shops: their ground floor is a shopfront with the shop's name on the fascia. [x0, x1, name, fascia, awning]. */
+const SHOPS: Record<string, [number, number, string, string, string?]> = {
+  'roof-bakery': [536, 586, 'Marco\u2019s Bakery', '#2f4a3e', '#c9473a'],
+  'roof-sale-room': [708, 760, 'Sale Rooms', '#2c3a52'],
+};
+
 /** A building: walls of its own material, a roof, and on its street side storeys of windows, a door, its number. */
 function building(b: Block, night: boolean, seed: number): Group {
   const g = new Group();
   const [x, y, w, h] = b.at;
-  const z = b.wall * HS;
+  // A terrace is never level: each house a little taller or lower than the next.
+  const lift = ({ 6: 1.08, 8: 0.94, 10: 1.12 } as Record<number, number>)[b.number ?? 0] ?? 1;
+  const z = b.wall * HS * lift;
   const base = (b.base ?? 0) * HS;
   const walls = new Mesh(box(w, z, h), skin(() => {
     const t = b.walls === 'f-brick' ? brick() : plaster(tone(b.walls));
@@ -147,6 +156,17 @@ function building(b: Block, night: boolean, seed: number): Group {
     top.position.set(x + w / 2, base + z + 0.6, y + h / 2);
     g.add(top);
   }
+  if (b.number != null && b.number % 2 === 0 && b.number > 2) {
+    // Each house in the terrace has its own chimney stack, with 2 pots.
+    const st = new Mesh(box(7, 16, 10), skin(brick, '#a65a44'));
+    st.position.set(x + w * 0.5, base + z + b.roof * 0.62 * 0.62, y + h * 0.5);
+    g.add(st);
+    for (const dz of [-2.4, 2.4]) {
+      const pot = new Mesh(new CylinderGeometry(1.2, 1.4, 3.4, 8), mat('#b0603f'));
+      pot.position.set(x + w * 0.5, base + z + b.roof * 0.62 * 0.62 + 9.6, y + h * 0.5 + dz);
+      g.add(pot);
+    }
+  }
   if (b.chimney) {
     const c = new Mesh(box(9, 26, 9), skin(brick, '#a65a44'));
     c.position.set(x + w - 40, base + z + b.roof * 0.62 * 0.6 + 8, y + h * 0.3);
@@ -168,20 +188,23 @@ function building(b: Block, night: boolean, seed: number): Group {
       const step = 16 + Math.floor(r() * 5);
       for (let wx = x + 6 + r() * 4; wx + 9 <= x + w - 5; wx += step) {
         if (s === 0 && door && wx + 10 > door[0] - 3 && wx < door[0] + door[1] + 10) continue;
+        if (s === 0 && SHOPS[b.anchor ?? '']) continue;
         if (r() < 0.08) continue;
         const isLit = night && r() < 0.4;
-        const pane = new Mesh(new BoxGeometry(8.6, 11, 0.6), isLit ? lit : glass);
-        pane.position.set(wx + 4.5, sy + 5.5, faceZ);
-        const fr = new Mesh(new BoxGeometry(10, 12.4, 0.4), frame);
-        fr.position.set(wx + 4.5, sy + 5.5, faceZ + (north ? -0.15 : 0.15));
-        const bar = new Mesh(new BoxGeometry(0.6, 11, 0.8), frame);
-        bar.position.set(wx + 4.5, sy + 5.5, faceZ);
+        // A single tall storey, the hall's, has tall windows filling most of the wall.
+        const tall = storeys === 1 && z > 30 ? Math.min(26, z * 0.6) : 11;
+        const pane = new Mesh(new BoxGeometry(8.6, tall, 0.6), isLit ? lit : glass);
+        pane.position.set(wx + 4.5, sy + tall / 2, faceZ);
+        const fr = new Mesh(new BoxGeometry(10, tall + 1.4, 0.4), frame);
+        fr.position.set(wx + 4.5, sy + tall / 2, faceZ + (north ? -0.15 : 0.15));
+        const bar = new Mesh(new BoxGeometry(0.6, tall, 0.8), frame);
+        bar.position.set(wx + 4.5, sy + tall / 2, faceZ);
         const sill = new Mesh(new BoxGeometry(11, 0.8, 2), frame);
         sill.position.set(wx + 4.5, sy - 0.6, faceZ);
         g.add(fr, pane, bar, sill);
         if (r() < 0.18) for (const side of [-1, 1]) {
-          const sh = new Mesh(new BoxGeometry(4.4, 12, 0.5), mat(r() < 0.5 ? '#4f6a55' : '#5d4a3a'));
-          sh.position.set(wx + 4.5 + side * 7.4, sy + 5.5, faceZ);
+          const sh = new Mesh(new BoxGeometry(4.4, tall + 1, 0.5), mat(r() < 0.5 ? '#4f6a55' : '#5d4a3a'));
+          sh.position.set(wx + 4.5 + side * 7.4, sy + tall / 2, faceZ);
           g.add(sh);
         }
       }
@@ -419,8 +442,14 @@ export function buildStreet({ view = 'iso', hour = 15, date = new Date(Date.UTC(
       scene.add(stall(b));
       return;
     }
+    if (b.wall === 12 && b.roof === 8) {
+      // A parked car: at the kerb along the street, in the yard nose in.
+      const [x, y, w, hh] = b.at;
+      scene.add(shadowy(car(mat, x + w / 2, y + hh / 2, tone(b.walls), hh > w)));
+      return;
+    }
     if (b.wall < 14 && !b.posts && b.roof === 0) {
-      // Small things: cars and sheds and the like, as solid little blocks.
+      // Small things: sheds and the like, as solid little blocks.
       const [x, y, w, hh] = b.at;
       const m = new Mesh(new BoxGeometry(w, b.wall * HS + 2, hh), mat(tone(b.walls), { roughness: 0.6 }));
       m.position.set(x + w / 2, (b.wall * HS + 2) / 2, y + hh / 2);
@@ -428,7 +457,16 @@ export function buildStreet({ view = 'iso', hour = 15, date = new Date(Date.UTC(
       return;
     }
     scene.add(building(b, night, i + 3));
+    const shop = SHOPS[b.anchor ?? ''];
+    if (shop) scene.add(shadowy(shopfront(mat, shop[0], shop[1], b.at[1] + b.at[3], shop[2], shop[3], shop[4])));
   });
+  // What a lived-in street has at eye level.
+  scene.add(shadowy(postBox(mat, 524, 422)));
+  scene.add(shadowy(bench(mat, 300, 422, 1)), shadowy(bench(mat, 470, 520, -1)), shadowy(bench(mat, 1010, 604, -1)));
+  scene.add(shadowy(planter(mat, 650, 423, 3)), shadowy(planter(mat, 960, 336, 5)), shadowy(planter(mat, 1080, 336, 7)));
+  for (const [bx, bz] of [[884, 425], [884, 515], [1156, 425], [1156, 515]] as const) scene.add(shadowy(bollard(mat, bx, bz)));
+  scene.add(shadowy(cycleRack(mat, 690, 519)));
+  scene.add(wires(mat, [[130, 523], [400, 523], [660, 523], [870, 523]], [[702, 531], [747, 531], [792, 531], [837, 531]]));
   TREES.forEach(([x, y, rad, hgt, form, kind, leaf], i) => scene.add(tree3d(x, y, rad, hgt, form, kind, leaf, i * 7)));
   const metal = mat('#3a3d42', { roughness: 0.5, metalness: 0.3 });
   for (const [x, y] of LAMPS) {
