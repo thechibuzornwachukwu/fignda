@@ -7,13 +7,15 @@ Seed (after `npm run db:seed:gen`): `npx supabase db query --linked -f supabase/
 
 ## To build, in sets
 
-Each item names who champions it. **Opus**: engines, the server, data, money, anything that can cost points or trust. **Sonnet**: screens, drawing, research. **Haiku**: tests, copy, drafts, screenshots. **You**: accounts, money, signatures and decisions.
+Each item names who champions it. **Opus**: engines, the server, data, money, anything that can cost points or trust. **Sonnet**: screens, drawing, research. **Haiku**: tests, copy, screenshots. **Free model** (OpenRouter's free tier): bulk drafts of words only, never code, always checked by the engine or a person. **You**: accounts, money, signatures and decisions.
 
 One set at a time. Each set is small, works on its own and leaves the live game whole. After each set: lint, typecheck, unit tests and the browser tests pass.
 
 ### 10. New game types
 
-- [ ] **Opus** (engine, server checks), **Haiku** (tests, copy, screenshots). **Set 10a. A third family.** SPEC section 9, Families: Liar or Relay (words), number series (numbers), Trace (shapes). One type at a time, engine first, through the registry.
+- [ ] **Opus** (engine, server checks), **Haiku** (tests, copy, screenshots), **Free model** (Liar's statements, checked by you). **Set 10a. A third family.** SPEC section 9, Families: Liar or Relay (words), number series (numbers), Trace (shapes). One type at a time, engine first, through the registry.
+
+- [ ] **Free model** drafts paragraphs, the engine keeps only those whose words truly hide, **Haiku** adds them to `data/games.json`. **Set 10b. More packs,** 5 at a time, on topics players ask Make for most.
 
 ### 7. Pets
 
@@ -29,8 +31,8 @@ Play with no account, and sponsors get numbers, never people.
 ### 9. Smaller
 
 - [ ] **You** (SMTP), then **Sonnet**. Reminders by email, once SMTP is set.
-- [ ] **Haiku** drafts the articles, **you** publish. Later, once there are players to help: a help centre on GitBook (how a puzzle works, tip-offs, circles, the account, privacy), linked from Settings and the footer. Advised to the owner. Check its free plan and whether it can sit on our own domain first.
-- [ ] **Haiku** drafts the emails, **you** set up Loops. Later, with it: email sequences on Loops, to teach a new player the game a little at a time (the first puzzle, a circle, a pet). Advised to the owner. It needs the domain and a yes from the player at sign up, it is a new company that receives email addresses, so the privacy page names it, and every email has a way out. No guilt and no word about what would be lost, as in reminders.
+- [ ] **Free model** drafts the articles, **you** edit and publish. Later, once there are players to help: a help centre on GitBook (how a puzzle works, tip-offs, circles, the account, privacy), linked from Settings and the footer. Advised to the owner. Check its free plan and whether it can sit on our own domain first.
+- [ ] **Free model** drafts the emails, **you** edit and set up Loops. Later, with it: email sequences on Loops, to teach a new player the game a little at a time (the first puzzle, a circle, a pet). Advised to the owner. It needs the domain and a yes from the player at sign up, it is a new company that receives email addresses, so the privacy page names it, and every email has a way out. No guilt and no word about what would be lost, as in reminders.
 
 ## Owner
 
