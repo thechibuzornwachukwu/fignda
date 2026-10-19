@@ -1,6 +1,6 @@
 # Lantern Row
 
-The street every case happens on. Read it before writing a story. Its map is `design/sketches/the-street.html` (`.png`), and its places, with their spots, are `src/engine/world.ts`. A case may add a place, a person or a custom: add it here in the same change, and never contradict a line already here.
+The street every case happens on. Read it before writing a story. Its map is `design/sketches/the-street.html` (`.png`), and its places, with their spots, are `src/engine/world.ts`. By day in the light theme, at night in the dark (`the-street-dark.png`). A case may add a place, a person or a custom: add it here in the same change, and never contradict a line already here.
 
 ## The street
 
