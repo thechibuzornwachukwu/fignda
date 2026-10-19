@@ -9,6 +9,10 @@ Seed (after `npm run db:seed:gen`): `npx supabase db query --linked -f supabase/
 
 One set at a time. Each set is small, works on its own and leaves the live game whole. After each set: lint, typecheck, unit tests and the browser tests pass.
 
+### 10. New game types
+
+- [ ] **Set 10a. A third family.** SPEC section 9, Families: Liar or Relay (words), number series (numbers), Trace (shapes). One type at a time, engine first, through the registry.
+
 ### 7. Pets
 
 - [ ] **Set 7p. Outfits for sale,** once Paystack is in: more outfits for each pet, bought once, cosmetic only.
