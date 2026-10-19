@@ -1,4 +1,4 @@
-// Writes both maps of Lantern Row from src/map/street.ts: the plan (design/sketches/map/the-street.html) and the
+// Writes both maps of Lantern Row from src/map/street.ts: the plan (design/sketches/map/plan/the-street.html) and the
 // 30 degree view (the-street-iso.html), each at 3 in the afternoon, by day or by night with ?theme=dark, and their pictures, by day, at night, and in each weather.
 // Run: npm run street:render, after any change to src/map/street.ts or src/engine/world.ts.
 
@@ -6,10 +6,12 @@ import { writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from '@playwright/test';
-import { drawPlan, drawStreet, MAP_COLOURS, type Scene, type Weather } from '../src/map/street';
+import { drawPlan, drawStreet, MAP_COLOURS, type After, type Scene, type Weather } from '../src/map/street';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const out = join(root, 'design/sketches/map');
+// Each view in its own folder: the plan straight down, the 30 degree view (and, when it is drawn, the street front).
+const iso30 = join(root, 'design/sketches/map/iso');
+const plan2d = join(root, 'design/sketches/map/plan');
 
 const esc = (v: string | number) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;');
 const svg = (scene: Scene) =>
@@ -58,7 +60,8 @@ ${vars(1)}
   svg { display: block; width: 100%; max-width: 100%; height: auto; }
 ${Object.keys(MAP_COLOURS).map((k) => `  .f-${k} { fill: var(--map-${k}); }`).join('\n')}
   .s-ink { stroke: var(--map-ink); }
-  .f-star, .f-shadow, .f-sun, .f-sun-dawn, .f-moon, .f-moon-dark, .f-wet, .f-puddle, .f-fog, .f-snow-cap, .f-snow-ground, .f-slush, .f-flake, .f-flood, .f-water, .f-grass, .f-pavement, .f-moss, .f-grime, .f-leaf-light, .f-camera-eye, .f-crack, .f-weed, .f-weed-2, .f-shadow-storm, .glow { stroke: none; }
+  .f-star, .f-shadow, .f-sun, .f-sun-dawn, .f-moon, .f-moon-dark, .f-wet, .f-puddle, .f-fog, .f-snow-cap, .f-snow-ground, .f-slush, .f-flake, .f-flood, .f-water, .f-grass, .f-pavement, .f-moss, .f-grime, .f-leaf-light, .f-camera-eye, .f-crack, .f-weed, .f-weed-2, .f-shadow-storm, .f-flood-stain, .f-mud, .f-storm-dark, .f-strike, .glow { stroke: none; }
+  .f-sandbag { stroke-width: 1; }
   .f-funnel-dust { stroke-width: 1.4; }
   .f-cone { stroke: var(--map-blue); stroke-width: 1; stroke-dasharray: 4 4; }
   .f-camera { stroke-width: 1.2; }
@@ -66,6 +69,11 @@ ${Object.keys(MAP_COLOURS).map((k) => `  .f-${k} { fill: var(--map-${k}); }`).jo
   .plaque-words { fill: #2a2622; stroke: none; font-family: Manrope, 'Segoe UI', Arial, sans-serif; font-weight: 800; }
   .picket { stroke: var(--map-ink); stroke-width: 1.4; }
   .fence-plan { stroke: var(--map-ink); stroke-width: 2.5; stroke-dasharray: 2 3; }
+  .tideline { stroke: var(--map-wood); stroke-width: 1.2; opacity: 0.6; }
+  .fence-broken { stroke-width: 1.2; opacity: 0.6; stroke-dasharray: 6 9; }
+  .bolt { stroke: #fffbe8; stroke-width: 4; fill: none; }
+  .bolt-glow { stroke: rgba(255,248,210,0.45); stroke-width: 16; fill: none; }
+  .current { stroke: rgba(240,230,210,0.55); stroke-width: 2; }
   .weed { stroke: var(--map-weed); stroke-width: 1.6; }
   .twig { stroke: var(--map-bark); stroke-width: 1.4; }
   .snow-line { stroke: var(--map-snow-cap); stroke-width: 2; }
@@ -108,12 +116,12 @@ const standalone = (scene: Scene, dark: boolean) => {
 };
 
 const day = drawStreet({ hour: 15 });
-writeFileSync(join(out, 'the-street-iso.html'), page(day));
+writeFileSync(join(iso30, 'the-street-iso.html'), page(day));
 const plan = drawPlan({ hour: 15 });
 const planPage = (p: Scene) => page(p, 'Map of Lantern Row', 'The street straight down, the plan routes are drawn on');
-writeFileSync(join(out, 'the-street.html'), planPage(plan));
+writeFileSync(join(plan2d, 'the-street.html'), planPage(plan));
 
-const shots: Array<{ file: string; hour: number; weather: Weather; dark: boolean; fenced?: number[] }> = [
+const shots: Array<{ file: string; hour: number; weather: Weather; dark: boolean; fenced?: number[]; after?: After }> = [
   { file: 'the-street-iso.png', hour: 15, weather: 'clear', dark: false },
   { file: 'the-street-iso-dark.png', hour: 22, weather: 'clear', dark: true },
   { file: 'the-street-iso-rain.png', hour: 10, weather: 'rain', dark: false },
@@ -126,21 +134,24 @@ const shots: Array<{ file: string; hour: number; weather: Weather; dark: boolean
   { file: 'the-street-iso-flood.png', hour: 11, weather: 'flood', dark: false },
   // A case that has fenced 2 houses: their fronts carry a picket fence.
   { file: 'the-street-iso-fenced.png', hour: 15, weather: 'clear', dark: false, fenced: [6, 8] },
+  // The mornings after.
+  { file: 'the-street-iso-after-storm.png', hour: 9, weather: 'clear', dark: false, after: 'storm' },
+  { file: 'the-street-iso-after-flood.png', hour: 11, weather: 'clear', dark: false, after: 'flood' },
 ];
 const browser = await chromium.launch();
 const tab = await browser.newPage({ viewport: { width: day.width, height: day.height } });
 for (const s of shots) {
   await tab.emulateMedia({ colorScheme: s.dark ? 'dark' : 'light' });
-  await tab.setContent(page(drawStreet({ hour: s.hour, weather: s.weather, fenced: s.fenced })));
-  await tab.locator('svg').screenshot({ path: join(out, s.file), type: 'png' });
+  await tab.setContent(page(drawStreet({ hour: s.hour, weather: s.weather, fenced: s.fenced, after: s.after })));
+  await tab.locator('svg').screenshot({ path: join(iso30, s.file), type: 'png' });
   // The same picture as vector, to open and zoom without losing sharpness.
-  writeFileSync(join(out, s.file.replace(/\.png$/, '.svg')), standalone(drawStreet({ hour: s.hour, weather: s.weather, fenced: s.fenced }), s.dark));
+  writeFileSync(join(iso30, s.file.replace(/\.png$/, '.svg')), standalone(drawStreet({ hour: s.hour, weather: s.weather, fenced: s.fenced, after: s.after }), s.dark));
 }
 await tab.setViewportSize({ width: plan.width, height: plan.height });
 for (const [file, dark] of [['the-street.png', false], ['the-street-dark.png', true]] as const) {
   await tab.emulateMedia({ colorScheme: dark ? 'dark' : 'light' });
   await tab.setContent(planPage(drawPlan({ hour: dark ? 22 : 15 })));
-  await tab.locator('svg').screenshot({ path: join(out, file), type: 'png' });
-  writeFileSync(join(out, file.replace(/\.png$/, '.svg')), standalone(drawPlan({ hour: dark ? 22 : 15 }), dark));
+  await tab.locator('svg').screenshot({ path: join(plan2d, file), type: 'png' });
+  writeFileSync(join(plan2d, file.replace(/\.png$/, '.svg')), standalone(drawPlan({ hour: dark ? 22 : 15 }), dark));
 }
 await browser.close();

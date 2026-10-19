@@ -1,4 +1,4 @@
-// Lantern Row as places (design/WORLD.md), each with its spot on the map of the street (design/sketches/map/the-street.html,
+// Lantern Row as places (design/WORLD.md), each with its spot on the map of the street (design/sketches/map/plan/the-street.html,
 // 1200 by 800). A case and each of its steps name a place here, and checkChapter refuses one that does not, so no story
 // happens off the street. A place too far to walk to sits at an edge of the map, where its road leaves.
 // Pure: data and nothing else. A test keeps every spot the same as the drawing's.

@@ -1,5 +1,5 @@
 // The map of Lantern Row seen at 30 degrees (BUILD_PLAN set 1-map): the same street as the plan
-// (design/sketches/map/the-street.html, src/engine/world.ts), raised into blocks and looked at from the south east, so
+// (design/sketches/map/plan/the-street.html, src/engine/world.ts), raised into blocks and looked at from the south east, so
 // the fronts of the hall, the bakery and the sale room face the player. Pure: it returns shapes, and whoever draws them
 // (the sketch script, the Cases screen) turns them into SVG. The hour moves the sun and the shadows, the date sets the
 // moon, the case sets the weather.
@@ -11,9 +11,11 @@ import { ANCHORS, MAP_H, MAP_W, PLACES, PLACE_IDS, type PlaceId } from '../engin
 
 /** The weather on the night of a case (its story says which). Snow comes in December; a storm or a flood is a case of its own. */
 export type Weather = 'clear' | 'rain' | 'fog' | 'snow' | 'storm' | 'flood';
-type Wet = { snow?: boolean; flood?: boolean };
+/** The morning after a storm or a flood: the weather has gone, what it did has not. */
+export type After = 'storm' | 'flood';
+type Wet = { snow?: boolean; flood?: boolean; after?: After };
 export type Shape = {
-  tag: 'polygon' | 'circle' | 'ellipse' | 'line' | 'path' | 'text';
+  tag: 'polygon' | 'polyline' | 'circle' | 'ellipse' | 'line' | 'path' | 'text';
   /** The words a sign or a plaque carries, at their real size: legible only when the map is zoomed in. */
   text?: string;
   attrs: Record<string, string | number>;
@@ -342,6 +344,13 @@ function block(b: Block, wet: Wet = {}): Shape[] {
   out.push({ tag: 'polygon', attrs: { points: pts(east) }, cls: 'shade-2' });
   out.push({ tag: 'polygon', attrs: { points: pts(south) }, cls: b.walls });
   out.push({ tag: 'polygon', attrs: { points: pts(south) }, cls: 'shade-1' });
+  // After a flood, every wall keeps the line the water reached.
+  if (wet.after === 'flood' && base === 0 && z > 14) {
+    const d = 28;
+    out.push({ tag: 'polygon', attrs: { points: pts([iso2(x + w, y), iso2(x + w, y + h), iso2(x + w, y + h, d), iso2(x + w, y, d)]) }, cls: 'f-flood-stain' });
+    out.push({ tag: 'polygon', attrs: { points: pts([iso2(x, y + h), iso2(x + w, y + h), iso2(x + w, y + h, d), iso2(x, y + h, d)]) }, cls: 'f-flood-stain' });
+    out.push({ tag: 'line', attrs: { x1: iso2(x, y + h, d)[0], y1: iso2(x, y + h, d)[1], x2: iso2(x + w, y + h, d)[0], y2: iso2(x + w, y + h, d)[1] }, cls: 'tideline' });
+  }
   // A poster pasted on the east wall: a clean graphic, 2 blocks of colour, no words.
   if (b.poster) {
     const [p0, p1, z0, z1] = [y + h * 0.2, y + h * 0.8, z * 0.2, z * 0.85];
@@ -362,7 +371,8 @@ function block(b: Block, wet: Wet = {}): Shape[] {
   }
   // In a flood the water stands against the walls, and leaves its line on them.
   if (wet.flood && base === 0) {
-    const d = 12;
+    // At its height the water stands a metre up the walls; a car or a bin is nearly under.
+    const d = Math.min(30, z * 0.85);
     out.push({ tag: 'polygon', attrs: { points: pts([iso2(x + w, y), iso2(x + w, y + h), iso2(x + w, y + h, d), iso2(x + w, y, d)]) }, cls: 'f-water' });
     out.push({ tag: 'polygon', attrs: { points: pts([iso2(x, y + h), iso2(x + w, y + h), iso2(x + w, y + h, d), iso2(x, y + h, d)]) }, cls: 'f-water' });
   }
@@ -372,7 +382,7 @@ function block(b: Block, wet: Wet = {}): Shape[] {
     const z0 = 14 + row * 38;
     for (let wx = x + 14; wx + 16 <= x + w - 10; wx += 34) {
       if (b.door && wx + 16 > b.door[0] - 4 && wx < b.door[0] + b.door[1] + (b.number != null ? 18 : 4) && row === 0) continue;
-      out.push({ tag: 'polygon', attrs: { points: pts([iso2(wx, y + h, z0), iso2(wx + 16, y + h, z0), iso2(wx + 16, y + h, z0 + 22), iso2(wx, y + h, z0 + 22)]) }, cls: (wx * 7 + row * 3) % 5 < 2 ? 'f-window-lit' : 'f-window' });
+      out.push({ tag: 'polygon', attrs: { points: pts([iso2(wx, y + h, z0), iso2(wx + 16, y + h, z0), iso2(wx + 16, y + h, z0 + 22), iso2(wx, y + h, z0 + 22)]) }, cls: wet.after === 'storm' && (wx * 3 + row) % 4 === 0 ? 'f-window-broken' : (wx * 7 + row * 3) % 5 < 2 ? 'f-window-lit' : 'f-window' });
     }
   }
   if (b.door) {
@@ -390,6 +400,15 @@ function block(b: Block, wet: Wet = {}): Shape[] {
   const roof = (cls: string, list: Array<[number, number]>, anchor?: Shape['anchor']) => {
     out.push({ tag: 'polygon', attrs: { points: pts(list) }, cls, anchor });
     if (b.wear != null) out.push(...wearOn(list, b.wear + out.length, b.shape === 'ridge'));
+    // After a storm, a worn roof has lost whole patches of tiles, down to the battens.
+    if (wet.after === 'storm' && b.wear != null && list.length >= 4) {
+      const n = list.length;
+      const cx = list.reduce((a, p) => a + p[0], 0) / n;
+      const cy = list.reduce((a, p) => a + p[1], 0) / n;
+      const [vx, vy] = list[(b.wear + out.length) % n]!;
+      const [px, py] = [cx + (vx - cx) * 0.3, cy + (vy - cy) * 0.3];
+      out.push({ tag: 'polygon', attrs: { points: pts(list.map(([a, c]): [number, number] => [round(px + (a - cx) * 0.42), round(py + (c - cy) * 0.42)])) }, cls: 'f-battens' });
+    }
     // Snow lies on every slope.
     if (wet.snow) out.push({ tag: 'polygon', attrs: { points: pts(list) }, cls: 'f-snow-cap' });
   };
@@ -455,13 +474,13 @@ const fenceLine = (b: Block): [number, number, number] => {
   return y + h < 470 ? [x, y + h + 7, w] : [x, y - 6, w];
 };
 
-export function drawStreet({ hour = 15, date = new Date(Date.UTC(2026, 9, 19)), weather = 'clear', fenced = [] }: { hour?: number; date?: Date; weather?: Weather; fenced?: readonly number[] } = {}): Scene {
+export function drawStreet({ hour = 15, date = new Date(Date.UTC(2026, 9, 19)), weather = 'clear', fenced = [], after }: { hour?: number; date?: Date; weather?: Weather; fenced?: readonly number[]; after?: After } = {}): Scene {
   const width = Math.ceil((1200 + 800) * COS + PAD * 2);
   const height = Math.ceil((1200 + 800) * SIN + SKY + PAD);
   const shapes: Shape[] = [];
   // Rain, fog, storm, flood and falling snow all come from cloud: no sun, no moon, no stars.
   const grey = weather !== 'clear';
-  const wet: Wet = { snow: weather === 'snow', flood: weather === 'flood' };
+  const wet: Wet = { snow: weather === 'snow', flood: weather === 'flood', after };
   const full = (cls: string): Shape => ({ tag: 'polygon', attrs: { points: pts([[0, 0], [width, 0], [width, height], [0, height]]) }, cls });
   const sun = sunAt(hour);
 
@@ -472,11 +491,51 @@ export function drawStreet({ hour = 15, date = new Date(Date.UTC(2026, 9, 19)), 
   for (const [x, y, w, h, cls, anchor] of GROUND) shapes.push({ tag: 'polygon', attrs: { points: pts(quad(x, y, w, h)) }, cls, anchor });
   // Parking lines in the yard, and the fences between the back gardens.
   for (let lx = 530; lx <= 830; lx += 60) shapes.push({ tag: 'line', attrs: { x1: iso(lx, 60)[0], y1: iso(lx, 60)[1], x2: iso(lx, 130)[0], y2: iso(lx, 130)[1] }, cls: 'thin' });
-  for (const fx of [725, 770, 815]) shapes.push({ tag: 'line', attrs: { x1: iso(fx, 700)[0], y1: iso(fx, 700)[1], x2: iso(fx, 790)[0], y2: iso(fx, 790)[1] }, cls: 'fence' });
+  for (const fx of [725, 770, 815]) shapes.push({ tag: 'line', attrs: { x1: iso(fx, 700)[0], y1: iso(fx, 700)[1], x2: iso(fx, 790)[0], y2: iso(fx, 790)[1] }, cls: after === 'storm' ? 'fence-broken' : 'fence' });
 
   for (const [x, y] of WEEDS) {
     const [wx, wy] = iso(x, y);
     shapes.push(...weed(wx, wy));
+  }
+
+  if (after === 'flood') {
+    // Mud over the lot where the water stood, and a line of what it carried, left along each kerb.
+    shapes.push({ tag: 'polygon', attrs: { points: pts(quad(0, 0, 1200, 800)) }, cls: 'f-mud' });
+    for (const ky of [428, 512]) {
+      const r = scatter(40, ky);
+      r.forEach((v, i) => {
+        const [px, py] = iso(10 + v * 1180, ky + ((i * 7) % 5) - 2);
+        shapes.push({ tag: 'line', attrs: { x1: px, y1: py, x2: px + 6 + (i % 3) * 2, y2: py - 1 - (i % 2) * 2 }, cls: 'twig' });
+      });
+    }
+  }
+  if (after === 'storm') {
+    // Wreckage: heaps of planks and bricks against what was hit, tiles strewn round every torn roof, and the rest
+    // blown across the street and the lot.
+    const piece = (px: number, py: number, kind: number): Shape => {
+      if (kind === 0) return { tag: 'polygon', attrs: { points: pts([[px, py], [px + 24, py - 8], [px + 25, py - 4], [px + 1, py + 4]]) }, cls: 'f-wood' };
+      if (kind === 1) return { tag: 'polygon', attrs: { points: pts([[px, py], [px + 8, py - 3], [px + 9, py + 2], [px + 1, py + 5]]) }, cls: 'f-brick' };
+      if (kind === 2) return { tag: 'polygon', attrs: { points: pts([[px, py], [px + 10, py - 4], [px + 11, py + 1], [px + 1, py + 5]]) }, cls: 'f-terracotta' };
+      return { tag: 'polygon', attrs: { points: pts([[px, py], [px + 9, py - 2], [px + 7, py + 6]]) }, cls: 'f-plaque' };
+    };
+    const heap = (hx: number, hy: number, n: number, seed: number) => {
+      const a = scatter(n, seed);
+      const c = scatter(n, seed + 1);
+      a.forEach((v, k) => {
+        const [px, py] = iso(hx + (v - 0.5) * 60, hy + (c[k]! - 0.5) * 40);
+        shapes.push(piece(px, py, k % 3));
+      });
+    };
+    for (const [hx, hy, seed] of [[890, 300, 3], [905, 420, 5], [700, 720, 7], [790, 720, 9], [860, 640, 11], [170, 580, 13], [1140, 700, 15]] as const) heap(hx, hy, 18, seed);
+    const ys = scatter(90, 101);
+    scatter(90, 67).forEach((v, k) => {
+      const [px, py] = iso(20 + v * 1160, 120 + ys[k]! * 620);
+      shapes.push(piece(px, py, k % 4));
+    });
+    // The hoarding lies face down on open ground by the market, its posts snapped.
+    shapes.push({ tag: 'polygon', attrs: { points: pts(quad(1162, 286, 34, 62)) }, cls: 'f-poster' });
+    shapes.push({ tag: 'polygon', attrs: { points: pts(quad(1162, 286, 12, 62)) }, cls: 'f-blue' });
+    for (const [px, py] of [[1168, 352], [1188, 352]] as const) shapes.push({ tag: 'line', attrs: { x1: iso(px, py)[0], y1: iso(px, py)[1], x2: iso(px + 3, py + 12)[0], y2: iso(px + 3, py + 12)[1] }, cls: 'post' });
   }
 
   // What lies on the ground, under everything standing.
@@ -493,7 +552,22 @@ export function drawStreet({ hour = 15, date = new Date(Date.UTC(2026, 9, 19)), 
     for (const ty of [455, 485]) shapes.push({ tag: 'polygon', attrs: { points: pts(quad(0, ty, 1200, 7)) }, cls: 'f-slush' });
   }
   if (weather === 'flood') {
-    shapes.push({ tag: 'polygon', attrs: { points: pts(quad(0, 0, 1200, 800)) }, cls: 'f-flood' });
+    // The water covers the whole valley, not just the street.
+    shapes.push(full('f-flood'));
+    // The current runs down the street toward the market: long streaks on the water, and what it carries.
+    for (let k = 0; k < 14; k++) {
+      const y0 = 440 + (k % 4) * 18;
+      const x0 = 30 + k * 80;
+      const [ax, ay] = iso(x0, y0);
+      const [bx, by] = iso(x0 + 70, y0 + 4);
+      shapes.push({ tag: 'path', attrs: { d: `M${ax},${ay} Q${round((ax + bx) / 2)},${round((ay + by) / 2 - 4)} ${bx},${by}`, fill: 'none' }, cls: 'current' });
+    }
+    const fy = scatter(12, 77);
+    scatter(12, 19).forEach((v, k) => {
+      const [px, py] = iso(60 + v * 1100, 430 + fy[k]! * 90);
+      if (k % 3 === 0) shapes.push({ tag: 'ellipse', attrs: { cx: px, cy: py, rx: 7, ry: 4 }, cls: 'f-wood' });
+      else shapes.push({ tag: 'polygon', attrs: { points: pts([[px, py], [px + 20, py - 7], [px + 21, py - 3], [px + 1, py + 4]]) }, cls: k % 2 ? 'f-wood' : 'f-plaque' });
+    });
     scatter(26, 5).forEach((v, i) => {
       const [px, py] = iso(40 + v * 1120, 40 + ((i * 97) % 720));
       shapes.push({ tag: 'path', attrs: { d: `M${px - 18},${py} q9,-5 18,0 t18,0`, fill: 'none' }, cls: 'ripple' });
@@ -503,10 +577,26 @@ export function drawStreet({ hour = 15, date = new Date(Date.UTC(2026, 9, 19)), 
   if (sun.up && !grey) for (const b of BLOCKS) shapes.push({ tag: 'polygon', attrs: { points: pts(shadow(b, sun)) }, cls: 'f-shadow' });
 
   // Everything standing, from the back of the street to the front, so nearer things cover farther ones.
-  const lean = weather === 'storm' ? 14 : 0;
+  const lean = weather === 'storm' ? 26 : 0;
   const standing: Array<{ depth: number; shapes: Shape[] }> = [];
-  for (const b of BLOCKS) standing.push({ depth: b.at[0] + b.at[2] + b.at[1] + b.at[3], shapes: block(b, wet) });
+  for (const b of BLOCKS) if (!(after === 'storm' && b.anchor === 'billboard-1')) standing.push({ depth: b.at[0] + b.at[2] + b.at[1] + b.at[3], shapes: block(b, wet) });
   for (const [x, y, rad, hgt, kind, leaf, anchor] of TREES) {
+    // After a storm the plane tree at the top of the street is down across the road: its root plate torn up out of
+    // the pavement, its crown lying on the cobbles.
+    if (after === 'storm' && anchor === 'tree-plane-1') {
+      const [rx, ry] = iso(x, y);
+      const [cx, cy] = iso(x - 40, y - 92);
+      standing.push({
+        depth: x + y,
+        shapes: [
+          { tag: 'ellipse', attrs: { cx: rx, cy: ry, rx: 12, ry: 8 }, cls: 'f-mud' },
+          { tag: 'polygon', attrs: { points: pts([[rx - 3, ry - 2], [rx + 3, ry + 2], [cx + 3, cy + 2], [cx - 3, cy - 2]]) }, cls: 'f-bark' },
+          { tag: 'ellipse', attrs: { cx: rx, cy: ry - 4, rx: 10, ry: 12 }, cls: 'f-mud-root' },
+          ...tree('healthy', leaf, cx, cy - 4, rad * 1.05, null, anchor, false),
+        ],
+      });
+      continue;
+    }
     const foot = iso(x, y);
     const [tx0, ty] = iso(x, y, hgt);
     // In a storm the crowns are pushed over by the wind.
@@ -534,6 +624,22 @@ export function drawStreet({ hour = 15, date = new Date(Date.UTC(2026, 9, 19)), 
     });
   });
   for (const [x, y, kind, cls] of BINS) standing.push({ depth: x + y + 9, shapes: bin(x, y, kind, cls) });
+  if (after === 'flood') {
+    // Sandbags stacked across the doors the water reached, and what it ruined, carried out onto the pavement.
+    for (const b of BLOCKS) {
+      if (!b.door) continue;
+      const fy = b.at[1] + b.at[3] + 4;
+      const bags: Shape[] = [];
+      for (let row = 0; row < 2; row++) for (let k = 0; k < 4 - row; k++) {
+        const [sx, sy] = iso(b.door[0] - 2 + k * 14 + row * 7, fy, 4 + row * 6);
+        bags.push({ tag: 'ellipse', attrs: { cx: sx, cy: sy, rx: 7, ry: 4 }, cls: 'f-sandbag' });
+      }
+      standing.push({ depth: b.door[0] + fy + 2, shapes: bags });
+    }
+    for (const [fx, fy, w, d, hgt, cls] of [[560, 414, 30, 14, 6, 'f-plaque'], [600, 414, 12, 12, 16, 'f-wood'], [700, 514, 34, 12, 5, 'f-house'], [740, 514, 10, 10, 14, 'f-wood'], [800, 514, 26, 12, 9, 'f-blue']] as const) {
+      standing.push({ depth: fx + w + fy + d, shapes: block({ at: [fx, fy, w, d], wall: hgt, roof: 0, shape: 'flat', walls: cls, top: cls }) });
+    }
+  }
   for (const c of CAMERAS) {
     const [x, y] = c.at;
     const [wx, wy] = iso(x, y, c.z);
@@ -580,21 +686,40 @@ export function drawStreet({ hour = 15, date = new Date(Date.UTC(2026, 9, 19)), 
 
   // What falls, over everything.
   if (weather === 'rain' || weather === 'storm' || weather === 'flood') {
-    const n = weather === 'storm' ? 200 : weather === 'flood' ? 90 : 140;
-    const slant = weather === 'storm' ? 18 : 7;
+    const n = weather === 'storm' ? 340 : weather === 'flood' ? 200 : 140;
+    const slant = weather === 'storm' ? 34 : weather === 'flood' ? 12 : 7;
     const ys = scatter(n, 23);
     scatter(n, 7).forEach((x, i) => {
       const x1 = round(x * width);
       const y1 = round(ys[i]! * height);
-      shapes.push({ tag: 'line', attrs: { x1, y1, x2: round(x1 - slant), y2: round(y1 + 22) }, cls: 'rain' });
+      shapes.push({ tag: 'line', attrs: { x1, y1, x2: round(x1 - slant), y2: round(y1 + (weather === 'storm' ? 30 : 22)) }, cls: 'rain' });
     });
   }
   if (weather === 'storm') {
-    // Papers and leaves torn loose, blown down the street.
-    const ys = scatter(24, 31);
-    scatter(24, 13).forEach((x, i) => {
-      const [px, py] = iso(80 + x * 1040, 300 + ys[i]! * 360, 20 + ((i * 37) % 90));
-      shapes.push({ tag: 'polygon', attrs: { points: pts([[px, py], [px + 9, py - 3], [px + 11, py + 5], [px + 2, py + 8]]) }, cls: i % 2 ? 'f-ochre-dim' : 'f-sage' });
+    // The street under the storm: darkened, lit for an instant by a strike of lightning over the fields to the east.
+    shapes.push({ tag: 'polygon', attrs: { points: pts([[0, 0], [width, 0], [width, height], [0, height]]) }, cls: 'f-storm-dark' });
+    // It strikes the ground, on the fields north east of the yard, and the ground flashes where it lands.
+    const [lx, ly] = iso(560, -250);
+    const bolt: Array<[number, number]> = [[lx + 40, 0], [lx + 14, 80], [lx + 46, 96], [lx + 12, 200], [lx + 40, 216], [lx + 6, 300], [lx, ly]];
+    shapes.push({ tag: 'ellipse', attrs: { cx: lx, cy: ly, rx: 40, ry: 14 }, cls: 'f-strike' });
+    shapes.push({ tag: 'polyline', attrs: { points: pts(bolt), fill: 'none' }, cls: 'bolt-glow' });
+    shapes.push({ tag: 'polyline', attrs: { points: pts(bolt), fill: 'none' }, cls: 'bolt' });
+    // Tiles lifting off the worn roofs, caught in the air above them.
+    for (const b of BLOCKS) {
+      if (b.wear == null || b.base) continue;
+      const r = scatter(5, b.wear + 3);
+      r.forEach((v, k) => {
+        const [px, py] = iso(b.at[0] + v * b.at[2], b.at[1] + ((k * 37) % 100) / 100 * b.at[3], b.wall + b.roof + 14 + k * 9);
+        shapes.push({ tag: 'polygon', attrs: { points: pts([[px, py], [px + 9, py - 4], [px + 10, py + 1], [px + 1, py + 5]]) }, cls: 'f-terracotta' });
+      });
+    }
+    // Papers, leaves and planks torn loose, blown down the street.
+    const ys = scatter(60, 31);
+    scatter(60, 13).forEach((x, i) => {
+      const [px, py] = iso(80 + x * 1040, 200 + ys[i]! * 500, 20 + ((i * 37) % 120));
+      shapes.push(i % 5 === 0
+        ? { tag: 'polygon', attrs: { points: pts([[px, py], [px + 22, py - 9], [px + 23, py - 5], [px + 1, py + 4]]) }, cls: 'f-wood' }
+        : { tag: 'polygon', attrs: { points: pts([[px, py], [px + 9, py - 3], [px + 11, py + 5], [px + 2, py + 8]]) }, cls: i % 2 ? 'f-ochre-dim' : 'f-sage' });
     });
   }
   if (weather === 'snow') {
@@ -720,7 +845,7 @@ export function drawStreet({ hour = 15, date = new Date(Date.UTC(2026, 9, 19)), 
 }
 
 /**
- * The same street seen straight down: the plan routes are drawn on (design/sketches/map/the-street.html). Made from the
+ * The same street seen straight down: the plan routes are drawn on (design/sketches/map/plan/the-street.html). Made from the
  * same blocks as the 30 degree view, so the 2 can never disagree. Roads first, buildings as blocks that frame them,
  * and each slope of a roof its own flat tone, so a roof reads as a volume from above.
  */
@@ -843,5 +968,5 @@ export const MAP_COLOURS: Record<string, [string, string]> = { ink: ['#2a2622', 
   'sun-dawn': ['#e8955a', 'rgba(0,0,0,0)'],
   fog: ['rgba(238,233,224,0.3)', 'rgba(120,130,145,0.17)'], 'snow-cap': ['rgba(250,249,246,0.86)', 'rgba(205,214,226,0.82)'],
   'snow-ground': ['rgba(250,249,246,0.82)', 'rgba(150,165,185,0.5)'], slush: ['rgba(170,165,155,0.5)', 'rgba(60,66,78,0.6)'], flake: ['#ffffff', '#e6ecf2'],
-  funnel: ['#8d877d', '#3a404a'], 'wall-cloud': ['#7d776d', '#1f242c'], dust: ['#b3a58a', '#3d3a33'], land: ['#dfdfc2', '#171c1d'], 'funnel-dust': ['#9a8a6e', '#3d3a33'], 'shadow-storm': ['rgba(42,38,34,0.18)', 'rgba(0,0,0,0.3)'], 'bin-public': ['#3f5a4a', '#2c3e34'], 'bin-green': ['#4f7a4a', '#2f4a2c'], 'bin-grey': ['#7d8288', '#454a50'], 'bin-lid': ['#2f3a34', '#1c2420'], picket: ['#f3ead9', '#8a8270'], camera: ['#e8e4dc', '#9aa0a8'], 'camera-eye': ['#2a2622', '#f26b5b'], cone: ['rgba(80,110,160,0.12)', 'rgba(150,180,230,0.10)'], 'lamp-head': ['#5a5f66', '#3a3f46'], weed: ['#6f8a4e', '#4a5e3a'], 'weed-2': ['#8fa65f', '#5a6e44'], crack: ['rgba(42,38,34,0.28)', 'rgba(0,0,0,0.4)'], sign: ['#3f5a4a', '#2c3e34'], plaque: ['#f3ead9', '#8a8270'], bark: ['#7a5236', '#3a2a1f'], 'leaf-dry': ['#b8a46a', '#4a4430'], 'leaf-light': ['rgba(255,255,240,0.22)', 'rgba(255,255,240,0.06)'], 'fruit-red': ['#c4452f', '#7a3324'], 'fruit-orange': ['#e48a2e', '#8a5a26'], nest: ['#8a6a48', '#3d3024'], bird: ['#3a3430', '#d8cfbd'], moss: ['rgba(110,128,72,0.42)', 'rgba(70,90,60,0.5)'], grime: ['rgba(42,38,34,0.16)', 'rgba(0,0,0,0.28)'], battens: ['#3b2a1f', '#120d0a'], grass: ['#c9cf9f', '#1d251f'], pavement: ['#e7ddc8', '#262b33'], poster: ['#e9d8a6', '#4a4536'], dial: ['#c9dbe2', '#10141c'], 'dial-grey': ['#cfccc5', '#1c2028'], 'cloud-shadow': ['rgba(42,38,34,0.08)', 'rgba(0,0,0,0.18)'], lot: ['#f3ead9', '#1b1f27'], flood: ['rgba(122,128,118,0.62)', 'rgba(52,62,74,0.7)'], water: ['rgba(122,128,118,0.7)', 'rgba(52,62,74,0.75)'], puddle: ['rgba(110,135,150,0.45)', 'rgba(242,196,107,0.28)'],
+  funnel: ['#8d877d', '#3a404a'], 'wall-cloud': ['#7d776d', '#1f242c'], dust: ['#b3a58a', '#3d3a33'], land: ['#dfdfc2', '#171c1d'], 'mud-root': ['#6e5236', '#2e2218'], 'flood-stain': ['rgba(110,90,60,0.28)', 'rgba(20,16,10,0.4)'], mud: ['rgba(130,105,70,0.32)', 'rgba(60,48,32,0.45)'], sandbag: ['#c9b48a', '#5a5040'], 'window-broken': ['#2a2622', '#0c0d10'], 'funnel-dust': ['#9a8a6e', '#3d3a33'], 'shadow-storm': ['rgba(42,38,34,0.18)', 'rgba(0,0,0,0.3)'], 'bin-public': ['#3f5a4a', '#2c3e34'], 'bin-green': ['#4f7a4a', '#2f4a2c'], 'bin-grey': ['#7d8288', '#454a50'], 'bin-lid': ['#2f3a34', '#1c2420'], picket: ['#f3ead9', '#8a8270'], camera: ['#e8e4dc', '#9aa0a8'], 'camera-eye': ['#2a2622', '#f26b5b'], cone: ['rgba(80,110,160,0.12)', 'rgba(150,180,230,0.10)'], 'lamp-head': ['#5a5f66', '#3a3f46'], weed: ['#6f8a4e', '#4a5e3a'], 'weed-2': ['#8fa65f', '#5a6e44'], crack: ['rgba(42,38,34,0.28)', 'rgba(0,0,0,0.4)'], sign: ['#3f5a4a', '#2c3e34'], plaque: ['#f3ead9', '#8a8270'], bark: ['#7a5236', '#3a2a1f'], 'leaf-dry': ['#b8a46a', '#4a4430'], 'leaf-light': ['rgba(255,255,240,0.22)', 'rgba(255,255,240,0.06)'], 'fruit-red': ['#c4452f', '#7a3324'], 'fruit-orange': ['#e48a2e', '#8a5a26'], nest: ['#8a6a48', '#3d3024'], bird: ['#3a3430', '#d8cfbd'], moss: ['rgba(110,128,72,0.42)', 'rgba(70,90,60,0.5)'], grime: ['rgba(42,38,34,0.16)', 'rgba(0,0,0,0.28)'], battens: ['#3b2a1f', '#120d0a'], grass: ['#c9cf9f', '#1d251f'], pavement: ['#e7ddc8', '#262b33'], poster: ['#e9d8a6', '#4a4536'], dial: ['#c9dbe2', '#10141c'], 'dial-grey': ['#cfccc5', '#1c2028'], 'cloud-shadow': ['rgba(42,38,34,0.08)', 'rgba(0,0,0,0.18)'], lot: ['#f3ead9', '#1b1f27'], flood: ['rgba(118,104,78,0.78)', 'rgba(48,46,40,0.82)'], water: ['rgba(118,104,78,0.86)', 'rgba(48,46,40,0.88)'], 'storm-dark': ['rgba(30,34,44,0.32)', 'rgba(0,0,0,0.3)'], strike: ['rgba(255,248,210,0.55)', 'rgba(255,248,210,0.4)'], puddle: ['rgba(110,135,150,0.45)', 'rgba(242,196,107,0.28)'],
 };

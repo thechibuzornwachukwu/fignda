@@ -5,7 +5,7 @@ What is built, in 1 line each, so `BUILD_PLAN.md` holds only what is left. Read 
 ## Cases
 - Casebook 1, Lantern Row: 8 cases, written and open, in `design/stories`.
 - The case engine (`src/engine/chapter.ts`): `checkChapter` (a fair fight), `balanceOf` (every built kind of work, no method more than twice), `checkCasebook` (shapes and suspects rotate, 1 new method a case). A test runs all 3 over every file.
-- The street itself (`design/WORLD.md`): its places, the hall, people, the year and the thread. Its 2 maps, the plan and the 30 degree view, made from 1 module (`src/map/street.ts`, `npm run street:render`), by day and at night, in 6 weathers, with the sun by the hour, tonight's moon, clouds, birds, worn roofs and 2 billboards, with every place at a spot (`src/engine/world.ts`), checked against the drawing; every case and step names its place.
+- The street itself (`design/WORLD.md`): its places, the hall, people, the year and the thread. Its 2 maps, the plan and the 30 degree view, made from 1 module (`src/map/street.ts`, `npm run street:render`), by day and at night, in 6 weathers at their height and 2 mornings after, sorted by view (`design/sketches/map/plan`, `map/iso`), with the sun by the hour, tonight's moon, clouds, birds, worn roofs and 2 billboards, with every place at a spot (`src/engine/world.ts`), checked against the drawing; every case and step names its place.
 - The story file and the case-writing rules (`design/CASE_WRITING.md`), with case 1's story as the worked example.
 
 ## Methods

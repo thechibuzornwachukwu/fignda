@@ -41,9 +41,9 @@ describe('the street at 30 degrees', () => {
   });
 
   it('the sketch is the module, rendered', () => {
-    const sketch = readFileSync('design/sketches/map/the-street-iso.html', 'utf8');
+    const sketch = readFileSync('design/sketches/map/iso/the-street-iso.html', 'utf8');
     expect(sketch).toContain(`viewBox="0 0 ${day.width} ${day.height}"`);
-    expect(sketch.match(/<(polygon|circle|ellipse|line|path|text)\b/g)!.length).toBe(day.shapes.length + PLACE_IDS.length);
+    expect(sketch.match(/<(polygon|polyline|circle|ellipse|line|path|text)\b/g)!.length).toBe(day.shapes.length + PLACE_IDS.length);
   });
 
   it('the street carries its name on its signs, and each front door its number', () => {

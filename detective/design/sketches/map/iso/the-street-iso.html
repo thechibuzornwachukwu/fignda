@@ -1,5 +1,280 @@
-<svg style="--map-ink: #2a2622; --map-cobble: #ddd0b8; --map-tarmac: #d9cdb6; --map-square: #e3d6bd; --map-alley: #c8b998; --map-terracotta: #b5573c; --map-wood: #7a5236; --map-ochre: #d0a65a; --map-ochre-dim: #d0a65a; --map-bakery: #c98b4e; --map-sage: #8a9a6b; --map-blue: #8fa3ad; --map-plane: #9aa57a; --map-library: #7f8d63; --map-lime: #a9b37f; --map-house: #c9b48f; --map-house-2: #d3bf9a; --map-brick: #a5503a; --map-plaster: #eadcc0; --map-stone: #d8ccb4; --map-window: #8fa3ad; --map-window-lit: #8fa3ad; --map-clock: #f3ead9; --map-shadow: rgba(42,38,34,0.16); --map-sun: #f4d27a; --map-moon: rgba(0,0,0,0); --map-moon-dark: rgba(0,0,0,0); --map-wet: rgba(80,96,110,0.18); --map-star: rgba(0,0,0,0); --map-cloud: rgba(251,248,241,0.92); --map-cloud-grey: rgba(185,180,170,0.88); --map-sun-dawn: #e8955a; --map-fog: rgba(238,233,224,0.3); --map-snow-cap: rgba(250,249,246,0.86); --map-snow-ground: rgba(250,249,246,0.82); --map-slush: rgba(170,165,155,0.5); --map-flake: #ffffff; --map-funnel: #8d877d; --map-wall-cloud: #7d776d; --map-dust: #b3a58a; --map-land: #dfdfc2; --map-funnel-dust: #9a8a6e; --map-shadow-storm: rgba(42,38,34,0.18); --map-bin-public: #3f5a4a; --map-bin-green: #4f7a4a; --map-bin-grey: #7d8288; --map-bin-lid: #2f3a34; --map-picket: #f3ead9; --map-camera: #e8e4dc; --map-camera-eye: #2a2622; --map-cone: rgba(80,110,160,0.12); --map-lamp-head: #5a5f66; --map-weed: #6f8a4e; --map-weed-2: #8fa65f; --map-crack: rgba(42,38,34,0.28); --map-sign: #3f5a4a; --map-plaque: #f3ead9; --map-bark: #7a5236; --map-leaf-dry: #b8a46a; --map-leaf-light: rgba(255,255,240,0.22); --map-fruit-red: #c4452f; --map-fruit-orange: #e48a2e; --map-nest: #8a6a48; --map-bird: #3a3430; --map-moss: rgba(110,128,72,0.42); --map-grime: rgba(42,38,34,0.16); --map-battens: #3b2a1f; --map-grass: #c9cf9f; --map-pavement: #e7ddc8; --map-poster: #e9d8a6; --map-dial: #c9dbe2; --map-dial-grey: #cfccc5; --map-cloud-shadow: rgba(42,38,34,0.08); --map-lot: #f3ead9; --map-flood: rgba(122,128,118,0.62); --map-water: rgba(122,128,118,0.7); --map-puddle: rgba(110,135,150,0.45); --map-glow: 0; background: var(--map-land)" width="1813" height="1260" viewBox="0 0 1813 1260" xmlns="http://www.w3.org/2000/svg">
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lantern Row at 30 degrees</title>
+<!--
+  Written by scripts/render-street.ts from src/map/street.ts. Do not edit by hand: change the module and render again.
+  The street from the south east, by day in the light theme and at night in the dark (?theme=dark). The sun and the
+  shadows follow the hour, the moon follows the date, the weather follows the case.
+-->
 <style>
+  :root {
+    --map-ink: #2a2622;
+    --map-cobble: #ddd0b8;
+    --map-tarmac: #d9cdb6;
+    --map-square: #e3d6bd;
+    --map-alley: #c8b998;
+    --map-terracotta: #b5573c;
+    --map-wood: #7a5236;
+    --map-ochre: #d0a65a;
+    --map-ochre-dim: #d0a65a;
+    --map-bakery: #c98b4e;
+    --map-sage: #8a9a6b;
+    --map-blue: #8fa3ad;
+    --map-plane: #9aa57a;
+    --map-library: #7f8d63;
+    --map-lime: #a9b37f;
+    --map-house: #c9b48f;
+    --map-house-2: #d3bf9a;
+    --map-brick: #a5503a;
+    --map-plaster: #eadcc0;
+    --map-stone: #d8ccb4;
+    --map-window: #8fa3ad;
+    --map-window-lit: #8fa3ad;
+    --map-clock: #f3ead9;
+    --map-shadow: rgba(42,38,34,0.16);
+    --map-sun: #f4d27a;
+    --map-moon: rgba(0,0,0,0);
+    --map-moon-dark: rgba(0,0,0,0);
+    --map-wet: rgba(80,96,110,0.18);
+    --map-star: rgba(0,0,0,0);
+    --map-cloud: rgba(251,248,241,0.92);
+    --map-cloud-grey: rgba(185,180,170,0.88);
+    --map-sun-dawn: #e8955a;
+    --map-fog: rgba(238,233,224,0.3);
+    --map-snow-cap: rgba(250,249,246,0.86);
+    --map-snow-ground: rgba(250,249,246,0.82);
+    --map-slush: rgba(170,165,155,0.5);
+    --map-flake: #ffffff;
+    --map-funnel: #8d877d;
+    --map-wall-cloud: #7d776d;
+    --map-dust: #b3a58a;
+    --map-land: #dfdfc2;
+    --map-mud-root: #6e5236;
+    --map-flood-stain: rgba(110,90,60,0.28);
+    --map-mud: rgba(130,105,70,0.32);
+    --map-sandbag: #c9b48a;
+    --map-window-broken: #2a2622;
+    --map-funnel-dust: #9a8a6e;
+    --map-shadow-storm: rgba(42,38,34,0.18);
+    --map-bin-public: #3f5a4a;
+    --map-bin-green: #4f7a4a;
+    --map-bin-grey: #7d8288;
+    --map-bin-lid: #2f3a34;
+    --map-picket: #f3ead9;
+    --map-camera: #e8e4dc;
+    --map-camera-eye: #2a2622;
+    --map-cone: rgba(80,110,160,0.12);
+    --map-lamp-head: #5a5f66;
+    --map-weed: #6f8a4e;
+    --map-weed-2: #8fa65f;
+    --map-crack: rgba(42,38,34,0.28);
+    --map-sign: #3f5a4a;
+    --map-plaque: #f3ead9;
+    --map-bark: #7a5236;
+    --map-leaf-dry: #b8a46a;
+    --map-leaf-light: rgba(255,255,240,0.22);
+    --map-fruit-red: #c4452f;
+    --map-fruit-orange: #e48a2e;
+    --map-nest: #8a6a48;
+    --map-bird: #3a3430;
+    --map-moss: rgba(110,128,72,0.42);
+    --map-grime: rgba(42,38,34,0.16);
+    --map-battens: #3b2a1f;
+    --map-grass: #c9cf9f;
+    --map-pavement: #e7ddc8;
+    --map-poster: #e9d8a6;
+    --map-dial: #c9dbe2;
+    --map-dial-grey: #cfccc5;
+    --map-cloud-shadow: rgba(42,38,34,0.08);
+    --map-lot: #f3ead9;
+    --map-flood: rgba(118,104,78,0.78);
+    --map-water: rgba(118,104,78,0.86);
+    --map-storm-dark: rgba(30,34,44,0.32);
+    --map-strike: rgba(255,248,210,0.55);
+    --map-puddle: rgba(110,135,150,0.45);
+    --map-glow: 0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+    --map-ink: #e9dfcc;
+    --map-cobble: #2a2f38;
+    --map-tarmac: #2c313a;
+    --map-square: #303641;
+    --map-alley: #22262d;
+    --map-terracotta: #6e3a2c;
+    --map-wood: #4a3526;
+    --map-ochre: #f2c46b;
+    --map-ochre-dim: #8a6d3b;
+    --map-bakery: #7a5838;
+    --map-sage: #4f5a42;
+    --map-blue: #4b5a63;
+    --map-plane: #4d5740;
+    --map-library: #45503a;
+    --map-lime: #5c6648;
+    --map-house: #514636;
+    --map-house-2: #5a4e3c;
+    --map-brick: #5a3026;
+    --map-plaster: #4a4438;
+    --map-stone: #454039;
+    --map-window: #2b3440;
+    --map-window-lit: #f2c46b;
+    --map-clock: #f2d9a0;
+    --map-shadow: rgba(0,0,0,0);
+    --map-sun: rgba(0,0,0,0);
+    --map-moon: #efe6cf;
+    --map-moon-dark: #2a2f38;
+    --map-wet: rgba(120,150,180,0.12);
+    --map-star: #e9dfcc;
+    --map-cloud: rgba(52,58,70,0.85);
+    --map-cloud-grey: rgba(38,43,51,0.88);
+    --map-sun-dawn: rgba(0,0,0,0);
+    --map-fog: rgba(120,130,145,0.17);
+    --map-snow-cap: rgba(205,214,226,0.82);
+    --map-snow-ground: rgba(150,165,185,0.5);
+    --map-slush: rgba(60,66,78,0.6);
+    --map-flake: #e6ecf2;
+    --map-funnel: #3a404a;
+    --map-wall-cloud: #1f242c;
+    --map-dust: #3d3a33;
+    --map-land: #171c1d;
+    --map-mud-root: #2e2218;
+    --map-flood-stain: rgba(20,16,10,0.4);
+    --map-mud: rgba(60,48,32,0.45);
+    --map-sandbag: #5a5040;
+    --map-window-broken: #0c0d10;
+    --map-funnel-dust: #3d3a33;
+    --map-shadow-storm: rgba(0,0,0,0.3);
+    --map-bin-public: #2c3e34;
+    --map-bin-green: #2f4a2c;
+    --map-bin-grey: #454a50;
+    --map-bin-lid: #1c2420;
+    --map-picket: #8a8270;
+    --map-camera: #9aa0a8;
+    --map-camera-eye: #f26b5b;
+    --map-cone: rgba(150,180,230,0.10);
+    --map-lamp-head: #3a3f46;
+    --map-weed: #4a5e3a;
+    --map-weed-2: #5a6e44;
+    --map-crack: rgba(0,0,0,0.4);
+    --map-sign: #2c3e34;
+    --map-plaque: #8a8270;
+    --map-bark: #3a2a1f;
+    --map-leaf-dry: #4a4430;
+    --map-leaf-light: rgba(255,255,240,0.06);
+    --map-fruit-red: #7a3324;
+    --map-fruit-orange: #8a5a26;
+    --map-nest: #3d3024;
+    --map-bird: #d8cfbd;
+    --map-moss: rgba(70,90,60,0.5);
+    --map-grime: rgba(0,0,0,0.28);
+    --map-battens: #120d0a;
+    --map-grass: #1d251f;
+    --map-pavement: #262b33;
+    --map-poster: #4a4536;
+    --map-dial: #10141c;
+    --map-dial-grey: #1c2028;
+    --map-cloud-shadow: rgba(0,0,0,0.18);
+    --map-lot: #1b1f27;
+    --map-flood: rgba(48,46,40,0.82);
+    --map-water: rgba(48,46,40,0.88);
+    --map-storm-dark: rgba(0,0,0,0.3);
+    --map-strike: rgba(255,248,210,0.4);
+    --map-puddle: rgba(242,196,107,0.28);
+      --map-glow: 0.22;
+    }
+  }
+  :root[data-theme="dark"] {
+    --map-ink: #e9dfcc;
+    --map-cobble: #2a2f38;
+    --map-tarmac: #2c313a;
+    --map-square: #303641;
+    --map-alley: #22262d;
+    --map-terracotta: #6e3a2c;
+    --map-wood: #4a3526;
+    --map-ochre: #f2c46b;
+    --map-ochre-dim: #8a6d3b;
+    --map-bakery: #7a5838;
+    --map-sage: #4f5a42;
+    --map-blue: #4b5a63;
+    --map-plane: #4d5740;
+    --map-library: #45503a;
+    --map-lime: #5c6648;
+    --map-house: #514636;
+    --map-house-2: #5a4e3c;
+    --map-brick: #5a3026;
+    --map-plaster: #4a4438;
+    --map-stone: #454039;
+    --map-window: #2b3440;
+    --map-window-lit: #f2c46b;
+    --map-clock: #f2d9a0;
+    --map-shadow: rgba(0,0,0,0);
+    --map-sun: rgba(0,0,0,0);
+    --map-moon: #efe6cf;
+    --map-moon-dark: #2a2f38;
+    --map-wet: rgba(120,150,180,0.12);
+    --map-star: #e9dfcc;
+    --map-cloud: rgba(52,58,70,0.85);
+    --map-cloud-grey: rgba(38,43,51,0.88);
+    --map-sun-dawn: rgba(0,0,0,0);
+    --map-fog: rgba(120,130,145,0.17);
+    --map-snow-cap: rgba(205,214,226,0.82);
+    --map-snow-ground: rgba(150,165,185,0.5);
+    --map-slush: rgba(60,66,78,0.6);
+    --map-flake: #e6ecf2;
+    --map-funnel: #3a404a;
+    --map-wall-cloud: #1f242c;
+    --map-dust: #3d3a33;
+    --map-land: #171c1d;
+    --map-mud-root: #2e2218;
+    --map-flood-stain: rgba(20,16,10,0.4);
+    --map-mud: rgba(60,48,32,0.45);
+    --map-sandbag: #5a5040;
+    --map-window-broken: #0c0d10;
+    --map-funnel-dust: #3d3a33;
+    --map-shadow-storm: rgba(0,0,0,0.3);
+    --map-bin-public: #2c3e34;
+    --map-bin-green: #2f4a2c;
+    --map-bin-grey: #454a50;
+    --map-bin-lid: #1c2420;
+    --map-picket: #8a8270;
+    --map-camera: #9aa0a8;
+    --map-camera-eye: #f26b5b;
+    --map-cone: rgba(150,180,230,0.10);
+    --map-lamp-head: #3a3f46;
+    --map-weed: #4a5e3a;
+    --map-weed-2: #5a6e44;
+    --map-crack: rgba(0,0,0,0.4);
+    --map-sign: #2c3e34;
+    --map-plaque: #8a8270;
+    --map-bark: #3a2a1f;
+    --map-leaf-dry: #4a4430;
+    --map-leaf-light: rgba(255,255,240,0.06);
+    --map-fruit-red: #7a3324;
+    --map-fruit-orange: #8a5a26;
+    --map-nest: #3d3024;
+    --map-bird: #d8cfbd;
+    --map-moss: rgba(70,90,60,0.5);
+    --map-grime: rgba(0,0,0,0.28);
+    --map-battens: #120d0a;
+    --map-grass: #1d251f;
+    --map-pavement: #262b33;
+    --map-poster: #4a4536;
+    --map-dial: #10141c;
+    --map-dial-grey: #1c2028;
+    --map-cloud-shadow: rgba(0,0,0,0.18);
+    --map-lot: #1b1f27;
+    --map-flood: rgba(48,46,40,0.82);
+    --map-water: rgba(48,46,40,0.88);
+    --map-storm-dark: rgba(0,0,0,0.3);
+    --map-strike: rgba(255,248,210,0.4);
+    --map-puddle: rgba(242,196,107,0.28);
+    --map-glow: 0.22;
+  }
+  html, body { margin: 0; background: var(--map-land); }
+  svg { display: block; width: 100%; max-width: 100%; height: auto; }
   .f-ink { fill: var(--map-ink); }
   .f-cobble { fill: var(--map-cobble); }
   .f-tarmac { fill: var(--map-tarmac); }
@@ -41,6 +316,11 @@
   .f-wall-cloud { fill: var(--map-wall-cloud); }
   .f-dust { fill: var(--map-dust); }
   .f-land { fill: var(--map-land); }
+  .f-mud-root { fill: var(--map-mud-root); }
+  .f-flood-stain { fill: var(--map-flood-stain); }
+  .f-mud { fill: var(--map-mud); }
+  .f-sandbag { fill: var(--map-sandbag); }
+  .f-window-broken { fill: var(--map-window-broken); }
   .f-funnel-dust { fill: var(--map-funnel-dust); }
   .f-shadow-storm { fill: var(--map-shadow-storm); }
   .f-bin-public { fill: var(--map-bin-public); }
@@ -76,9 +356,12 @@
   .f-lot { fill: var(--map-lot); }
   .f-flood { fill: var(--map-flood); }
   .f-water { fill: var(--map-water); }
+  .f-storm-dark { fill: var(--map-storm-dark); }
+  .f-strike { fill: var(--map-strike); }
   .f-puddle { fill: var(--map-puddle); }
   .s-ink { stroke: var(--map-ink); }
-  .f-star, .f-shadow, .f-sun, .f-sun-dawn, .f-moon, .f-moon-dark, .f-wet, .f-puddle, .f-fog, .f-snow-cap, .f-snow-ground, .f-slush, .f-flake, .f-flood, .f-water, .f-grass, .f-pavement, .f-moss, .f-grime, .f-leaf-light, .f-camera-eye, .f-crack, .f-weed, .f-weed-2, .f-shadow-storm, .glow { stroke: none; }
+  .f-star, .f-shadow, .f-sun, .f-sun-dawn, .f-moon, .f-moon-dark, .f-wet, .f-puddle, .f-fog, .f-snow-cap, .f-snow-ground, .f-slush, .f-flake, .f-flood, .f-water, .f-grass, .f-pavement, .f-moss, .f-grime, .f-leaf-light, .f-camera-eye, .f-crack, .f-weed, .f-weed-2, .f-shadow-storm, .f-flood-stain, .f-mud, .f-storm-dark, .f-strike, .glow { stroke: none; }
+  .f-sandbag { stroke-width: 1; }
   .f-funnel-dust { stroke-width: 1.4; }
   .f-cone { stroke: var(--map-blue); stroke-width: 1; stroke-dasharray: 4 4; }
   .f-camera { stroke-width: 1.2; }
@@ -86,6 +369,11 @@
   .plaque-words { fill: #2a2622; stroke: none; font-family: Manrope, 'Segoe UI', Arial, sans-serif; font-weight: 800; }
   .picket { stroke: var(--map-ink); stroke-width: 1.4; }
   .fence-plan { stroke: var(--map-ink); stroke-width: 2.5; stroke-dasharray: 2 3; }
+  .tideline { stroke: var(--map-wood); stroke-width: 1.2; opacity: 0.6; }
+  .fence-broken { stroke-width: 1.2; opacity: 0.6; stroke-dasharray: 6 9; }
+  .bolt { stroke: #fffbe8; stroke-width: 4; fill: none; }
+  .bolt-glow { stroke: rgba(255,248,210,0.45); stroke-width: 16; fill: none; }
+  .current { stroke: rgba(240,230,210,0.55); stroke-width: 2; }
   .weed { stroke: var(--map-weed); stroke-width: 1.6; }
   .twig { stroke: var(--map-bark); stroke-width: 1.4; }
   .snow-line { stroke: var(--map-snow-cap); stroke-width: 2; }
@@ -111,6 +399,10 @@
   .rain { stroke: var(--map-blue); stroke-width: 1.6; opacity: 0.7; }
   .glow { fill: var(--map-ochre); opacity: var(--map-glow); }
 </style>
+<script>if (new URLSearchParams(location.search).get('theme') === 'dark') document.documentElement.dataset.theme = 'dark';</script>
+</head>
+<body>
+<svg width="1813" height="1260" viewBox="0 0 1813 1260" xmlns="http://www.w3.org/2000/svg">
   <g class="s-ink" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
     <polygon points="0,0 1813,0 1813,1260 0,1260" class="f-land"/>
     <polygon points="732.8,220 1772.1,820 1079.2,1220 40,620" class="f-lot"/>
@@ -267,36 +559,36 @@
     <path d="M386.4,815 Q384.9,808.95 386.4,804 Q387.9,808.95 386.4,815 Z" class="f-weed"/>
     <path d="M386.4,815 Q385.5,810.6 389.4,807 Q388.5,810.6 386.4,815 Z" class="f-weed-2"/>
     <path d="M386.4,815 Q386.09999999999997,812.8 392.4,811 Q389.09999999999997,812.8 386.4,815 Z" class="f-weed"/>
-    <polygon points="604.4,261.7 855.5,406.7 1009.9,530 784.8,660 533.6,515 379.2,391.7" class="f-shadow"/>
-    <polygon points="719.8,568.5 744,582.5 816,640 784.8,658 760.5,644 688.6,586.5" class="f-shadow"/>
-    <polygon points="890.1,446.7 1028.7,526.7 1183.2,650 975.3,770 836.7,690 682.3,566.7" class="f-shadow"/>
-    <polygon points="1028.7,536.7 1175.9,621.7 1330.4,745 1131.2,860 984,775 829.5,651.7" class="f-shadow"/>
-    <polygon points="258.2,455 344.8,505 416.7,562.5 387.3,579.5 300.7,529.5 228.7,472" class="f-shadow"/>
-    <polygon points="351,506.2 389.1,528.2 472.1,594.5 434,616.5 395.9,594.5 312.9,528.2" class="f-shadow"/>
-    <polygon points="448.5,551.7 621.7,651.7 776.1,775 576.9,890 403.7,790 249.3,666.7" class="f-shadow"/>
-    <polygon points="708.3,701.7 747.2,724.2 901.7,847.5 754.5,932.5 715.5,910 561.1,786.7" class="f-shadow"/>
-    <polygon points="747.2,724.2 786.2,746.7 940.7,870 793.4,955 754.5,932.5 600,809.2" class="f-shadow"/>
-    <polygon points="786.2,746.7 825.2,769.2 979.6,892.5 832.4,977.5 793.4,955 639,831.7" class="f-shadow"/>
-    <polygon points="825.2,769.2 864.2,791.7 1018.6,915 871.4,1000 832.4,977.5 678,854.2" class="f-shadow"/>
-    <polygon points="1068.6,1014.3 1108.5,1037.3 1197,1108 1157.2,1131 1117.3,1108 1028.8,1037.3" class="f-shadow"/>
-    <polygon points="1296.8,837.1 1348.7,867.1 1459.4,955.5 1454.2,958.5 1402.3,928.5 1291.6,840.1" class="f-shadow"/>
-    <polygon points="614.5,901.7 633.6,912.7 687.8,956 672.2,965 653.1,954 598.9,910.7" class="f-shadow"/>
-    <polygon points="653.5,924.2 672.5,935.2 726.8,978.5 711.2,987.5 692.1,976.5 637.9,933.2" class="f-shadow"/>
-    <polygon points="692.4,946.7 711.5,957.7 765.7,1001 750.1,1010 731.1,999 676.9,955.7" class="f-shadow"/>
-    <polygon points="731.4,969.2 750.5,980.2 804.7,1023.5 789.1,1032.5 770.1,1021.5 715.8,978.2" class="f-shadow"/>
-    <polygon points="1089,490.4 1115,505.4 1161.5,542.5 1123.4,564.5 1097.4,549.5 1050.9,512.4" class="f-shadow"/>
-    <polygon points="1193,550.4 1218.9,565.4 1265.4,602.5 1227.3,624.5 1201.3,609.5 1154.9,572.4" class="f-shadow"/>
-    <polygon points="1296.9,610.4 1322.9,625.4 1369.3,662.5 1331.2,684.5 1305.3,669.5 1258.8,632.4" class="f-shadow"/>
-    <polygon points="796.3,679.4 834.4,701.4 880.9,738.5 863.6,748.5 825.5,726.5 779,689.4" class="f-shadow"/>
-    <polygon points="943.5,764.4 981.6,786.4 1028.1,823.5 1010.8,833.5 972.7,811.5 926.2,774.4" class="f-shadow"/>
-    <polygon points="1131.7,783.1 1179.3,810.6 1256.8,872.5 1204.8,902.5 1157.2,875 1079.7,813.1" class="f-shadow"/>
-    <polygon points="1187.9,815.6 1235.6,843.1 1313.1,905 1261.1,935 1213.5,907.5 1136,845.6" class="f-shadow"/>
-    <polygon points="1244.2,848.1 1291.9,875.6 1369.3,937.5 1317.4,967.5 1269.8,940 1192.3,878.1" class="f-shadow"/>
-    <polygon points="1300.5,880.6 1348.2,908.1 1425.6,970 1373.7,1000 1326,972.5 1248.6,910.6" class="f-shadow"/>
-    <polygon points="975.8,873.1 1023.4,900.6 1100.9,962.5 1048.9,992.5 1001.3,965 923.8,903.1" class="f-shadow"/>
-    <polygon points="1032.1,905.6 1079.7,933.1 1157.2,995 1105.2,1025 1057.6,997.5 980.1,935.6" class="f-shadow"/>
-    <polygon points="1088.4,938.1 1136,965.6 1213.5,1027.5 1161.5,1057.5 1113.9,1030 1036.4,968.1" class="f-shadow"/>
-    <polygon points="1144.6,970.6 1192.3,998.1 1269.8,1060 1217.8,1090 1170.2,1062.5 1092.7,1000.6" class="f-shadow"/>
+    <polygon points="758.8,385 894.8,404.6 1146,549.6 920.8,679.6 784.8,660 533.6,515" class="f-shadow"/>
+    <polygon points="791.7,626 823.3,630.6 847.5,644.6 816.4,662.6 784.8,658 760.5,644" class="f-shadow"/>
+    <polygon points="1044.6,570 1196.4,591.9 1335,671.9 1127.1,791.9 975.3,770 836.7,690" class="f-shadow"/>
+    <polygon points="1183.2,660 1325.3,680.5 1472.5,765.5 1273.3,880.5 1131.2,860 984,775" class="f-shadow"/>
+    <polygon points="330.1,512.5 361.7,517.1 448.3,567.1 418.9,584.1 387.3,579.5 300.7,529.5" class="f-shadow"/>
+    <polygon points="434,572.5 470.5,577.8 508.6,599.8 470.5,621.8 434,616.5 395.9,594.5" class="f-shadow"/>
+    <polygon points="602.9,675 746.2,695.7 919.4,795.7 720.3,910.7 576.9,890 403.7,790" class="f-shadow"/>
+    <polygon points="862.7,825 978.8,841.8 1017.8,864.3 870.6,949.3 754.5,932.5 715.5,910" class="f-shadow"/>
+    <polygon points="901.7,847.5 1017.8,864.3 1056.8,886.8 909.6,971.8 793.4,955 754.5,932.5" class="f-shadow"/>
+    <polygon points="940.7,870 1056.8,886.8 1095.7,909.3 948.5,994.3 832.4,977.5 793.4,955" class="f-shadow"/>
+    <polygon points="979.6,892.5 1095.7,909.3 1134.7,931.8 987.5,1016.8 871.4,1000 832.4,977.5" class="f-shadow"/>
+    <polygon points="1157.2,1085 1196,1090.6 1235.9,1113.6 1196,1136.6 1157.2,1131 1117.3,1108" class="f-shadow"/>
+    <polygon points="1407.5,925.5 1456,932.5 1508,962.5 1502.8,965.5 1454.2,958.5 1402.3,928.5" class="f-shadow"/>
+    <polygon points="668.7,945 692.5,948.4 711.6,959.4 696,968.4 672.2,965 653.1,954" class="f-shadow"/>
+    <polygon points="707.7,967.5 731.5,970.9 750.6,981.9 735,990.9 711.2,987.5 692.1,976.5" class="f-shadow"/>
+    <polygon points="746.7,990 770.5,993.4 789.5,1004.4 773.9,1013.4 750.1,1010 731.1,999" class="f-shadow"/>
+    <polygon points="785.6,1012.5 809.5,1015.9 828.5,1026.9 812.9,1035.9 789.1,1032.5 770.1,1021.5" class="f-shadow"/>
+    <polygon points="1135.5,527.5 1155.9,530.4 1181.9,545.4 1143.8,567.4 1123.4,564.5 1097.4,549.5" class="f-shadow"/>
+    <polygon points="1239.4,587.5 1259.8,590.4 1285.8,605.4 1247.7,627.4 1227.3,624.5 1201.3,609.5" class="f-shadow"/>
+    <polygon points="1343.4,647.5 1363.8,650.4 1389.8,665.4 1351.6,687.4 1331.2,684.5 1305.3,669.5" class="f-shadow"/>
+    <polygon points="842.8,716.5 863.2,719.4 901.3,741.4 884,751.4 863.6,748.5 825.5,726.5" class="f-shadow"/>
+    <polygon points="990,801.5 1010.4,804.4 1048.5,826.4 1031.2,836.4 1010.8,833.5 972.7,811.5" class="f-shadow"/>
+    <polygon points="1209.1,845 1243.1,849.9 1290.8,877.4 1238.8,907.4 1204.8,902.5 1157.2,875" class="f-shadow"/>
+    <polygon points="1265.4,877.5 1299.4,882.4 1347.1,909.9 1295.1,939.9 1261.1,935 1213.5,907.5" class="f-shadow"/>
+    <polygon points="1321.7,910 1355.7,914.9 1403.4,942.4 1351.4,972.4 1317.4,967.5 1269.8,940" class="f-shadow"/>
+    <polygon points="1378,942.5 1412,947.4 1459.6,974.9 1407.7,1004.9 1373.7,1000 1326,972.5" class="f-shadow"/>
+    <polygon points="1053.2,935 1087.3,939.9 1134.9,967.4 1082.9,997.4 1048.9,992.5 1001.3,965" class="f-shadow"/>
+    <polygon points="1109.5,967.5 1143.5,972.4 1191.2,999.9 1139.2,1029.9 1105.2,1025 1057.6,997.5" class="f-shadow"/>
+    <polygon points="1165.8,1000 1199.8,1004.9 1247.5,1032.4 1195.5,1062.4 1161.5,1057.5 1113.9,1030" class="f-shadow"/>
+    <polygon points="1222.1,1032.5 1256.1,1037.4 1303.8,1064.9 1251.8,1094.9 1217.8,1090 1170.2,1062.5" class="f-shadow"/>
     <ellipse cx="434.9" cy="492" rx="34" ry="18" class="glow"/>
     <line x1="452.2" y1="482" x2="452.2" y2="418" class="post"/>
     <path d="M452.2,418 Q452.2,410 438.4,422" fill="none" class="post"/>
@@ -322,7 +614,7 @@
     <polygon points="408.2,553.8 403.8,556.3 403.8,549.9 408.2,547.4" class="f-terracotta"/>
     <polygon points="330.1,486.5 416.7,536.5 387.3,553.5 300.7,503.5" class="f-wood"/>
     <polygon points="332.5,489.3 364.2,507.6 353.4,513.8 321.8,495.5" class="f-grime"/>
-    <ellipse cx="203.5" cy="574" rx="26" ry="10" class="f-shadow"/>
+    <ellipse cx="250.3" cy="574" rx="26" ry="10" class="f-shadow"/>
     <polygon points="226.5,570 234.5,570 232.5,518.05 228.5,518.05" class="f-bark"/>
     <polygon points="230.5,570 234.5,570 232.5,518.05 230.5,518.05" class="shade-2"/>
     <path d="M230.5,520.4 L209.8,497.4" fill="none" class="branch"/>
@@ -363,7 +655,7 @@
     <path d="M729.4,578 Q729.4,570 715.5,582" fill="none" class="post"/>
     <polygon points="714.6,578.5 723.3,583.5 714.6,588.5 706,583.5" class="f-lamp-head"/>
     <polygon points="714.6,581.5 721.6,585.5 714.6,589.5 707.7,585.5" class="f-ochre" data-anchor="lamp-2"/>
-    <ellipse cx="450.8" cy="641.5" rx="33.8" ry="13" class="f-shadow"/>
+    <ellipse cx="511.7" cy="641.5" rx="33.8" ry="13" class="f-shadow"/>
     <polygon points="482,637.5 490,637.5 488,577.965 484,577.965" class="f-bark"/>
     <polygon points="486,637.5 490,637.5 488,577.965 486,577.965" class="shade-2"/>
     <circle cx="486" cy="554.9" r="17.3" class="f-plane cloud-edge"/>
@@ -415,7 +707,7 @@
     <polygon points="1009.9,475 784.8,605 784.8,380" class="f-terracotta"/>
     <polygon points="1009.9,475 784.8,605 784.8,380" class="shade-1"/>
     <polygon points="758.8,365 784.8,380 784.8,605 533.6,460" class="f-terracotta" data-anchor="roof-hall"/>
-    <ellipse cx="502.8" cy="671.5" rx="33.8" ry="13" class="f-shadow"/>
+    <ellipse cx="563.7" cy="671.5" rx="33.8" ry="13" class="f-shadow"/>
     <polygon points="534,667.5 542,667.5 540,607.965 536,607.965" class="f-bark"/>
     <polygon points="538,667.5 542,667.5 540,607.965 538,607.965" class="shade-2"/>
     <path d="M538,606.5 L514.1,582.6" fill="none" class="branch"/>
@@ -497,7 +789,7 @@
     <polygon points="972.7,811.5 1010.8,833.5 1010.8,821.5 972.7,799.5" class="f-blue"/>
     <polygon points="972.7,811.5 1010.8,833.5 1010.8,821.5 972.7,799.5" class="shade-1"/>
     <polygon points="990,789.5 1028.1,811.5 1010.8,821.5 972.7,799.5" class="f-blue"/>
-    <ellipse cx="721.9" cy="822.5" rx="54.6" ry="21" class="f-shadow"/>
+    <ellipse cx="820.3" cy="822.5" rx="54.6" ry="21" class="f-shadow"/>
     <polygon points="774.7,818.5 782.7,818.5 780.7,743.405 776.7,743.405" class="f-bark"/>
     <polygon points="778.7,818.5 782.7,818.5 780.7,743.405 778.7,743.405" class="shade-2"/>
     <circle cx="778.7" cy="706.2" r="28" class="f-lime cloud-edge"/>
@@ -604,7 +896,7 @@
     <polygon points="1213.5,885.5 1261.1,913 1237.3,889.3" class="f-wood"/>
     <polygon points="1289.2,859.3 1313.1,883 1261.1,913 1237.3,889.3" class="f-sage" data-anchor="awning-2"/>
     <polygon points="1289.2,859.3 1313.1,883 1261.1,913 1237.3,889.3" class="shade-1"/>
-    <ellipse cx="680.9" cy="941.5" rx="20.8" ry="8" class="f-shadow"/>
+    <ellipse cx="718.3" cy="941.5" rx="20.8" ry="8" class="f-shadow"/>
     <polygon points="698.5,937.5 706.5,937.5 704.5,897.94 700.5,897.94" class="f-bark"/>
     <polygon points="702.5,937.5 706.5,937.5 704.5,897.94 702.5,897.94" class="shade-2"/>
     <circle cx="702.5" cy="883.8" r="10.7" class="f-plane cloud-edge"/>
@@ -768,7 +1060,7 @@
     <polygon points="751,996.5 759.7,1001.5 759.7,1003.5 751,998.5" class="f-bin-lid"/>
     <circle cx="761.4" cy="1007.5" r="2" class="f-bin-lid"/>
     <circle cx="766.6" cy="1010.5" r="2" class="f-bin-lid"/>
-    <ellipse cx="803.8" cy="1014" rx="23.4" ry="9" class="f-shadow"/>
+    <ellipse cx="845.9" cy="1014" rx="23.4" ry="9" class="f-shadow"/>
     <polygon points="824.1,1010 832.1,1010 830.1,967.245 826.1,967.245" class="f-bark"/>
     <polygon points="828.1,1010 832.1,1010 830.1,967.245 828.1,967.245" class="shade-2"/>
     <circle cx="828.1" cy="951.3" r="12" class="f-lime cloud-edge"/>
@@ -856,7 +1148,7 @@
     <polygon points="1117.3,1108 1157.2,1131 1157.2,1099 1117.3,1076" class="shade-1"/>
     <polygon points="1157.2,1053 1197,1076 1157.2,1099 1117.3,1076" class="f-wood"/>
     <polygon points="1157.2,1055.9 1170.1,1063.4 1157.2,1070.8 1144.3,1063.4" class="f-grime"/>
-    <ellipse cx="1126.9" cy="1154" rx="20.8" ry="8" class="f-shadow"/>
+    <ellipse cx="1164.3" cy="1154" rx="20.8" ry="8" class="f-shadow"/>
     <polygon points="1144.5,1150 1152.5,1150 1150.5,1104.44 1146.5,1104.44" class="f-bark"/>
     <polygon points="1148.5,1150 1152.5,1150 1150.5,1104.44 1148.5,1104.44" class="shade-2"/>
     <path d="M1148.5,1103.5 L1133.8,1088.8" fill="none" class="branch"/>
@@ -926,7 +1218,7 @@
     <path d="M1413.9,431.4 A72.8,13.5 0 0 0 1559.5,431.4 Z" class="shade-2"/>
     <circle cx="1717" cy="96" r="62" class="f-dial"/>
     <path d="M1665,118 L1769,118" fill="none" class="thin"/>
-    <circle cx="1759.5" cy="106.1" r="12" class="f-sun-dawn"/>
+    <circle cx="1685.9" cy="85.5" r="12" class="f-sun"/>
     <circle cx="1677" cy="56" r="1.8" class="f-star"/>
     <circle cx="1742.2" cy="106.5" r="1.2" class="f-star"/>
     <circle cx="1750" cy="58.4" r="1.2" class="f-star"/>
@@ -936,15 +1228,8 @@
     <circle cx="1706.1" cy="81.7" r="1.8" class="f-star"/>
     <circle cx="1732" cy="107" r="1.2" class="f-star"/>
     <circle cx="1733" cy="56.1" r="1.2" class="f-star"/>
-    <circle cx="1711.3" cy="72.4" r="12" class="f-moon-dark"/>
-    <path d="M1711.3,60.4 A12,12 0 0 1 1711.3,84.4 A0.6,12 0 0 1 1711.3,60.4 Z" class="f-moon"/>
-    <path d="M537,77 Q540.5,73 544,80 Q547.5,73 551,77" fill="none" class="bird"/>
-    <path d="M927.8,79.1 Q932.3,75.1 936.8,82.1 Q941.3,75.1 945.8,79.1" fill="none" class="bird"/>
-    <path d="M966.8,85.3 Q972.3,81.3 977.8,88.3 Q983.3,81.3 988.8,85.3" fill="none" class="bird"/>
-    <path d="M976.6,165 Q980.1,161 983.6,168 Q987.1,161 990.6,165" fill="none" class="bird"/>
-    <path d="M857.8,121.9 Q862.3,117.9 866.8,124.9 Q871.3,117.9 875.8,121.9" fill="none" class="bird"/>
-    <path d="M578.9,109.1 Q584.4,105.1 589.9,112.1 Q595.4,105.1 600.9,109.1" fill="none" class="bird"/>
-    <path d="M872.6,155.3 Q876.1,151.3 879.6,158.3 Q883.1,151.3 886.6,155.3" fill="none" class="bird"/>
+    <circle cx="1676.3" cy="100.4" r="12" class="f-moon-dark"/>
+    <path d="M1676.3,88.4 A12,12 0 0 1 1676.3,112.4 A0.6,12 0 0 1 1676.3,88.4 Z" class="f-moon"/>
     <polygon points="120,40 380,40 380,160 120,160" fill="none" stroke="none" data-anchor="sky-1"/>
     <polygon points="776.5,30 1036.5,30 1036.5,140 776.5,140" fill="none" stroke="none" data-anchor="sky-2"/>
     <polygon points="1393,260 1653,260 1653,380 1393,380" fill="none" stroke="none" data-anchor="sky-3"/>
@@ -973,3 +1258,5 @@
     <circle data-place="secretary-house" cx="1326.9" cy="1053" r="1"/>
   </g>
 </svg>
+</body>
+</html>

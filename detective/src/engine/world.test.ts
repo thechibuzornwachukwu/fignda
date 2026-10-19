@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { ANCHORS, MAP_H, MAP_W, PLACE_IDS, PLACES } from './world';
 
-// The map of the street (design/sketches/map/the-street.html) and the places the cases are pinned to stay the same.
-const sketch = readFileSync('design/sketches/map/the-street.html', 'utf8');
+// The map of the street (design/sketches/map/plan/the-street.html) and the places the cases are pinned to stay the same.
+const sketch = readFileSync('design/sketches/map/plan/the-street.html', 'utf8');
 const points = Object.fromEntries([...sketch.matchAll(/data-place="([^"]+)" cx="(\d+)" cy="(\d+)"/g)].map((m) => [m[1], [Number(m[2]), Number(m[3])]]));
 
 describe('the map of Lantern Row', () => {

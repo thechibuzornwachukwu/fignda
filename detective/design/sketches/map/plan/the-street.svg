@@ -1,259 +1,5 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Map of Lantern Row</title>
-<!--
-  Written by scripts/render-street.ts from src/map/street.ts. Do not edit by hand: change the module and render again.
-  The street straight down, the plan routes are drawn on, by day in the light theme and at night in the dark (?theme=dark). The sun and the
-  shadows follow the hour, the moon follows the date, the weather follows the case.
--->
+<svg style="--map-ink: #2a2622; --map-cobble: #ddd0b8; --map-tarmac: #d9cdb6; --map-square: #e3d6bd; --map-alley: #c8b998; --map-terracotta: #b5573c; --map-wood: #7a5236; --map-ochre: #d0a65a; --map-ochre-dim: #d0a65a; --map-bakery: #c98b4e; --map-sage: #8a9a6b; --map-blue: #8fa3ad; --map-plane: #9aa57a; --map-library: #7f8d63; --map-lime: #a9b37f; --map-house: #c9b48f; --map-house-2: #d3bf9a; --map-brick: #a5503a; --map-plaster: #eadcc0; --map-stone: #d8ccb4; --map-window: #8fa3ad; --map-window-lit: #8fa3ad; --map-clock: #f3ead9; --map-shadow: rgba(42,38,34,0.16); --map-sun: #f4d27a; --map-moon: rgba(0,0,0,0); --map-moon-dark: rgba(0,0,0,0); --map-wet: rgba(80,96,110,0.18); --map-star: rgba(0,0,0,0); --map-cloud: rgba(251,248,241,0.92); --map-cloud-grey: rgba(185,180,170,0.88); --map-sun-dawn: #e8955a; --map-fog: rgba(238,233,224,0.3); --map-snow-cap: rgba(250,249,246,0.86); --map-snow-ground: rgba(250,249,246,0.82); --map-slush: rgba(170,165,155,0.5); --map-flake: #ffffff; --map-funnel: #8d877d; --map-wall-cloud: #7d776d; --map-dust: #b3a58a; --map-land: #dfdfc2; --map-mud-root: #6e5236; --map-flood-stain: rgba(110,90,60,0.28); --map-mud: rgba(130,105,70,0.32); --map-sandbag: #c9b48a; --map-window-broken: #2a2622; --map-funnel-dust: #9a8a6e; --map-shadow-storm: rgba(42,38,34,0.18); --map-bin-public: #3f5a4a; --map-bin-green: #4f7a4a; --map-bin-grey: #7d8288; --map-bin-lid: #2f3a34; --map-picket: #f3ead9; --map-camera: #e8e4dc; --map-camera-eye: #2a2622; --map-cone: rgba(80,110,160,0.12); --map-lamp-head: #5a5f66; --map-weed: #6f8a4e; --map-weed-2: #8fa65f; --map-crack: rgba(42,38,34,0.28); --map-sign: #3f5a4a; --map-plaque: #f3ead9; --map-bark: #7a5236; --map-leaf-dry: #b8a46a; --map-leaf-light: rgba(255,255,240,0.22); --map-fruit-red: #c4452f; --map-fruit-orange: #e48a2e; --map-nest: #8a6a48; --map-bird: #3a3430; --map-moss: rgba(110,128,72,0.42); --map-grime: rgba(42,38,34,0.16); --map-battens: #3b2a1f; --map-grass: #c9cf9f; --map-pavement: #e7ddc8; --map-poster: #e9d8a6; --map-dial: #c9dbe2; --map-dial-grey: #cfccc5; --map-cloud-shadow: rgba(42,38,34,0.08); --map-lot: #f3ead9; --map-flood: rgba(118,104,78,0.78); --map-water: rgba(118,104,78,0.86); --map-storm-dark: rgba(30,34,44,0.32); --map-strike: rgba(255,248,210,0.55); --map-puddle: rgba(110,135,150,0.45); --map-glow: 0; background: var(--map-land)" width="1200" height="800" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
 <style>
-  :root {
-    --map-ink: #2a2622;
-    --map-cobble: #ddd0b8;
-    --map-tarmac: #d9cdb6;
-    --map-square: #e3d6bd;
-    --map-alley: #c8b998;
-    --map-terracotta: #b5573c;
-    --map-wood: #7a5236;
-    --map-ochre: #d0a65a;
-    --map-ochre-dim: #d0a65a;
-    --map-bakery: #c98b4e;
-    --map-sage: #8a9a6b;
-    --map-blue: #8fa3ad;
-    --map-plane: #9aa57a;
-    --map-library: #7f8d63;
-    --map-lime: #a9b37f;
-    --map-house: #c9b48f;
-    --map-house-2: #d3bf9a;
-    --map-brick: #a5503a;
-    --map-plaster: #eadcc0;
-    --map-stone: #d8ccb4;
-    --map-window: #8fa3ad;
-    --map-window-lit: #8fa3ad;
-    --map-clock: #f3ead9;
-    --map-shadow: rgba(42,38,34,0.16);
-    --map-sun: #f4d27a;
-    --map-moon: rgba(0,0,0,0);
-    --map-moon-dark: rgba(0,0,0,0);
-    --map-wet: rgba(80,96,110,0.18);
-    --map-star: rgba(0,0,0,0);
-    --map-cloud: rgba(251,248,241,0.92);
-    --map-cloud-grey: rgba(185,180,170,0.88);
-    --map-sun-dawn: #e8955a;
-    --map-fog: rgba(238,233,224,0.3);
-    --map-snow-cap: rgba(250,249,246,0.86);
-    --map-snow-ground: rgba(250,249,246,0.82);
-    --map-slush: rgba(170,165,155,0.5);
-    --map-flake: #ffffff;
-    --map-funnel: #8d877d;
-    --map-wall-cloud: #7d776d;
-    --map-dust: #b3a58a;
-    --map-land: #dfdfc2;
-    --map-funnel-dust: #9a8a6e;
-    --map-shadow-storm: rgba(42,38,34,0.18);
-    --map-bin-public: #3f5a4a;
-    --map-bin-green: #4f7a4a;
-    --map-bin-grey: #7d8288;
-    --map-bin-lid: #2f3a34;
-    --map-picket: #f3ead9;
-    --map-camera: #e8e4dc;
-    --map-camera-eye: #2a2622;
-    --map-cone: rgba(80,110,160,0.12);
-    --map-lamp-head: #5a5f66;
-    --map-weed: #6f8a4e;
-    --map-weed-2: #8fa65f;
-    --map-crack: rgba(42,38,34,0.28);
-    --map-sign: #3f5a4a;
-    --map-plaque: #f3ead9;
-    --map-bark: #7a5236;
-    --map-leaf-dry: #b8a46a;
-    --map-leaf-light: rgba(255,255,240,0.22);
-    --map-fruit-red: #c4452f;
-    --map-fruit-orange: #e48a2e;
-    --map-nest: #8a6a48;
-    --map-bird: #3a3430;
-    --map-moss: rgba(110,128,72,0.42);
-    --map-grime: rgba(42,38,34,0.16);
-    --map-battens: #3b2a1f;
-    --map-grass: #c9cf9f;
-    --map-pavement: #e7ddc8;
-    --map-poster: #e9d8a6;
-    --map-dial: #c9dbe2;
-    --map-dial-grey: #cfccc5;
-    --map-cloud-shadow: rgba(42,38,34,0.08);
-    --map-lot: #f3ead9;
-    --map-flood: rgba(122,128,118,0.62);
-    --map-water: rgba(122,128,118,0.7);
-    --map-puddle: rgba(110,135,150,0.45);
-    --map-glow: 0;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-    --map-ink: #e9dfcc;
-    --map-cobble: #2a2f38;
-    --map-tarmac: #2c313a;
-    --map-square: #303641;
-    --map-alley: #22262d;
-    --map-terracotta: #6e3a2c;
-    --map-wood: #4a3526;
-    --map-ochre: #f2c46b;
-    --map-ochre-dim: #8a6d3b;
-    --map-bakery: #7a5838;
-    --map-sage: #4f5a42;
-    --map-blue: #4b5a63;
-    --map-plane: #4d5740;
-    --map-library: #45503a;
-    --map-lime: #5c6648;
-    --map-house: #514636;
-    --map-house-2: #5a4e3c;
-    --map-brick: #5a3026;
-    --map-plaster: #4a4438;
-    --map-stone: #454039;
-    --map-window: #2b3440;
-    --map-window-lit: #f2c46b;
-    --map-clock: #f2d9a0;
-    --map-shadow: rgba(0,0,0,0);
-    --map-sun: rgba(0,0,0,0);
-    --map-moon: #efe6cf;
-    --map-moon-dark: #2a2f38;
-    --map-wet: rgba(120,150,180,0.12);
-    --map-star: #e9dfcc;
-    --map-cloud: rgba(52,58,70,0.85);
-    --map-cloud-grey: rgba(38,43,51,0.88);
-    --map-sun-dawn: rgba(0,0,0,0);
-    --map-fog: rgba(120,130,145,0.17);
-    --map-snow-cap: rgba(205,214,226,0.82);
-    --map-snow-ground: rgba(150,165,185,0.5);
-    --map-slush: rgba(60,66,78,0.6);
-    --map-flake: #e6ecf2;
-    --map-funnel: #3a404a;
-    --map-wall-cloud: #1f242c;
-    --map-dust: #3d3a33;
-    --map-land: #171c1d;
-    --map-funnel-dust: #3d3a33;
-    --map-shadow-storm: rgba(0,0,0,0.3);
-    --map-bin-public: #2c3e34;
-    --map-bin-green: #2f4a2c;
-    --map-bin-grey: #454a50;
-    --map-bin-lid: #1c2420;
-    --map-picket: #8a8270;
-    --map-camera: #9aa0a8;
-    --map-camera-eye: #f26b5b;
-    --map-cone: rgba(150,180,230,0.10);
-    --map-lamp-head: #3a3f46;
-    --map-weed: #4a5e3a;
-    --map-weed-2: #5a6e44;
-    --map-crack: rgba(0,0,0,0.4);
-    --map-sign: #2c3e34;
-    --map-plaque: #8a8270;
-    --map-bark: #3a2a1f;
-    --map-leaf-dry: #4a4430;
-    --map-leaf-light: rgba(255,255,240,0.06);
-    --map-fruit-red: #7a3324;
-    --map-fruit-orange: #8a5a26;
-    --map-nest: #3d3024;
-    --map-bird: #d8cfbd;
-    --map-moss: rgba(70,90,60,0.5);
-    --map-grime: rgba(0,0,0,0.28);
-    --map-battens: #120d0a;
-    --map-grass: #1d251f;
-    --map-pavement: #262b33;
-    --map-poster: #4a4536;
-    --map-dial: #10141c;
-    --map-dial-grey: #1c2028;
-    --map-cloud-shadow: rgba(0,0,0,0.18);
-    --map-lot: #1b1f27;
-    --map-flood: rgba(52,62,74,0.7);
-    --map-water: rgba(52,62,74,0.75);
-    --map-puddle: rgba(242,196,107,0.28);
-      --map-glow: 0.22;
-    }
-  }
-  :root[data-theme="dark"] {
-    --map-ink: #e9dfcc;
-    --map-cobble: #2a2f38;
-    --map-tarmac: #2c313a;
-    --map-square: #303641;
-    --map-alley: #22262d;
-    --map-terracotta: #6e3a2c;
-    --map-wood: #4a3526;
-    --map-ochre: #f2c46b;
-    --map-ochre-dim: #8a6d3b;
-    --map-bakery: #7a5838;
-    --map-sage: #4f5a42;
-    --map-blue: #4b5a63;
-    --map-plane: #4d5740;
-    --map-library: #45503a;
-    --map-lime: #5c6648;
-    --map-house: #514636;
-    --map-house-2: #5a4e3c;
-    --map-brick: #5a3026;
-    --map-plaster: #4a4438;
-    --map-stone: #454039;
-    --map-window: #2b3440;
-    --map-window-lit: #f2c46b;
-    --map-clock: #f2d9a0;
-    --map-shadow: rgba(0,0,0,0);
-    --map-sun: rgba(0,0,0,0);
-    --map-moon: #efe6cf;
-    --map-moon-dark: #2a2f38;
-    --map-wet: rgba(120,150,180,0.12);
-    --map-star: #e9dfcc;
-    --map-cloud: rgba(52,58,70,0.85);
-    --map-cloud-grey: rgba(38,43,51,0.88);
-    --map-sun-dawn: rgba(0,0,0,0);
-    --map-fog: rgba(120,130,145,0.17);
-    --map-snow-cap: rgba(205,214,226,0.82);
-    --map-snow-ground: rgba(150,165,185,0.5);
-    --map-slush: rgba(60,66,78,0.6);
-    --map-flake: #e6ecf2;
-    --map-funnel: #3a404a;
-    --map-wall-cloud: #1f242c;
-    --map-dust: #3d3a33;
-    --map-land: #171c1d;
-    --map-funnel-dust: #3d3a33;
-    --map-shadow-storm: rgba(0,0,0,0.3);
-    --map-bin-public: #2c3e34;
-    --map-bin-green: #2f4a2c;
-    --map-bin-grey: #454a50;
-    --map-bin-lid: #1c2420;
-    --map-picket: #8a8270;
-    --map-camera: #9aa0a8;
-    --map-camera-eye: #f26b5b;
-    --map-cone: rgba(150,180,230,0.10);
-    --map-lamp-head: #3a3f46;
-    --map-weed: #4a5e3a;
-    --map-weed-2: #5a6e44;
-    --map-crack: rgba(0,0,0,0.4);
-    --map-sign: #2c3e34;
-    --map-plaque: #8a8270;
-    --map-bark: #3a2a1f;
-    --map-leaf-dry: #4a4430;
-    --map-leaf-light: rgba(255,255,240,0.06);
-    --map-fruit-red: #7a3324;
-    --map-fruit-orange: #8a5a26;
-    --map-nest: #3d3024;
-    --map-bird: #d8cfbd;
-    --map-moss: rgba(70,90,60,0.5);
-    --map-grime: rgba(0,0,0,0.28);
-    --map-battens: #120d0a;
-    --map-grass: #1d251f;
-    --map-pavement: #262b33;
-    --map-poster: #4a4536;
-    --map-dial: #10141c;
-    --map-dial-grey: #1c2028;
-    --map-cloud-shadow: rgba(0,0,0,0.18);
-    --map-lot: #1b1f27;
-    --map-flood: rgba(52,62,74,0.7);
-    --map-water: rgba(52,62,74,0.75);
-    --map-puddle: rgba(242,196,107,0.28);
-    --map-glow: 0.22;
-  }
-  html, body { margin: 0; background: var(--map-land); }
-  svg { display: block; width: 100%; max-width: 100%; height: auto; }
   .f-ink { fill: var(--map-ink); }
   .f-cobble { fill: var(--map-cobble); }
   .f-tarmac { fill: var(--map-tarmac); }
@@ -295,6 +41,11 @@
   .f-wall-cloud { fill: var(--map-wall-cloud); }
   .f-dust { fill: var(--map-dust); }
   .f-land { fill: var(--map-land); }
+  .f-mud-root { fill: var(--map-mud-root); }
+  .f-flood-stain { fill: var(--map-flood-stain); }
+  .f-mud { fill: var(--map-mud); }
+  .f-sandbag { fill: var(--map-sandbag); }
+  .f-window-broken { fill: var(--map-window-broken); }
   .f-funnel-dust { fill: var(--map-funnel-dust); }
   .f-shadow-storm { fill: var(--map-shadow-storm); }
   .f-bin-public { fill: var(--map-bin-public); }
@@ -330,9 +81,12 @@
   .f-lot { fill: var(--map-lot); }
   .f-flood { fill: var(--map-flood); }
   .f-water { fill: var(--map-water); }
+  .f-storm-dark { fill: var(--map-storm-dark); }
+  .f-strike { fill: var(--map-strike); }
   .f-puddle { fill: var(--map-puddle); }
   .s-ink { stroke: var(--map-ink); }
-  .f-star, .f-shadow, .f-sun, .f-sun-dawn, .f-moon, .f-moon-dark, .f-wet, .f-puddle, .f-fog, .f-snow-cap, .f-snow-ground, .f-slush, .f-flake, .f-flood, .f-water, .f-grass, .f-pavement, .f-moss, .f-grime, .f-leaf-light, .f-camera-eye, .f-crack, .f-weed, .f-weed-2, .f-shadow-storm, .glow { stroke: none; }
+  .f-star, .f-shadow, .f-sun, .f-sun-dawn, .f-moon, .f-moon-dark, .f-wet, .f-puddle, .f-fog, .f-snow-cap, .f-snow-ground, .f-slush, .f-flake, .f-flood, .f-water, .f-grass, .f-pavement, .f-moss, .f-grime, .f-leaf-light, .f-camera-eye, .f-crack, .f-weed, .f-weed-2, .f-shadow-storm, .f-flood-stain, .f-mud, .f-storm-dark, .f-strike, .glow { stroke: none; }
+  .f-sandbag { stroke-width: 1; }
   .f-funnel-dust { stroke-width: 1.4; }
   .f-cone { stroke: var(--map-blue); stroke-width: 1; stroke-dasharray: 4 4; }
   .f-camera { stroke-width: 1.2; }
@@ -340,6 +94,11 @@
   .plaque-words { fill: #2a2622; stroke: none; font-family: Manrope, 'Segoe UI', Arial, sans-serif; font-weight: 800; }
   .picket { stroke: var(--map-ink); stroke-width: 1.4; }
   .fence-plan { stroke: var(--map-ink); stroke-width: 2.5; stroke-dasharray: 2 3; }
+  .tideline { stroke: var(--map-wood); stroke-width: 1.2; opacity: 0.6; }
+  .fence-broken { stroke-width: 1.2; opacity: 0.6; stroke-dasharray: 6 9; }
+  .bolt { stroke: #fffbe8; stroke-width: 4; fill: none; }
+  .bolt-glow { stroke: rgba(255,248,210,0.45); stroke-width: 16; fill: none; }
+  .current { stroke: rgba(240,230,210,0.55); stroke-width: 2; }
   .weed { stroke: var(--map-weed); stroke-width: 1.6; }
   .twig { stroke: var(--map-bark); stroke-width: 1.4; }
   .snow-line { stroke: var(--map-snow-cap); stroke-width: 2; }
@@ -365,10 +124,6 @@
   .rain { stroke: var(--map-blue); stroke-width: 1.6; opacity: 0.7; }
   .glow { fill: var(--map-ochre); opacity: var(--map-glow); }
 </style>
-<script>if (new URLSearchParams(location.search).get('theme') === 'dark') document.documentElement.dataset.theme = 'dark';</script>
-</head>
-<body>
-<svg width="1200" height="800" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
   <g class="s-ink" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
     <polygon points="0,0 1200,0 1200,800 0,800" class="f-lot"/>
     <polygon points="140,120 470,120 470,150 140,150" class="f-alley"/>
@@ -953,5 +708,3 @@
     <circle data-place="secretary-house" cx="1176" cy="490" r="1"/>
   </g>
 </svg>
-</body>
-</html>
