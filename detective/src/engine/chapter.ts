@@ -6,6 +6,7 @@
 import { buildHiddenWords, norm } from './hiddenWords';
 import { buildMirror } from './mirror';
 import { sumsClue } from './sums';
+import { isPlace, type PlaceId } from './world';
 
 export const SHAPES = ['who-did-it', 'prove-it', 'what-is-it-really', 'where-is-it', 'nothing-was-taken'] as const;
 export type Shape = (typeof SHAPES)[number];
@@ -124,6 +125,8 @@ export const SWEEP_ROOM_MIN = 6;
 
 export type Step = {
   place: string;
+  /** Where on Lantern Row it happens: a place on the map (`src/engine/world.ts`). */
+  where: PlaceId;
   method: Method;
   /** The real thing in the detective's hands, and why it exists. */
   thing: string;
@@ -171,6 +174,8 @@ export type Chapter = {
   ask?: string;
   item: { name: string; line: string };
   place: string;
+  /** The case's pin on the map of the street. */
+  where: PlaceId;
   brief: string[];
   board: Board;
   suspects: Suspect[];
@@ -212,6 +217,8 @@ export function checkChapter(raw: unknown, roles: readonly string[]): string[] {
 
   if (!text(c.id) || !text(c.title) || !text(c.place)) out.push('id, title and place are needed');
   if (!SHAPES.includes(c.shape as Shape)) out.push('unknown shape');
+  // Every case happens on the street: on the map, or down a road that leaves it.
+  if (!isPlace(c.where)) out.push('the case is not at a place on the map');
   if (!text(c.item?.name) || !text(c.item?.line)) out.push('the item needs a name and a line');
   if (!Array.isArray(c.brief) || c.brief.length === 0) out.push('no brief');
 
@@ -247,6 +254,7 @@ export function checkChapter(raw: unknown, roles: readonly string[]): string[] {
     const at = `step ${i + 1}`;
     if (!METHODS.includes(s.method)) out.push(`${at}: unknown method`);
     if (!text(s.place) || !text(s.thing) || !text(s.fact)) out.push(`${at}: a place, a thing and a fact are needed`);
+    if (!isPlace(s.where)) out.push(`${at}: it is not at a place on the map`);
     if (s.method === 'accounts' || s.accounts != null) {
       const list = Array.isArray(s.accounts) ? s.accounts : [];
       if (s.method !== 'accounts') out.push(`${at}: only a "which account fits" step has accounts`);

@@ -9,6 +9,7 @@
     "line": "A biscuit tin with a slot cut in the lid and the committee's wax seal across it. It holds the street's votes on whether the 19th name stays on the Long Spoon."
   },
   "place": "The committee room",
+  "where": "committee-room",
   "brief": [
     "Last night Lantern Row voted on the name burned back onto the Long Spoon. The box was sealed at 9 pm, in front of the committee.",
     "At 8 this morning the seal is broken and the lid sits loose. The count is at noon.",
@@ -59,6 +60,7 @@
   "steps": [
     {
       "place": "The committee room",
+      "where": "committee-room",
       "method": "buried-sums",
       "thing": "The roll of voters and the box itself. Everybody who voted signed the roll, and every card in the box can be counted without being read.",
       "fact": "41 names are on the roll and 41 cards are in the box. Whatever happened to the seal, no vote is missing.",
@@ -68,6 +70,7 @@
     },
     {
       "place": "The secretary's desk",
+      "where": "committee-room",
       "method": "mirror",
       "thing": "The blotter. The tally sheet went into the safe, but the blotter kept its wet ink, back to front.",
       "text": ".thgie ytriht :xob eht ni yllaT .enin ,etov fo esolC",
@@ -85,6 +88,7 @@
     },
     {
       "place": "The bus stop",
+      "where": "bus-stop",
       "method": "buried-sums",
       "thing": "The ticket roll from last night's buses, and the key book from the hall. Each is kept by somebody with no stake in the vote.",
       "fact": "Ines handed key 4 in at 9.05 pm and paid her fare on the 9.10. She came back on the 9.50 for her umbrella, which is why she said nothing. The cloakroom is at the door, 2 floors below.",
@@ -95,6 +99,7 @@
     },
     {
       "place": "The key board",
+      "where": "committee-room",
       "method": "hidden-words",
       "thing": "The label strip under the hooks, punched from a label maker in 1 row with no spaces.",
       "text": "KEYNINEMUSICCUPBOARDINTHECOMMITTEEROOMHELDBYTHECHOIR",
@@ -112,6 +117,7 @@
     },
     {
       "place": "The piano",
+      "where": "hall",
       "method": "hidden-words",
       "thing": "A rehearsal notice that is really a promise passed in plain sight, to 3 singers who could not stay for the vote.",
       "text": "Bravo tenors. Please all bring both reeds and folders. Lola tends the door. Wedding at 7, back by 9.",
@@ -129,6 +135,7 @@
     },
     {
       "place": "The committee room, at noon",
+      "where": "committee-room",
       "method": "accounts",
       "thing": "3 accounts of the same night, as the street is telling it. Each piece of evidence already on the board strikes 1 of them out.",
       "accounts": [

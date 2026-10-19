@@ -10,6 +10,7 @@
     "line": "2 painted boards over 2 market stalls: the Stew Pot and Green Fingers. On market day each hangs over the wrong one."
   },
   "place": "The market row",
+  "where": "market-row",
   "brief": [
     "Nobody signed out the key Ines used, and nobody will say who sent it. The street is pretending to think about something else, and on Friday it gets its wish.",
     "Market day. The Stew Pot wakes under the sign of Green Fingers, and Green Fingers under the sign of the Stew Pot.",
@@ -60,6 +61,7 @@
   "steps": [
     {
       "place": "The judge's table",
+      "where": "market-row",
       "method": "buried-sums",
       "thing": "The judge's mark sheet. She is from out of town, walks the row before anybody sets out, and marks each stall by its sign.",
       "fact": "Judged at 6.30 am, by sign. The Stew Pot: 6 of 20. Green Fingers: 19 of 20. The signs were already changed, so each stall got the other's marks.",
@@ -69,6 +71,7 @@
     },
     {
       "place": "The stew pitch",
+      "where": "market-row",
       "method": "mirror",
       "thing": "The tarpaulin that covered the pitch overnight. It lay against the sign and took a print of it, back to front.",
       "text": ".yadirF yreve hserF .dees dna sbreh ,stnalP .sregniF neerG",
@@ -86,6 +89,7 @@
     },
     {
       "place": "The watchman's hut",
+      "where": "watchman-hut",
       "method": "chain",
       "thing": "The watchman's log of the row, with a gap in it.",
       "chain": {
@@ -116,6 +120,7 @@
     },
     {
       "place": "The pot store",
+      "where": "market-row",
       "method": "claim",
       "thing": "The row's claim, set against the clock.",
       "claim": {
@@ -141,6 +146,7 @@
     },
     {
       "place": "The row, end to end",
+      "where": "market-row",
       "method": "trail",
       "thing": "The case, walked once more along the row. Each find goes back where it was found.",
       "fact": "Behind the plant stall are 14 trays of seedlings, black with frost. Thursday's cold snap took the lot. A bare stall scores 6.",
@@ -151,6 +157,7 @@
     },
     {
       "place": "The line-up",
+      "where": "market-row",
       "method": "line-up",
       "thing": "The 2 from the brief, and what the evidence left standing.",
       "fact": "Chance: the empty row, 8 to 9 pm. Means: paint, laid over each sign where it hung. Motive: 14 trays lost to frost, and a judge at 6.30."

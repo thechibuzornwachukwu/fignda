@@ -9,6 +9,7 @@
     "line": "The hall's record of 1 year, bound in green and 46 cm tall. It says what was decided about the name planed off the Long Spoon."
   },
   "place": "The library",
+  "where": "library",
   "brief": [
     "A card under a wiper, with a drawing of the rod and a lantern. That is 3 cards now, and nobody admits to sending 1.",
     "On Wednesday the committee sent for the hall's minute book for 2011. Its place on the library shelf is empty.",
@@ -66,6 +67,7 @@
   "steps": [
     {
       "place": "The minutes shelf",
+      "where": "library",
       "method": "buried-sums",
       "thing": "The shelf list and the loans ledger. One gives every volume's size, the other every book that has left the building.",
       "fact": "The 2011 volume is the tall one: green, 46 cm. No minute book is in the loans ledger, this week or ever.",
@@ -75,6 +77,7 @@
     },
     {
       "place": "The request desk",
+      "where": "library",
       "method": "mirror",
       "thing": "The desk blotter. The request slips go in a tray, but the blotter kept their wet ink, back to front.",
       "text": ".yrekab eht yb rof deksA .evif net yadseuT ,flehs no toN .1102 ,setuniM",
@@ -93,6 +96,7 @@
     },
     {
       "place": "The caretaker's desk",
+      "where": "caretaker-desk",
       "method": "claim",
       "thing": "The street's claim, set against the tape measure. His tool bag is on the desk.",
       "claim": {
@@ -118,6 +122,7 @@
     },
     {
       "place": "The atlas shelf",
+      "where": "library",
       "method": "hidden-words",
       "thing": "A card from the suggestions box. It reads as a complaint about the heating. Read closely, it is not.",
       "text": "That last disco very loud. Rich ideas, though. The sun cuts in by ten.",
@@ -135,6 +140,7 @@
     },
     {
       "place": "The library door",
+      "where": "library",
       "method": "trail",
       "thing": "The case, walked once more from the door. Each find goes back where it was found.",
       "fact": "Every stop is behind the desk. By the door is a note to the committee, refused twice: \"Lock 2011 away until tempers cool.\"",
@@ -145,6 +151,7 @@
     },
     {
       "place": "The reading room",
+      "where": "library",
       "method": "accounts",
       "thing": "3 accounts of where the book went. Each piece of evidence already on the board strikes 1 of them out.",
       "accounts": [

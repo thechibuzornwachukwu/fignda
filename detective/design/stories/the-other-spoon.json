@@ -9,6 +9,7 @@
     "line": "An oak spoon as long as an arm, with 20 names burned into the handle, up for sale on Saturday. The Long Spoon is on its hooks in the hall."
   },
   "place": "The sale room",
+  "where": "sale-room",
   "brief": [
     "Both signs on the row were painted by 1 practised hand, and nobody will say whose. Then the sale room puts up its list for Saturday.",
     "Lot 20: the Long Spoon, with all 20 names burned into the handle. The Long Spoon is on its hooks in the hall, where it has been since the final.",
@@ -47,6 +48,7 @@
   "steps": [
     {
       "place": "The sale room",
+      "where": "sale-room",
       "method": "sweep",
       "thing": "The sale room the day before the sale. Most of it is lots nobody is asking about.",
       "room": {
@@ -77,6 +79,7 @@
     },
     {
       "place": "The sale book",
+      "where": "sale-room",
       "method": "torn",
       "thing": "The 2 halves of the page, one from the bin and one from the spine of the book. Each line tore in a different place.",
       "page": [
@@ -92,6 +95,7 @@
     },
     {
       "place": "The art room",
+      "where": "art-room",
       "method": "buried-sums",
       "thing": "The art room's receipt book. Bea writes in every penny, because the school checks it each term.",
       "fact": "On 2 October the art room bought an oak blank 1 metre long and a second burning pen. The kiln fund is 140 short of a new kiln.",
@@ -102,6 +106,7 @@
     },
     {
       "place": "The sale room desk",
+      "where": "sale-room",
       "method": "chain",
       "thing": "The clerk's log for Tuesday morning, with a gap in it.",
       "chain": {
@@ -132,6 +137,7 @@
     },
     {
       "place": "The art room wall",
+      "where": "art-room",
       "method": "hidden-words",
       "thing": "The class project title, strung across the wall in cut out letters, 1 row with no spaces.",
       "text": "CANTHESTREETTELLOURBURNSFROMTWENTYYEARSOFFINALS",
@@ -149,6 +155,7 @@
     },
     {
       "place": "The street",
+      "where": "street",
       "method": "accounts",
       "thing": "3 accounts of lot 20. Each piece of evidence already on the board strikes 1 of them out.",
       "accounts": [

@@ -9,6 +9,7 @@
     "line": "A small light that moves about the locked hall after 11 at night, stops by the piano for an hour, and goes out before midnight."
   },
   "place": "The hall behind the market",
+  "where": "hall",
   "brief": [
     "The minute book for 2011 is in the hall safe, ribbon uncut. And for 3 nights now the hall has not been empty after dark.",
     "From the street a small light moves about the locked hall after 11, stops at the far end for an hour, and goes out.",
@@ -73,6 +74,7 @@
   "steps": [
     {
       "place": "The hall",
+      "where": "hall",
       "method": "sweep",
       "thing": "The hall at night, as it was left. Most of it is only the hall.",
       "room": {
@@ -110,6 +112,7 @@
     },
     {
       "place": "The caretaker's desk",
+      "where": "caretaker-desk",
       "method": "buried-sums",
       "thing": "The key book, and the ticket roll from the bus to the next town. Mr Cole keeps the first, and the bus company keeps the second.",
       "fact": "Every signed key is on its hook. Mr Cole's own ring went with him on the 10.45 to his sister's, all 3 nights, and came back on the first bus.",
@@ -120,6 +123,7 @@
     },
     {
       "place": "The watchman's hut",
+      "where": "watchman-hut",
       "method": "chain",
       "thing": "The watchman's log for last night, with a gap in it.",
       "chain": {
@@ -151,6 +155,7 @@
     },
     {
       "place": "The choir's desk",
+      "where": "hall",
       "method": "mirror",
       "thing": "The choir's booking blotter. The bookings went to the printer, but the blotter kept the ink, back to front.",
       "text": ".yadnuS ot yadirF ,dleifkaO ni gniddeW .yadnom no kcab riohC",
@@ -168,6 +173,7 @@
     },
     {
       "place": "The side door",
+      "where": "side-door",
       "method": "trail",
       "thing": "The case, walked once more from the side door. Each find goes back where it was found.",
       "fact": "On the piano's stand is a beginner's book, marked in pencil up to page 40, and a card tucked in it: \"For Mum, 80 on Saturday.\"",
@@ -178,6 +184,7 @@
     },
     {
       "place": "The street",
+      "where": "street",
       "method": "accounts",
       "thing": "3 accounts of the light in the hall. Each piece of evidence already on the board strikes 1 of them out.",
       "accounts": [

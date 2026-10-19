@@ -50,6 +50,13 @@ describe('written chapters', () => {
     expect(balanceOf(c)).toEqual(['no find work', 'buried-sums is met 3 times, 2 at most']);
   });
 
+  it('a case and every step happen at a place on the map', () => {
+    const c = spoon();
+    expect(checkChapter({ ...c, where: 'the moon' }, roles)).toContain('the case is not at a place on the map');
+    c.steps[0]!.where = 'nowhere' as never;
+    expect(checkChapter(c, roles)).toContain('step 1: it is not at a place on the map');
+  });
+
   it('the casebook rotates its shapes and its suspects, and brings 1 new method a case', () => {
     const cases = files.map(read).filter((c) => !c.draft).sort((a, b) => a.number! - b.number!);
     expect(checkCasebook(cases)).toEqual(['case 5 brings 2 new methods: sweep, chain']);

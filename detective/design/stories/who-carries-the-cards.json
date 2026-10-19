@@ -10,6 +10,7 @@
     "line": "7 plain cream cards, each with a lantern drawn on it, found in 7 cases on Lantern Row."
   },
   "place": "Lantern Row",
+  "where": "street",
   "brief": [
     "The letter that came to the art room had no name on it, and the lantern card. That makes 7 cards in 7 cases, and the committee has had enough.",
     "Every card was handed over in person, by somebody who knew each time what was about to happen on the street.",
@@ -81,6 +82,7 @@
   "steps": [
     {
       "place": "The committee room",
+      "where": "committee-room",
       "method": "buried-sums",
       "thing": "The committee's list of the 7 cards: where each was found, and on what day.",
       "fact": "7 cards in 6 weeks, each found within a day of its case. Rosa was at the coast with the night stall for 2 of those days, and the till rolls show it.",
@@ -91,6 +93,7 @@
     },
     {
       "place": "The bakery",
+      "where": "bakery",
       "method": "torn",
       "thing": "The bakery's round sheet for card days, torn top to bottom on the van door. Both halves were kept for the accounts.",
       "page": [
@@ -107,6 +110,7 @@
     },
     {
       "place": "The hall door",
+      "where": "hall",
       "method": "chain",
       "thing": "The watchman's log for a card night, with a gap in it.",
       "chain": {
@@ -138,6 +142,7 @@
     },
     {
       "place": "The art room",
+      "where": "art-room",
       "method": "claim",
       "thing": "The street's claim, set against the night round.",
       "claim": {
@@ -163,6 +168,7 @@
     },
     {
       "place": "The notice board",
+      "where": "notice-board",
       "method": "hidden-words",
       "thing": "This morning's card on the hall notice board. It reads as a lost and found. Read closely, it is not.",
       "text": "Walk up Lane 4, past the rich old yew. Fair is fair.",
@@ -180,6 +186,7 @@
     },
     {
       "place": "The hall store",
+      "where": "store-room",
       "method": "trail",
       "thing": "The case, walked once more through every place a card was left. Each find goes back where it was found.",
       "fact": "Every card was left where the night round goes. And in the hall store the guillotine still has cream card in its tray, cut to the size of every card on the street.",
@@ -190,6 +197,7 @@
     },
     {
       "place": "The line-up",
+      "where": "street",
       "method": "line-up",
       "thing": "The 5 from the brief, and what the evidence left standing.",
       "fact": "Chance: inside the locked hall, after the round. Means: the keys of the round, and the hall's own card and guillotine. Motive: a plane held in 2011."

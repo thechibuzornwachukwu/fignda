@@ -1,6 +1,6 @@
 # Lantern Row
 
-The street every case happens on. Read it before writing a story. A case may add a place, a person or a custom: add it here in the same change, and never contradict a line already here.
+The street every case happens on. Read it before writing a story. Its map is `design/sketches/the-street.html` (`.png`), and its places, with their spots, are `src/engine/world.ts`. A case may add a place, a person or a custom: add it here in the same change, and never contradict a line already here.
 
 ## The street
 
@@ -9,12 +9,13 @@ The street every case happens on. Read it before writing a story. A case may add
 | From the top | What is there |
 |---|---|
 | The bus stop | A shelter and a timetable. The last bus is the 10.30. The tea kiosk stands beside it |
+| The alley | Up the left side of the hall and along its back wall, to the yard. Unlit |
 | The hall | Brick, 1 storey, behind the market. Its clock faces the street |
 | The yard and the gate | Behind the hall. A car park on Friday nights, with Mr Cole at the gate |
 | The library | 2 rooms and a reading room. Minute books are kept here and never lent |
-| The bakery | Marco's. Ovens at the back, lit from 4 am. The art room is upstairs |
+| The bakery | Marco's. Ovens at the back, lit from 4 am. The art room is upstairs. Window boxes on the front |
 | The sale room | Auctions on Saturdays. A desk, a sale book, numbered lots |
-| The alley | Between the bakery and the sale room. Unlit, cut through to the yard |
+| The houses | Terraced, on the bottom side past the library |
 | The market row | Stalls under awnings, 1 pitch each. Market day is Friday |
 | The watchman's hut | At the bottom of the row. Somebody sits in it from 10 pm to 6 am |
 
@@ -74,7 +75,7 @@ They live and work here, and return from case to case. A cleared suspect can be 
 ## Rules for a new case
 
 - Times and distances on this page hold. A walk on the street is under 5 minutes end to end.
-- A new place goes in the table where it stands on the street, with what is in it.
+- A new place goes in the table where it stands on the street, with what is in it, then on the map: a spot in `world.ts` and the same point in the drawing (a test checks both). Every case and every step names its place (`where`).
 - A new person gets a row: name, who, where, what everybody knows. Their secret stays in the case's story file.
 - No harm, no weapons, no police. The committee settles things.
 - Money, food and names read anywhere: no 1 country's customs that need explaining.

@@ -9,6 +9,7 @@
     "line": "The 10.30 from the stop outside the hall. After a late night it is the only way home for half the street."
   },
   "place": "The bus stop",
+  "where": "bus-stop",
   "brief": [
     "The card from the ballot box has a lantern drawn on it, like the one on the spoon's hooks. Nobody on the committee will say whose it is, and the street has a louder complaint.",
     "On the night of the final the last bus left Lantern Row at 10.21 pm. The timetable says 10.30. 14 people walked home.",
@@ -52,6 +53,7 @@
   "steps": [
     {
       "place": "The hall",
+      "where": "hall",
       "method": "buried-sums",
       "thing": "The secretary's photos of the final. Her phone stamped each one with its own time, and the hall clock is in the back of every picture.",
       "fact": "At 9.58 pm by the phone, the hall clock reads 9.58. It was right 23 minutes before the bus left by it. The face is 4 metres up, behind glass.",
@@ -61,6 +63,7 @@
     },
     {
       "place": "The alley",
+      "where": "alley",
       "method": "mirror",
       "thing": "A hatch in the hall's back wall. The clockmaker's label is stuck inside its glass, so from the alley it reads back to front.",
       "text": ".etunim eno ,nrut enO .dor eht dniw dna hctah yella eht nepo ,sdnah eht tes oT",
@@ -78,6 +81,7 @@
     },
     {
       "place": "The tea kiosk",
+      "where": "tea-kiosk",
       "method": "buried-sums",
       "thing": "The kiosk's till roll. Every cup is on it, with its number and its time, because the owner pays for cups by the sleeve.",
       "fact": "Cup 31 was sold at 10.04 pm, the only cup sold after 9.58. The owner remembers who to: the last bus had stood at the stop since 9.50, and its driver came over for tea.",
@@ -87,6 +91,7 @@
     },
     {
       "place": "The bus stop",
+      "where": "bus-stop",
       "method": "claim",
       "thing": "His claim, set against the tape measure and the clock. 2 things already on the board bear on it, and only 1 of them decides it.",
       "claim": {
@@ -112,6 +117,7 @@
     },
     {
       "place": "The cab",
+      "where": "bus-stop",
       "method": "hidden-words",
       "thing": "A postcard kept behind the sun visor. Its words say one thing to a passenger and another to whoever it was meant for. He kept the copy.",
       "text": "Half light suits the hotel evening shift. Come, Etta, the music locker is open.",
@@ -129,6 +135,7 @@
     },
     {
       "place": "The depot",
+      "where": "depot",
       "method": "accounts",
       "thing": "3 accounts of the same night, as the stop is telling it. Each piece of evidence already on the board strikes 1 of them out.",
       "accounts": [

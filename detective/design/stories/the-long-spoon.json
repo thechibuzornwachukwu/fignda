@@ -9,6 +9,7 @@
     "line": "An oak cooking spoon as long as an arm. The winner of the street's cook-off final gets a name burned into its handle."
   },
   "place": "The hall behind the market",
+  "where": "store-room",
   "brief": [
     "Tonight at 6 is the 20th cook-off final. The Long Spoon has 19 burns on its handle and 18 names. One was planed flat years ago, and nobody talks about it.",
     "At 7 this morning the committee opened the cabinet in the hall store room to polish it. The cabinet was locked, and empty.",
@@ -77,6 +78,7 @@
   "steps": [
     {
       "place": "The store room",
+      "where": "store-room",
       "method": "mirror",
       "thing": "The key book. Last night's page is torn across, and the blotter under it kept the wet ink back to front.",
       "text": ".neetfif enin ta kcaB .sthgil eht rof ytrof xis ta tuo ,neves yeK",
@@ -94,6 +96,7 @@
     },
     {
       "place": "Rosa's night stall",
+      "where": "night-stall",
       "method": "buried-sums",
       "thing": "The till roll from last night. Every sale is on it, with its time.",
       "fact": "She sold a plate every few minutes from 6.30 pm to 9.30 pm, 20 minutes' drive from the hall. She said home because the night stall has no permit.",
@@ -104,6 +107,7 @@
     },
     {
       "place": "The bakery",
+      "where": "bakery",
       "method": "hidden-words",
       "thing": "The invoice typewriter. Its ribbon kept every key Marco struck last night, in a row, with no spaces.",
       "text": "TOTHECOMMITTEEBURNNONAMEONTHESPOONUNTILEVERYVOTEGETSAFRESHCOUNTORITIS2011AGAIN",
@@ -121,6 +125,7 @@
     },
     {
       "place": "The caretaker's desk",
+      "where": "caretaker-desk",
       "method": "buried-sums",
       "thing": "The gate book. On Friday nights the yard is a car park, and Mr Cole writes every car in.",
       "fact": "He wrote in 31 cars between 6 pm and 10 pm and never left the gate. The cabinet key hangs with key 7, for the extension reels on the bottom shelf. Whoever took 7 had both.",
@@ -132,6 +137,7 @@
     },
     {
       "place": "The hall notice board",
+      "where": "notice-board",
       "method": "hidden-words",
       "thing": "A notice nobody remembers pinning up: a room to let, oddly worded. Read closely, it says something else.",
       "text": "Room to let. Last let 2 years ago. Estate road, quiet. The light is on a meter. A tub, urn and stove are included. Ask Phoebe for entry.",
@@ -149,6 +155,7 @@
     },
     {
       "place": "The line-up",
+      "where": "store-room",
       "method": "line-up",
       "thing": "The 4 from the brief, and what the evidence left standing.",
       "fact": "Chance: key 7, from 6.40 pm to 9.15 pm. Means: the cabinet key, and a reel that fed more than lamps. Motive: a name planed off in 2011."
