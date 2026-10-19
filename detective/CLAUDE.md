@@ -2,7 +2,7 @@
 
 A standalone app: its own code, Worker, database and accounts. It shares nothing with `../puzzles` at run time and never imports from it. "Lantern Row" is a working name until the owner names the game.
 
-Design: `/design`. Read `SPEC.md` before UI work, `SECURITY.md` before data, auth or Worker work, `CASE_WRITING.md` before touching a case, `CHARACTERS.md` before drawing a person. What is left: `BUILD_PLAN.md`. What is built: `ACCOMPLISHED STUFF.md`, only when needed.
+Design: `/design`. Read `SPEC.md` before UI work, `SECURITY.md` before data, auth or Worker work, `WORLD.md` and `CASE_WRITING.md` before touching a case, `CHARACTERS.md` before drawing a person. What is left: `BUILD_PLAN.md`. What is built: `ACCOMPLISHED STUFF.md`, only when needed.
 
 ## Keep in step
 - A case is a story first: `design/stories/<id>.md`, then its `.json`. Never a puzzle looking for a story.

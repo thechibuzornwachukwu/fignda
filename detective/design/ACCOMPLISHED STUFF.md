@@ -5,6 +5,7 @@ What is built, in 1 line each, so `BUILD_PLAN.md` holds only what is left. Read 
 ## Cases
 - Casebook 1, Lantern Row: 8 cases, written and open, in `design/stories`.
 - The case engine (`src/engine/chapter.ts`): `checkChapter` (a fair fight), `balanceOf` (every built kind of work, no method more than twice), `checkCasebook` (shapes and suspects rotate, 1 new method a case). A test runs all 3 over every file.
+- The street itself (`design/WORLD.md`): its places, the hall, people, the year and the thread.
 - The story file and the case-writing rules (`design/CASE_WRITING.md`), with case 1's story as the worked example.
 
 ## Methods

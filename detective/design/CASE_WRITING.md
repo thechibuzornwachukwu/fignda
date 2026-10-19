@@ -2,6 +2,7 @@
 
 The case comes first. The puzzles are made from it, never the other way. A case is written in this order, and a step that skips one is not done.
 
+0. **The street**, `design/WORLD.md`: read it first. A new place or person goes there in the same change.
 1. **The story**, `design/stories/<id>.md`. Prose, no game in it.
 2. **The evidence**, listed in the story file: every physical thing the case leaves behind.
 3. **The steps**: each piece of evidence picks its method.
