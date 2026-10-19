@@ -27,6 +27,8 @@ import { useUnlocks } from '../lib/useUnlocks';
 import { CharacterEditor } from './AvatarDesigner';
 import { Week } from './Games';
 import { loadRecords } from '../lib/records';
+import { OUTFIT_NEEDS, useOutfit, wearOutfit } from '../lib/petOutfit';
+import { PET_OUTFITS, type PetOutfit } from '../engine/partners';
 import { Ring, type RingPart } from '../components/Ring';
 import { Segmented } from '../components/Segmented';
 import { GOALS, loadGoal, puzzlesToday, saveGoal, type GoalKey } from '../lib/goal';
@@ -229,6 +231,8 @@ export function Me() {
         </ul>
       </section>
 
+      <PetOutfits standing={standing} />
+
       <section className={styles.section} aria-labelledby="me-gear">
         <h2 id="me-gear" className={styles.h2}>
           Gear
@@ -339,6 +343,56 @@ function DailyGoal() {
           }}
         />
       </div>
+    </section>
+  );
+}
+
+/**
+ * The pet's outfits (BUILD_PLAN set 7m): none, then each outfit on the pet beside you. One earned is worn with a
+ * tap; one not earned yet shows its lock and what it takes. Kept in this browser.
+ */
+function PetOutfits({ standing }: { standing: Standing }) {
+  const worn = useOutfit();
+  const choices: Array<PetOutfit | null> = [null, ...PET_OUTFITS];
+  return (
+    <section className={styles.section} aria-labelledby="me-outfits" data-pet-outfits>
+      <h2 id="me-outfits" className={styles.h2}>
+        Outfits
+      </h2>
+      <ul className={styles.row}>
+        {choices.map((o) => {
+          const need = o ? OUTFIT_NEEDS[o] : undefined;
+          const locked = !!need && !isEarned(need, standing) && worn !== o;
+          const on = worn === o;
+          const name = o ? o[0]!.toUpperCase() + o.slice(1) : 'No outfit';
+          return (
+            <li key={o ?? 'none'}>
+              <button
+                type="button"
+                className={styles.card}
+                aria-pressed={on}
+                aria-disabled={locked || undefined}
+                data-locked={locked || undefined}
+                data-on={on || undefined}
+                aria-label={`${name}. ${locked ? `Locked. ${howTo(need!)}` : on ? 'On.' : 'Yours.'}`}
+                onClick={() => !locked && wearOutfit(o)}
+              >
+                <Partner moment={locked ? 'asleep' : 'empty'} outfit={o} size={88} />
+                {on && (
+                  <span className={styles.tick} aria-hidden="true">
+                    <Icon icon={Check} size={16} />
+                  </span>
+                )}
+                {locked && (
+                  <span className={styles.need} aria-hidden="true">
+                    <Icon icon={Lock} size={16} />
+                  </span>
+                )}
+              </button>
+            </li>
+          );
+        })}
+      </ul>
     </section>
   );
 }

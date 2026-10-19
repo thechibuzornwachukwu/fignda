@@ -41,6 +41,11 @@ export type Options = {
   coat?: boolean;
   glass?: boolean;
   monocle?: boolean;
+  /** Bond things (BUILD_PLAN set 7n): a scarf at 3 packs together, and a gold pin on it at 10. */
+  scarf?: boolean;
+  pin?: boolean;
+  /** An outfit (set 7m), worn over the rest. */
+  outfit?: Outfit;
   wave?: boolean;
   view?: View;
   flip?: boolean;
@@ -48,12 +53,46 @@ export type Options = {
   back?: string;
   size?: number;
 };
-type Dress = Required<Pick<Options, 'hat' | 'coat' | 'glass' | 'monocle' | 'wave' | 'dark'>> & { mood: Mood; line: string };
+export const OUTFITS = ['bow tie', 'beanie', 'party hat'] as const;
+export type Outfit = (typeof OUTFITS)[number];
+type Dress = Required<Pick<Options, 'hat' | 'coat' | 'glass' | 'monocle' | 'scarf' | 'pin' | 'wave' | 'dark'>> & { mood: Mood; line: string; outfit: Outfit | null };
 /** A character: its name, how it is drawn, the square around its eyes, and the colour that fills its icon. */
 /** `called` is the character's name. `tools` says what `glass` and `monocle` are on this character. */
 type Member = { name: string; called: string; tools: { glass: string; monocle: string }; draw: (d: Dress) => string; eyes: readonly [number, number, number]; fur: string; eye: readonly [number, number, number] };
 
 // ------------------------------------------------------------------ Shared parts
+
+const SCARF = '#e4572e';
+const SCARF_DARK = '#b8431f';
+const BEANIE = '#3d7bd9';
+const BEANIE_DARK = '#2c5fae';
+const PARTY = '#f2c94c';
+
+/** What a pet wears at the neck, centred on x 120: the scarf, its pin, and a bow tie. Drawn over the chin, so the head-and-shoulders picture shows it. */
+function neck(d: Dress, y: number, w: number): string {
+  let s = '';
+  if (d.scarf) {
+    s += `<path d="M${120 + w * 0.3} ${y + 10}l${w * 0.18} 34l-14 3l-${w * 0.12}-34z" fill="${SCARF_DARK}"/>`;
+    s += `<rect x="${120 - w}" y="${y}" width="${w * 2}" height="18" rx="9" fill="${SCARF}"/>`;
+    s += `<path d="M${120 - w + 8} ${y + 9}h${w * 2 - 16}" stroke="${SCARF_DARK}" stroke-width="2" stroke-dasharray="3 7" stroke-linecap="round"/>`;
+  }
+  if (d.pin) s += `<circle cx="${120 + w * 0.45}" cy="${y + 9}" r="10" fill="${GOLD}"/><path d="M${120 + w * 0.45} ${y + 3}l1.8 3.8 4.2.6-3 2.9.7 4.2-3.7-2-3.7 2 .7-4.2-3-2.9 4.2-.6z" fill="${WHITE}"/>`;
+  if (d.outfit === 'bow tie') s += `<path d="M120 ${y + 8}l-18-11v22zM120 ${y + 8}l18-11v22z" fill="${SCARF}"/><circle cx="120" cy="${y + 8}" r="5" fill="${SCARF_DARK}"/>`;
+  return s;
+}
+
+/** A hat from the outfits, in the frame the fedora uses: centred on x 120 with its brim at y 64. Drawn over the head. */
+function headwear(d: Dress, tilt: number, dx = 0, dy = 0): string {
+  const g = (inner: string) => `<g transform="translate(${dx} ${dy}) rotate(${tilt} 120 64) translate(120 72) scale(1.15) translate(-120 -64)">${inner}</g>`;
+  if (d.outfit === 'beanie') {
+    return g(`<path d="M78 64c0-32 18-50 42-50s42 18 42 50z" fill="${BEANIE}"/><rect x="74" y="52" width="92" height="16" rx="7" fill="${BEANIE_DARK}"/><circle cx="120" cy="12" r="10" fill="${WHITE}"/>`);
+  }
+  if (d.outfit === 'party hat') {
+    return g(`<path d="M94 64L120 2l26 62z" fill="${PARTY}"/><path d="M104 40l26 10M100 52l38 10M112 22l14 6" stroke="${SCARF}" stroke-width="4" stroke-linecap="round"/><circle cx="120" cy="2" r="7" fill="${SCARF}"/>`);
+  }
+  return '';
+}
+const hatOn = (d: Dress) => d.hat || d.outfit === 'beanie' || d.outfit === 'party hat';
 
 /** A fedora with a lime band, centred on x 120 with its brim at y 64. */
 const fedora = (tilt: number, dx = 0, dy = 0): string =>
@@ -164,9 +203,11 @@ function cat(d: Dress): string {
   s += `<path d="M38 122c0-36 34-60 82-60s82 24 82 60c0 10-3 19-9 27l15 10-24 5c-15 14-38 22-64 22s-49-8-64-22l-24-5 15-10c-6-8-9-17-9-27z" fill="${CAT}"/>`;
   s += `<ellipse cx="106" cy="155" rx="17" ry="13" fill="${CREAM}"/><ellipse cx="134" cy="155" rx="17" ry="13" fill="${CREAM}"/><ellipse cx="120" cy="167" rx="12" ry="8" fill="${CREAM}"/>`;
   s += catFace(d.mood);
+  s += neck(d, 172, 40);
   s += `<path d="M88 152l-40-10M88 160l-42 2M152 152l40-10M152 160l42 2" stroke="${CREAM}" stroke-width="2.4" stroke-linecap="round"/>`;
   if (d.monocle) s += monocle(155, 116, 29);
   if (d.hat) s += fedora(-11, -8, -2);
+  s += headwear(d, -11, -8, -2);
   if (d.glass) s += heldGlass(d.line, CAT);
   return s;
 }
@@ -214,6 +255,7 @@ function dog(d: Dress): string {
     s += `<path d="M82 204c-8 34-6 68 6 98h64c12-30 14-64 6-98z" fill="${DOG}"/>`;
     for (const [x, y, r] of [[102, 216, 15], [120, 222, 17], [138, 216, 15], [110, 240, 15], [130, 240, 15], [120, 258, 14]] as const) s += puff(x, y, r, DOG_LIGHT);
   }
+
   for (const sx of [1, -1]) {
     const f = (x: number) => 120 + sx * (x - 120);
     s += `<path d="M${f(70)} 80L${f(64)} 34 ${f(104)} 58z" fill="${DOG}"/><path d="M${f(75)} 70L${f(72)} 48 ${f(92)} 60z" fill="${DOG_DARK}"/>`;
@@ -223,8 +265,10 @@ function dog(d: Dress): string {
   s += puff(96, 92, 6.5, DOG_LIGHT) + puff(144, 92, 6.5, DOG_LIGHT);
   s += `<circle cx="78" cy="146" r="11" fill="${PINK}" fill-opacity=".55"/><circle cx="162" cy="146" r="11" fill="${PINK}" fill-opacity=".55"/>`;
   s += dogFace(d.mood);
+  s += neck(d, 180, 46);
   if (d.monocle) s += monocle(146, 118, 21);
   if (d.hat) s += fedora(9, 4, -4);
+  s += headwear(d, 9, 4, -4);
   if (d.glass) s += heldGlass(d.line, DOG);
   return s;
 }
@@ -278,12 +322,14 @@ function dino(d: Dress): string {
     ? stroke('M84 216q-18-4-24-20', arm, 13) + stroke('M58 192l-8-5m11-1l-3-9', REX_DARK, 3.4) + waveMarks(52, 192, d.line)
     : stroke('M84 216q-14 4-20 16', arm, 13) + stroke('M60 228l-7 5m9 3l-5 7', REX_DARK, 3.4);
   s += d.glass ? stroke('M156 214q10 0 16 6', arm, 13) : stroke('M156 216q14 4 20 16', arm, 13) + stroke('M180 228l7 5m-9 3l5 7', REX_DARK, 3.4);
-  if (!d.hat) for (const [x, y] of [[98, 52], [120, 46], [142, 52]] as const) s += `<path d="M${x - 11} ${y + 14}l11-24 11 24z" fill="${REX_SPIKE}"/>`;
+  if (!hatOn(d)) for (const [x, y] of [[98, 52], [120, 46], [142, 52]] as const) s += `<path d="M${x - 11} ${y + 14}l11-24 11 24z" fill="${REX_SPIKE}"/>`;
   s += `<ellipse cx="120" cy="100" rx="76" ry="56" fill="${REX}"/><rect x="58" y="104" width="124" height="84" rx="38" fill="${REX}"/>`;
   s += `<circle cx="72" cy="134" r="4" fill="${REX_DARK}"/><circle cx="62" cy="120" r="3" fill="${REX_DARK}"/><circle cx="168" cy="134" r="4" fill="${REX_DARK}"/><circle cx="178" cy="120" r="3" fill="${REX_DARK}"/>`;
   s += dinoFace(d.mood);
+  s += neck(d, 176, 50);
   if (d.monocle) s += monocle(152, 96, 29);
   if (d.hat) s += fedora(-6, 0, -22);
+  s += headwear(d, -6, 0, -22);
   if (d.glass) s += heldGlass(d.line, REX);
   return s;
 }
@@ -333,12 +379,14 @@ function robot(d: Dress): string {
     s += `<circle cx="106" cy="229" r="9" fill="${LIME}"/><rect x="124" y="220" width="18" height="5" rx="2.5" fill="${STEEL}"/><rect x="124" y="232" width="12" height="5" rx="2.5" fill="${STEEL}"/>`;
     s += `<circle cx="84" cy="270" r="3.5" fill="${STEEL_DARK}"/><circle cx="156" cy="270" r="3.5" fill="${STEEL_DARK}"/>`;
   }
+
   // No hat: an aerial with a lime bulb. The hat sits over it.
-  if (!d.hat) s += `<path d="M120 46V22" stroke="${STEEL_DARK}" stroke-width="5" stroke-linecap="round"/><circle cx="120" cy="16" r="9" fill="${LIME}"/>`;
+  if (!hatOn(d)) s += `<path d="M120 46V22" stroke="${STEEL_DARK}" stroke-width="5" stroke-linecap="round"/><circle cx="120" cy="16" r="9" fill="${LIME}"/>`;
   s += `<circle cx="42" cy="108" r="14" fill="${STEEL_DARK}"/><circle cx="198" cy="108" r="14" fill="${STEEL_DARK}"/>`;
   s += `<rect x="44" y="42" width="152" height="132" rx="36" fill="${STEEL}"/><rect x="60" y="68" width="120" height="86" rx="28" fill="${VISOR}"/>`;
   s += `<path d="M72 86a22 22 0 0 1 16-12" fill="none" stroke="${WHITE}" stroke-opacity=".35" stroke-width="4" stroke-linecap="round"/>`;
   s += robotFace(d.mood);
+  s += neck(d, 168, 36);
   // Zoom: a reticle on the screen around one eye. Nothing is held up to the face.
   if (d.monocle) {
     s += `<circle cx="148" cy="108" r="22" fill="none" stroke="${LIME}" stroke-width="3" stroke-dasharray="7 5"/>`;
@@ -346,6 +394,7 @@ function robot(d: Dress): string {
     s += `<path d="M66 82v-8h8M174 74h8v8M66 140v8h8M174 148h8v-8" fill="none" stroke="${LIME}" stroke-opacity=".6" stroke-width="2.5" stroke-linecap="round"/>`;
   }
   if (d.hat) s += fedora(-6, 0, -18);
+  s += headwear(d, -6, 0, -18);
   // Scanner: a handset with a lime beam, where the others hold a glass.
   if (d.glass) {
     s += `<path d="M184 208L232 150l8 52z" fill="${LIME}" fill-opacity=".3"/>` + stroke('M184 208L232 150M184 208l56-6', LIME, 1.6);
@@ -379,7 +428,7 @@ export function character(o: Options): string {
   // A mood nobody has drawn falls back to the default, so a typo never draws a face with no eyes.
   const asked = o.mood && (MOODS as readonly string[]).includes(o.mood) ? o.mood : undefined;
   const mood = asked ?? (o.wave ? 'happy' : 'calm');
-  const inner = m.draw({ mood, hat: !!o.hat, coat: !!o.coat, glass: !!o.glass, monocle: !!o.monocle, wave: !!o.wave, dark, line: dark ? CREAM : INK });
+  const inner = m.draw({ mood, hat: !!o.hat, coat: !!o.coat, glass: !!o.glass, monocle: !!o.monocle, scarf: !!o.scarf, pin: !!o.pin, outfit: o.outfit ?? null, wave: !!o.wave, dark, line: dark ? CREAM : INK });
   const art = o.flip ? `<g transform="translate(240 0) scale(-1 1)">${inner}</g>` : inner;
   // The icon is filled edge to edge with the character's own colour.
   const back = view === 'eyes' ? m.fur : o.back;

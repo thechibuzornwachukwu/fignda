@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 import { TabBar } from '../components/TabBar';
@@ -246,5 +246,22 @@ describe('the goal on You', () => {
     fireEvent.click(within(goal).getByRole('radio', { name: 'Serious' }));
     expect(within(goal).getByRole('img', { name: '0 of 4 today' })).toBeInTheDocument();
     expect(localStorage.getItem('gazecraft-goal')).toBe('serious');
+  });
+});
+
+describe('pet outfits on You', () => {
+  it('none is worn to start, the rest are locked with what they take, and 3 packs bring the bow tie, worn with a tap', () => {
+    show();
+    const row = screen.getByRole('region', { name: 'Outfits' });
+    expect(within(row).getByRole('button', { name: 'No outfit. On.' })).toHaveAttribute('aria-pressed', 'true');
+    expect(within(row).getByRole('button', { name: 'Bow tie. Locked. Finish 3 packs.' })).toHaveAttribute('aria-disabled', 'true');
+    cleanup();
+    localStorage.setItem('gazecraft-finished', JSON.stringify(games.slice(0, 3).map((g) => g.id)));
+    show();
+    const again = screen.getByRole('region', { name: 'Outfits' });
+    fireEvent.click(within(again).getByRole('button', { name: 'Bow tie. Yours.' }));
+    expect(within(again).getByRole('button', { name: 'Bow tie. On.' })).toHaveAttribute('aria-pressed', 'true');
+    expect(localStorage.getItem('gazecraft-pet-outfit')).toBe('bow tie');
+    expect(document.querySelector('[data-outfit="bow tie"]')).not.toBeNull();
   });
 });

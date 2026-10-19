@@ -92,11 +92,9 @@ Never for sale: hints, extra tries, time, or anything that touches a score; stre
 One set at a time. Each set is small, works on its own and leaves the live game whole. After each set: lint, typecheck, unit tests and the browser tests pass.
 
 
-### 7. Pets and drawings
+### 7. Pets
 
-- [ ] **Set 7o. 12 topic icons of our own** for home subjects (jollof, market, church choir and so on) in `src/components/icons/`, beside the lucide ones in `topicIcons.ts`.
-- [ ] **Set 7n. Bond things.** At 3 and 10 packs together a pet gains something plain of its own, drawn for all 4 pets in every mood. Today both tiers are drawn plain, since the glass and the monocle left with the story.
-- [ ] **Set 7m. Pet outfits.** A pet can wear things: a row of outfits per pet on You, tried on the stage like gear, drawn for all 4 pets in every mood. A few are earned, the rest are bought once Paystack is in. Cosmetic only. Needs the art first.
+- [ ] **Set 7p. Outfits for sale,** once Paystack is in: more outfits for each pet, bought once, cosmetic only.
 
 ### 8. Data and privacy (GDPR, Nigeria's NDPA)
 

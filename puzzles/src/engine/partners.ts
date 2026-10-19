@@ -110,4 +110,11 @@ export function mixedSquad(pets: ReadonlyArray<string | undefined>): number {
   return pets.length >= 2 && known.length === pets.length && new Set(known).size === pets.length ? pets.length : 0;
 }
 
-export const partnerSrc = (id: PartnerId, moment: Moment, tier = 0): string => `/pets/${id}-${MOOD[moment]}${tier > 0 ? `-${Math.min(BOND_AT.length, Math.floor(tier))}` : ''}.svg`;
+/** Outfits a pet can wear (BUILD_PLAN set 7m), in the order they are offered. The drawings are design/characters. */
+export const PET_OUTFITS = ['bow tie', 'beanie', 'party hat'] as const;
+export type PetOutfit = (typeof PET_OUTFITS)[number];
+/** An outfit as it is written in a picture's file name: "party hat" is "party-hat". */
+export const outfitSlug = (o: string): string => o.replace(/\s+/g, '-');
+
+export const partnerSrc = (id: PartnerId, moment: Moment, tier = 0, outfit: PetOutfit | null = null): string =>
+  `/pets/${id}-${MOOD[moment]}${tier > 0 ? `-${Math.min(BOND_AT.length, Math.floor(tier))}` : ''}${outfit && PET_OUTFITS.includes(outfit) ? `-${outfitSlug(outfit)}` : ''}.svg`;

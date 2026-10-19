@@ -1,3 +1,5 @@
+import { HOME_ICONS } from '../components/icons/home';
+import { TOPIC_ICONS } from '../components/topicIcons';
 import { icons } from 'lucide-react';
 import iconTable from '../../data/topicIcons.json';
 import emojiTable from '../../data/topicEmoji.json';
@@ -14,9 +16,16 @@ describe('topicIcons.json', () => {
   const rows = iconTable.icons;
   const names = [...rows.map((r) => r.icon), iconTable.default];
 
-  it('every icon name exists in the installed lucide-react', () => {
-    const missing = names.filter((n) => !(n in icons));
+  it('every icon name is a lucide icon or one of our own, and each has its drawing in the app', () => {
+    const missing = names.filter((n) => !(n in icons) && !(n in HOME_ICONS));
     expect(missing).toEqual([]);
+    expect(names.filter((n) => !(n in TOPIC_ICONS))).toEqual([]);
+  });
+
+  it('a home word wins over a general one', () => {
+    expect(iconForTopic('jollof rice')).toBe('Pot');
+    expect(iconForTopic('Balogun market')).toBe('Stall');
+    expect(iconForTopic('owambe')).toBe('Gele');
   });
 
   it('has at least 60 topic words over about 25 icons, and a default', () => {
