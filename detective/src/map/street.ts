@@ -47,7 +47,7 @@ const onSouthWall = (x: number, y: number, z: number, words: string, size: numbe
 };
 
 type Roof = 'flat' | 'hip' | 'ridge';
-type Block = {
+export type Block = {
   /** The footprint on the plan, the height of the walls, and how much the roof rises above them. */
   at: [number, number, number, number];
   wall: number;
@@ -75,18 +75,18 @@ type Block = {
 };
 
 // The street from the plan, building by building. Heights are drawn taller than life so the fronts read on a phone.
-const BLOCKS: Block[] = [
-  { at: [180, 150, 290, 260], wall: 55, roof: 95, shape: 'hip', walls: 'f-brick', top: 'f-terracotta', anchor: 'roof-hall', windows: 1, door: [300, 50], doorAnchor: 'door-hall', clock: 325, number: 1 },
+export const BLOCKS: Block[] = [
+  { at: [180, 150, 290, 260], wall: 55, roof: 95, shape: 'hip', walls: 'f-brick', top: 'f-slate', anchor: 'roof-hall', windows: 1, door: [300, 50], doorAnchor: 'door-hall', clock: 325, number: 1 },
   { at: [440, 372, 28, 36], wall: 26, roof: 0, shape: 'flat', walls: 'f-plaster', top: 'f-ochre-dim' },
-  { at: [530, 170, 160, 240], wall: 95, roof: 50, shape: 'ridge', walls: 'f-plaster', top: 'f-bakery', anchor: 'roof-bakery', windows: 2, door: [590, 40], doorAnchor: 'door-bakery', chimney: true, number: 3 },
+  { at: [530, 170, 160, 240], wall: 95, roof: 50, shape: 'ridge', walls: 'f-plaster', top: 'f-slate-light', anchor: 'roof-bakery', windows: 2, door: [590, 40], doorAnchor: 'door-bakery', chimney: true, number: 3 },
   { at: [700, 180, 170, 230], wall: 75, roof: 70, shape: 'hip', walls: 'f-stone', top: 'f-blue', anchor: 'roof-sale-room', wear: 3, windows: 2, door: [765, 40], doorAnchor: 'door-sale-room', number: 5, poster: 'billboard-2' },
   { at: [60, 525, 100, 34], wall: 26, roof: 0, shape: 'flat', walls: 'f-wood', top: 'f-wood', wear: 5, poster: 'billboard-3' },
-  { at: [180, 525, 44, 44], wall: 30, roof: 0, shape: 'flat', walls: 'f-plaster', top: 'f-terracotta' },
+  { at: [180, 525, 44, 44], wall: 30, roof: 0, shape: 'flat', walls: 'f-plaster', top: 'f-charcoal' },
   { at: [380, 530, 200, 230], wall: 70, roof: 80, shape: 'hip', walls: 'f-stone', top: 'f-library', anchor: 'roof-library', windows: 1, number: 2 },
-  { at: [680, 530, 45, 170], wall: 80, roof: 26, shape: 'ridge', walls: 'f-house', top: 'f-terracotta', anchor: 'roof-houses', windows: 2, number: 4 },
-  { at: [725, 530, 45, 170], wall: 80, roof: 26, shape: 'ridge', walls: 'f-house-2', top: 'f-wood', windows: 2, wear: 7, number: 6 },
+  { at: [680, 530, 45, 170], wall: 80, roof: 26, shape: 'ridge', walls: 'f-house', top: 'f-slate', anchor: 'roof-houses', windows: 2, number: 4 },
+  { at: [725, 530, 45, 170], wall: 80, roof: 26, shape: 'ridge', walls: 'f-house-2', top: 'f-charcoal', windows: 2, wear: 7, number: 6 },
   { at: [770, 530, 45, 170], wall: 80, roof: 26, shape: 'ridge', walls: 'f-house', top: 'f-terracotta', windows: 2, number: 8 },
-  { at: [815, 530, 45, 170], wall: 80, roof: 26, shape: 'ridge', walls: 'f-house-2', top: 'f-wood', windows: 2, wear: 11, number: 10 },
+  { at: [815, 530, 45, 170], wall: 80, roof: 26, shape: 'ridge', walls: 'f-house-2', top: 'f-roof-black', windows: 2, wear: 11, number: 10 },
   { at: [1110, 620, 46, 46], wall: 32, roof: 0, shape: 'flat', walls: 'f-wood', top: 'f-wood', wear: 13 },
 ];
 // 3 billboards of 3 kinds: a hoarding on posts on open ground at the top of the market square, a poster pasted on the sale room's side wall, and a
@@ -94,7 +94,7 @@ const BLOCKS: Block[] = [
 BLOCKS.push({ at: [1095, 316, 60, 6], wall: 40, roof: 0, shape: 'flat', walls: 'f-poster', top: 'f-wood', anchor: 'billboard-1', base: 18, posts: true });
 // Bins: public litter bins at the bus stop, the hall, and the market corners; wheelie bins in the back gardens and
 // beside the bakery. A bin is where things are thrown away, and where a detective finds them again.
-const BINS: Array<[number, number, 'public' | 'wheelie', string]> = [
+export const BINS: Array<[number, number, 'public' | 'wheelie', string]> = [
   [178, 516, 'public', 'f-bin-public'], [358, 433, 'public', 'f-bin-public'], [886, 605, 'public', 'f-bin-public'], [1152, 605, 'public', 'f-bin-public'],
   [713, 770, 'wheelie', 'f-bin-green'], [758, 770, 'wheelie', 'f-bin-grey'], [803, 770, 'wheelie', 'f-bin-green'], [848, 770, 'wheelie', 'f-bin-grey'], [524, 398, 'wheelie', 'f-bin-grey'],
 ];
@@ -125,7 +125,7 @@ function bin(x: number, y: number, kind: 'public' | 'wheelie', cls: string): Sha
   ];
 }
 /** The street's name, on a sign on a post at each end. */
-const SIGNS: Array<[number, number]> = [[130, 414], [860, 414]];
+export const SIGNS: Array<[number, number]> = [[130, 414], [860, 414]];
 // Behind the houses, a shed at the end of each back garden.
 for (const gx of [688, 733, 778, 823]) BLOCKS.push({ at: [gx, 762, 22, 18], wall: 16, roof: 6, shape: 'ridge', walls: 'f-wood', top: 'f-wood', wear: gx });
 // Cars: 3 in the yard, 2 at the kerb.
@@ -179,7 +179,7 @@ export const cameraView = (c: (typeof CAMERAS)[number]): Array<[number, number]>
 };
 
 /** Weeds, where a real street grows them: along the kerbs, in the alley, at the yard's edge, round the hut. */
-const WEEDS: Array<[number, number]> = [
+export const WEEDS: Array<[number, number]> = [
   [150, 300], [158, 200], [148, 380], [300, 132], [430, 140], [478, 300], [512, 380], [475, 145], [868, 130],
   [70, 428], [380, 428], [640, 512], [820, 512], [1100, 612], [1162, 668], [1120, 672], [884, 598], [1150, 344],
   [600, 512], [210, 512], [700, 792], [395, 795],
@@ -192,7 +192,7 @@ const weed = (x: number, y: number): Shape[] => [
 ];
 
 /** Flat ground on the plan: [x, y, w, h, class]. */
-const GROUND: Array<[number, number, number, number, string, Shape['anchor']?]> = [
+export const GROUND: Array<[number, number, number, number, string, Shape['anchor']?]> = [
   [0, 0, 1200, 800, 'f-lot'],
   [140, 120, 330, 30, 'f-alley'],
   [140, 150, 40, 280, 'f-alley'],
@@ -209,34 +209,57 @@ const GROUND: Array<[number, number, number, number, string, Shape['anchor']?]> 
   [680, 700, 180, 90, 'f-grass'],
   [380, 760, 200, 30, 'f-grass'],
 ];
-/** How a tree is doing: in full leaf, in fruit, drying out, or holding a nest. */
-type TreeKind = 'healthy' | 'apple' | 'orange' | 'dry' | 'nest' | 'bare';
-/** [x, y, crown radius, height, kind, leaf class, anchor]. */
-const TREES: Array<[number, number, number, number, TreeKind, string, Shape['anchor']?]> = [
-  [275, 560, 26, 70, 'healthy', 'f-plane', 'tree-plane-1'],
-  [335, 560, 26, 70, 'dry', 'f-leaf-dry', 'tree-plane-2'],
-  [625, 572, 42, 92, 'nest', 'f-lime', 'tree-lime'],
-  [700, 735, 16, 46, 'apple', 'f-plane'],
-  [845, 735, 18, 50, 'orange', 'f-lime'],
-  [1170, 690, 16, 52, 'dry', 'f-leaf-dry'],
-  [60, 640, 20, 60, 'bare', 'f-bark'],
+/** A tree's crown, by species: how it reads from afar (design/TREES.md). */
+export type TreeForm = 'spreading' | 'oval' | 'round' | 'columnar' | 'conical' | 'weeping' | 'slender';
+/** How it is doing: in leaf, in fruit, drying out, bare, or holding a nest. */
+export type TreeKind = 'healthy' | 'apple' | 'orange' | 'dry' | 'nest' | 'bare';
+/** [x, y, crown radius, height, form, condition, leaf class, anchor]. */
+export const TREES: Array<[number, number, number, number, TreeForm, TreeKind, string, Shape['anchor']?]> = [
+  // Street trees: London planes, spreading, on the pavement by the bus stop.
+  [275, 560, 28, 50, 'spreading', 'healthy', 'f-plane', 'tree-plane-1'],
+  [335, 560, 28, 50, 'spreading', 'dry', 'f-leaf-dry', 'tree-plane-2'],
+  // The lime outside the library, the oldest thing on the street: tall and oval, with a nest.
+  [625, 572, 40, 72, 'oval', 'nest', 'f-lime', 'tree-lime'],
+  // In the back gardens: an apple, an orange, a birch.
+  [700, 735, 17, 32, 'round', 'apple', 'f-plane'],
+  [845, 735, 19, 34, 'round', 'orange', 'f-lime'],
+  [748, 738, 13, 48, 'slender', 'healthy', 'f-birch-leaf'],
+  [1170, 690, 17, 36, 'round', 'dry', 'f-leaf-dry'],
+  // Out of town: a row of poplars along the field edge behind the yard, a pine to the west, a dead oak.
+  [560, -40, 22, 70, 'columnar', 'healthy', 'f-poplar'],
+  [640, -40, 22, 70, 'columnar', 'healthy', 'f-poplar'],
+  [720, -40, 22, 70, 'columnar', 'healthy', 'f-poplar'],
+  [-70, 300, 24, 84, 'conical', 'healthy', 'f-pine'],
+  [60, 640, 22, 48, 'spreading', 'bare', 'f-bark'],
 ];
-// A crown is several rounded clumps, each with its own light and shade, so its outline is uneven and it reads as
-// standing in the scene, not as a ball. Offsets are in crown radii from the crown's middle; back clumps first.
-const CLUMPS: Array<[number, number, number]> = [[0, -0.42, 0.58], [-0.5, -0.1, 0.55], [0.52, -0.08, 0.52], [-0.22, 0.32, 0.56], [0.3, 0.34, 0.52], [0, 0.02, 0.6]];
-const SPARSE: Array<[number, number, number]> = [[-0.45, -0.25, 0.42], [0.4, -0.1, 0.4], [-0.05, 0.3, 0.44]];
+/** Where the clumps of a crown sit, in crown radii from its middle, back ones first: [dx, dy, r]. */
+export const CROWNS: Record<Exclude<TreeForm, 'conical' | 'weeping'>, Array<[number, number, number]>> = {
+  round: [[0, -0.42, 0.58], [-0.5, -0.1, 0.55], [0.52, -0.08, 0.52], [-0.22, 0.32, 0.56], [0.3, 0.34, 0.52], [0, 0.02, 0.6]],
+  oval: [[0, -0.8, 0.5], [-0.42, -0.42, 0.5], [0.44, -0.4, 0.5], [-0.4, 0.12, 0.52], [0.42, 0.12, 0.52], [0, 0.45, 0.5], [0, -0.18, 0.62]],
+  spreading: [[-0.62, -0.22, 0.5], [0.62, -0.24, 0.5], [0, -0.36, 0.56], [-1.22, 0.08, 0.42], [1.22, 0.06, 0.42], [-0.62, 0.22, 0.46], [0.62, 0.22, 0.46], [0, 0.16, 0.52]],
+  columnar: [[0, -1.5, 0.36], [0.08, -1.05, 0.42], [-0.08, -0.6, 0.45], [0.06, -0.15, 0.46], [-0.05, 0.3, 0.44]],
+  slender: [[-0.2, -0.85, 0.3], [0.22, -0.6, 0.32], [-0.28, -0.25, 0.33], [0.3, 0, 0.3], [0, 0.3, 0.32], [-0.1, -0.5, 0.28]],
+};
 
 /**
- * 1 tree, its crown centred on (cx, cy) in the picture, its foot at (fx, fy). The trunk tapers and is shaded on 1
- * side; a dry tree shows bare branches through a thin crown; fruit hangs in the crown; a nest sits on top with its bird.
+ * 1 tree, its crown centred on (cx, cy) in the picture, its foot at (fx, fy) or none in the plan. The trunk tapers and
+ * is shaded on 1 side, in its species' bark; the crown is the species' own shape, in clumps each lit on 1 side; a dry
+ * tree is thin with bare branches showing; a bare tree is branches only; fruit hangs in the crown; a nest sits on top.
  */
-function tree(kind: TreeKind, leaf: string, cx: number, cy: number, rad: number, foot: [number, number] | null, anchor: Shape['anchor'] | undefined, snow: boolean): Shape[] {
+function tree(form: TreeForm, kind: TreeKind, leaf: string, cx: number, cy: number, rad: number, foot: [number, number] | null, anchor: Shape['anchor'] | undefined, snow: boolean): Shape[] {
   const out: Shape[] = [];
+  const bark = form === 'slender' ? 'f-birch' : 'f-bark';
   if (foot) {
     const [fx, fy] = foot;
-    const top = cy + rad * 0.35;
-    out.push({ tag: 'polygon', attrs: { points: pts([[fx - 4, fy], [fx + 4, fy], [cx + 2, top], [cx - 2, top]]) }, cls: 'f-bark' });
-    out.push({ tag: 'polygon', attrs: { points: pts([[fx, fy], [fx + 4, fy], [cx + 2, top], [cx, top]]) }, cls: 'shade-2' });
+    const top = cy + rad * (form === 'columnar' ? 0.6 : form === 'conical' ? 0.9 : 0.35);
+    const w = form === 'slender' ? 2.5 : 4;
+    out.push({ tag: 'polygon', attrs: { points: pts([[fx - w, fy], [fx + w, fy], [cx + w / 2, top], [cx - w / 2, top]]) }, cls: bark });
+    out.push({ tag: 'polygon', attrs: { points: pts([[fx, fy], [fx + w, fy], [cx + w / 2, top], [cx, top]]) }, cls: 'shade-2' });
+    // Birch bark is white with black marks; plane bark flakes off in pale patches.
+    if (form === 'slender') for (let k = 1; k < 5; k++) { const t = k / 5; out.push({ tag: 'line', attrs: { x1: round(fx + (cx - fx) * t - 2), y1: round(fy + (top - fy) * t), x2: round(fx + (cx - fx) * t + 1.5), y2: round(fy + (top - fy) * t - 1) }, cls: 'birch-mark' }); }
+    if (form === 'spreading' && kind !== 'bare') for (const t of [0.3, 0.6]) out.push({ tag: 'ellipse', attrs: { cx: round(fx + (cx - fx) * t + 1), cy: round(fy + (top - fy) * t), rx: 1.6, ry: 2.6 }, cls: 'f-plane-bark' });
+    // A spreading tree forks low, into limbs that hold its wide crown.
+    if (form === 'spreading' && kind !== 'bare') for (const s of [-1, 1]) out.push({ tag: 'path', attrs: { d: `M${round(cx)},${round(top)} L${round(cx + s * rad * 0.6)},${round(cy + rad * 0.05)}`, fill: 'none' }, cls: 'branch' });
   }
   if (kind === 'bare') {
     // No leaves at all: the trunk forks into branches, and each branch forks again.
@@ -249,10 +272,22 @@ function tree(kind: TreeKind, leaf: string, cx: number, cy: number, rad: number,
     if (snow) out.push({ tag: 'path', attrs: { d: `M${round(cx - rad * 0.9)},${round(cy - rad * 0.55)} L${round(cx)},${round(cy + rad * 0.45)} L${round(cx + rad * 0.85)},${round(cy - rad * 0.6)}`, fill: 'none' }, cls: 'snow-line' });
     return out;
   }
+  if (form === 'conical') {
+    // A conifer: tiers of needles, each wider than the one above, lit on the left and in shade on the right.
+    for (let k = 0; k < 4; k++) {
+      const ty = cy - rad * 1.5 + k * rad * 0.55;
+      const half = rad * (0.32 + k * 0.24);
+      const tier: Array<[number, number]> = [[cx, ty], [cx + half, ty + rad * 0.75], [cx - half, ty + rad * 0.75]];
+      out.push({ tag: 'polygon', attrs: { points: pts(tier) }, cls: leaf });
+      out.push({ tag: 'polygon', attrs: { points: pts([[cx, ty], [cx + half, ty + rad * 0.75], [cx, ty + rad * 0.75]]) }, cls: 'shade-2' });
+      if (snow) out.push({ tag: 'polygon', attrs: { points: pts([[cx, ty], [cx + half * 0.5, ty + rad * 0.3], [cx - half * 0.5, ty + rad * 0.3]]) }, cls: 'f-snow-cap' });
+    }
+    return out;
+  }
   const dry = kind === 'dry';
-  const clumps = dry ? SPARSE : CLUMPS;
+  const weeping = form === 'weeping';
+  const clumps = dry ? CROWNS.slender.map(([a, b, r]): [number, number, number] => [a * 1.4, b * 0.8, r * 1.2]) : weeping ? CROWNS.round : CROWNS[form as keyof typeof CROWNS];
   if (dry) {
-    // Bare branches, showing where the leaves have gone.
     for (const [dx, dy] of [[-0.8, -0.5], [0.75, -0.55], [0.1, -0.9], [-0.6, 0.15], [0.65, 0.1]] as const) {
       out.push({ tag: 'path', attrs: { d: `M${round(cx)},${round(cy + rad * 0.3)} L${round(cx + dx * rad)},${round(cy + dy * rad)}`, fill: 'none' }, cls: 'branch' });
     }
@@ -262,28 +297,37 @@ function tree(kind: TreeKind, leaf: string, cx: number, cy: number, rad: number,
   clumps.forEach(([dx, dy, r], i) => {
     const c = circle(dx, dy, r);
     out.push({ tag: 'circle', attrs: c, cls: `${leaf} cloud-fill`, anchor: i === clumps.length - 1 ? anchor : undefined });
-    // Shade on the lower right of each clump, light on the upper left.
     out.push({ tag: 'path', attrs: { d: `M${round(c.cx + c.r)},${c.cy} A${c.r},${c.r} 0 0 1 ${c.cx},${round(c.cy + c.r)} A${round(c.r * 0.82)},${round(c.r * 0.82)} 0 0 0 ${round(c.cx + c.r)},${c.cy} Z` }, cls: 'shade-2' });
     out.push({ tag: 'circle', attrs: { cx: round(c.cx - c.r * 0.35), cy: round(c.cy - c.r * 0.35), r: round(c.r * 0.32) }, cls: 'f-leaf-light' });
   });
+  if (weeping) {
+    // A willow's branches hang in a curtain from the edge of its dome, almost to the ground.
+    for (let k = 0; k < 11; k++) {
+      const a = Math.PI * (0.05 + (k / 10) * 0.9);
+      const [sx, sy] = [cx - Math.cos(a) * rad * 1.05, cy + Math.sin(a) * rad * 0.2];
+      out.push({ tag: 'path', attrs: { d: `M${round(sx)},${round(sy)} q${round(-Math.cos(a) * 4)},${round(rad * 0.6)} ${round(-Math.cos(a) * 2)},${round(rad * 1.1)}`, fill: 'none' }, cls: 'frond' });
+    }
+  }
   if (kind === 'apple' || kind === 'orange') {
     for (const [dx, dy] of [[-0.45, 0.05], [0.2, -0.3], [0.45, 0.25], [-0.15, 0.4], [0.05, 0.05], [-0.55, -0.35]] as const) {
       out.push({ tag: 'circle', attrs: { cx: round(cx + dx * rad), cy: round(cy + dy * rad), r: Math.max(2.4, round(rad * 0.13)) }, cls: kind === 'apple' ? 'f-fruit-red' : 'f-fruit-orange' });
     }
   }
   if (kind === 'nest') {
-    // A nest of twigs in the top of the crown, and its bird.
-    const [nx, ny] = [round(cx + rad * 0.15), round(cy - rad * 0.78)];
+    const [nx, ny] = [round(cx + rad * 0.15), round(cy - rad * (form === 'oval' ? 1.12 : 0.78))];
     out.push({ tag: 'ellipse', attrs: { cx: nx, cy: ny, rx: round(rad * 0.3), ry: round(rad * 0.14) }, cls: 'f-nest' });
     for (const k of [-1, 0, 1]) out.push({ tag: 'path', attrs: { d: `M${nx - rad * 0.28},${ny + k * 2} L${nx + rad * 0.28},${ny - k * 2}`, fill: 'none' }, cls: 'thin' });
     out.push({ tag: 'ellipse', attrs: { cx: nx + 3, cy: ny - 6, rx: 6, ry: 4.5 }, cls: 'f-bird' });
     out.push({ tag: 'circle', attrs: { cx: nx + 8, cy: ny - 9, r: 3 }, cls: 'f-bird' });
   }
-  if (snow) out.push({ tag: 'ellipse', attrs: { cx: round(cx), cy: round(cy - rad * 0.55), rx: round(rad * 0.9), ry: round(rad * 0.4) }, cls: 'f-snow-cap' });
+  if (snow) {
+    const top = clumps.reduce((m, c) => (c[1] < m[1] ? c : m));
+    out.push({ tag: 'ellipse', attrs: { cx: round(cx + top[0] * rad), cy: round(cy + (top[1] - top[2] * 0.4) * rad), rx: round(top[2] * rad * 0.95), ry: round(top[2] * rad * 0.45) }, cls: 'f-snow-cap' });
+  }
   return out;
 }
-const LAMPS: Array<[number, number]> = [[100, 424], [420, 424], [700, 424], [880, 334], [240, 516], [600, 516], [880, 606], [1160, 606]];
-const LAMP_H = 64;
+export const LAMPS: Array<[number, number]> = [[100, 424], [420, 424], [700, 424], [880, 334], [240, 516], [600, 516], [880, 606], [1160, 606]];
+export const LAMP_H = 64;
 
 const quad = (x: number, y: number, w: number, h: number, z = 0): Array<[number, number]> => [iso(x, y, z), iso(x + w, y, z), iso(x + w, y + h, z), iso(x, y + h, z)];
 
@@ -580,7 +624,7 @@ export function drawStreet({ hour = 15, date = new Date(Date.UTC(2026, 9, 19)), 
   const lean = weather === 'storm' ? 26 : 0;
   const standing: Array<{ depth: number; shapes: Shape[] }> = [];
   for (const b of BLOCKS) if (!(after === 'storm' && b.anchor === 'billboard-1')) standing.push({ depth: b.at[0] + b.at[2] + b.at[1] + b.at[3], shapes: block(b, wet) });
-  for (const [x, y, rad, hgt, kind, leaf, anchor] of TREES) {
+  for (const [x, y, rad, hgt, form, kind, leaf, anchor] of TREES) {
     // After a storm the plane tree at the top of the street is down across the road: its root plate torn up out of
     // the pavement, its crown lying on the cobbles.
     if (after === 'storm' && anchor === 'tree-plane-1') {
@@ -592,7 +636,7 @@ export function drawStreet({ hour = 15, date = new Date(Date.UTC(2026, 9, 19)), 
           { tag: 'ellipse', attrs: { cx: rx, cy: ry, rx: 12, ry: 8 }, cls: 'f-mud' },
           { tag: 'polygon', attrs: { points: pts([[rx - 3, ry - 2], [rx + 3, ry + 2], [cx + 3, cy + 2], [cx - 3, cy - 2]]) }, cls: 'f-bark' },
           { tag: 'ellipse', attrs: { cx: rx, cy: ry - 4, rx: 10, ry: 12 }, cls: 'f-mud-root' },
-          ...tree('healthy', leaf, cx, cy - 4, rad * 1.05, null, anchor, false),
+          ...tree('spreading', 'healthy', leaf, cx, cy - 4, rad * 1.05, null, anchor, false),
         ],
       });
       continue;
@@ -602,7 +646,7 @@ export function drawStreet({ hour = 15, date = new Date(Date.UTC(2026, 9, 19)), 
     // In a storm the crowns are pushed over by the wind.
     const tx = tx0 + lean;
     const cast: Shape[] = sun.up && !grey ? [{ tag: 'ellipse', attrs: { cx: round(foot[0] - Math.cos(sun.azimuth) * rad * 1.4), cy: round(foot[1] + 4), rx: round(rad * 1.3), ry: round(rad * 0.5) }, cls: 'f-shadow' }] : [];
-    standing.push({ depth: x + y + rad, shapes: [...cast, ...tree(kind, leaf, tx, ty, rad * 1.15, foot, anchor, !!wet.snow)] });
+    standing.push({ depth: x + y + rad, shapes: [...cast, ...tree(form, kind, leaf, tx, ty, rad * 1.15, foot, anchor, !!wet.snow)] });
   }
   LAMPS.forEach(([x, y], i) => {
     // A modern street light: a tall pole, an arm curving out over the road, a flat head shining down.
@@ -942,7 +986,7 @@ export function drawPlan({ hour = 15, fenced = [] }: { hour?: number; fenced?: r
     for (const off of [18, 36]) shapes.push({ tag: 'line', attrs: { x1: sx + off, y1: sy, x2: sx + off, y2: sy + 60 }, cls: 'thin' });
   }
   // Tree crowns, shaded on the side away from the sun.
-  for (const [x, y, rad, , kind, leaf, anchor] of TREES) shapes.push(...tree(kind, leaf, x, y, rad, null, anchor, false));
+  for (const [x, y, rad, , form, kind, leaf, anchor] of TREES) if (x >= 0 && y >= 0) shapes.push(...tree(form, kind, leaf, x, y, rad, null, anchor, false));
   LAMPS.forEach(([x, y], i) => {
     shapes.push({ tag: 'circle', attrs: { cx: x, cy: y, r: 24 }, cls: 'glow' });
     shapes.push({ tag: 'circle', attrs: { cx: x, cy: y, r: 6 }, cls: 'f-ochre', anchor: `lamp-${i + 1}` as Shape['anchor'] });
@@ -968,5 +1012,5 @@ export const MAP_COLOURS: Record<string, [string, string]> = { ink: ['#2a2622', 
   'sun-dawn': ['#e8955a', 'rgba(0,0,0,0)'],
   fog: ['rgba(238,233,224,0.3)', 'rgba(120,130,145,0.17)'], 'snow-cap': ['rgba(250,249,246,0.86)', 'rgba(205,214,226,0.82)'],
   'snow-ground': ['rgba(250,249,246,0.82)', 'rgba(150,165,185,0.5)'], slush: ['rgba(170,165,155,0.5)', 'rgba(60,66,78,0.6)'], flake: ['#ffffff', '#e6ecf2'],
-  funnel: ['#8d877d', '#3a404a'], 'wall-cloud': ['#7d776d', '#1f242c'], dust: ['#b3a58a', '#3d3a33'], land: ['#dfdfc2', '#171c1d'], 'mud-root': ['#6e5236', '#2e2218'], 'flood-stain': ['rgba(110,90,60,0.28)', 'rgba(20,16,10,0.4)'], mud: ['rgba(130,105,70,0.32)', 'rgba(60,48,32,0.45)'], sandbag: ['#c9b48a', '#5a5040'], 'window-broken': ['#2a2622', '#0c0d10'], 'funnel-dust': ['#9a8a6e', '#3d3a33'], 'shadow-storm': ['rgba(42,38,34,0.18)', 'rgba(0,0,0,0.3)'], 'bin-public': ['#3f5a4a', '#2c3e34'], 'bin-green': ['#4f7a4a', '#2f4a2c'], 'bin-grey': ['#7d8288', '#454a50'], 'bin-lid': ['#2f3a34', '#1c2420'], picket: ['#f3ead9', '#8a8270'], camera: ['#e8e4dc', '#9aa0a8'], 'camera-eye': ['#2a2622', '#f26b5b'], cone: ['rgba(80,110,160,0.12)', 'rgba(150,180,230,0.10)'], 'lamp-head': ['#5a5f66', '#3a3f46'], weed: ['#6f8a4e', '#4a5e3a'], 'weed-2': ['#8fa65f', '#5a6e44'], crack: ['rgba(42,38,34,0.28)', 'rgba(0,0,0,0.4)'], sign: ['#3f5a4a', '#2c3e34'], plaque: ['#f3ead9', '#8a8270'], bark: ['#7a5236', '#3a2a1f'], 'leaf-dry': ['#b8a46a', '#4a4430'], 'leaf-light': ['rgba(255,255,240,0.22)', 'rgba(255,255,240,0.06)'], 'fruit-red': ['#c4452f', '#7a3324'], 'fruit-orange': ['#e48a2e', '#8a5a26'], nest: ['#8a6a48', '#3d3024'], bird: ['#3a3430', '#d8cfbd'], moss: ['rgba(110,128,72,0.42)', 'rgba(70,90,60,0.5)'], grime: ['rgba(42,38,34,0.16)', 'rgba(0,0,0,0.28)'], battens: ['#3b2a1f', '#120d0a'], grass: ['#c9cf9f', '#1d251f'], pavement: ['#e7ddc8', '#262b33'], poster: ['#e9d8a6', '#4a4536'], dial: ['#c9dbe2', '#10141c'], 'dial-grey': ['#cfccc5', '#1c2028'], 'cloud-shadow': ['rgba(42,38,34,0.08)', 'rgba(0,0,0,0.18)'], lot: ['#f3ead9', '#1b1f27'], flood: ['rgba(118,104,78,0.78)', 'rgba(48,46,40,0.82)'], water: ['rgba(118,104,78,0.86)', 'rgba(48,46,40,0.88)'], 'storm-dark': ['rgba(30,34,44,0.32)', 'rgba(0,0,0,0.3)'], strike: ['rgba(255,248,210,0.55)', 'rgba(255,248,210,0.4)'], puddle: ['rgba(110,135,150,0.45)', 'rgba(242,196,107,0.28)'],
+  funnel: ['#8d877d', '#3a404a'], 'wall-cloud': ['#7d776d', '#1f242c'], dust: ['#b3a58a', '#3d3a33'], land: ['#dfdfc2', '#171c1d'], slate: ['#5f6871', '#2e3238'], 'slate-light': ['#8b939b', '#454a50'], charcoal: ['#3d3f44', '#1e1f22'], 'roof-black': ['#2c2c2e', '#141416'], 'birch-leaf': ['#b3c27f', '#55613f'], poplar: ['#7f9a5c', '#3f4f33'], pine: ['#4f6b4a', '#27382a'], birch: ['#efe9dc', '#9a958a'], 'plane-bark': ['#d6c79e', '#5a5040'], 'mud-root': ['#6e5236', '#2e2218'], 'flood-stain': ['rgba(110,90,60,0.28)', 'rgba(20,16,10,0.4)'], mud: ['rgba(130,105,70,0.32)', 'rgba(60,48,32,0.45)'], sandbag: ['#c9b48a', '#5a5040'], 'window-broken': ['#2a2622', '#0c0d10'], 'funnel-dust': ['#9a8a6e', '#3d3a33'], 'shadow-storm': ['rgba(42,38,34,0.18)', 'rgba(0,0,0,0.3)'], 'bin-public': ['#3f5a4a', '#2c3e34'], 'bin-green': ['#4f7a4a', '#2f4a2c'], 'bin-grey': ['#7d8288', '#454a50'], 'bin-lid': ['#2f3a34', '#1c2420'], picket: ['#f3ead9', '#8a8270'], camera: ['#e8e4dc', '#9aa0a8'], 'camera-eye': ['#2a2622', '#f26b5b'], cone: ['rgba(80,110,160,0.12)', 'rgba(150,180,230,0.10)'], 'lamp-head': ['#5a5f66', '#3a3f46'], weed: ['#6f8a4e', '#4a5e3a'], 'weed-2': ['#8fa65f', '#5a6e44'], crack: ['rgba(42,38,34,0.28)', 'rgba(0,0,0,0.4)'], sign: ['#3f5a4a', '#2c3e34'], plaque: ['#f3ead9', '#8a8270'], bark: ['#7a5236', '#3a2a1f'], 'leaf-dry': ['#b8a46a', '#4a4430'], 'leaf-light': ['rgba(255,255,240,0.22)', 'rgba(255,255,240,0.06)'], 'fruit-red': ['#c4452f', '#7a3324'], 'fruit-orange': ['#e48a2e', '#8a5a26'], nest: ['#8a6a48', '#3d3024'], bird: ['#3a3430', '#d8cfbd'], moss: ['rgba(110,128,72,0.42)', 'rgba(70,90,60,0.5)'], grime: ['rgba(42,38,34,0.16)', 'rgba(0,0,0,0.28)'], battens: ['#3b2a1f', '#120d0a'], grass: ['#c9cf9f', '#1d251f'], pavement: ['#e7ddc8', '#262b33'], poster: ['#e9d8a6', '#4a4536'], dial: ['#c9dbe2', '#10141c'], 'dial-grey': ['#cfccc5', '#1c2028'], 'cloud-shadow': ['rgba(42,38,34,0.08)', 'rgba(0,0,0,0.18)'], lot: ['#f3ead9', '#1b1f27'], flood: ['rgba(118,104,78,0.78)', 'rgba(48,46,40,0.82)'], water: ['rgba(118,104,78,0.86)', 'rgba(48,46,40,0.88)'], 'storm-dark': ['rgba(30,34,44,0.32)', 'rgba(0,0,0,0.3)'], strike: ['rgba(255,248,210,0.55)', 'rgba(255,248,210,0.4)'], puddle: ['rgba(110,135,150,0.45)', 'rgba(242,196,107,0.28)'],
 };

@@ -60,7 +60,7 @@ ${vars(1)}
   svg { display: block; width: 100%; max-width: 100%; height: auto; }
 ${Object.keys(MAP_COLOURS).map((k) => `  .f-${k} { fill: var(--map-${k}); }`).join('\n')}
   .s-ink { stroke: var(--map-ink); }
-  .f-star, .f-shadow, .f-sun, .f-sun-dawn, .f-moon, .f-moon-dark, .f-wet, .f-puddle, .f-fog, .f-snow-cap, .f-snow-ground, .f-slush, .f-flake, .f-flood, .f-water, .f-grass, .f-pavement, .f-moss, .f-grime, .f-leaf-light, .f-camera-eye, .f-crack, .f-weed, .f-weed-2, .f-shadow-storm, .f-flood-stain, .f-mud, .f-storm-dark, .f-strike, .glow { stroke: none; }
+  .f-star, .f-shadow, .f-sun, .f-sun-dawn, .f-moon, .f-moon-dark, .f-wet, .f-puddle, .f-fog, .f-snow-cap, .f-snow-ground, .f-slush, .f-flake, .f-flood, .f-water, .f-grass, .f-pavement, .f-moss, .f-grime, .f-leaf-light, .f-camera-eye, .f-crack, .f-weed, .f-weed-2, .f-shadow-storm, .f-plane-bark, .f-flood-stain, .f-mud, .f-storm-dark, .f-strike, .glow { stroke: none; }
   .f-sandbag { stroke-width: 1; }
   .f-funnel-dust { stroke-width: 1.4; }
   .f-cone { stroke: var(--map-blue); stroke-width: 1; stroke-dasharray: 4 4; }
@@ -77,6 +77,8 @@ ${Object.keys(MAP_COLOURS).map((k) => `  .f-${k} { fill: var(--map-${k}); }`).jo
   .weed { stroke: var(--map-weed); stroke-width: 1.6; }
   .twig { stroke: var(--map-bark); stroke-width: 1.4; }
   .snow-line { stroke: var(--map-snow-cap); stroke-width: 2; }
+  .birch-mark { stroke: #2a2622; stroke-width: 1.4; }
+  .frond { stroke: var(--map-lime); stroke-width: 2.4; }
   .branch { stroke: var(--map-bark); stroke-width: 2.5; }
   .f-fruit-red, .f-fruit-orange { stroke-width: 1; }
   .f-battens { stroke-width: 1; }
