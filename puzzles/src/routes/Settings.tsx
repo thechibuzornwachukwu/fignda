@@ -185,6 +185,7 @@ export function Settings() {
           >
             Sign out
           </Button>
+          <TextLink to="/help">Help</TextLink>
         </div>
       </section>
 

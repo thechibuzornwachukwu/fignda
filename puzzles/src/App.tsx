@@ -33,6 +33,8 @@ const Made = lazy(() => import('./routes/Made').then((m) => ({ default: m.Made }
 const StreakInvite = lazy(() => import('./routes/StreakInvite').then((m) => ({ default: m.StreakInvite })));
 const Welcome = lazy(() => import('./routes/Welcome').then((m) => ({ default: m.Welcome })));
 const Privacy = lazy(() => import('./routes/Privacy').then((m) => ({ default: m.Privacy })));
+const Help = lazy(() => import('./routes/Help').then((m) => ({ default: m.Help })));
+const HelpArticlePage = lazy(() => import('./routes/Help').then((m) => ({ default: m.HelpArticlePage })));
 
 // Test-only card harness. VITE_E2E is set only by the e2e build, so production compiles this away.
 const CardsHarness = import.meta.env.VITE_E2E === '1' ? lazy(() => import('./routes/CardsHarness').then((m) => ({ default: m.CardsHarness }))) : null;
@@ -109,6 +111,8 @@ export function App() {
         <Route path="owner/puzzles" element={<OwnerPuzzles />} />
         <Route path="notifications" element={<Notifications />} />
         <Route path="privacy" element={<Privacy />} />
+        <Route path="help" element={<Help />} />
+        <Route path="help/:slug" element={<HelpArticlePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
       {OgHarness && (

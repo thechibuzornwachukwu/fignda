@@ -31,7 +31,6 @@ Play with no account, and sponsors get numbers, never people.
 ### 9. Smaller
 
 - [ ] **You** (SMTP), then **Sonnet**. Reminders by email, once SMTP is set.
-- [ ] **Free model** drafts the articles, **you** edit and publish. Later, once there are players to help: a help centre on GitBook (how a puzzle works, tip-offs, circles, the account, privacy), linked from Settings and the footer. Advised to the owner. Check its free plan and whether it can sit on our own domain first.
 - [ ] **Free model** drafts the emails, **you** edit and set up Loops. Later, with it: email sequences on Loops, to teach a new player the game a little at a time (the first puzzle, a circle, a pet). Advised to the owner. It needs the domain and a yes from the player at sign up, it is a new company that receives email addresses, so the privacy page names it, and every email has a way out. No guilt and no word about what would be lost, as in reminders.
 
 ## Owner

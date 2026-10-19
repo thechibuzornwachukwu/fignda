@@ -50,7 +50,7 @@ export type Deps = {
 export const LIMITS = {
   guestGeneratePerHour: 5,
   /** Make, signed in: drafts asked for and puzzles published, on 1 count. */
-  makePerHour: 20,
+  makePerHour: MAKE.perHour,
   playsPerHour: 120,
   pushLinesPerHour: 60,
   invitesPerHour: 30,

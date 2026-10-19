@@ -11,6 +11,8 @@ export const MAKE = {
   maxText: 900,
   titleMax: 40,
   nounMax: 40,
+  /** Drafts and published puzzles a signed in player may ask for in an hour, together (the Worker's limit). */
+  perHour: 20,
 } as const;
 
 export const WORD_RE = /^[A-Za-z]{3,12}$/;

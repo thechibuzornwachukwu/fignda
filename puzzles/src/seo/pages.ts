@@ -6,6 +6,8 @@ import gamesFile from '../../data/games.json';
 import { pick } from '../copy';
 import { buildHiddenWords } from '../engine/hiddenWords';
 import { sponsorOf } from '../engine/sponsor';
+import { HELP_ARTICLES, helpArticle } from '../help/articles';
+import type { HelpArticle } from '../help/types';
 
 type Game = { id: string; category: string; title: string; noun: string; text: string; dict: string[]; sponsor?: unknown };
 const data = gamesFile as unknown as { games: Game[]; dailyPool: string[]; filters: string[] };
@@ -212,6 +214,27 @@ const simple = (path: string, title: string, description: string, body: string):
   body: `<h1>${esc(title.replace(/ · Gazecraft$/, ''))}</h1><p>${esc(description)}</p>${body}`,
 });
 
+/** One help article: its question, answer, steps and facts, as text a crawler reads. */
+function helpPage(a: HelpArticle): Page {
+  const steps = a.steps?.length ? `<ol>${a.steps.map((s) => `<li>${esc(s)}</li>`).join('')}</ol>` : '';
+  const facts = a.facts?.length ? `<ul>${a.facts.map((f) => `<li>${esc(f)}</li>`).join('')}</ul>` : '';
+  return {
+    title: `${a.title} · Gazecraft`,
+    description: a.answer,
+    image: '/og/default.png',
+    imageAlt: 'Gazecraft. Find it. Figure it out.',
+    canonical: `/help/${a.slug}`,
+    jsonLd: [
+      {
+        '@context': 'https://schema.org',
+        '@type': 'FAQPage',
+        mainEntity: [{ '@type': 'Question', name: a.title, acceptedAnswer: { '@type': 'Answer', text: a.answer } }],
+      },
+    ],
+    body: `<h1>${esc(a.title)}</h1><p>${esc(a.answer)}</p>${steps}${facts}`,
+  };
+}
+
 /** Everything a crawler or link previewer needs for one path. Profiles need their summary passed in. */
 export function pageFor(path: string, origin: string): Page {
   const clean = path.replace(/\/+$/, '') || '/';
@@ -233,6 +256,21 @@ export function pageFor(path: string, origin: string): Page {
   if (clean === '/leaderboard') return simple('/leaderboard', 'Ranks · Gazecraft', 'The best scores on the pack you are on, on Gazecraft.', '');
   if (clean === '/players') return simple('/players', 'Players · Gazecraft', 'Find players to follow on Gazecraft: longest runs, most points and new players.', '');
   if (clean === '/privacy') return simple('/privacy', 'Privacy · Gazecraft', 'What Gazecraft keeps, why, and how to delete it.', '');
+  if (clean === '/help') {
+    const list = HELP_ARTICLES.map((a) => `<li><a href="/help/${a.slug}">${esc(a.title)}</a></li>`).join('');
+    return simple(
+      '/help',
+      'Help · Gazecraft',
+      'How Gazecraft works: playing, packs, points, leagues, pets, friends and your account.',
+      `<ul>${list}</ul>`,
+    );
+  }
+
+  const help = clean.match(/^\/help\/([a-z0-9-]{2,80})$/);
+  if (help) {
+    const a = helpArticle(help[1] ?? '');
+    return a ? helpPage(a) : { ...home(origin), canonical: clean, noindex: true };
+  }
 
   // Custom puzzles, sign in, settings and anything else: generic preview, not indexed.
   return { ...home(origin), canonical: clean, noindex: !clean.startsWith('/u/') };
@@ -247,6 +285,8 @@ export function sitemapPaths(): Array<{ path: string; daily?: boolean }> {
     { path: '/leaderboard' },
     { path: '/players' },
     { path: '/privacy' },
+    { path: '/help' },
+    ...HELP_ARTICLES.map((a) => ({ path: '/help/' + a.slug })),
   ];
 }
 

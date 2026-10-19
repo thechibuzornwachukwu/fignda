@@ -175,6 +175,8 @@ All but the last are counted by the game as it is played, per puzzle per UTC day
 
 **Usage report:** `npm run usage:report -- [--weeks 8] [--local]`, for the owner, from a terminal (`src/engine/usageReport.ts`). One row a week (Monday, UTC): the players who played, and how many of them used each feature: the path, whole puzzles, Play together, Make, Circles, Following, Friend streaks, Leagues, Sharing.
 
+**Help:** `/help` and `/help/SLUG`, open to everyone, linked from Settings and the footer (`src/help/articles.ts`). One question an article, titled as a player asks it, the answer in its first 1 or 2 sentences, then numbered steps or facts, then related articles. Grouped by what a player is trying to do; a search box filters as you type. Every number in an article is imported from the code the game runs, so an article changes on the next deploy when its rule does; `src/help/articles.test.ts` fails if the wording and the numbers drift. Each article is its own crawlable page with FAQ data, and all are in the sitemap.
+
 **Made by players:** `/made`, open to everyone, linked beside "Make a puzzle" at the foot of Packs. PageHeader "Made by players" with "Make one" as its action, then published puzzles that passed the safety check, were never hidden and are not reported, most liked first (`public_puzzles`): each a row with its icon and title over "@maker · 6 words · 1 play · 3 liked it", leading to `/p/CODE`.
 
 **Make a puzzle:** `/make`, signed in, reached from "Make a puzzle" at the foot of Packs after 5 plays and "Or make your own" on the landing page . One box: "What should we hide words in?" (`readBox` in `src/engine/makeBox.ts`).

@@ -105,3 +105,9 @@ describe('sitemap and llms.txt', () => {
   });
 });
 
+describe('help centre', () => {
+  it('/help has a title and is listed in the sitemap', () => {
+    expect(pageFor('/help', O).title).toBe('Help · Gazecraft');
+    expect(sitemapPaths().map((u) => u.path)).toContain('/help');
+  });
+});
