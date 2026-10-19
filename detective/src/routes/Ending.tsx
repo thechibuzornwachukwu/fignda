@@ -1,10 +1,11 @@
-import { Award } from 'lucide-react';
+import { ArrowLeft, Award } from 'lucide-react';
 import { useMemo, useRef, useState } from 'react';
 import { characterFor } from '../avatar/draw';
 import { Avatar } from '../components/Avatar';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
 import { Stars } from '../components/Stars';
+import { IconLink } from '../components/IconLink';
 import { TextLink } from '../components/TextLink';
 import { pick } from '../copy';
 import { faceSeed, roleLabel, type Chapter } from '../engine/chapter';
@@ -41,7 +42,7 @@ export function Ending({ chapter, stars, msg }: { chapter: Chapter; stars: numbe
   return (
     <div className={styles.screen} data-ending={chapter.id}>
       <div className={styles.top}>
-        <TextLink to={base}>The board</TextLink>
+        <IconLink to={base} icon={ArrowLeft} label="The board" />
         <span className={deck.earned}>
           {cold && (
             <span className={deck.seal} data-seal>

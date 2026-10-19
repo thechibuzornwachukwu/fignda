@@ -1,0 +1,21 @@
+.link {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: var(--tap);
+  height: var(--tap);
+  padding: 0;
+  border: 1px solid var(--line-3);
+  border-radius: var(--radius-lg);
+  background: none;
+  color: var(--fg);
+  cursor: pointer;
+  transition: background var(--dur-base) var(--ease-std);
+}
+.link:hover {
+  background: var(--surface-2);
+}
+.link:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}

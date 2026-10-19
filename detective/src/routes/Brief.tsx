@@ -1,8 +1,10 @@
+import { ArrowLeft } from 'lucide-react';
 import { useMemo } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { CaseBoard } from '../components/CaseBoard';
 import { PartnerNote } from '../components/PartnerNote';
+import { IconLink } from '../components/IconLink';
 import { TextLink } from '../components/TextLink';
 import { pick } from '../copy';
 import { chapterProgress } from '../engine/chapter';
@@ -56,7 +58,7 @@ export function Brief() {
 
   return (
     <div className={styles.screen} data-brief={chapter.id} data-cold={cold || undefined}>
-      <TextLink to="/cases">Cases</TextLink>
+      <IconLink to="/cases" icon={ArrowLeft} label="Cases" />
       <h1 className={styles.title}>{chapter.title}</h1>
       <CaseBoard chapter={chapter} solved={progress.solved} cleared={progress.cleared} />
       <Button variant="accent" to={`${base}/${next}`}>

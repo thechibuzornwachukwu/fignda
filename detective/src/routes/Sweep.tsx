@@ -1,10 +1,11 @@
-import { Check, X } from 'lucide-react';
+import { ArrowLeft, Check, PawPrint, X } from 'lucide-react';
 import { useMemo, useState, type CSSProperties } from 'react';
 import { Icon } from '../components/Icon';
 import { MobileBar } from '../components/MobileBar';
 import { Skeleton, SkeletonGroup } from '../components/Skeleton';
 import { Stars } from '../components/Stars';
 import { StepResult } from '../components/StepResult';
+import { IconLink } from '../components/IconLink';
 import { TextLink } from '../components/TextLink';
 import { pick } from '../copy';
 import { SCENE_H, SCENE_W, sweepHint, sweepResult, type Chapter } from '../engine/chapter';
@@ -85,7 +86,7 @@ export function Sweep({ chapter, at, solved }: { chapter: Chapter; at: number; s
   return (
     <div className={page.screen} data-step={at} data-sweep={done ? 'done' : 'open'} data-finished={done || undefined}>
       <div className={page.top}>
-        <TextLink to={base}>The board</TextLink>
+        <IconLink to={base} icon={ArrowLeft} label="The board" />
         <Marks chapter={chapter} at={at} solved={Math.max(solved, done ? at : 0)} />
       </div>
       <h1 className={page.title}>{step.place}</h1>
@@ -146,7 +147,7 @@ export function Sweep({ chapter, at, solved }: { chapter: Chapter; at: number; s
 
       {!done && (
         <div className={page.actions} data-sweep-actions>
-          <TextLink onClick={hint}>Ask for a tip-off</TextLink>
+          <IconLink onClick={hint} icon={PawPrint} label="Ask for a tip-off" />
           <TextLink onClick={() => finish(picks)}>I'm done</TextLink>
           <span className={page.count}>
             {result.found} of {result.total}

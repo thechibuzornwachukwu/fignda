@@ -1,8 +1,8 @@
-import { Check } from 'lucide-react';
+import { ArrowLeft, Check } from 'lucide-react';
 import { useId, useState } from 'react';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
-import { TextLink } from '../components/TextLink';
+import { IconLink } from '../components/IconLink';
 import { pick } from '../copy';
 import { pickStep, type Chapter, type Progress } from '../engine/chapter';
 import { submitPlay } from '../lib/api';
@@ -69,7 +69,7 @@ export function Accounts({ chapter, progress }: { chapter: Chapter; progress: Pr
   return (
     <div className={screen.screen} data-accounts={closed ? 'weighed' : 'open'}>
       <div className={screen.top}>
-        <TextLink to={base}>The board</TextLink>
+        <IconLink to={base} icon={ArrowLeft} label="The board" />
         <span className={screen.tries} role="img" aria-label={left === 1 ? '1 try left' : `${left} tries left`} data-tries={left}>
           {Array.from({ length: choice.tries }, (_, i) => (
             <span key={i} className={screen.pip} data-spent={i >= left || undefined} />

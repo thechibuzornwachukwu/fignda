@@ -1,0 +1,78 @@
+/* The street on Cases: a picture of Lantern Row with each case pinned at its place. */
+.map {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 16 / 10;
+  border-radius: var(--radius-xl);
+  /* Until the live street is drawn, its photograph at the same hour stands in. */
+  background: var(--surface-2) url('/street/day.jpg') center / cover;
+  box-shadow: inset 0 0 0 1px var(--line-2);
+}
+.map[data-night] {
+  background-image: url('/street/night.jpg');
+}
+.map[data-phone] {
+  aspect-ratio: 4 / 5;
+}
+.street {
+  display: block;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  transition: opacity var(--dur-slow) var(--ease-out);
+}
+.map[data-drawn] .street {
+  opacity: 1;
+}
+
+/* A pin stands with its foot on the place. */
+.pin {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: var(--space-6);
+  height: var(--space-6);
+  border-radius: var(--radius-pill);
+  transform: translate(-50%, -50%);
+  text-decoration: none;
+}
+.pin[data-state='closed'] {
+  background: var(--fg);
+  color: var(--bg);
+  box-shadow: 0 0 0 2px var(--bg);
+}
+.pin[data-seal] {
+  background: var(--medal-gold);
+  color: var(--paper-ink);
+  box-shadow: inset 0 0 0 2px var(--medal-gold-rim), 0 0 0 2px var(--paper);
+}
+.pin[data-state='locked'] {
+  width: var(--space-3);
+  height: var(--space-3);
+  background: var(--paper);
+  opacity: 0.6;
+  box-shadow: 0 0 0 1px var(--paper-ink);
+}
+/* The open case: the red pin of the board, with its name on a paper tag. */
+.pin[data-state='open'] {
+  width: var(--pin-dot);
+  height: var(--pin-dot);
+  background: var(--pin);
+  box-shadow: 0 0 0 3px var(--paper), 0 0 0 8px color-mix(in srgb, var(--pin) 35%, transparent);
+}
+.name {
+  composes: label from '../styles/type.module.css';
+  position: absolute;
+  bottom: calc(100% + var(--space-2));
+  left: 50%;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  color: var(--paper-ink);
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+.pin:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 3px;
+}

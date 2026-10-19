@@ -1,8 +1,9 @@
+import { ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '../components/Button';
 import { CaseBoard } from '../components/CaseBoard';
 import { StepResult } from '../components/StepResult';
-import { TextLink } from '../components/TextLink';
+import { IconLink } from '../components/IconLink';
 import { pick } from '../copy';
 import { LINEUP_TRIES, lineupStars, type Chapter, type Progress } from '../engine/chapter';
 import { submitPlay } from '../lib/api';
@@ -57,7 +58,7 @@ export function LineUp({ chapter, progress }: { chapter: Chapter; progress: Prog
   return (
     <div className={styles.screen} data-lineup="open">
       <div className={styles.top}>
-        <TextLink to={base}>The board</TextLink>
+        <IconLink to={base} icon={ArrowLeft} label="The board" />
         <span className={styles.tries} role="img" aria-label={left === 1 ? '1 try left' : `${left} tries left`} data-tries={left}>
           {Array.from({ length: LINEUP_TRIES }, (_, i) => (
             <span key={i} className={styles.pip} data-spent={i >= left || undefined} />

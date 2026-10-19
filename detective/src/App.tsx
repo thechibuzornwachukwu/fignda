@@ -1,6 +1,7 @@
 import { lazy, Suspense, useEffect } from 'react';
 import { Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { Header } from './components/Header';
+import { Skeleton, SkeletonGroup, SkeletonList } from './components/Skeleton';
 import { TabBar } from './components/TabBar';
 import { useDelayedWaiting } from './components/useDelayedWaiting';
 import { Waiting } from './components/Waiting';
@@ -20,11 +21,18 @@ const SignIn = lazy(() => import('./routes/SignIn').then((m) => ({ default: m.Si
 const Settings = lazy(() => import('./routes/Settings').then((m) => ({ default: m.Settings })));
 const Privacy = lazy(() => import('./routes/Privacy').then((m) => ({ default: m.Privacy })));
 
-const blank = <div className={styles.loading} aria-busy="true" />;
+// The shape of a screen while it is fetched: a title, the main picture, and rows under it.
+const shape = (
+  <SkeletonGroup className={styles.loading}>
+    <Skeleton width="42%" height={28} />
+    <Skeleton height={220} />
+    <SkeletonList rows={3} stat={false} />
+  </SkeletonGroup>
+);
 
-/** A page that is still being fetched. Blank for the first second, then the waiting screen. */
+/** A page that is still being fetched. Its skeleton for the first second, then the waiting screen. */
 function SlowLoad() {
-  return useDelayedWaiting(true) ? <Waiting size="full" /> : blank;
+  return useDelayedWaiting(true) ? <Waiting size="full" /> : shape;
 }
 
 function Layout() {

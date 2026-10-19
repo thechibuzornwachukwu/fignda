@@ -1,5 +1,6 @@
 // Renders the 3D street's previews into design/sketches/map/3d: every camera, by day, at dawn, at night, in weather.
 // Run: npm run street3d:render. It starts the dev server, opens /__street for each shot, and photographs the canvas.
+// `npm run street3d:render -- posters` writes the 2 pictures Cases shows while its map loads (public/street).
 
 import { mkdirSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -35,6 +36,16 @@ const browser = await chromium.launch({ args: ['--use-gl=angle', '--use-angle=sw
 const page = await browser.newPage({ viewport: { width: 1600, height: 900 } });
 // Name shots to render only those: npm run street3d:render -- walk-storm iso-storm
 const only = process.argv.slice(2);
+if (only.includes('posters')) {
+  // What Cases shows the moment it opens, by day and by night, until the live street is drawn: small JPEGs at 16:10.
+  mkdirSync(join(root, 'public/street'), { recursive: true });
+  await page.setViewportSize({ width: 1280, height: 800 });
+  for (const [file, hour] of [['day.jpg', 15], ['night.jpg', 22]] as const) {
+    await page.goto(`http://localhost:5199/__street?bare&w=1280&h=800&view=iso&hour=${hour}`, { waitUntil: 'domcontentloaded', timeout: 600_000 });
+    await page.waitForFunction(() => document.body.dataset.ready, null, { timeout: 600_000 });
+    await page.locator('canvas').screenshot({ path: join(root, 'public/street', file), type: 'jpeg', quality: 72 });
+  }
+}
 for (const [file, q] of shots.filter(([f]) => only.length === 0 || only.includes(f.replace(/\.png$/, '')))) {
   // The first visit compiles three.js, which is slow; after that each shot is quick.
   await page.goto(`http://localhost:5199/__street?bare&w=1600&h=900&${q}`, { waitUntil: 'domcontentloaded', timeout: 600_000 });

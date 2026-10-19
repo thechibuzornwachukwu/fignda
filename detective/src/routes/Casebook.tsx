@@ -3,10 +3,8 @@ import { useId, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
-import { chapterProgress } from '../engine/chapter';
 import { CASEBOOK, chapters } from '../games/chapters';
-import { loadChapterStars } from '../lib/chapterStore';
-import { caseClosed, coldSealed } from '../lib/cold';
+import { casebookRows } from '../lib/casebook';
 import styles from './Casebook.module.css';
 
 /**
@@ -16,15 +14,7 @@ import styles from './Casebook.module.css';
  */
 export function Casebook() {
   const headId = useId();
-  const rows = useMemo(() => {
-    // The first case that is not closed is the one being worked. Every case after it is shut.
-    const at = chapters.findIndex((c) => !caseClosed(c));
-    return chapters.map((chapter, n) => {
-      const closed = caseClosed(chapter);
-      const state = closed ? ('closed' as const) : n === at ? ('open' as const) : ('locked' as const);
-      return { chapter, state, sealed: closed && coldSealed(chapter), solved: chapterProgress(chapter, loadChapterStars(chapter.id)).solved };
-    });
-  }, []);
+  const rows = useMemo(() => casebookRows(), []);
   if (rows.length === 0) return null;
   const written = rows.length;
   // Art never blocks the path: a later case can be released first, so the file still shut is the lowest number missing.

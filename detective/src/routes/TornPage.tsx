@@ -1,7 +1,8 @@
+import { ArrowLeft } from 'lucide-react';
 import { useMemo, useState, type CSSProperties } from 'react';
 import { Stars } from '../components/Stars';
 import { StepResult } from '../components/StepResult';
-import { TextLink } from '../components/TextLink';
+import { IconLink } from '../components/IconLink';
 import { tornOf, tornStars, tornWrongs, type Chapter } from '../engine/chapter';
 import { submitPlay } from '../lib/api';
 import { useAuth } from '../lib/auth';
@@ -64,7 +65,7 @@ export function TornPage({ chapter, at, solved }: { chapter: Chapter; at: number
   return (
     <div className={page.screen} data-step={at} data-torn={done ? 'done' : 'open'} data-finished={done || undefined}>
       <div className={page.top}>
-        <TextLink to={base}>The board</TextLink>
+        <IconLink to={base} icon={ArrowLeft} label="The board" />
         <Marks chapter={chapter} at={at} solved={Math.max(solved, done ? at : 0)} />
       </div>
       <h1 className={page.title}>{step.place}</h1>

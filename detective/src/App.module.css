@@ -11,7 +11,15 @@
   width: 100%;
 }
 .loading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 640px;
   min-height: 60vh;
+  margin: 0 auto;
+  padding: var(--screen-top-game) var(--gutter) 0;
 }
 /* Room for the phone tab bar so the last row is never under it. */
 @media (max-width: 640px) {

@@ -1,3 +1,4 @@
+import { ArrowLeft, PawPrint } from 'lucide-react';
 import { useEffect, useId, useMemo, useState } from 'react';
 import { Navigate, useParams } from 'react-router-dom';
 import { CaseBoard } from '../components/CaseBoard';
@@ -7,6 +8,7 @@ import { Partner } from '../components/Partner';
 import { PartnerNote } from '../components/PartnerNote';
 import { Stars } from '../components/Stars';
 import { StepResult } from '../components/StepResult';
+import { IconLink } from '../components/IconLink';
 import { TextLink } from '../components/TextLink';
 import { WordList, type WordRow } from '../components/WordList';
 import { pick } from '../copy';
@@ -87,7 +89,7 @@ export function Step() {
     return (
       <div className={styles.screen} data-step="soon">
         <div className={styles.top}>
-          <TextLink to={base}>The board</TextLink>
+          <IconLink to={base} icon={ArrowLeft} label="The board" />
           <Marks chapter={chapter} at={at} solved={progress.solved} />
         </div>
         <h1 className={styles.title}>{step.place}</h1>
@@ -166,7 +168,7 @@ export function Play({ chapter, at, def, solved }: { chapter: Chapter; at: numbe
   return (
     <div className={styles.screen} data-step={at} data-finished={finished || undefined}>
       <div className={styles.top}>
-        <TextLink to={base}>The board</TextLink>
+        <IconLink to={base} icon={ArrowLeft} label="The board" />
         <Marks chapter={chapter} at={at} solved={Math.max(solved, finished ? at : 0)} />
       </div>
       <h1 className={styles.title}>{step.place}</h1>
@@ -208,7 +210,7 @@ export function Play({ chapter, at, def, solved }: { chapter: Chapter; at: numbe
 
       {!finished && (
         <div className={styles.actions}>
-          {!cold && <TextLink onClick={g.hint}>Ask for a tip-off</TextLink>}
+          {!cold && <IconLink onClick={g.hint} icon={PawPrint} label="Ask for a tip-off" />}
           <TextLink onClick={g.finish}>I'm done</TextLink>
           <span className={styles.count}>
             {g.s.found.length} of {total}
