@@ -70,26 +70,30 @@ export function tarmac(): Texture {
 }
 
 export function cobbles(): Texture {
-  const size = 256;
+  // Granite setts: rectangular stones laid in rows, each a little different in size and tone, with dark joints.
+  const size = 512;
   const [c, g] = canvas(size);
-  g.fillStyle = '#4a4540';
+  g.fillStyle = '#3f3b37';
   g.fillRect(0, 0, size, size);
   const r = rng(5);
-  const step = 16;
-  for (let row = 0; row < size / step; row++) {
-    for (let col = 0; col < size / step + 1; col++) {
-      const x = col * step + (row % 2 ? step / 2 : 0) + (r() - 0.5) * 3;
-      const y = row * step + step / 2 + (r() - 0.5) * 3;
-      const tone = 120 + Math.floor(r() * 50);
-      g.fillStyle = `rgb(${tone},${tone - 8},${tone - 18})`;
+  const rowH = 22;
+  for (let row = 0; row < size / rowH; row++) {
+    let x = (row % 2) * -14 - r() * 10;
+    while (x < size) {
+      const w = 26 + r() * 16;
+      const t = 105 + Math.floor(r() * 55);
+      const warm = Math.floor(r() * 10);
+      g.fillStyle = `rgb(${t + warm},${t},${t - 6})`;
+      const [y0, h] = [row * rowH + 2, rowH - 4];
       g.beginPath();
-      g.ellipse(x, y, step * 0.44, step * 0.4, r() * 0.6, 0, Math.PI * 2);
+      g.roundRect(x + 2, y0 + (r() - 0.5) * 1.5, w - 4, h, 4);
       g.fill();
-      // Each stone is rounded: lit on top, darker below.
-      g.fillStyle = 'rgba(255,255,255,0.18)';
-      g.beginPath();
-      g.ellipse(x - 1.5, y - 2, step * 0.22, step * 0.14, 0, 0, Math.PI * 2);
-      g.fill();
+      // Worn smooth on top: a lighter face, a darker lower edge.
+      g.fillStyle = 'rgba(255,255,255,0.10)';
+      g.fillRect(x + 5, y0 + 3, w - 12, h * 0.35);
+      g.fillStyle = 'rgba(0,0,0,0.18)';
+      g.fillRect(x + 3, y0 + h - 4, w - 6, 3);
+      x += w;
     }
   }
   return finish(c, 1);

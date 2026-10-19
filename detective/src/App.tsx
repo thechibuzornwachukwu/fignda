@@ -13,6 +13,8 @@ const Cases = lazy(() => import('./routes/Cases').then((m) => ({ default: m.Case
 const Brief = lazy(() => import('./routes/Brief').then((m) => ({ default: m.Brief })));
 const Step = lazy(() => import('./routes/Step').then((m) => ({ default: m.Step })));
 const Notebook = lazy(() => import('./routes/Notebook').then((m) => ({ default: m.Notebook })));
+// The 3D street lab: development only, so three.js never reaches a player's download from here.
+const StreetLab = import.meta.env.DEV ? lazy(() => import('./routes/StreetLab').then((m) => ({ default: m.StreetLab }))) : null;
 const Ranks = lazy(() => import('./routes/Ranks').then((m) => ({ default: m.Ranks })));
 const SignIn = lazy(() => import('./routes/SignIn').then((m) => ({ default: m.SignIn })));
 const Settings = lazy(() => import('./routes/Settings').then((m) => ({ default: m.Settings })));
@@ -56,6 +58,7 @@ export function App() {
         <Route path="cold/:id" element={<Brief />} />
         <Route path="cold/:id/:n" element={<Step />} />
         <Route path="notebook" element={<Notebook />} />
+        {StreetLab && <Route path="__street" element={<StreetLab />} />}
         <Route path="ranks" element={<Ranks />} />
         <Route path="signin" element={<SignIn />} />
         <Route path="settings" element={<Settings />} />
