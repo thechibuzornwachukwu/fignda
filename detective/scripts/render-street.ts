@@ -58,7 +58,8 @@ ${vars(1)}
   svg { display: block; width: 100%; max-width: 100%; height: auto; }
 ${Object.keys(MAP_COLOURS).map((k) => `  .f-${k} { fill: var(--map-${k}); }`).join('\n')}
   .s-ink { stroke: var(--map-ink); }
-  .f-star, .f-shadow, .f-sun, .f-sun-dawn, .f-moon, .f-moon-dark, .f-wet, .f-puddle, .f-fog, .f-snow-cap, .f-snow-ground, .f-slush, .f-flake, .f-flood, .f-water, .f-grass, .f-pavement, .f-moss, .f-grime, .f-leaf-light, .f-camera-eye, .f-crack, .f-weed, .f-weed-2, .glow { stroke: none; }
+  .f-star, .f-shadow, .f-sun, .f-sun-dawn, .f-moon, .f-moon-dark, .f-wet, .f-puddle, .f-fog, .f-snow-cap, .f-snow-ground, .f-slush, .f-flake, .f-flood, .f-water, .f-grass, .f-pavement, .f-moss, .f-grime, .f-leaf-light, .f-camera-eye, .f-crack, .f-weed, .f-weed-2, .f-shadow-storm, .glow { stroke: none; }
+  .f-funnel-dust { stroke-width: 1.4; }
   .f-cone { stroke: var(--map-blue); stroke-width: 1; stroke-dasharray: 4 4; }
   .f-camera { stroke-width: 1.2; }
   .sign-words { fill: #f3ead9; stroke: none; font-family: Manrope, 'Segoe UI', Arial, sans-serif; font-weight: 700; letter-spacing: 0.02em; }

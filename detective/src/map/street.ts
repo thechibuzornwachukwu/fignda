@@ -629,36 +629,46 @@ export function drawStreet({ hour = 15, date = new Date(Date.UTC(2026, 9, 19)), 
   }
 
   if (weather === 'storm') {
-    // On the open land behind the bus stop, far off the street. A low row of heavy dark cloud; out of it a funnel,
-    // broad where it leaves the cloud, roping down to a narrow point, streaked in long spirals; where it touches, a
-    // churning cloud of dust with debris thrown out; and rain falling in slanted shafts to one side.
-    const fx = round(width * 0.17);
-    const base = 92;
-    const ground = 228;
-    const steps = 28;
-    const at = (f: number): [number, number, number] => [fx + Math.sin(f * Math.PI * 1.1) * 30 * f - 8 * f * f, base + f * (ground - base), 62 * (1 - f) ** 2.1 + 4];
-    for (let k = 0; k < 8; k++) shapes.push({ tag: 'line', attrs: { x1: fx - 190 + k * 17, y1: base, x2: fx - 222 + k * 17, y2: ground }, cls: 'shaft' });
-    const left: Array<[number, number]> = [];
-    const right: Array<[number, number]> = [];
-    for (let k = 0; k <= steps; k++) {
-      const [cx, cy, rx] = at(k / steps);
-      left.push([round(cx - rx), round(cy)]);
-      right.unshift([round(cx + rx), round(cy)]);
-    }
-    shapes.push({ tag: 'polygon', attrs: { points: pts([...left, ...right]) }, cls: 'f-funnel' });
-    // Long spiral streaks, each running from 1 side high to the other side low.
-    for (const [f0, f1] of [[0.02, 0.22], [0.16, 0.4], [0.34, 0.6], [0.55, 0.8]] as const) {
+    // A tornado always stands on the ground. Its foot is on the fields west of the town, past the end of the road, on
+    // the plan at (-80, 630): there it throws a shadow and churns a cloud of dust and debris. From there it rises the
+    // whole height of the picture, a cone narrow at the ground and broad where it leaves the lowered wall cloud under
+    // the storm, grey above and brown below with the dust it lifts. Behind it, across the fields and away from the
+    // street, the path it has torn. Rain falls in shafts to one side.
+    const [gx, gy] = iso(-80, 630);
+    const [tx, ty] = [gx + 40, 64];
+    const steps = 30;
+    const at = (f: number): [number, number, number] => [tx + (gx - tx) * f + Math.sin(f * Math.PI) * 18, ty + (gy - ty) * f, 64 * (1 - f) ** 1.4 + 9];
+    // The path it has torn, running back toward the far corner of the fields.
+    const trail = scatter(26, 91);
+    scatter(26, 59).forEach((v, i) => {
+      const [px, py] = iso(-80 - v * 340, 630 + v * 120 + (trail[i]! - 0.5) * 50);
+      shapes.push({ tag: 'polygon', attrs: { points: pts([[px, py], [px + 6, py - 2], [px + 7, py + 3], [px + 1, py + 4]]) }, cls: i % 3 ? 'f-bark' : 'f-dust' });
+    });
+    for (let k = 0; k < 7; k++) shapes.push({ tag: 'line', attrs: { x1: tx - 150 + k * 18, y1: ty + 10, x2: tx - 190 + k * 18, y2: gy - 30 }, cls: 'shaft' });
+    shapes.push({ tag: 'ellipse', attrs: { cx: gx + 12, cy: gy + 6, rx: 46, ry: 14 }, cls: 'f-shadow-storm' });
+    const outline = (f0: number, f1: number): Array<[number, number]> => {
+      const left: Array<[number, number]> = [];
+      const right: Array<[number, number]> = [];
+      for (let k = 0; k <= steps; k++) {
+        const [cx, cy, rx] = at(f0 + ((f1 - f0) * k) / steps);
+        left.push([round(cx - rx), round(cy)]);
+        right.unshift([round(cx + rx), round(cy)]);
+      }
+      return [...left, ...right];
+    };
+    shapes.push({ tag: 'polygon', attrs: { points: pts(outline(0, 0.72)) }, cls: 'f-funnel' });
+    shapes.push({ tag: 'polygon', attrs: { points: pts(outline(0.7, 1)) }, cls: 'f-funnel-dust' });
+    for (const [f0, f1] of [[0.04, 0.2], [0.18, 0.36], [0.34, 0.52], [0.5, 0.68], [0.66, 0.84]] as const) {
       const [ax, ay, ar] = at(f0);
       const [bx, by, br] = at(f1);
-      shapes.push({ tag: 'path', attrs: { d: `M${round(ax - ar * 0.9)},${round(ay)} Q${round((ax + bx) / 2)},${round((ay + by) / 2 + 6)} ${round(bx + br * 0.9)},${round(by)}`, fill: 'none' }, cls: 'band' });
+      shapes.push({ tag: 'path', attrs: { d: `M${round(ax - ar * 0.9)},${round(ay)} Q${round((ax + bx) / 2)},${round((ay + by) / 2 + 8)} ${round(bx + br * 0.9)},${round(by)}`, fill: 'none' }, cls: 'band' });
     }
-    // The churning dust at its foot, and the debris thrown out of it.
-    const [dx0] = at(1);
-    for (const [ox, oy, sz] of [[-26, -6, 20], [14, -10, 24], [-4, -22, 18], [34, -2, 16]] as const) puff(dx0 + ox, ground + oy, sz, 'f-dust');
-    const bits = scatter(10, 83);
-    scatter(10, 47).forEach((v, i) => shapes.push({ tag: 'circle', attrs: { cx: round(dx0 - 60 + v * 120), cy: round(ground - 64 + bits[i]! * 50), r: 1.5 + (i % 3) * 0.5 }, cls: 'f-bark' }));
-    // The heavy cloud it comes down from, a low dark row.
-    for (const [ox, oy, sz] of [[-200, 6, 54], [-110, -6, 66], [0, -2, 72], [104, -8, 62], [196, 4, 50]] as const) puff(fx + ox, base - 30 + oy, sz, 'f-wall-cloud');
+    // The dust and debris churning at its foot.
+    for (const [ox, oy, sz] of [[-30, -4, 22], [16, -8, 26], [-6, -24, 20], [40, 0, 18]] as const) puff(gx + ox, gy + oy, sz, 'f-dust');
+    const bits = scatter(12, 83);
+    scatter(12, 47).forEach((v, i) => shapes.push({ tag: 'circle', attrs: { cx: round(gx - 70 + v * 140), cy: round(gy - 90 + bits[i]! * 70), r: 1.5 + (i % 3) * 0.5 }, cls: 'f-bark' }));
+    // The lowered wall cloud it comes out of, under a long dark storm base.
+    for (const [ox, oy, sz] of [[-230, -10, 54], [-130, -18, 66], [-20, -6, 74], [90, -16, 64], [190, -8, 52]] as const) puff(tx + ox, ty - 20 + oy, sz, 'f-wall-cloud');
   }
   // The sky dial, in the corner: the sun on its arc by the player's hour, or tonight's moon among a few stars. When it
   // is overcast the dial is grey, because nobody on the street can see either.
@@ -833,5 +843,5 @@ export const MAP_COLOURS: Record<string, [string, string]> = { ink: ['#2a2622', 
   'sun-dawn': ['#e8955a', 'rgba(0,0,0,0)'],
   fog: ['rgba(238,233,224,0.3)', 'rgba(120,130,145,0.17)'], 'snow-cap': ['rgba(250,249,246,0.86)', 'rgba(205,214,226,0.82)'],
   'snow-ground': ['rgba(250,249,246,0.82)', 'rgba(150,165,185,0.5)'], slush: ['rgba(170,165,155,0.5)', 'rgba(60,66,78,0.6)'], flake: ['#ffffff', '#e6ecf2'],
-  funnel: ['#8d877d', '#3a404a'], 'wall-cloud': ['#7d776d', '#1f242c'], dust: ['#b3a58a', '#3d3a33'], land: ['#dfdfc2', '#171c1d'], 'bin-public': ['#3f5a4a', '#2c3e34'], 'bin-green': ['#4f7a4a', '#2f4a2c'], 'bin-grey': ['#7d8288', '#454a50'], 'bin-lid': ['#2f3a34', '#1c2420'], picket: ['#f3ead9', '#8a8270'], camera: ['#e8e4dc', '#9aa0a8'], 'camera-eye': ['#2a2622', '#f26b5b'], cone: ['rgba(80,110,160,0.12)', 'rgba(150,180,230,0.10)'], 'lamp-head': ['#5a5f66', '#3a3f46'], weed: ['#6f8a4e', '#4a5e3a'], 'weed-2': ['#8fa65f', '#5a6e44'], crack: ['rgba(42,38,34,0.28)', 'rgba(0,0,0,0.4)'], sign: ['#3f5a4a', '#2c3e34'], plaque: ['#f3ead9', '#8a8270'], bark: ['#7a5236', '#3a2a1f'], 'leaf-dry': ['#b8a46a', '#4a4430'], 'leaf-light': ['rgba(255,255,240,0.22)', 'rgba(255,255,240,0.06)'], 'fruit-red': ['#c4452f', '#7a3324'], 'fruit-orange': ['#e48a2e', '#8a5a26'], nest: ['#8a6a48', '#3d3024'], bird: ['#3a3430', '#d8cfbd'], moss: ['rgba(110,128,72,0.42)', 'rgba(70,90,60,0.5)'], grime: ['rgba(42,38,34,0.16)', 'rgba(0,0,0,0.28)'], battens: ['#3b2a1f', '#120d0a'], grass: ['#c9cf9f', '#1d251f'], pavement: ['#e7ddc8', '#262b33'], poster: ['#e9d8a6', '#4a4536'], dial: ['#c9dbe2', '#10141c'], 'dial-grey': ['#cfccc5', '#1c2028'], 'cloud-shadow': ['rgba(42,38,34,0.08)', 'rgba(0,0,0,0.18)'], lot: ['#f3ead9', '#1b1f27'], flood: ['rgba(122,128,118,0.62)', 'rgba(52,62,74,0.7)'], water: ['rgba(122,128,118,0.7)', 'rgba(52,62,74,0.75)'], puddle: ['rgba(110,135,150,0.45)', 'rgba(242,196,107,0.28)'],
+  funnel: ['#8d877d', '#3a404a'], 'wall-cloud': ['#7d776d', '#1f242c'], dust: ['#b3a58a', '#3d3a33'], land: ['#dfdfc2', '#171c1d'], 'funnel-dust': ['#9a8a6e', '#3d3a33'], 'shadow-storm': ['rgba(42,38,34,0.18)', 'rgba(0,0,0,0.3)'], 'bin-public': ['#3f5a4a', '#2c3e34'], 'bin-green': ['#4f7a4a', '#2f4a2c'], 'bin-grey': ['#7d8288', '#454a50'], 'bin-lid': ['#2f3a34', '#1c2420'], picket: ['#f3ead9', '#8a8270'], camera: ['#e8e4dc', '#9aa0a8'], 'camera-eye': ['#2a2622', '#f26b5b'], cone: ['rgba(80,110,160,0.12)', 'rgba(150,180,230,0.10)'], 'lamp-head': ['#5a5f66', '#3a3f46'], weed: ['#6f8a4e', '#4a5e3a'], 'weed-2': ['#8fa65f', '#5a6e44'], crack: ['rgba(42,38,34,0.28)', 'rgba(0,0,0,0.4)'], sign: ['#3f5a4a', '#2c3e34'], plaque: ['#f3ead9', '#8a8270'], bark: ['#7a5236', '#3a2a1f'], 'leaf-dry': ['#b8a46a', '#4a4430'], 'leaf-light': ['rgba(255,255,240,0.22)', 'rgba(255,255,240,0.06)'], 'fruit-red': ['#c4452f', '#7a3324'], 'fruit-orange': ['#e48a2e', '#8a5a26'], nest: ['#8a6a48', '#3d3024'], bird: ['#3a3430', '#d8cfbd'], moss: ['rgba(110,128,72,0.42)', 'rgba(70,90,60,0.5)'], grime: ['rgba(42,38,34,0.16)', 'rgba(0,0,0,0.28)'], battens: ['#3b2a1f', '#120d0a'], grass: ['#c9cf9f', '#1d251f'], pavement: ['#e7ddc8', '#262b33'], poster: ['#e9d8a6', '#4a4536'], dial: ['#c9dbe2', '#10141c'], 'dial-grey': ['#cfccc5', '#1c2028'], 'cloud-shadow': ['rgba(42,38,34,0.08)', 'rgba(0,0,0,0.18)'], lot: ['#f3ead9', '#1b1f27'], flood: ['rgba(122,128,118,0.62)', 'rgba(52,62,74,0.7)'], water: ['rgba(122,128,118,0.7)', 'rgba(52,62,74,0.75)'], puddle: ['rgba(110,135,150,0.45)', 'rgba(242,196,107,0.28)'],
 };

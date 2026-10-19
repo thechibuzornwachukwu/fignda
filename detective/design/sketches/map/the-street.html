@@ -52,6 +52,8 @@
     --map-wall-cloud: #7d776d;
     --map-dust: #b3a58a;
     --map-land: #dfdfc2;
+    --map-funnel-dust: #9a8a6e;
+    --map-shadow-storm: rgba(42,38,34,0.18);
     --map-bin-public: #3f5a4a;
     --map-bin-green: #4f7a4a;
     --map-bin-grey: #7d8288;
@@ -131,6 +133,8 @@
     --map-wall-cloud: #1f242c;
     --map-dust: #3d3a33;
     --map-land: #171c1d;
+    --map-funnel-dust: #3d3a33;
+    --map-shadow-storm: rgba(0,0,0,0.3);
     --map-bin-public: #2c3e34;
     --map-bin-green: #2f4a2c;
     --map-bin-grey: #454a50;
@@ -210,6 +214,8 @@
     --map-wall-cloud: #1f242c;
     --map-dust: #3d3a33;
     --map-land: #171c1d;
+    --map-funnel-dust: #3d3a33;
+    --map-shadow-storm: rgba(0,0,0,0.3);
     --map-bin-public: #2c3e34;
     --map-bin-green: #2f4a2c;
     --map-bin-grey: #454a50;
@@ -289,6 +295,8 @@
   .f-wall-cloud { fill: var(--map-wall-cloud); }
   .f-dust { fill: var(--map-dust); }
   .f-land { fill: var(--map-land); }
+  .f-funnel-dust { fill: var(--map-funnel-dust); }
+  .f-shadow-storm { fill: var(--map-shadow-storm); }
   .f-bin-public { fill: var(--map-bin-public); }
   .f-bin-green { fill: var(--map-bin-green); }
   .f-bin-grey { fill: var(--map-bin-grey); }
@@ -324,7 +332,8 @@
   .f-water { fill: var(--map-water); }
   .f-puddle { fill: var(--map-puddle); }
   .s-ink { stroke: var(--map-ink); }
-  .f-star, .f-shadow, .f-sun, .f-sun-dawn, .f-moon, .f-moon-dark, .f-wet, .f-puddle, .f-fog, .f-snow-cap, .f-snow-ground, .f-slush, .f-flake, .f-flood, .f-water, .f-grass, .f-pavement, .f-moss, .f-grime, .f-leaf-light, .f-camera-eye, .f-crack, .f-weed, .f-weed-2, .glow { stroke: none; }
+  .f-star, .f-shadow, .f-sun, .f-sun-dawn, .f-moon, .f-moon-dark, .f-wet, .f-puddle, .f-fog, .f-snow-cap, .f-snow-ground, .f-slush, .f-flake, .f-flood, .f-water, .f-grass, .f-pavement, .f-moss, .f-grime, .f-leaf-light, .f-camera-eye, .f-crack, .f-weed, .f-weed-2, .f-shadow-storm, .glow { stroke: none; }
+  .f-funnel-dust { stroke-width: 1.4; }
   .f-cone { stroke: var(--map-blue); stroke-width: 1; stroke-dasharray: 4 4; }
   .f-camera { stroke-width: 1.2; }
   .sign-words { fill: #f3ead9; stroke: none; font-family: Manrope, 'Segoe UI', Arial, sans-serif; font-weight: 700; letter-spacing: 0.02em; }
