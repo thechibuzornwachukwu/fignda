@@ -11,8 +11,22 @@ export const SHAPES = ['who-did-it', 'prove-it', 'what-is-it-really', 'where-is-
 export type Shape = (typeof SHAPES)[number];
 
 /** The methods a step can use today. A new method joins this list in the set that builds its engine. */
-export const METHODS = ['hidden-words', 'mirror', 'buried-sums', 'unmask', 'line-up', 'accounts', 'claim', 'trail', 'chain', 'sweep', 'torn'] as const;
+export const METHODS = ['hidden-words', 'mirror', 'buried-sums', 'line-up', 'accounts', 'claim', 'trail', 'chain', 'sweep', 'torn'] as const;
 export type Method = (typeof METHODS)[number];
+
+/**
+ * The 4 kinds of detective work (`design/CASE_WRITING.md`): finding what is there, reading what was left, talking to
+ * people, and weighing what could have happened. A case holds every kind that has a method built.
+ */
+export const KINDS = ['find', 'read', 'talk', 'weigh'] as const;
+export type Kind = (typeof KINDS)[number];
+export const KIND_OF: Readonly<Record<Method, Kind>> = {
+  sweep: 'find',
+  'hidden-words': 'read', mirror: 'read', 'buried-sums': 'read', torn: 'read',
+  'line-up': 'weigh', accounts: 'weigh', claim: 'weigh', chain: 'weigh', trail: 'weigh',
+};
+/** A method is met at most this often in 1 case, so no case is the same puzzle in a new coat. */
+export const METHOD_MAX = 2;
 
 /** The methods a case can close on. A case closes on its last step, and only there. */
 export const CLOSERS: readonly Method[] = ['line-up', 'accounts'];
@@ -344,6 +358,42 @@ export function checkChapter(raw: unknown, roles: readonly string[]): string[] {
     if (/[—!]/.test(l)) out.push(`an em dash or an exclamation mark: ${l}`);
     if (l.length > LINE_MAX) out.push(`longer than ${LINE_MAX}: ${l}`);
   }
+  return out;
+}
+
+/** The kinds that have a method built. A kind with none yet (talk) is asked of no case until its first method lands. */
+export const KINDS_BUILT: readonly Kind[] = KINDS.filter((k) => Object.values(KIND_OF).includes(k));
+
+/**
+ * Whether a case is balanced, in words: every built kind of work is in it, and no method is met more than
+ * `METHOD_MAX` times. Kept apart from `checkChapter` because a case can be fair and still be thin.
+ */
+export function balanceOf(chapter: Pick<Chapter, 'steps'>): string[] {
+  const out: string[] = [];
+  const methods = chapter.steps.map((s) => s.method);
+  for (const k of KINDS_BUILT) if (!methods.some((m) => KIND_OF[m] === k)) out.push(`no ${k} work`);
+  for (const m of new Set(methods)) {
+    const n = methods.filter((x) => x === m).length;
+    if (n > METHOD_MAX) out.push(`${m} is met ${n} times, ${METHOD_MAX} at most`);
+  }
+  return out;
+}
+
+/**
+ * What is wrong with a casebook as a whole, in words, its cases in order: no 2 neighbours share a shape or a number
+ * of suspects, and after the first case each brings 1 new method at most, so a player meets them one at a time.
+ */
+export function checkCasebook(cases: ReadonlyArray<Pick<Chapter, 'number' | 'shape' | 'suspects' | 'steps'>>): string[] {
+  const out: string[] = [];
+  const seen = new Set<Method>();
+  cases.forEach((c, i) => {
+    const prev = cases[i - 1];
+    if (prev && prev.shape === c.shape) out.push(`cases ${prev.number} and ${c.number} share a shape`);
+    if (prev && prev.suspects.length === c.suspects.length) out.push(`cases ${prev.number} and ${c.number} have as many suspects`);
+    const fresh = [...new Set(c.steps.map((s) => s.method))].filter((m) => !seen.has(m));
+    if (i > 0 && fresh.length > 1) out.push(`case ${c.number} brings ${fresh.length} new methods: ${fresh.join(', ')}`);
+    fresh.forEach((m) => seen.add(m));
+  });
   return out;
 }
 

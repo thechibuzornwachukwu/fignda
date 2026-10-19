@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lantern Row flow</title>
+<!--
+  How Lantern Row flows: writing a case, and playing one. Keep it true: a change to a screen, a method or the way a
+  case is checked changes NODES or EDGES below, then `npm run flow:render` writes design/flow.jpg.
+  A box is [id, x, y, w, h, lines, planned?]. An edge is [from, to, label?, waypoints?, planned?].
+-->
+<style>
+  body { margin: 0; background: #f6f0e4; font-family: Manrope, "Segoe UI", Arial, sans-serif; }
+  svg text { fill: #2b2622; }
+</style>
+</head>
+<body>
+<svg id="flow" xmlns="http://www.w3.org/2000/svg" width="1720" height="1000" viewBox="0 0 1720 1000"></svg>
+<script>
+const INK = '#2b2622', PAPER = '#fffaf0', MUTED = '#8a7f72', LANE = '#efe6d4';
+
+const NODES = [
+  // Writing a case (design/CASE_WRITING.md)
+  ['story', 40, 110, 200, 74, ['The story', 'design/stories/<id>.md']],
+  ['evidence', 275, 110, 200, 74, ['The evidence', 'shows, proves, leaves open']],
+  ['steps', 510, 110, 200, 74, ['The steps', 'the thing picks the method']],
+  ['json', 745, 110, 200, 74, ['The chapter file', 'design/stories/<id>.json']],
+  ['checks', 980, 110, 220, 74, ['The engine checks', 'checkChapter, balanceOf,', 'checkCasebook (npm test)']],
+  ['read', 1235, 110, 200, 74, ['The read', 'played by a non-writer']],
+  ['ship', 1470, 110, 200, 74, ['On the path', 'a file in the casebook']],
+
+  // Playing a case
+  ['landing', 40, 330, 200, 64, ['Landing', 'Play follows playNext']],
+  ['cases', 290, 330, 200, 64, ['Cases', 'the casebook']],
+  ['brief', 540, 330, 200, 64, ['Brief', 'the case board, the suspects']],
+  ['step', 790, 330, 230, 64, ['Step n', 'opens in order']],
+  ['result', 1080, 330, 220, 64, ['Result', 'stars, a pin, the lead']],
+  ['closer', 1360, 330, 300, 64, ['The closer, 2 tries', 'the line-up or which account fits']],
+  ['ending', 1360, 520, 300, 64, ['Ending', 'the culprit, the confession, after']],
+  ['notebook', 1360, 870, 300, 64, ['Your Notebook', 'every case, clue, person, lead'], true],
+  ['tipoff', 560, 440, 200, 60, ['Tip-off', 'the pet marks where to look']],
+  ['guest', 40, 560, 200, 64, ['Guest wall', 'a guest\'s 3rd step']],
+  ['signin', 290, 560, 200, 64, ['Sign in', 'nothing is lost']],
+  ['cold', 290, 750, 200, 64, ['Cold case', 'a closed case, no tip-offs']],
+  ['worker', 1080, 560, 220, 64, ['Worker grades it', 'replays the log, record_step']],
+  ['ranks', 1080, 700, 220, 64, ['Ranks', 'by points, board steps only']],
+  ['server', 1080, 870, 220, 64, ['Answers on the server', 'set 1d'], true],
+];
+
+const EDGES = [
+  ['story', 'evidence'], ['evidence', 'steps'], ['steps', 'json'], ['json', 'checks'], ['checks', 'read', 'passes'], ['read', 'ship'],
+  ['landing', 'cases'], ['cases', 'brief'], ['brief', 'step'], ['step', 'result', 'done'],
+  ['result', 'step', '2 stars clear a suspect, then the next step', [[1190, 330], [1190, 312], [905, 312], [905, 330]]],
+  ['result', 'closer', 'last step'], ['closer', 'ending'],
+  ['ending', 'notebook', 'the case is filed', null, true],
+  ['ending', 'cases', 'Back to cases', [[1660, 552], [1695, 552], [1695, 290], [390, 290], [390, 330]]],
+  ['tipoff', 'step', null, [[760, 470], [830, 470], [830, 394]]],
+  ['brief', 'guest', null, [[560, 394], [140, 560]]],
+  ['guest', 'signin'],
+  ['signin', 'brief', null, [[390, 560], [600, 394]]],
+  ['cases', 'cold', null, [[290, 380], [265, 380], [265, 782], [290, 782]]],
+  ['cold', 'brief', 'same steps', [[490, 782], [525, 782], [525, 380], [540, 380]]],
+  ['result', 'worker', 'signed in', [[1190, 394], [1190, 560]]],
+  ['worker', 'ranks'],
+  ['methods', 'notebook', 'every clue',  [[1000, 730], [1000, 790], [1325, 790], [1325, 902], [1360, 902]]],
+];
+
+// The methods a step is played on, by kind of work. Planned ones are in italics.
+const METHODS = { x: 560, y: 560, w: 480, h: 170, cols: [
+  ['Find', ['Sweep the room'], ['By torchlight', 'Look under it', 'What does not belong', 'Piece it together']],
+  ['Read', ['Hidden words', 'The blotter', 'Buried sums', 'The torn page'], []],
+  ['Talk', [], ['Question them', 'Sit with them:', 'chess, a meal']],
+  ['Weigh', ['Could it be done', 'The missing step', 'Walk it back'], ['Which came first', 'Who could reach it']],
+] };
+
+const svg = document.getElementById('flow');
+const NS = 'http://www.w3.org/2000/svg';
+const el = (tag, attrs, parent = svg) => { const e = document.createElementNS(NS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); parent.appendChild(e); return e; };
+const text = (x, y, s, o = {}) => { const t = el('text', { x, y, 'font-size': o.size ?? 13, 'font-weight': o.weight ?? 500, 'text-anchor': o.anchor ?? 'middle', 'font-style': o.italic ? 'italic' : 'normal' }); t.textContent = s; if (o.fill) t.style.fill = o.fill; return t; };
+
+el('defs', {}).innerHTML = `<marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="${INK}"/></marker>`;
+
+el('rect', { x: 20, y: 70, width: 1680, height: 140, rx: 14, fill: LANE });
+el('rect', { x: 20, y: 250, width: 1680, height: 710, rx: 14, fill: LANE });
+text(36, 46, 'Lantern Row: how the game flows', { size: 24, weight: 800, anchor: 'start' });
+text(36, 92, 'Writing a case', { size: 15, weight: 800, anchor: 'start' });
+text(36, 274, 'Playing a case', { size: 15, weight: 800, anchor: 'start' });
+
+const box = {};
+for (const [id, x, y, w, h, lines, planned] of NODES) {
+  box[id] = { x, y, w, h };
+  el('rect', { x, y, width: w, height: h, rx: 8, fill: PAPER, stroke: INK, 'stroke-width': 1.6, 'stroke-dasharray': planned ? '6 5' : 'none' });
+  const top = y + h / 2 - (lines.length - 1) * 9 + 4;
+  lines.forEach((l, i) => text(x + w / 2, top + i * 18, l, { size: i === 0 ? 14 : 12, weight: i === 0 ? 800 : 500, fill: i === 0 ? INK : MUTED, italic: planned && i > 0 }));
+}
+
+const m = METHODS;
+box.methods = m;
+el('rect', { x: m.x, y: m.y, width: m.w, height: m.h, rx: 8, fill: PAPER, stroke: INK, 'stroke-width': 1.6 });
+text(m.x + m.w / 2, m.y + 22, 'Played on the method of its evidence', { size: 13, weight: 800 });
+const cw = m.w / m.cols.length;
+m.cols.forEach(([kind, built, planned], i) => {
+  const cx = m.x + cw * i + cw / 2;
+  text(cx, m.y + 50, kind, { size: 13, weight: 800 });
+  [...built.map((s) => [s, false]), ...planned.map((s) => [s, true])].forEach(([s, p], j) => text(cx, m.y + 72 + j * 17, s, { size: 11.5, italic: p, fill: p ? MUTED : INK }));
+});
+el('line', { x1: 905, y1: 394, x2: 905, y2: 560, stroke: INK, 'stroke-width': 1.6, 'marker-end': 'url(#arrow)' });
+
+const edgePoint = (b, toward) => {
+  const cx = b.x + b.w / 2, cy = b.y + b.h / 2, dx = toward[0] - cx, dy = toward[1] - cy;
+  const s = Math.min(Math.abs((b.w / 2) / (dx || 1e-9)), Math.abs((b.h / 2) / (dy || 1e-9)));
+  return [cx + dx * s, cy + dy * s];
+};
+for (const [from, to, label, via, planned] of EDGES) {
+  const a = box[from], b = box[to];
+  const pts = via ?? [edgePoint(a, [b.x + b.w / 2, b.y + b.h / 2]), edgePoint(b, [a.x + a.w / 2, a.y + a.h / 2])];
+  el('polyline', { points: pts.map((p) => p.join(',')).join(' '), fill: 'none', stroke: INK, 'stroke-width': 1.6, 'stroke-dasharray': planned ? '6 5' : 'none', 'marker-end': 'url(#arrow)' });
+  if (label) {
+    const k = Math.floor((pts.length - 1) / 2), p = pts[k], q = pts[k + 1];
+    const t = text((p[0] + q[0]) / 2, (p[1] + q[1]) / 2 - 7, label, { size: 11.5, weight: 700 });
+    t.style.paintOrder = 'stroke'; t.style.stroke = LANE; t.style.strokeWidth = '5px';
+  }
+}
+
+el('rect', { x: 40, y: 900, width: 26, height: 18, rx: 4, fill: PAPER, stroke: INK, 'stroke-width': 1.6 });
+text(76, 914, 'built', { size: 12, anchor: 'start' });
+el('rect', { x: 130, y: 900, width: 26, height: 18, rx: 4, fill: PAPER, stroke: INK, 'stroke-width': 1.6, 'stroke-dasharray': '6 5' });
+text(166, 914, 'planned (BUILD_PLAN.md)', { size: 12, anchor: 'start' });
+text(370, 914, 'Italics: methods planned, not built', { size: 12, anchor: 'start', italic: true, fill: MUTED });
+</script>
+</body>
+</html>

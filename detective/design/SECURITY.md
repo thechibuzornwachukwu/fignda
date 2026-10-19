@@ -34,6 +34,7 @@ Risks: leaked keys, faked scores, injected text. All items required.
 - A step answered by picking (the accounts, a claim) sends its picks, and the Worker counts them with the same rule as the client.
 - `chapter_board(chapter)` returns handles, names and totals.
 - A guest's steps stay in the browser and are never moved to an account: they were never checked.
+- Known gap until BUILD_PLAN set 1d: every chapter is bundled into the page, so its culprit and answers can be read from the download. Grading is still the Worker's, so a score cannot be faked.
 
 ## Browser storage
 - Every key starts `lantern-`.

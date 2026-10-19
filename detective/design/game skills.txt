@@ -1,0 +1,17 @@
+https://github.com/Roobyx/awesome-game-design
+
+https://github.com/Stanestane/game-design-skills-bundle
+
+https://github.com/zenstory-ai/novel-to-game/blob/main/skills/game-world-design/
+
+https://github.com/ellisonleao/magictools#graphics
+
+https://github.com/khanhhuyenngo985-sys/character-scene-design-skills/blob/main/skills/
+
+https://github.com/Cheiineeey/companion-embodiment/blob/main/
+
+https://github.com/irenerachel/comic-ip-onboarder-skill/blob/main/
+
+https://github.com/xiaohuailabs/xiaohu-ip-studio/tree/main
+
+https://github.com/lingdongbudong/Comfyui-Anima-Wardrobe/tree/main/

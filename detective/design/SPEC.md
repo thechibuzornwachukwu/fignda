@@ -50,7 +50,7 @@ Two faces. Bungee (`--font-display`, 400 only, capitals only) for headings.
 | Button accent | bg `--accent`, text `--on-accent`, hover `--accent-hover` |
 | Button secondary | 1px `--line-3`, text `--fg`, hover bg `--surface-2` |
 | TextLink | 14/600 `--muted`, underline offset 4 `--line-3`, hover `--fg` |
-| PageHeader | One per tab (Cases, Ranks, Settings). Title is the `h1` at `resultTitle`, left; one action slot on the right (a TextLink, or nothing), baseline aligned, wraps under the title when it does not fit. Same top padding (`--screen-top-game`) on all 4, phone and desktop |
+| PageHeader | One per tab page (Cases, Ranks, Settings). Title is the `h1` at `resultTitle`, left; one action slot on the right (a TextLink, or nothing), baseline aligned, wraps under the title when it does not fit. Same top padding (`--screen-top-game`) on all 3, phone and desktop |
 | Ring | An open circle that fills clockwise from 12 o'clock. SVG, 20, stroke 2.5, track `--line-3`, fill `--fg`. Closed (value 1) it turns `--accent-ink`: the only time it is lime, since lime means found. `value` 0 to 1 is a `progressbar`. `parts` makes a segmented ring (an `img` with a label), 12 degrees open between parts: done `--fg` 2.5, rest `--muted` 1.5 in 3 dashes, empty `--line-3` 1.5, so a rest day never reads by colour alone. A segmented ring closes when no part is empty and at least 1 is done |
 | WordList | 2px `--fg` top rule. Header title + count. Rows 10 0, 1px `--line`, index 01 left. Chip: found `--accent`/`--on-accent`, missed `--miss`, unfound one • per letter `--line-4`. Chip 2 6, r4. Desktop sticky top 24, max-h min(62vh,640) scroll |
 | Segmented | track p4 r10 `--surface` 1px `--line`. Option h36 r7 14/700. Active `--fg`/`--bg` |
@@ -71,10 +71,10 @@ Anything that waits on the network shows the shape of what is coming, in the pla
 |---|---|
 | Ranks | 8 rows: a 28 circle, a line, a number |
 
-## 5. The puzzle interaction
-Paragraph renders one span per character. Letters carry `li` (index in lowercase letter stream `S`).
+## 5. Boards of letters and digits
+The reading steps (hidden words, the blotter, buried sums) are played on a board. The paragraph renders one span per character. Letters carry `li` (index in lowercase letter stream `S`).
 
-**Letter states:** idle transparent · selecting `--sel`/`--sel-fg` · found `--accent`/`--on-accent` · missed (after finish) `--miss` · hint: a 2px `--fg` ring around the letter over a `--hint-bg` wash, and a hand (Pointer at 0.62em of the puzzle type, about 12 on a phone and 17 on a desk, `--fg` on `--bg`) under it pointing up, small enough to sit between two lines. Selecting and found win the fill, and the ring and the hand still show on them, so a hint for a word that starts inside a found word is seen.
+**Letter states:** idle transparent · selecting `--sel`/`--sel-fg` · found `--accent`/`--on-accent` · missed (after finish) `--miss` · tip-off: a 2px `--fg` ring around the letter over a `--hint-bg` wash, and a hand (Pointer at 0.62em of the puzzle type, about 12 on a phone and 17 on a desk, `--fg` on `--bg`) under it pointing up, small enough to sit between two lines. Selecting and found win the fill, and the ring and the hand still show on them, so a tip-off for a word that starts inside a found word is seen.
 
 **Input**
 - Mouse/pen: drag (pointerdown starts, window pointermove extends via `elementFromPoint`, pointerup evaluates), or click first letter then last.
@@ -82,7 +82,7 @@ Paragraph renders one span per character. Letters carry `li` (index in lowercase
 - Tap or click the anchored letter again to cancel.
 - Second tap or click: the whole range shows as selecting for `--dur-connect` (220ms), then is checked.
 
-**Evaluate** (`reference/engine.js` `check`):
+**Evaluate** (`src/engine/evaluate.ts`):
 | Result | Action |
 |---|---|
 | hit | mark found, `onFound(ctx)` line, word moves to top of list |
@@ -91,22 +91,24 @@ Paragraph renders one span per character. Letters carry `li` (index in lowercase
 | wrong, 3+ letters | `wrong` line. |
 | under 3 letters | nothing |
 
-Streak resets on wrong pick and on hint. `onFound` picks: first find, last one left, every 3rd in a row, quick (<6s), long (8+ letters), else generic.
+Streak resets on a wrong pick and on a tip-off. `onFound` picks: first find, last one left, every 3rd in a row, quick (<6s), long (8+ letters), else generic.
 
-**Tip-off** (`hint` in code): on screen the pet's help is always a "tip-off": the link "Ask for a tip-off", the phone bar's "Tip-off" button and "1 tip-off" in the count. It marks the first letter of one unfound answer, -25.
+**Tip-off** (`hint` in code): on screen the pet's help is always a "tip-off": the link "Ask for a tip-off", the phone bar's "Tip-off" button and "1 tip-off" in the count. It marks the first letter of one unfound answer, and costs 25 points.
 **Finish:** "I'm done" or last find. Missed answers shade.
-**Save and resume:** a game played alone that is left unfinished carries on where it stopped: the finds, the hints, the hand of a hint still showing, the wrong picks and the clock. One line from the `resumed` pool says so when there is a find or a hint to come back to.
-- The clock counts time on the puzzle, not time away, in every game played alone.
+**Save and resume:** a step left unfinished carries on where it stopped: the finds, the tip-offs, the hand of a tip-off still showing, the wrong picks and the clock. One line from the `resumed` pool says so when there is a find or a tip-off to come back to.
+- The clock counts time on the step, not time away.
 - A step is kept in this browser, one record each (`lantern-resume-CHAPTER~N`, `src/games/resume.ts`).
 - A finished game is kept too.
 - Nothing is dropped in normal play.
 - Stored data that is missing or unreadable is no saved game.
 
-**Clean read:** every word found by you, no hints, no wrong picks (near misses do not count). One `cleanRead` line under the result title.
+**Clean read:** every word found by you, no tip-offs, no wrong picks (near misses do not count). One `cleanRead` line under the result title.
 **Result lines:** under the result title and its line, each only when it is true: stars, then skill lines (2 at most). A helper with nothing true to say returns no line.
 **Stars (result):** a step earns 1 to 3 from `starsFor`. The best is kept per step in this browser (`lantern-chapters`).
-**Skill lines:** from `skillsOf` on your own finds, one each, 2 at most, rarest first: clean read (`cleanRead`), no-hint perfect (`skillNoHint`: every word, no hint, said only when a wrong pick spoiled the clean read), deep find (`skillDeep`: a word across 3 joins or more, said as the 4 or more words it runs across), long word (`skillLong`: 9 letters or more). In every game, rooms included; a teammate's find never counts.
+**Skill lines:** from `skillsOf` on your own finds, one each, 2 at most, rarest first: clean read (`cleanRead`), no tip-off perfect (`skillNoHint`: every word, no tip-off, said only when a wrong pick spoiled the clean read), deep find (`skillDeep`: a word across 3 joins or more, said as the 4 or more words it runs across), long word (`skillLong`: 9 letters or more). On every board step.
 **Sound:** Web Audio, synthesized, no files (`src/lib/sound.ts`). A soft triangle tick per new letter in a selection, pitch up a semitone per letter from 660 Hz (cap 2 octaves), ticks under 25ms apart merge.
+
+### Across the game
 
 **The promise in copy:** we promise the practice, never a result. No pool line or page string says attention span, brain training, memory, IQ or proven (`src/copy/claims.ts`, checked in `npm test`).
 **Pets:** the player's pets. A player keeps one and it comes along on every case.
@@ -114,11 +116,12 @@ Streak resets on wrong pick and on hint. `onFound` picks: first find, last one l
 - `<Partner moment>` shows the player's pet in the mood of the moment: hello (waving), empty (calm), loading (thinking), error (stumped), done (happy), found (found), asleep (sleepy).
 - `<PartnerNote moment layout>`: the player's pet with a line, so a screen with nothing on it is never just grey text.
 - Where it shows: the waiting screen, empty and failed states, the guest wall, a step's tip-off and the ending.
+- Pets are drawn in clean shapes and never dressed as people. The people of the street, the player's detective among them, are in `design/CHARACTERS.md`.
 - The pick: Settings, the 4 as buttons, all free.
 - What a pet does in play: it chooses which answer a tip-off marks.
 
 **Tab bar (phones, app pages):** a floating dock, 12 from the sides and the bottom plus the safe area, `--tabbar-h` 64 high, `--surface` with a 1px `--line-3` border, radius `--radius-dock` 22 and a hard lower edge of `--ledge` 4 in `--line-3`. Tabs: icon 20 inside a 48 by 28 pill over an 11/800 label, `--muted`; the active tab is `--fg` with the pill filled `--surface-2` (shape and weight, never colour alone).
-- 5 slots: Cases, Open Eye, Play, Ranks, Settings.
+- 5 slots: Cases, Open Eye, Play, Ranks, Settings. The Open Eye slot becomes Your Notebook in BUILD_PLAN set 1a.
 - Play, in the middle: a 60 disc raised above the dock, `--fg` fill with a `--bg` Play icon and its own ledge, sinking by the ledge when pressed.
 ## 6. Screens
 
@@ -141,7 +144,7 @@ A case opens on its board. It is reached from the landing page and from Cases wh
 
 **The chapter that is open** (`openCase`, the first written chapter not yet closed)
 - Landing: the main button is "Open your case" before any step is done, "Carry on your case" half way, and "See your cases" once every case is closed.
-- Cases is the casebook (`<Casebook>`), then practice.
+- Cases is the casebook (`<Casebook>`).
 - The ending, for a guest where sign in is set up: under "Back to cases", a `chapterKeep` line and "Sign in".
 - The Play button (the dock, the wide header, the landing page) follows one rule, `playNext`: the written case that is open (its brief before any step is done, then the step that is open), then Cases.
 - A step counts toward a guest's 2, and a 3rd step shows the guest wall in place of the step.
@@ -211,7 +214,7 @@ Events in order with 1 gap, and 3 things that could have happened in it. Only 1 
 - Done, it ends as any step does: the stars, `<StepResult>`, the lead, the way on and "Play it again", with the events and the filled gap under them.
 - Stars: 3 at once, 2 after 1 wrong pick, 1 after 2.
 
-**The Open Eye file** (`/open-eye`, `src/engine/openEye.ts`)
+**The Open Eye file** (`/open-eye`, `src/engine/openEye.ts`). Built, and leaving in BUILD_PLAN set 1a for Your Notebook.
 Every message to the Open Eye a player has read, in the order of the story: the steps marked `eye` in each chapter (a line passed in plain sight, intercepted) and the interludes after the case they follow.
 - Top to bottom: the title "The Open Eye", then the file.
 - Nothing read yet: the pet, large and centred, "Nothing filed yet", an `eyeEmpty` line and "Open your case".
@@ -223,7 +226,7 @@ A closed case worked again with no tip-offs, for a gold seal. The same screens a
 - A board step has no "Ask for a tip-off" and no Tip-off on the phone bar.
 - Closed cold, the ending shows a gold seal (Award at 18 on a `--medal-gold` disc, named "Gold seal") before the stars, and the file on Cases carries it.
 
-**Interlude** (`/interlude/:id`, `design/stories/interludes`)
+**Interlude** (`/interlude/:id`, `design/stories/interludes`). Built, and leaving in BUILD_PLAN set 1a.
 1 message to the Open Eye, intercepted between 2 cases. 1 sitting on 1 hidden-words board.
 - It is played as a step is (`<Play>`): "Cases" as the way back, no marks, the title, the thing in hand and what to find, the board, the tip-off and "I'm done".
 - It opens when the case it follows is closed, and never blocks the next case.
@@ -235,10 +238,13 @@ A closed case worked again with no tip-offs, for a gold seal. The same screens a
 - Not every screen pages.
 
 **Mobile <760**
-Fixed bottom bar (`--bg`, top 1px `--line-2`, pad 12 16 + safe area): Ring, count, time at the far end; live message, Hint and Done (h44). Main padding-bottom 96.
+Fixed bottom bar on a board step (`--bg`, top 1px `--line-2`, pad 12 16 + safe area): Ring, count, time at the far end; live message, Tip-off and I'm done (h44). Main padding-bottom 96.
 
 **Sign in `/signin`**
 The lead ends "Accounts are for players aged 13 and over." The privacy page says the same, and lists every company that receives data under "Who receives data". Google + email OTP → 6 digit code (auto submit, resend after 30s) → a new account picks its name and handle on the same screen (@handle autofilled from name until edited) → return to `next`, or Cases when there is none.
+
+## 7. Characters
+The player's detective and the suspects: `design/CHARACTERS.md`. The pets: section 5, Pets.
 
 ## 8. Motion
 Durations and easings are tokens. Reduced motion sets them to 0 and disables FLIP and hover slide.
@@ -247,33 +253,25 @@ Rules for any new motion (from Emil Kowalski's design engineering skill, linked 
 - `--ease-out` is `cubic-bezier(.23,1,.32,1)`: it moves most in the first moments, so the screen answers at once.
 - Only `transform` and `opacity` move.
 - Under 300ms for anything in the interface.
-- How often it is seen decides how much it moves: many times a day (a find, stepping the reveal, a tab) little or nothing; rare moments can carry more.
+- How often it is seen decides how much it moves: many times a day (a find, a tab) little or nothing; rare moments can carry more.
 - Nothing grows from scale 0.
 - Hover styles sit behind `(hover: hover) and (pointer: fine)`, so a tap on a phone does not leave one stuck.
 
 | Element | Transition |
 |---|---|
 | Letter | bg, color 180ms ease |
-| Hint hand | rises 6 and fades in once, `--dur-slow` `--ease-out`. It does not loop |
+| Tip-off hand | rises 6 and fades in once, `--dur-slow` `--ease-out`. It does not loop |
 | Tab bar | active pill pops from 0.8 scale, `--dur-slow` `--ease-out`; a pressed tab's pill scales to 0.9; the Play disc sinks by `--ledge`, `--dur-fast` |
 | Word chip | bg, color 250ms ease |
-| GameRow hover | padding-left 0→12, color 250ms ease |
-| FilterTab, Button, Toggle | 200ms ease |
+| Button, Toggle | 200ms ease |
 | Button press | scales to 0.97 while held, `--dur-fast` `--ease-out`. Not when disabled. Hover fills only with a mouse |
 | Progress | width 400ms ease |
 | Ring | the fill's stroke-dashoffset, `--dur-slower` `--ease-out`; stroke colour `--dur-base` `--ease-std` when it closes. Like Progress, it is drawn, not moved. Segmented rings do not animate. Reduced motion: it jumps to its value |
-| Clock finish | color 300ms ease |
 | WordList reorder | FLIP translateY. Found row 520ms z2, others 420ms, `--ease-out`. Scroll list to top first |
 | Finish | smooth scroll to top 400ms after last find |
-| Landing how-to | two loops of 420ms beats. The pointer moves between letters with `--dur-slower` `--ease-out` and shrinks to 0.84 while pressed, `--dur-fast`. Drag: wait, reach the first letter, press and mark one more letter each beat, let go and the word is found, hold 3 beats. Tap: wait, reach the first letter, tap (it marks), move to the last, tap (the whole word marks), found, hold 3 beats. Reduced motion: no loop, the word shown found with the pointer on its last letter |
-| First find guide | first visit on a phone only, on the landing demo, the same beats and moves as the how-to: the hand reaches the first letter, taps, moves to the last, taps, waits, and starts again. `transform` only. It stops for good on the first find or Skip. Reduced motion: no loop, the hand rests on the first letter, which keeps its hint ring |
 | Skeleton | opacity 1 to 0.5 and back, `--dur-skeleton` each way, `--ease-loop`. A second loop allowed past 300ms, because it only says "still coming". Still under reduced motion |
 | Waiting | the other loop outside the landing, so it is allowed past 300ms. The pet bobs up `--space-1` and back, `--dur-bob` each way, `--ease-loop`. 3 dots in `--muted` hop `--space-1h` one after the other, a `--dur-bounce` cycle, each `--dur-bounce-step` behind the last, `--ease-loop`. Only `transform` moves. No blink: the avatar is drawn by `<Avatar>` and is not redrawn. The line changes every 20 seconds with no motion. Shown after 1 second, kept at least 600ms. Reduced motion: no bob, no hop, the line still changes |
-| Stars | on the clue or the case just finished, and on the result screen: earned stars pop in one at a time, each from 0.8 scale and 0 opacity, `--dur-star` `--ease-out`, each `--dur-star-step` behind the last. Stars already seen do not move. Reduced motion: all shown at once |
-| Secret piece | on a clue's result: the slots this clue filled pop in, each from 0.8 scale and 0 opacity, `--dur-star` `--ease-out`. Slots held before do not move. Reduced motion: shown at once |
-| Unmasking | once, on the result that closes a case: after `--dur-slower` the mask lifts up and off the culprit (`transform` and `opacity`, `--dur-unmask` `--ease-out`), then the "Case closed" stamp lands from 1.5 scale and 0 opacity, `--dur-stamp` `--ease-out`. A rare moment (once per case), so it may pass 300ms. Reduced motion: the mask is simply off and the stamp is down |
-| Clue done | the popup rises `--space-4` from 0.96 scale and 0 opacity, `--dur-slower` `--ease-out`, and its stars pop as stars do. Reduced motion: it is there |
-| Burst | 18 small pieces of paper fly out from one point and fade, `transform` and `opacity` only, `--dur-burst` `--ease-out`, each starting `--dur-burst-step` after the last, reaching `--burst-reach`. Once, behind 3 stars in the popup, and behind the culprit at the unmasking, where it waits for the mask (`--burst-delay`) and the culprit swells to 1.08 and settles, `--dur-reveal`. Rare moments, so they may pass 300ms. Reduced motion: no paper, no swell |
+| Stars | on a step's result and on the ending: earned stars pop in one at a time, each from 0.8 scale and 0 opacity, `--dur-star` `--ease-out`, each `--dur-star-step` behind the last. Stars already seen do not move. Reduced motion: all shown at once |
 | Sums tile | a tile being selected lifts by `--space-1`, `--dur-fast`. A found run's tiles settle from 1.18 scale, `--dur-slow` `--ease-out`. The meter fills by `transform`, `--dur-base`. Reduced motion: none of it |
 | Dock quick return | phones: the dock slides below the screen on a scroll down and back on any scroll up, `transform` only, `--dur-slow` `--ease-out`, the same rule as the header (8px of scroll before it moves). Always shown near the top, at the end of the page, on a new page, and while focus is inside it. Reduced motion: it is there or not, with no slide |
 
@@ -281,11 +279,10 @@ Nothing else animates.
 
 ## 9. Game system
 - Registry: `type -> { build(def), check(puzzle, sel), Board }`.
-- Difficulty (computed): Hard if 20+ answers or 900+ chars.
-- Score: 100 per find, -25 per hint, + max(0, 600 - secs) when all found.
+- Stars are the score a player sees and keeps. Points only order Ranks, and only board steps earn them: 100 per find, -25 per tip-off, + max(0, 600 - secs) when all found. A step answered by picking earns stars and no points, so playing it again knowing the answer moves no board.
 - Buried sums (`src/engine/sums.ts`): a row of digits 1 to 9, and the runs of 2 or more in a row that add up to a target from 10 to 17.
 - Mirror (`src/engine/mirror.ts`): hidden words that read right to left.
-- Chapters (`src/engine/chapter.ts`, `design/stories/`): a case written down as a detective works it, one file a chapter.
+- Chapters (`src/engine/chapter.ts`, `design/stories/`): a case written down as a detective works it, a story file and a chapter file each, written as `design/CASE_WRITING.md` says. `checkChapter` keeps it fair, `balanceOf` keeps it balanced, `checkCasebook` keeps the casebook in rotation.
 
 ## 10. Accessibility
 - 4.5:1 text contrast in both themes (tokens pass).

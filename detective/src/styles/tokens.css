@@ -5,13 +5,11 @@
   color-scheme: dark;
   --bg: #0d0d0e;
   --surface: #151517;
-  --surface-hover: #18181b;
   --surface-2: #1c1c1f;
   --line: #232327;
   --line-2: #2a2a2f;
   --line-3: #34343a;
   --line-4: #3a3a40;
-  --header-line: #1f1f22;
   --fg: #ededee;
   --fg-strong: #ffffff;
   --ink-display: #c0c0c1; /* Bungee is heavy: display type sits at 80% of --fg, headings at 88% */
@@ -19,7 +17,6 @@
   --text-puzzle: #cfcfd4;
   --muted: #a1a1a8;
   --subtle: #7d7d85;
-  --track: #26262a;
   --sel: #3a3a40;
   --sel-fg: #ffffff;
   --miss: #2c2c31;
@@ -28,21 +25,18 @@
   --on-accent: #0d0d0e;
   --accent-ink: #d4f04c;
   --hint-bg: rgba(212, 240, 76, 0.16); /* Hinted letter: lime wash, ringed, never a found fill */
-  --bar: #d4f04c;
-  --cell: #d4f04c;
+
   --scrim: rgba(0,0,0,0.62);
 }
 [data-theme="light"] {
   color-scheme: light;
   --bg: #f6f6f7;
   --surface: #ffffff;
-  --surface-hover: #f0f0f2;
   --surface-2: #ececef;
   --line: #e3e3e7;
   --line-2: #d6d6db;
   --line-3: #c4c4ca;
   --line-4: #a8a8b0;
-  --header-line: #e3e3e7;
   --fg: #111113;
   --fg-strong: #000000;
   --ink-display: #3f3f41;
@@ -50,7 +44,6 @@
   --text-puzzle: #2a2a2e;
   --muted: #55555c;
   --subtle: #6a6a72;
-  --track: #e3e3e7;
   --sel: #111113;
   --sel-fg: #ffffff;
   --miss: #dcdce1;
@@ -59,57 +52,42 @@
   --on-accent: #0d0d0e;
   --accent-ink: #5a6b00;
   --hint-bg: rgba(212, 240, 76, 0.38);
-  --bar: #111113;
-  --cell: #111113;
 }
 :root {
   --font: 'Manrope', system-ui, sans-serif;
   --font-display: 'Bungee', 'Manrope', system-ui, sans-serif; /* Headings only. One weight (400), capitals only, digits are not tabular */
   --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
-  --radius-xs: 3px; --radius-sm: 4px; --radius-md: 6px; --radius-lg: 8px; --radius-xl: 12px; --radius-sheet: 14px;
+  --radius-xs: 3px; --radius-sm: 4px; --radius-lg: 8px; --radius-xl: 12px; --radius-sheet: 14px;
   --radius-seg: 10px; --radius-seg-option: 7px; --radius-toggle: 13px; --radius-pill: 999px; /* M7: Segmented and Toggle, SPEC section 4 */
-  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px; --space-12: 48px; --space-14: 56px; --space-18: 72px; --space-20: 80px; --space-24: 96px; --space-30: 120px;
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-10: 40px; --space-12: 48px; --space-18: 72px; --space-20: 80px; --space-24: 96px; --space-30: 120px;
   --page-max: 1200px; --gutter: 24px;
   --dur-fast: 150ms; --dur-base: 200ms; --dur-slow: 250ms; --dur-slower: 400ms;
   --ease-std: ease; --ease-out: cubic-bezier(.23,1,.32,1);
-  --icon-stroke: 1.75;
   --tabbar-h: 64px; /* Phone dock height, above the safe area */
   --tabbar-disc: 60px; --tabbar-disc-icon: 24px; /* The raised daily button and its icon */
   --radius-dock: 22px; /* Phone dock corners */
   --ledge: 4px; /* The hard lower edge on the dock and the daily button: what makes them look pressable */
   --space-6h: 28px;
   /* Avatar editor stage: controls that sit on any avatar background colour. */
-  --stage-ring: rgba(20, 20, 22, 0.14); --stage-ink: #141416; --stage-chip: rgba(255, 255, 255, 0.7);
-  --stage-ring-dark: rgba(255, 255, 255, 0.18); --stage-ink-dark: #f4f4f5; --stage-chip-dark: rgba(255, 255, 255, 0.12);
-  --swatch-tick: #ffffff; /* with mix-blend-mode: difference it reads on any swatch */
+
   /* The case board: cork, paper and photos. A thing, so it is the same in both themes. */
   --board: #2b241d; --board-edge: #4a3a2a; --board-ink: #e8dfd0; --paper: #f3ead9; --photo: #fbfaf6; --paper-ink: #1b1b1f; --paper-muted: #5c5c64; --pin: #c2462f;
   --board-tilt: 2deg; --pin-dot: 12px; --face-max: 104px; /* How far a pin leans, the pin's head, and the widest a suspect's photo runs */
   /* Medals: the metal a tier is struck in, with the darker rim that gives it weight. A thing, so the same in both themes. */
-  --medal-bronze: #c98a4b; --medal-bronze-rim: #8f5a26; --medal-silver: #cfd3da; --medal-silver-rim: #8d93a0; --medal-gold: #e9b93c; --medal-gold-rim: #a97b12;
-  --medal-jade: #5fc29a; --medal-jade-rim: #2f7d5f; --medal-onyx: #1c1c1f;
-  --medal: 76px; --medal-lg: 152px; --medal-card: 120px; /* A medal in a row, a medal opened, and the card it sits on */
-  --z-header: 15; /* Above the mobile bar, below the selection bubble */
+  --medal-gold: #e9b93c; --medal-gold-rim: #a97b12;
+  --medal: 76px;
 
   /* Added in M3. Values from SPEC sections 3, 4 and 8 and the prototype. */
-  --space-0h: 2px; --space-1h: 6px; --space-2h: 10px; --space-3h: 14px; --space-5h: 22px;
-  --section-gap: clamp(64px, 9vw, 120px);
+  --space-0h: 2px; --space-1h: 6px; --space-2h: 10px; --space-3h: 14px;
   --screen-top: clamp(48px, 8vw, 104px);      /* Games */
   --screen-top-game: clamp(32px, 5vw, 64px);  /* Game */
   --screen-gap: clamp(40px, 6vw, 72px);
   --screen-gap-game: clamp(28px, 4vw, 48px);
-  --column-gap: clamp(32px, 5vw, 72px);
-  --card-pad: clamp(20px, 3vw, 32px);
-  --stat-gap: clamp(24px, 5vw, 64px);
-  --results-pad: clamp(8px, 2vw, 24px);
-  --landing-hero-top: clamp(48px, 9vw, 112px);
-  --landing-demo-top: clamp(48px, 7vw, 88px);
-  --landing-band-pad: clamp(56px, 7vw, 96px);
+
   --sheet-pad: clamp(16px, 3vw, 28px);
   --auth-top: clamp(40px, 10vh, 112px);
   --mobile-bar-space: 96px;
   --dur-letter: 180ms;      /* Letter bg, color */
-  --dur-clock: 300ms;       /* Clock finish color */
   --dur-flip: 420ms;        /* WordList reorder, other rows */
   --dur-connect: 220ms;    /* Tap first, tap last: the whole range shows before it is checked. Not motion, so it stays under reduced motion */
   --dur-flip-lead: 520ms;   /* WordList reorder, found row */
@@ -120,28 +98,18 @@
   --ease-loop: cubic-bezier(.45,0,.55,1);
   --dur-skeleton: 900ms;   /* A skeleton fading down and back, one way. Opacity only, still under reduced motion */
   --z-cover: 12;            /* Full waiting screen: above the tab bar, below the header */
-  --dur-hop: 520ms;         /* Avatar to the next clue. Once per finished clue */
   --dur-star: 220ms;        /* One star popping in */
   --dur-star-step: 140ms;   /* Each star starts this long after the last */
-  --dur-unmask: 420ms;      /* A culprit's mask lifting off. Once per closed case */
-  --dur-stamp: 280ms;       /* The Case closed stamp landing, after the mask */
-  --dur-shake: 360ms;       /* The culprit shaking at a wrong letter. Once per wrong letter */
-  --dur-reveal: 520ms;      /* The unmasked culprit swelling and settling, in the popup */
-  --dur-burst: 900ms;       /* One piece of paper flying out. Once per closed case or 3 star clue */
-  --dur-burst-step: 12ms;   /* Each piece starts this long after the last */
-  --burst-delay: 0ms;       /* How long the paper waits. The unmasking holds it until the mask is off */
-  --burst-reach: 150px;     /* How far the paper flies */
+
   /* The sums board and the unmasking, SPEC sections 6 and 9. */
   --sums-tile: 44px; --sums-tile-h: 52px;
-  --unmask-slot: 26px; --unmask-slot-h: 38px; --unmask-keys: 400px; --unmask-key: 52px;
 }
 @media (prefers-reduced-motion: reduce) {
   :root {
     --dur-fast: 0ms; --dur-base: 0ms; --dur-slow: 0ms; --dur-slower: 0ms;
-    --dur-letter: 0ms; --dur-clock: 0ms; --dur-flip: 0ms; --dur-flip-lead: 0ms;
+    --dur-letter: 0ms; --dur-flip: 0ms; --dur-flip-lead: 0ms;
     --dur-bob: 0ms; --dur-bounce: 0ms; --dur-bounce-step: 0ms; --dur-skeleton: 0ms;
-    --dur-hop: 0ms; --dur-star: 0ms; --dur-star-step: 0ms; --dur-unmask: 0ms; --dur-stamp: 0ms;
-    --dur-shake: 0ms; --dur-reveal: 0ms; --dur-burst: 0ms; --dur-burst-step: 0ms;
+    --dur-star: 0ms; --dur-star-step: 0ms;
   }
 }
 html, body { margin: 0; background: var(--bg); color: var(--fg); font-family: var(--font); -webkit-font-smoothing: antialiased; }

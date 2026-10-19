@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import pools from '../../data/copy.json';
-import { accountStars, accountThatStands, chapterProgress, checkChapter, claimPick, claimStars, quarterOf, SCENE_H, SCENE_W, sweepHint, sweepResult, tornOf, tornStars, tornWrongs, trailOf, trailStars, trailWrongs, LINEUP_TRIES, lineupStars, NAME_MAX, pickStep, pickWrongs, stepPuzzle, type Chapter } from './chapter';
+import { accountStars, balanceOf, checkCasebook, accountThatStands, chapterProgress, checkChapter, claimPick, claimStars, quarterOf, SCENE_H, SCENE_W, sweepHint, sweepResult, tornOf, tornStars, tornWrongs, trailOf, trailStars, trailWrongs, LINEUP_TRIES, lineupStars, NAME_MAX, pickStep, pickWrongs, stepPuzzle, type Chapter } from './chapter';
 import { buildHiddenWords } from './hiddenWords';
 import { buildMirror } from './mirror';
 import { buildSums } from './sums';
@@ -27,6 +27,32 @@ describe('written chapters', () => {
   it('no 2 chapters share a place in a casebook', () => {
     const places = files.map((f) => `${read(f).casebook}#${read(f).number}`);
     expect(new Set(places).size).toBe(places.length);
+  });
+
+  // The cases written before the balance rules, and what each still owes. Rewriting a case from its story
+  // (BUILD_PLAN set 1a) takes it off this list. A case not on it must be balanced, so a new case lands balanced.
+  const OWED: Record<string, string[]> = {
+    'the-long-spoon': ['no find work'],
+    'the-open-box': ['no find work'],
+    'the-early-bus': ['no find work'],
+    'the-year-that-is-missing': ['no find work'],
+    'the-2-signs': ['no find work'],
+    'who-carries-the-cards': ['no find work'],
+  };
+  it.each(files)('%s is balanced, or owes exactly what is listed', (f) => {
+    const c = read(f);
+    expect(balanceOf(c)).toEqual(OWED[c.id] ?? []);
+  });
+
+  it('a method met 3 times, or a kind of work left out, is thin', () => {
+    const c = spoon();
+    c.steps[0]!.method = 'buried-sums';
+    expect(balanceOf(c)).toEqual(['no find work', 'buried-sums is met 3 times, 2 at most']);
+  });
+
+  it('the casebook rotates its shapes and its suspects, and brings 1 new method a case', () => {
+    const cases = files.map(read).filter((c) => !c.draft).sort((a, b) => a.number! - b.number!);
+    expect(checkCasebook(cases)).toEqual(['case 5 brings 2 new methods: sweep, chain']);
   });
 });
 
@@ -63,7 +89,7 @@ describe('checkChapter', () => {
     last.method = 'accounts';
     last.accounts = [{ text: 'It was borrowed.', struckBy: 1 }, { text: 'It was taken.', stands: true }, { text: 'It was lost.', struckBy: 2 }];
     expect(checkChapter(c, roles)).toEqual([]);
-    last.method = 'unmask';
+    last.method = 'hidden-words';
     delete last.accounts;
     expect(checkChapter(c, roles)).toEqual(['step 6: a case closes on its last step, and only there: the line-up or the accounts']);
   });
@@ -169,7 +195,7 @@ describe('checkChapter', () => {
 
   it('the line-up is last, and only last', () => {
     const c = spoon();
-    c.steps[5]!.method = 'unmask';
+    c.steps[5]!.method = 'accounts';
     expect(checkChapter(c, roles)).toContain('step 6: the line-up is the last step, and only the last');
   });
 

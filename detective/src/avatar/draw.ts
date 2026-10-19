@@ -10,7 +10,6 @@
 //   parts/kit.ts       detective pieces a player earns (badge, magnifying glass, hat); see earned.ts
 //   parts/festive.ts   seasonal and themed touches (Santa hat, hearts, Naija colours), drawn on top
 //   draw.ts (here)     the choices an avatar is made of, its saved code, and the layer order
-//   store.ts           fetching other players' codes in batches
 //
 // An avatar is one choice per part, saved as a short code like "b0s3h1c0e0m0f0x0k0t0a0o0" (a letter per
 // part, then the position of the choice). To add a hairstyle, outfit or mark, append one entry to its list:
