@@ -81,7 +81,7 @@ function roofGeometry(b: Block, z: number): BufferGeometry | null {
   const [x, y, w, h] = b.at;
   const r = z + b.roof * 0.62;
   const P = (px: number, py: number, pz: number) => [px, pz, py];
-  let faces: number[][][] = [];
+  let faces: number[][][];
   if (b.shape === 'flat' || b.roof === 0) return null;
   if (b.shape === 'ridge') {
     if (w >= h) {

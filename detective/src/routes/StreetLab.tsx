@@ -19,7 +19,8 @@ import { buildStreet, type Style, type View } from '../map3d/street3d';
  */
 export function StreetLab() {
   const ref = useRef<HTMLCanvasElement>(null);
-  const q = new URLSearchParams(location.search);
+  // Read once: the address only sets where the lab starts.
+  const [q] = useState(() => new URLSearchParams(location.search));
   const [view, setView] = useState<View>((q.get('view') as View) ?? 'iso');
   const [hour, setHour] = useState(Number(q.get('hour') ?? 15));
   const [weather, setWeather] = useState<Weather>((q.get('weather') as Weather) ?? 'clear');
@@ -44,7 +45,7 @@ export function StreetLab() {
     draw(renderer, scene, camera, style, view, hour, w, h);
     document.body.dataset.ready = `${style}-${view}-${hour}-${weather}-${walkX}`;
     return () => renderer.dispose();
-  }, [view, hour, weather, walkX, style]);
+  }, [q, view, hour, weather, walkX, style]);
 
   return (
     <div style={{ position: 'fixed', inset: 0, background: '#000' }}>
