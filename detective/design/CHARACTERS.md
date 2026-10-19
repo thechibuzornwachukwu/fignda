@@ -1,8 +1,8 @@
 # Characters
 
-How the people of Lantern Row are drawn: the player's detective and the suspects. The pets keep their own clean shapes (`design/characters/characters.ts`).
+How the people of Lantern Row and the pets are made: the player's detective, the suspects and the 4 pets. They live in the 3D street (`src/map3d`) as realistic 3D figures: real proportions, real faces, real clothes, lit by the same sun, so they belong to the map. Their photos on the board and in Your Notebook are pictures taken of the same figures.
 
-Today's avatars (`src/avatar`) are the old round, sticker-like style from the puzzle game. They are replaced by set 1c, below.
+Today's round avatars (`src/avatar`) and the cartoon pets (`design/characters`) are replaced by set 1c.
 
 ## The look
 
@@ -12,19 +12,17 @@ A grown-up, grounded look. A detective of the street who moves through it unnoti
 - Layered cloth that looks worn: a coat, a waistcoat or jumper under it, a scarf, a satchel.
 - Muted colour: ink, slate, olive, oxblood, ochre, cream. Lime is never worn: it means "found".
 - No weapons, no blades, no armour, no blood. Tools only: a notebook, a lantern, a lens, a torch, a key ring.
-- Drawn in the house ink style: 1 line weight, flat fills, warm cream paper, no gradients.
+- Real: skin, hair and cloth that read as themselves, no outline, no cartoon eyes, nothing toy-like.
 
 ## The player's detective
 
-The player is the detective, and from set 1c they are seen: on the path, at the ending and in Settings. Never inside a drawn scene, which is what they look at.
-
-Fixed, so the detective stays the same whatever they wear:
-- **Outline**: a hood that can be up or down, and a coat to the knee.
+A detective anyone would know at a glance, without a costume:
+- **Outline**: a knee-length overcoat with the collar up, and a brimmed hat.
 - **Prop**: a small brass lantern on the belt. The street is Lantern Row.
 - **Strap**: a satchel strap across the chest, left shoulder to right hip.
 - **Stance**: weight on 1 foot, a slight lean forward, as if about to look closer.
 
-The player chooses:
+What the player chooses:
 - Skin tone, face shape, hair (under or out of the hood), and how they present. Every choice is free.
 - The outfit, in layers that combine: coat, under layer, scarf or collar, gloves, boots, hood lining. Some pieces are earned by closing cases (a case's badge, its gold seal), never bought to go faster.
 
@@ -33,20 +31,30 @@ The player chooses:
 Drawn with the same system and proportions as the detective, so the street looks like 1 place.
 - Each has a role you can read: a baker's apron and floured sleeves, a caretaker's key ring and work coat, a photographer's lamp bag.
 - No 2 in a case share an outline, a main colour and a stance.
+- Real people, not tidy ones: an odd beard (a fork, a chinstrap, a tangle), hair that needs a cut, a comb-over, a bald patch, glasses on a cord, a crooked collar. Some look kempt, some do not.
 - A culprit wears a disguise layer until the case is closed (`src/avatar/parts/disguises.ts`). It is never saved.
 - A face belongs to the person, not the case: Rosa looks the same in every case she is in (`faceSeed`).
 
-## Making the art
+## Pets
 
-The order, so nothing drifts (learned from the character-design method in `khanhhuyenngo985-sys/character-scene-design-skills`; the ideas only, nothing copied):
-1. **Proportion sheet**: 1 neutral figure at 6.5 heads, front, side and back. Nothing goes on until this is right.
-2. **Face and prop**: the face set and the lantern, satchel and hood, locked.
-3. **Outfit layers**: each piece drawn to fit the locked figure, front and back, so any mix works.
-4. **Moods**: calm, thinking, found, stumped, for the ending and the empty states.
-5. **In the app**: layered SVG parts on 1 shared figure, saved as 1 short code, as today's avatars are.
+Working animals that go on cases, never toys. Grown, alert, real in shape and coat, no clothes, no hats.
+- **A bloodhound**: follows a trail by scent.
+- **An African grey parrot**: remembers every word it hears.
+- **A capuchin monkey**: quick hands, reaches what is out of reach.
+- **Agent 404, a robot**: a working machine of brushed metal and worn paint, never a toy.
 
-A prompt for an image model always carries the fixed parts word for word:
+Names are the owner's to choose (Agent 404 stays). Each has the 7 moods `<Partner>` shows (hello, empty, loading, error, done, found, asleep) as poses.
 
-> A detective of a quiet market street, 6.5 heads tall, grounded proportions. Knee-length [colour] coat, hood [up/down], satchel strap across the chest left shoulder to right hip, a small brass lantern on the belt, weight on 1 foot leaning slightly forward. Calm, watchful face. Flat colour, 1 ink line weight, warm cream paper, no gradient, no weapon. Keep consistent: hood and coat outline, brass lantern, satchel strap, stance.
+## Getting there
 
-A drawing an image model makes is a reference. What ships is drawn as SVG parts, checked by eye against the proportion sheet.
+Between places the player watches the detective and the pet go there on the 3D street, never controls it: on foot with the pet, by skateboard, bicycle or car, or on a horse. A short hop is a walk; a long one is a ride (set 1-travel). A tap skips it.
+
+## Making the figures
+
+1. **1 figure**: a shared body at 6.5 heads, front, side and back, checked against the street's doors and lamps for scale. Nothing goes on until this is right.
+2. **Face and props**: the face set, the hat, the lantern and the satchel, locked.
+3. **Outfit parts**: each piece made to fit the figure, so any mix works, saved as 1 short code as today's avatars are.
+4. **Poses and moves**: calm, thinking, found, stumped; walk, run, skate, cycle, drive, ride. Moves come from a free animation library fitted to the figure, its licence checked for sale before use.
+5. **Pictures**: the board's photos and the empty states are pictures of the figures, rendered from the street.
+
+A picture an image model makes is a reference only. What ships is the figure.

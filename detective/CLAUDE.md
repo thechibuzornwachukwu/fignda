@@ -23,11 +23,11 @@ Design: `/design`. Read `SPEC.md` before UI work, `SECURITY.md` before data, aut
 - Bungee is heavy. Headings use `--ink-display` or `--ink-heading`, never `--fg-strong`.
 - Icons: `lucide-react` through one `<Icon>` wrapper. Stroke 1.75. Sizes 16 inline, 18 controls, 20 cards.
 - Lime `--accent` = found or success. Never body text, never large fills. One accent button per screen.
-- Crime scenes, evidence and the board are drawn in ink (`design/sketches`). The pets are drawn in clean shapes. People (the player's detective and the suspects) are drawn as `CHARACTERS.md` says. All share the warm ink, the cream paper and lime for found.
+- Crime scenes, evidence and the board are drawn in ink (`design/sketches`). People and pets are realistic 3D figures in the 3D street, as `CHARACTERS.md` says. Screens are the detective's desk: cream paper and manila files on dark wood and cork. All share lime for found.
 - The player is the detective: seen in their own coat on the path, the ending and Settings, never inside a scene.
 
 ## Copy
-- The cat, the dino, the dog and the robot are the player's pets. On screen say "pet", never "partner". Code keeps `partner`.
+- The bloodhound, the parrot, the monkey and the robot are the player's pets (the cat, dino and puppy are being replaced, set 1c). On screen say "pet", never "partner". Code keeps `partner`.
 - The pet's help is a "tip-off" on screen, never a "hint". Code keeps `hint`.
 - No em dashes. No exclamation marks. Short sentences. Digits for numbers.
 - Show it, do not caption it. A card, a pin or a control says what it is by how it is drawn. No line under it to explain it. A name that is who something is stays: a pet, a suspect.

@@ -7,7 +7,7 @@ Values are tokens from `src/styles/tokens.css`. Prototype wins on visuals.
 - 4 kinds of work: finding what is there, reading what was left, talking to people, weighing what could have happened. Every method is a real thing somebody left, kept or tried to destroy, and the play is what you would do with it in your hands.
 - The case board is what a player watches change: it opens nearly empty, gains a pin a step, and no 2 cases open on the same arrangement.
 - Pictures by what they are for: what a player examines can be a free, credited photo; people and searched rooms are always drawn.
-- The player is a detective in their own coat (`CHARACTERS.md`), with a pet on every case: Detective X (the cat), Detective Tobs (the dino), Detective Puff (the dog), Agent 404 (the robot).
+- The player is a detective in their own coat (`CHARACTERS.md`), with a working pet on every case: a bloodhound, a parrot, a capuchin monkey or Agent 404, the robot (`CHARACTERS.md`).
 - Nothing to learn before playing: no secret society, no code words, no term to be taught. Your Notebook keeps every case, clue, person and lead in 1 place.
 - The calendar brings a player back: later cases are written for a season and open on its date.
 - Nothing expires or locks a player out: no timed content, hearts, energy or guilt in reminders. Nothing bought makes a case faster or easier.
@@ -126,7 +126,7 @@ Streak resets on a wrong pick and on a tip-off. `onFound` picks: first find, las
 - `<Partner moment>` shows the player's pet in the mood of the moment: hello (waving), empty (calm), loading (thinking), error (stumped), done (happy), found (found), asleep (sleepy).
 - `<PartnerNote moment layout>`: the player's pet with a line, so a screen with nothing on it is never just grey text.
 - Where it shows: the waiting screen, empty and failed states, the guest wall, a step's tip-off and the ending.
-- Pets are drawn in clean shapes and never dressed as people. The people of the street, the player's detective among them, are in `design/CHARACTERS.md`.
+- Pets are working animals made as the street's figures are (`CHARACTERS.md`), never dressed as people. The people of the street, the player's detective among them, are in `design/CHARACTERS.md`.
 - The pick: Settings, the 4 as buttons, all free.
 - What a pet does in play: it chooses which answer a tip-off marks.
 
@@ -136,7 +136,7 @@ Streak resets on a wrong pick and on a tip-off. `onFound` picks: first find, las
 ## 6. Screens
 
 **Landing `/`:** the name (h1), one line ("8 cases on 1 street. Something is hidden in plain sight."), the accent Play button from `playNext` ("Open your case", "Carry on your case", or "See your cases" once every case is closed), a TextLink "All the cases", then the case board of the case that is open.
-**Cases:** PageHeader "Cases", then the casebook. Nothing else.
+**Cases:** PageHeader "Cases", the street with a pin per case (`<StreetMap>`), then the casebook.
 
 **One job a screen:** every screen has one job and one main action, and the fewest taps to it (`BUILD_PLAN.md`, Screens). What is not the job moves to the screen whose job it is.
 - `<IconLink>`: a page action as a 44 square with a 1px `--line-3` border, radius `--radius-lg`.
