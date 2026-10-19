@@ -585,7 +585,8 @@ export function buildStreet({ view = 'iso', hour = 15, date = new Date(Date.UTC(
     const r = rng(77);
     const n = grey ? 26 : 9;
     for (let k = 0; k < n; k++) {
-      const c = new Sprite(new SpriteMaterial({ map: cloudTexture(grey), fog: false, depthWrite: false, transparent: true, opacity: grey ? 0.95 : 0.9 }));
+      // A cloud is lit by the sky it is in: white by day, at night a dark blue-grey shape barely lighter than the dark.
+      const c = new Sprite(new SpriteMaterial({ map: cloudTexture(grey), color: colour(night ? '#2c3340' : '#ffffff'), fog: false, depthWrite: false, transparent: true, opacity: night ? 0.7 : grey ? 0.95 : 0.9 }));
       const a = r() * Math.PI * 2;
       const d = 1800 + r() * 1600;
       c.position.set(600 + Math.cos(a) * d, 620 + r() * 420, 400 + Math.sin(a) * d);

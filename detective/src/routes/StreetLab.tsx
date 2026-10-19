@@ -94,7 +94,9 @@ function draw(renderer: WebGLRenderer, scene: Scene, camera: Camera, style: Styl
   ao.minDistance = 0.0006;
   ao.maxDistance = 0.04;
   composer.addPass(ao);
-  if (night) composer.addPass(new UnrealBloomPass(new Vector2(w, h), 0.6, 0.6, 0.82));
+  // A glow on the lamps and the lit windows only: from the street it stays tight, so the dark round them stays dark.
+  const level = view === 'walk' || view === 'enter' || view === 'front';
+  if (night) composer.addPass(new UnrealBloomPass(new Vector2(w, h), level ? 0.28 : 0.55, level ? 0.35 : 0.6, level ? 0.92 : 0.82));
   // From above, the village is photographed like a model: sharp in the middle band, softly out of focus above and below.
   if (style === 'village' && (view === 'iso' || view === 'plan')) {
     const hz = new ShaderPass(HorizontalTiltShiftShader);
