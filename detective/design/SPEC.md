@@ -2,6 +2,16 @@
 
 Values are tokens from `src/styles/tokens.css`. Prototype wins on visuals.
 
+## 0. What the game is
+- A few minutes of real detective work, in place of scrolling. One skill in every case: looking closely. For all ages, not a children's product. We promise the practice, never a result.
+- 4 kinds of work: finding what is there, reading what was left, talking to people, weighing what could have happened. Every method is a real thing somebody left, kept or tried to destroy, and the play is what you would do with it in your hands.
+- The case board is what a player watches change: it opens nearly empty, gains a pin a step, and no 2 cases open on the same arrangement.
+- Pictures by what they are for: what a player examines can be a free, credited photo; people and searched rooms are always drawn.
+- The player is a detective in their own coat (`CHARACTERS.md`), with a pet on every case: Detective X (the cat), Detective Tobs (the dino), Detective Puff (the dog), Agent 404 (the robot).
+- Nothing to learn before playing: no secret society, no code words, no term to be taught. Your Notebook keeps every case, clue, person and lead in 1 place.
+- The calendar brings a player back: later cases are written for a season and open on its date.
+- Nothing expires or locks a player out: no timed content, hearts, energy or guilt in reminders. Nothing bought makes a case faster or easier.
+
 ## 1. Brand
 
 **Name:** Lantern Row, a working name. One street, its people, and what they hide. 2 words, capitals on both, in running text.

@@ -23,7 +23,6 @@
     "deploy:api": "wrangler deploy --config worker/wrangler.toml",
     "pets:render": "tsx scripts/render-pets.ts",
     "flow:render": "node scripts/render-flow.mjs",
-    "street:render": "tsx scripts/render-street.ts",
     "street3d:render": "tsx scripts/render-3d.ts"
   },
   "dependencies": {

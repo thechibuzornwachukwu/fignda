@@ -1,4 +1,4 @@
-// Writes a sketch's picture from its source: node scripts/render-sketch.mjs design/sketches/map/plan/the-street.html
+// Writes a sketch's picture from its source: node scripts/render-sketch.mjs design/sketches/rooms/<room>.html
 // The .png lands beside the .html, at the drawing's own size (its first <svg>), and -dark.png for one drawn for both themes.
 
 import { fileURLToPath, pathToFileURL } from 'node:url';

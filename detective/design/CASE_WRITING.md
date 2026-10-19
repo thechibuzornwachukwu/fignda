@@ -78,6 +78,35 @@ Read by a person, because no engine can check them:
 - [ ] A person who did not write it has played it.
 - [ ] `design/flow.html` and `design/flow.jpg` still match the game, or are updated (`npm run flow:render`).
 
+## 6. The casebook
+
+| Level | What it is | Size | On screen |
+|---|---|---|---|
+| Casebook | A place and its cases, with a thread behind them | 8 cases | A named banner on the path |
+| Case | 1 story: something taken, hidden or faked | A brief, 5 to 7 steps, the closer, the ending | A file on the path, showing its board |
+| Step | 1 sitting on 1 piece of evidence | 2 to 4 minutes | A mark on the case, a screen of its own |
+| Cold case | A closed case, worked again with no tip-offs | The same case | A gold seal on its file |
+
+- 5 shapes: who did it, prove it, what is it really, where is it, nothing was taken.
+- Each case leaves 1 loose end, and it is the first line of the next brief.
+- Guessing is pointless, never punished: whoever the evidence cleared cannot be named, the closer has 2 tries, then the mask comes off anyway.
+- A step exists because the case needs its fact. Nothing is gated by time.
+- Art never blocks the path: a case waiting on a drawing swaps places with one written to stand in either slot.
+- After the last written case the game never just stops: cold cases, a seasonal case when one is open, then the next casebook's file, closed, with "Tell me when it opens".
+
+Casebook 1, Lantern Row:
+
+| # | Case | Shape | Suspects | New method | The loose end it leaves |
+|---|---|---|---|---|---|
+| 1 | The long spoon | Who did it | 4 | Blotter, buried sums, hidden words, line-up | Does the 19th name stay |
+| 2 | The open box | Nothing was taken | 2 | Which account fits | 1 card in the box is not a vote: it is the lantern card |
+| 3 | The early bus | Prove it | 1 | Could it be done | The hall clock can be set from outside |
+| 4 | The year that is missing | Where is it | 3 | Walk it back, the trail | The 2011 page, found uncut |
+| 5 | The light in the hall | What is it really | 4 | Sweep the room, the missing step | A key nobody signed for |
+| 6 | The 2 signs | Who did it | 2 | None | Both signs repainted by 1 hand |
+| 7 | The other spoon | Prove it | 1 | The torn page | The seller was sent the names by post |
+| 8 | Who carries the cards | Who did it | 5 | None | The card-giver is named, and the 2011 page is read |
+
 ## Sources
 
 - The narrative method of novel-to-game (`zenstory-ai/novel-to-game`, MIT): keep apart what is true, what each person knows, and what the player knows.
