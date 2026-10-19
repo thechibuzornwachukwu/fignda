@@ -1,10 +1,10 @@
 # Lantern Row
 
-The street every case happens on. Read it before writing a story. Its map is `design/sketches/the-street.html` (`.png`), and its places, with their spots, are `src/engine/world.ts`. By day in the light theme, at night in the dark (`the-street-dark.png`). A case may add a place, a person or a custom: add it here in the same change, and never contradict a line already here.
+The street every case happens on. Read it before writing a story. Its map is `design/sketches/map/the-street.html` (`.png`), and its places, with their spots, are `src/engine/world.ts`. By day in the light theme, at night in the dark (`the-street-dark.png`). A case may add a place, a person or a custom: add it here in the same change, and never contradict a line already here.
 
 ## The street
 
-1 street, about 400 m long, running from the bus stop at the top to the market row at the bottom. Cobbled at the top, tarmac below the hall. Gas-style street lamps, converted to electric, give the street its name.
+1 street, about 400 m long, running from the bus stop at the top to the market row at the bottom. Cobbled at the top, tarmac below the hall. The street is named for the gas lamps it once had. They are gone: modern street lights now, tall poles with an arm over the road.
 
 | From the top | What is there |
 |---|---|
@@ -15,9 +15,18 @@ The street every case happens on. Read it before writing a story. Its map is `de
 | The library | 2 rooms and a reading room. Minute books are kept here and never lent |
 | The bakery | Marco's. Ovens at the back, lit from 4 am. The art room is upstairs. Window boxes on the front |
 | The sale room | Auctions on Saturdays. A desk, a sale book, numbered lots |
-| The houses | Terraced, on the bottom side past the library |
+| The houses | Terraced, on the bottom side past the library. Fenced back gardens behind, a shed at the end of each. 2 of the roofs need work |
+| The billboards | 3 kinds: a hoarding on posts on open ground at the top of the market square, a poster on the sale room's side wall, a panel on the end of the bus shelter. Posters change with the case and the season |
+| The signs | The street's name on a green sign on a post, at each end |
+| Bins | Public litter bins at the bus stop, the hall and the market corners; wheelie bins in the back gardens and beside the bakery |
+| Fences | Back gardens are fenced. A front fence is a case's to put up: the case names the house numbers (`fenced`) |
+| CCTV | 3 cameras: the sale room's, over the street toward the hall; the bakery's, down the street toward the market; number 8's, over its front path. Each sees only its own wedge of ground (`CAMERAS` in `src/map/street.ts`) |
 | The market row | Stalls under awnings, 1 pitch each. Market day is Friday |
 | The watchman's hut | At the bottom of the row. Somebody sits in it from 10 pm to 6 am |
+
+Numbers: odd on the hall's side (the hall 1, the bakery 3, the sale room 5), even on the library's (the library 2, the houses 4, 6, 8 and 10). Each is on a plaque by the door.
+
+Pavements run both sides of the road. Cars park at the kerb, and in the yard on Friday nights. Fields lie round the town. The hall's roof is kept; the sale room's, the bus shelter's and the watchman's hut's are not.
 
 Off the street, and further than a walk: Rosa's night stall (20 minutes' drive), the bus depot, the committee secretary's house (40 minutes from the hall).
 

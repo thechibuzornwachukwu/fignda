@@ -5,7 +5,7 @@ What is built, in 1 line each, so `BUILD_PLAN.md` holds only what is left. Read 
 ## Cases
 - Casebook 1, Lantern Row: 8 cases, written and open, in `design/stories`.
 - The case engine (`src/engine/chapter.ts`): `checkChapter` (a fair fight), `balanceOf` (every built kind of work, no method more than twice), `checkCasebook` (shapes and suspects rotate, 1 new method a case). A test runs all 3 over every file.
-- The street itself (`design/WORLD.md`): its places, the hall, people, the year and the thread. Its map (`design/sketches/the-street.html`), by day and at night, with every place at a spot (`src/engine/world.ts`), checked against the drawing; every case and step names its place.
+- The street itself (`design/WORLD.md`): its places, the hall, people, the year and the thread. Its 2 maps, the plan and the 30 degree view, made from 1 module (`src/map/street.ts`, `npm run street:render`), by day and at night, in 6 weathers, with the sun by the hour, tonight's moon, clouds, birds, worn roofs and 2 billboards, with every place at a spot (`src/engine/world.ts`), checked against the drawing; every case and step names its place.
 - The story file and the case-writing rules (`design/CASE_WRITING.md`), with case 1's story as the worked example.
 
 ## Methods
@@ -32,5 +32,5 @@ What is built, in 1 line each, so `BUILD_PLAN.md` holds only what is left. Read 
 - Headers, CSP and CORS as `SECURITY.md` says. Secret checks on every commit, `npm run verify` on every push.
 
 ## Design
-- Room sketches in `design/sketches`. The flow of the game in `design/flow.html` and `design/flow.jpg`.
+- Sketches in `design/sketches`, by kind: `map`, `rooms`, `plans`, `evidence`. The flow of the game in `design/flow.html` and `design/flow.jpg`.
 - The character direction in `design/CHARACTERS.md` (the art itself is set 1c).

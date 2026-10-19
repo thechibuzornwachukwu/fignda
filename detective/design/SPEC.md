@@ -193,7 +193,7 @@ The case told once more: each find goes back to the place it was found. It is ma
 
 **Sweep the room** (`<Sweep>`, a step inside a case, `/case/:id/:n`)
 A drawn room, and the player taps what could matter. Most of it is only the room.
-- Top to bottom: "The board" and the marks, the place as the title, then the room: its drawing (`src/scenes`, copied from `design/sketches`, a test keeps them the same) the width of the screen at 4 by 3 on `--paper` with a `--ledge` edge, and a button over every thing in it, named for it ("The torch on the piano").
+- Top to bottom: "The board" and the marks, the place as the title, then the room: its drawing (`src/scenes`, copied from `design/sketches/rooms`, a test keeps them the same) the width of the screen at 4 by 3 on `--paper` with a `--ledge` edge, and a button over every thing in it, named for it ("The torch on the piano").
 - A small thing is still 40 wide to tap: its hit area grows round it, the drawing does not.
 - Evidence tapped: ringed in `--accent` with a tick, because lime means found.
 - A tip-off rings the quarter of the room that holds the next piece not found (`sweepHint`), dashed in `--paper-ink`, never the thing.

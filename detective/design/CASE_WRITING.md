@@ -41,6 +41,7 @@ The method is the way a detective would handle that thing. The puzzle is made of
 | Read | The blotter (mirror) | yes | Ink kept back to front |
 | Read | Buried sums | yes | A row of figures: a till roll, a gate log. Today the row is made by the engine, not by the case (set 1a fixes it) |
 | Read | The torn page | yes | A page torn in 2 |
+| Read | The recording | no | A CCTV camera's footage: who crossed its view, and when. A camera sees only its wedge of the plan, so a recorded fact must fall inside it, and what happened outside it the camera cannot clear |
 | Talk | Question them | no | A person with something to say and a reason not to say it |
 | Talk | Sit with them | no | A person who talks only over a game or a meal |
 | Weigh | Could it be done | yes | A claim against 2 facts on the board |

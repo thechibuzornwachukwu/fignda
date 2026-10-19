@@ -22,7 +22,8 @@
     "deploy:site": "node scripts/deploy-site.mjs",
     "deploy:api": "wrangler deploy --config worker/wrangler.toml",
     "pets:render": "tsx scripts/render-pets.ts",
-    "flow:render": "node scripts/render-flow.mjs"
+    "flow:render": "node scripts/render-flow.mjs",
+    "street:render": "tsx scripts/render-street.ts"
   },
   "dependencies": {
     "@fontsource/bungee": "^5.3.0",

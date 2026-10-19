@@ -465,7 +465,7 @@ describe('sweep the room', () => {
   });
 
   it.each(['the-hall', 'the-sale-room'])('the game shows the same %s the sketch holds', (scene) => {
-    const sketch = readFileSync(`design/sketches/${scene}.html`, 'utf8').match(/<svg[\s\S]*<\/svg>/)![0];
+    const sketch = readFileSync(`design/sketches/rooms/${scene}.html`, 'utf8').match(/<svg[\s\S]*<\/svg>/)![0];
     expect(readFileSync(`src/scenes/${scene}.svg`, 'utf8')).toContain(sketch);
   });
 

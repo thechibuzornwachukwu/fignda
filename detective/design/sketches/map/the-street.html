@@ -1,0 +1,948 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Map of Lantern Row</title>
+<!--
+  Written by scripts/render-street.ts from src/map/street.ts. Do not edit by hand: change the module and render again.
+  The street straight down, the plan routes are drawn on, by day in the light theme and at night in the dark (?theme=dark). The sun and the
+  shadows follow the hour, the moon follows the date, the weather follows the case.
+-->
+<style>
+  :root {
+    --map-ink: #2a2622;
+    --map-cobble: #ddd0b8;
+    --map-tarmac: #d9cdb6;
+    --map-square: #e3d6bd;
+    --map-alley: #c8b998;
+    --map-terracotta: #b5573c;
+    --map-wood: #7a5236;
+    --map-ochre: #d0a65a;
+    --map-ochre-dim: #d0a65a;
+    --map-bakery: #c98b4e;
+    --map-sage: #8a9a6b;
+    --map-blue: #8fa3ad;
+    --map-plane: #9aa57a;
+    --map-library: #7f8d63;
+    --map-lime: #a9b37f;
+    --map-house: #c9b48f;
+    --map-house-2: #d3bf9a;
+    --map-brick: #a5503a;
+    --map-plaster: #eadcc0;
+    --map-stone: #d8ccb4;
+    --map-window: #8fa3ad;
+    --map-window-lit: #8fa3ad;
+    --map-clock: #f3ead9;
+    --map-shadow: rgba(42,38,34,0.16);
+    --map-sun: #f4d27a;
+    --map-moon: rgba(0,0,0,0);
+    --map-moon-dark: rgba(0,0,0,0);
+    --map-wet: rgba(80,96,110,0.18);
+    --map-star: rgba(0,0,0,0);
+    --map-cloud: rgba(251,248,241,0.92);
+    --map-cloud-grey: rgba(185,180,170,0.88);
+    --map-sun-dawn: #e8955a;
+    --map-fog: rgba(238,233,224,0.3);
+    --map-snow-cap: rgba(250,249,246,0.86);
+    --map-snow-ground: rgba(250,249,246,0.82);
+    --map-slush: rgba(170,165,155,0.5);
+    --map-flake: #ffffff;
+    --map-funnel: #8d877d;
+    --map-wall-cloud: #7d776d;
+    --map-dust: #b3a58a;
+    --map-land: #dfdfc2;
+    --map-bin-public: #3f5a4a;
+    --map-bin-green: #4f7a4a;
+    --map-bin-grey: #7d8288;
+    --map-bin-lid: #2f3a34;
+    --map-picket: #f3ead9;
+    --map-camera: #e8e4dc;
+    --map-camera-eye: #2a2622;
+    --map-cone: rgba(80,110,160,0.12);
+    --map-lamp-head: #5a5f66;
+    --map-weed: #6f8a4e;
+    --map-weed-2: #8fa65f;
+    --map-crack: rgba(42,38,34,0.28);
+    --map-sign: #3f5a4a;
+    --map-plaque: #f3ead9;
+    --map-bark: #7a5236;
+    --map-leaf-dry: #b8a46a;
+    --map-leaf-light: rgba(255,255,240,0.22);
+    --map-fruit-red: #c4452f;
+    --map-fruit-orange: #e48a2e;
+    --map-nest: #8a6a48;
+    --map-bird: #3a3430;
+    --map-moss: rgba(110,128,72,0.42);
+    --map-grime: rgba(42,38,34,0.16);
+    --map-battens: #3b2a1f;
+    --map-grass: #c9cf9f;
+    --map-pavement: #e7ddc8;
+    --map-poster: #e9d8a6;
+    --map-dial: #c9dbe2;
+    --map-dial-grey: #cfccc5;
+    --map-cloud-shadow: rgba(42,38,34,0.08);
+    --map-lot: #f3ead9;
+    --map-flood: rgba(122,128,118,0.62);
+    --map-water: rgba(122,128,118,0.7);
+    --map-puddle: rgba(110,135,150,0.45);
+    --map-glow: 0;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+    --map-ink: #e9dfcc;
+    --map-cobble: #2a2f38;
+    --map-tarmac: #2c313a;
+    --map-square: #303641;
+    --map-alley: #22262d;
+    --map-terracotta: #6e3a2c;
+    --map-wood: #4a3526;
+    --map-ochre: #f2c46b;
+    --map-ochre-dim: #8a6d3b;
+    --map-bakery: #7a5838;
+    --map-sage: #4f5a42;
+    --map-blue: #4b5a63;
+    --map-plane: #4d5740;
+    --map-library: #45503a;
+    --map-lime: #5c6648;
+    --map-house: #514636;
+    --map-house-2: #5a4e3c;
+    --map-brick: #5a3026;
+    --map-plaster: #4a4438;
+    --map-stone: #454039;
+    --map-window: #2b3440;
+    --map-window-lit: #f2c46b;
+    --map-clock: #f2d9a0;
+    --map-shadow: rgba(0,0,0,0);
+    --map-sun: rgba(0,0,0,0);
+    --map-moon: #efe6cf;
+    --map-moon-dark: #2a2f38;
+    --map-wet: rgba(120,150,180,0.12);
+    --map-star: #e9dfcc;
+    --map-cloud: rgba(52,58,70,0.85);
+    --map-cloud-grey: rgba(38,43,51,0.88);
+    --map-sun-dawn: rgba(0,0,0,0);
+    --map-fog: rgba(120,130,145,0.17);
+    --map-snow-cap: rgba(205,214,226,0.82);
+    --map-snow-ground: rgba(150,165,185,0.5);
+    --map-slush: rgba(60,66,78,0.6);
+    --map-flake: #e6ecf2;
+    --map-funnel: #3a404a;
+    --map-wall-cloud: #1f242c;
+    --map-dust: #3d3a33;
+    --map-land: #171c1d;
+    --map-bin-public: #2c3e34;
+    --map-bin-green: #2f4a2c;
+    --map-bin-grey: #454a50;
+    --map-bin-lid: #1c2420;
+    --map-picket: #8a8270;
+    --map-camera: #9aa0a8;
+    --map-camera-eye: #f26b5b;
+    --map-cone: rgba(150,180,230,0.10);
+    --map-lamp-head: #3a3f46;
+    --map-weed: #4a5e3a;
+    --map-weed-2: #5a6e44;
+    --map-crack: rgba(0,0,0,0.4);
+    --map-sign: #2c3e34;
+    --map-plaque: #8a8270;
+    --map-bark: #3a2a1f;
+    --map-leaf-dry: #4a4430;
+    --map-leaf-light: rgba(255,255,240,0.06);
+    --map-fruit-red: #7a3324;
+    --map-fruit-orange: #8a5a26;
+    --map-nest: #3d3024;
+    --map-bird: #d8cfbd;
+    --map-moss: rgba(70,90,60,0.5);
+    --map-grime: rgba(0,0,0,0.28);
+    --map-battens: #120d0a;
+    --map-grass: #1d251f;
+    --map-pavement: #262b33;
+    --map-poster: #4a4536;
+    --map-dial: #10141c;
+    --map-dial-grey: #1c2028;
+    --map-cloud-shadow: rgba(0,0,0,0.18);
+    --map-lot: #1b1f27;
+    --map-flood: rgba(52,62,74,0.7);
+    --map-water: rgba(52,62,74,0.75);
+    --map-puddle: rgba(242,196,107,0.28);
+      --map-glow: 0.22;
+    }
+  }
+  :root[data-theme="dark"] {
+    --map-ink: #e9dfcc;
+    --map-cobble: #2a2f38;
+    --map-tarmac: #2c313a;
+    --map-square: #303641;
+    --map-alley: #22262d;
+    --map-terracotta: #6e3a2c;
+    --map-wood: #4a3526;
+    --map-ochre: #f2c46b;
+    --map-ochre-dim: #8a6d3b;
+    --map-bakery: #7a5838;
+    --map-sage: #4f5a42;
+    --map-blue: #4b5a63;
+    --map-plane: #4d5740;
+    --map-library: #45503a;
+    --map-lime: #5c6648;
+    --map-house: #514636;
+    --map-house-2: #5a4e3c;
+    --map-brick: #5a3026;
+    --map-plaster: #4a4438;
+    --map-stone: #454039;
+    --map-window: #2b3440;
+    --map-window-lit: #f2c46b;
+    --map-clock: #f2d9a0;
+    --map-shadow: rgba(0,0,0,0);
+    --map-sun: rgba(0,0,0,0);
+    --map-moon: #efe6cf;
+    --map-moon-dark: #2a2f38;
+    --map-wet: rgba(120,150,180,0.12);
+    --map-star: #e9dfcc;
+    --map-cloud: rgba(52,58,70,0.85);
+    --map-cloud-grey: rgba(38,43,51,0.88);
+    --map-sun-dawn: rgba(0,0,0,0);
+    --map-fog: rgba(120,130,145,0.17);
+    --map-snow-cap: rgba(205,214,226,0.82);
+    --map-snow-ground: rgba(150,165,185,0.5);
+    --map-slush: rgba(60,66,78,0.6);
+    --map-flake: #e6ecf2;
+    --map-funnel: #3a404a;
+    --map-wall-cloud: #1f242c;
+    --map-dust: #3d3a33;
+    --map-land: #171c1d;
+    --map-bin-public: #2c3e34;
+    --map-bin-green: #2f4a2c;
+    --map-bin-grey: #454a50;
+    --map-bin-lid: #1c2420;
+    --map-picket: #8a8270;
+    --map-camera: #9aa0a8;
+    --map-camera-eye: #f26b5b;
+    --map-cone: rgba(150,180,230,0.10);
+    --map-lamp-head: #3a3f46;
+    --map-weed: #4a5e3a;
+    --map-weed-2: #5a6e44;
+    --map-crack: rgba(0,0,0,0.4);
+    --map-sign: #2c3e34;
+    --map-plaque: #8a8270;
+    --map-bark: #3a2a1f;
+    --map-leaf-dry: #4a4430;
+    --map-leaf-light: rgba(255,255,240,0.06);
+    --map-fruit-red: #7a3324;
+    --map-fruit-orange: #8a5a26;
+    --map-nest: #3d3024;
+    --map-bird: #d8cfbd;
+    --map-moss: rgba(70,90,60,0.5);
+    --map-grime: rgba(0,0,0,0.28);
+    --map-battens: #120d0a;
+    --map-grass: #1d251f;
+    --map-pavement: #262b33;
+    --map-poster: #4a4536;
+    --map-dial: #10141c;
+    --map-dial-grey: #1c2028;
+    --map-cloud-shadow: rgba(0,0,0,0.18);
+    --map-lot: #1b1f27;
+    --map-flood: rgba(52,62,74,0.7);
+    --map-water: rgba(52,62,74,0.75);
+    --map-puddle: rgba(242,196,107,0.28);
+    --map-glow: 0.22;
+  }
+  html, body { margin: 0; background: var(--map-land); }
+  svg { display: block; width: 100%; max-width: 100%; height: auto; }
+  .f-ink { fill: var(--map-ink); }
+  .f-cobble { fill: var(--map-cobble); }
+  .f-tarmac { fill: var(--map-tarmac); }
+  .f-square { fill: var(--map-square); }
+  .f-alley { fill: var(--map-alley); }
+  .f-terracotta { fill: var(--map-terracotta); }
+  .f-wood { fill: var(--map-wood); }
+  .f-ochre { fill: var(--map-ochre); }
+  .f-ochre-dim { fill: var(--map-ochre-dim); }
+  .f-bakery { fill: var(--map-bakery); }
+  .f-sage { fill: var(--map-sage); }
+  .f-blue { fill: var(--map-blue); }
+  .f-plane { fill: var(--map-plane); }
+  .f-library { fill: var(--map-library); }
+  .f-lime { fill: var(--map-lime); }
+  .f-house { fill: var(--map-house); }
+  .f-house-2 { fill: var(--map-house-2); }
+  .f-brick { fill: var(--map-brick); }
+  .f-plaster { fill: var(--map-plaster); }
+  .f-stone { fill: var(--map-stone); }
+  .f-window { fill: var(--map-window); }
+  .f-window-lit { fill: var(--map-window-lit); }
+  .f-clock { fill: var(--map-clock); }
+  .f-shadow { fill: var(--map-shadow); }
+  .f-sun { fill: var(--map-sun); }
+  .f-moon { fill: var(--map-moon); }
+  .f-moon-dark { fill: var(--map-moon-dark); }
+  .f-wet { fill: var(--map-wet); }
+  .f-star { fill: var(--map-star); }
+  .f-cloud { fill: var(--map-cloud); }
+  .f-cloud-grey { fill: var(--map-cloud-grey); }
+  .f-sun-dawn { fill: var(--map-sun-dawn); }
+  .f-fog { fill: var(--map-fog); }
+  .f-snow-cap { fill: var(--map-snow-cap); }
+  .f-snow-ground { fill: var(--map-snow-ground); }
+  .f-slush { fill: var(--map-slush); }
+  .f-flake { fill: var(--map-flake); }
+  .f-funnel { fill: var(--map-funnel); }
+  .f-wall-cloud { fill: var(--map-wall-cloud); }
+  .f-dust { fill: var(--map-dust); }
+  .f-land { fill: var(--map-land); }
+  .f-bin-public { fill: var(--map-bin-public); }
+  .f-bin-green { fill: var(--map-bin-green); }
+  .f-bin-grey { fill: var(--map-bin-grey); }
+  .f-bin-lid { fill: var(--map-bin-lid); }
+  .f-picket { fill: var(--map-picket); }
+  .f-camera { fill: var(--map-camera); }
+  .f-camera-eye { fill: var(--map-camera-eye); }
+  .f-cone { fill: var(--map-cone); }
+  .f-lamp-head { fill: var(--map-lamp-head); }
+  .f-weed { fill: var(--map-weed); }
+  .f-weed-2 { fill: var(--map-weed-2); }
+  .f-crack { fill: var(--map-crack); }
+  .f-sign { fill: var(--map-sign); }
+  .f-plaque { fill: var(--map-plaque); }
+  .f-bark { fill: var(--map-bark); }
+  .f-leaf-dry { fill: var(--map-leaf-dry); }
+  .f-leaf-light { fill: var(--map-leaf-light); }
+  .f-fruit-red { fill: var(--map-fruit-red); }
+  .f-fruit-orange { fill: var(--map-fruit-orange); }
+  .f-nest { fill: var(--map-nest); }
+  .f-bird { fill: var(--map-bird); }
+  .f-moss { fill: var(--map-moss); }
+  .f-grime { fill: var(--map-grime); }
+  .f-battens { fill: var(--map-battens); }
+  .f-grass { fill: var(--map-grass); }
+  .f-pavement { fill: var(--map-pavement); }
+  .f-poster { fill: var(--map-poster); }
+  .f-dial { fill: var(--map-dial); }
+  .f-dial-grey { fill: var(--map-dial-grey); }
+  .f-cloud-shadow { fill: var(--map-cloud-shadow); }
+  .f-lot { fill: var(--map-lot); }
+  .f-flood { fill: var(--map-flood); }
+  .f-water { fill: var(--map-water); }
+  .f-puddle { fill: var(--map-puddle); }
+  .s-ink { stroke: var(--map-ink); }
+  .f-star, .f-shadow, .f-sun, .f-sun-dawn, .f-moon, .f-moon-dark, .f-wet, .f-puddle, .f-fog, .f-snow-cap, .f-snow-ground, .f-slush, .f-flake, .f-flood, .f-water, .f-grass, .f-pavement, .f-moss, .f-grime, .f-leaf-light, .f-camera-eye, .f-crack, .f-weed, .f-weed-2, .glow { stroke: none; }
+  .f-cone { stroke: var(--map-blue); stroke-width: 1; stroke-dasharray: 4 4; }
+  .f-camera { stroke-width: 1.2; }
+  .sign-words { fill: #f3ead9; stroke: none; font-family: Manrope, 'Segoe UI', Arial, sans-serif; font-weight: 700; letter-spacing: 0.02em; }
+  .plaque-words { fill: #2a2622; stroke: none; font-family: Manrope, 'Segoe UI', Arial, sans-serif; font-weight: 800; }
+  .picket { stroke: var(--map-ink); stroke-width: 1.4; }
+  .fence-plan { stroke: var(--map-ink); stroke-width: 2.5; stroke-dasharray: 2 3; }
+  .weed { stroke: var(--map-weed); stroke-width: 1.6; }
+  .twig { stroke: var(--map-bark); stroke-width: 1.4; }
+  .snow-line { stroke: var(--map-snow-cap); stroke-width: 2; }
+  .branch { stroke: var(--map-bark); stroke-width: 2.5; }
+  .f-fruit-red, .f-fruit-orange { stroke-width: 1; }
+  .f-battens { stroke-width: 1; }
+  .f-cloud, .f-cloud-grey, .f-funnel, .f-wall-cloud, .f-dust { stroke-width: 1.4; }
+  .f-land, .f-lot, .f-cloud-shadow { stroke: none; }
+  .cloud-edge { stroke-width: 5; }
+  .cloud-fill { stroke: none; }
+  .f-dial, .f-dial-grey { stroke-width: 2.5; }
+  .shaft { stroke: var(--map-cloud-grey); stroke-width: 6; opacity: 0.55; }
+  .band { stroke: var(--map-ink); stroke-width: 1.2; opacity: 0.35; }
+  .bird { stroke: var(--map-ink); stroke-width: 1.8; }
+  .ripple { stroke: var(--map-ink); stroke-width: 1.2; opacity: 0.35; }
+  .shade-1 { fill: #000; opacity: 0.07; stroke: none; }
+  .shade-2 { fill: #000; opacity: 0.17; stroke: none; }
+  .thin { stroke-width: 1.5; }
+  .thick { stroke-width: 4; }
+  .fence { stroke-width: 1.2; opacity: 0.6; }
+  .trunk { stroke: var(--map-wood); stroke-width: 5; }
+  .post { stroke-width: 3; }
+  .rain { stroke: var(--map-blue); stroke-width: 1.6; opacity: 0.7; }
+  .glow { fill: var(--map-ochre); opacity: var(--map-glow); }
+</style>
+<script>if (new URLSearchParams(location.search).get('theme') === 'dark') document.documentElement.dataset.theme = 'dark';</script>
+</head>
+<body>
+<svg width="1200" height="800" viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+  <g class="s-ink" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+    <polygon points="0,0 1200,0 1200,800 0,800" class="f-lot"/>
+    <polygon points="140,120 470,120 470,150 140,150" class="f-alley"/>
+    <polygon points="140,150 180,150 180,430 140,430" class="f-alley"/>
+    <polygon points="470,40 870,40 870,150 470,150" class="f-square"/>
+    <polygon points="470,150 520,150 520,430 470,430" class="f-square"/>
+    <polygon points="0,430 470,430 470,510 0,510" class="f-cobble"/>
+    <polygon points="470,430 880,430 880,510 470,510" class="f-tarmac"/>
+    <polygon points="880,340 1160,340 1160,600 880,600" class="f-square" data-anchor="market-square"/>
+    <polygon points="1160,430 1200,430 1200,510 1160,510" class="f-tarmac"/>
+    <polygon points="0,410 880,410 880,430 0,430" class="f-pavement"/>
+    <polygon points="0,510 880,510 880,526 0,526" class="f-pavement"/>
+    <polygon points="680,700 860,700 860,790 680,790" class="f-grass"/>
+    <polygon points="380,760 580,760 580,790 380,790" class="f-grass"/>
+    <line x1="490" y1="470" x2="508" y2="470" class="thin"/>
+    <line x1="530" y1="470" x2="548" y2="470" class="thin"/>
+    <line x1="570" y1="470" x2="588" y2="470" class="thin"/>
+    <line x1="610" y1="470" x2="628" y2="470" class="thin"/>
+    <line x1="650" y1="470" x2="668" y2="470" class="thin"/>
+    <line x1="690" y1="470" x2="708" y2="470" class="thin"/>
+    <line x1="730" y1="470" x2="748" y2="470" class="thin"/>
+    <line x1="770" y1="470" x2="788" y2="470" class="thin"/>
+    <line x1="810" y1="470" x2="828" y2="470" class="thin"/>
+    <line x1="850" y1="470" x2="868" y2="470" class="thin"/>
+    <path d="M50,456 L30,470 L50,484" fill="none" class="thick"/>
+    <path d="M1150,441 L1170,455 L1150,469" fill="none" class="thick"/>
+    <path d="M1150,476 L1170,490 L1150,504" fill="none" class="thick"/>
+    <line x1="530" y1="60" x2="530" y2="130" class="thin"/>
+    <line x1="590" y1="60" x2="590" y2="130" class="thin"/>
+    <line x1="650" y1="60" x2="650" y2="130" class="thin"/>
+    <line x1="710" y1="60" x2="710" y2="130" class="thin"/>
+    <line x1="770" y1="60" x2="770" y2="130" class="thin"/>
+    <line x1="830" y1="60" x2="830" y2="130" class="thin"/>
+    <line x1="725" y1="700" x2="725" y2="790" class="fence"/>
+    <line x1="770" y1="700" x2="770" y2="790" class="fence"/>
+    <line x1="815" y1="700" x2="815" y2="790" class="fence"/>
+    <ellipse cx="150" cy="301" rx="7" ry="2" class="f-crack"/>
+    <path d="M150,300 Q147.3,297.25 144,295 Q150.3,297.25 150,300 Z" class="f-weed"/>
+    <path d="M150,300 Q147.9,295.05 147,291 Q150.9,295.05 150,300 Z" class="f-weed-2"/>
+    <path d="M150,300 Q148.5,293.95 150,289 Q151.5,293.95 150,300 Z" class="f-weed"/>
+    <path d="M150,300 Q149.1,295.6 153,292 Q152.1,295.6 150,300 Z" class="f-weed-2"/>
+    <path d="M150,300 Q149.7,297.8 156,296 Q152.7,297.8 150,300 Z" class="f-weed"/>
+    <ellipse cx="158" cy="201" rx="7" ry="2" class="f-crack"/>
+    <path d="M158,200 Q155.3,197.25 152,195 Q158.3,197.25 158,200 Z" class="f-weed"/>
+    <path d="M158,200 Q155.9,195.05 155,191 Q158.9,195.05 158,200 Z" class="f-weed-2"/>
+    <path d="M158,200 Q156.5,193.95 158,189 Q159.5,193.95 158,200 Z" class="f-weed"/>
+    <path d="M158,200 Q157.1,195.6 161,192 Q160.1,195.6 158,200 Z" class="f-weed-2"/>
+    <path d="M158,200 Q157.7,197.8 164,196 Q160.7,197.8 158,200 Z" class="f-weed"/>
+    <ellipse cx="148" cy="381" rx="7" ry="2" class="f-crack"/>
+    <path d="M148,380 Q145.3,377.25 142,375 Q148.3,377.25 148,380 Z" class="f-weed"/>
+    <path d="M148,380 Q145.9,375.05 145,371 Q148.9,375.05 148,380 Z" class="f-weed-2"/>
+    <path d="M148,380 Q146.5,373.95 148,369 Q149.5,373.95 148,380 Z" class="f-weed"/>
+    <path d="M148,380 Q147.1,375.6 151,372 Q150.1,375.6 148,380 Z" class="f-weed-2"/>
+    <path d="M148,380 Q147.7,377.8 154,376 Q150.7,377.8 148,380 Z" class="f-weed"/>
+    <ellipse cx="300" cy="133" rx="7" ry="2" class="f-crack"/>
+    <path d="M300,132 Q297.3,129.25 294,127 Q300.3,129.25 300,132 Z" class="f-weed"/>
+    <path d="M300,132 Q297.9,127.05 297,123 Q300.9,127.05 300,132 Z" class="f-weed-2"/>
+    <path d="M300,132 Q298.5,125.95 300,121 Q301.5,125.95 300,132 Z" class="f-weed"/>
+    <path d="M300,132 Q299.1,127.6 303,124 Q302.1,127.6 300,132 Z" class="f-weed-2"/>
+    <path d="M300,132 Q299.7,129.8 306,128 Q302.7,129.8 300,132 Z" class="f-weed"/>
+    <ellipse cx="430" cy="141" rx="7" ry="2" class="f-crack"/>
+    <path d="M430,140 Q427.3,137.25 424,135 Q430.3,137.25 430,140 Z" class="f-weed"/>
+    <path d="M430,140 Q427.9,135.05 427,131 Q430.9,135.05 430,140 Z" class="f-weed-2"/>
+    <path d="M430,140 Q428.5,133.95 430,129 Q431.5,133.95 430,140 Z" class="f-weed"/>
+    <path d="M430,140 Q429.1,135.6 433,132 Q432.1,135.6 430,140 Z" class="f-weed-2"/>
+    <path d="M430,140 Q429.7,137.8 436,136 Q432.7,137.8 430,140 Z" class="f-weed"/>
+    <ellipse cx="478" cy="301" rx="7" ry="2" class="f-crack"/>
+    <path d="M478,300 Q475.3,297.25 472,295 Q478.3,297.25 478,300 Z" class="f-weed"/>
+    <path d="M478,300 Q475.9,295.05 475,291 Q478.9,295.05 478,300 Z" class="f-weed-2"/>
+    <path d="M478,300 Q476.5,293.95 478,289 Q479.5,293.95 478,300 Z" class="f-weed"/>
+    <path d="M478,300 Q477.1,295.6 481,292 Q480.1,295.6 478,300 Z" class="f-weed-2"/>
+    <path d="M478,300 Q477.7,297.8 484,296 Q480.7,297.8 478,300 Z" class="f-weed"/>
+    <ellipse cx="512" cy="381" rx="7" ry="2" class="f-crack"/>
+    <path d="M512,380 Q509.3,377.25 506,375 Q512.3,377.25 512,380 Z" class="f-weed"/>
+    <path d="M512,380 Q509.9,375.05 509,371 Q512.9,375.05 512,380 Z" class="f-weed-2"/>
+    <path d="M512,380 Q510.5,373.95 512,369 Q513.5,373.95 512,380 Z" class="f-weed"/>
+    <path d="M512,380 Q511.1,375.6 515,372 Q514.1,375.6 512,380 Z" class="f-weed-2"/>
+    <path d="M512,380 Q511.70000000000005,377.8 518,376 Q514.7,377.8 512,380 Z" class="f-weed"/>
+    <ellipse cx="475" cy="146" rx="7" ry="2" class="f-crack"/>
+    <path d="M475,145 Q472.3,142.25 469,140 Q475.3,142.25 475,145 Z" class="f-weed"/>
+    <path d="M475,145 Q472.9,140.05 472,136 Q475.9,140.05 475,145 Z" class="f-weed-2"/>
+    <path d="M475,145 Q473.5,138.95 475,134 Q476.5,138.95 475,145 Z" class="f-weed"/>
+    <path d="M475,145 Q474.1,140.6 478,137 Q477.1,140.6 475,145 Z" class="f-weed-2"/>
+    <path d="M475,145 Q474.7,142.8 481,141 Q477.7,142.8 475,145 Z" class="f-weed"/>
+    <ellipse cx="868" cy="131" rx="7" ry="2" class="f-crack"/>
+    <path d="M868,130 Q865.3,127.25 862,125 Q868.3,127.25 868,130 Z" class="f-weed"/>
+    <path d="M868,130 Q865.9,125.05 865,121 Q868.9,125.05 868,130 Z" class="f-weed-2"/>
+    <path d="M868,130 Q866.5,123.95 868,119 Q869.5,123.95 868,130 Z" class="f-weed"/>
+    <path d="M868,130 Q867.1,125.6 871,122 Q870.1,125.6 868,130 Z" class="f-weed-2"/>
+    <path d="M868,130 Q867.7,127.8 874,126 Q870.7,127.8 868,130 Z" class="f-weed"/>
+    <ellipse cx="70" cy="429" rx="7" ry="2" class="f-crack"/>
+    <path d="M70,428 Q67.3,425.25 64,423 Q70.3,425.25 70,428 Z" class="f-weed"/>
+    <path d="M70,428 Q67.9,423.05 67,419 Q70.9,423.05 70,428 Z" class="f-weed-2"/>
+    <path d="M70,428 Q68.5,421.95 70,417 Q71.5,421.95 70,428 Z" class="f-weed"/>
+    <path d="M70,428 Q69.1,423.6 73,420 Q72.1,423.6 70,428 Z" class="f-weed-2"/>
+    <path d="M70,428 Q69.7,425.8 76,424 Q72.7,425.8 70,428 Z" class="f-weed"/>
+    <ellipse cx="380" cy="429" rx="7" ry="2" class="f-crack"/>
+    <path d="M380,428 Q377.3,425.25 374,423 Q380.3,425.25 380,428 Z" class="f-weed"/>
+    <path d="M380,428 Q377.9,423.05 377,419 Q380.9,423.05 380,428 Z" class="f-weed-2"/>
+    <path d="M380,428 Q378.5,421.95 380,417 Q381.5,421.95 380,428 Z" class="f-weed"/>
+    <path d="M380,428 Q379.1,423.6 383,420 Q382.1,423.6 380,428 Z" class="f-weed-2"/>
+    <path d="M380,428 Q379.7,425.8 386,424 Q382.7,425.8 380,428 Z" class="f-weed"/>
+    <ellipse cx="640" cy="513" rx="7" ry="2" class="f-crack"/>
+    <path d="M640,512 Q637.3,509.25 634,507 Q640.3,509.25 640,512 Z" class="f-weed"/>
+    <path d="M640,512 Q637.9,507.05 637,503 Q640.9,507.05 640,512 Z" class="f-weed-2"/>
+    <path d="M640,512 Q638.5,505.95 640,501 Q641.5,505.95 640,512 Z" class="f-weed"/>
+    <path d="M640,512 Q639.1,507.6 643,504 Q642.1,507.6 640,512 Z" class="f-weed-2"/>
+    <path d="M640,512 Q639.7,509.8 646,508 Q642.7,509.8 640,512 Z" class="f-weed"/>
+    <ellipse cx="820" cy="513" rx="7" ry="2" class="f-crack"/>
+    <path d="M820,512 Q817.3,509.25 814,507 Q820.3,509.25 820,512 Z" class="f-weed"/>
+    <path d="M820,512 Q817.9,507.05 817,503 Q820.9,507.05 820,512 Z" class="f-weed-2"/>
+    <path d="M820,512 Q818.5,505.95 820,501 Q821.5,505.95 820,512 Z" class="f-weed"/>
+    <path d="M820,512 Q819.1,507.6 823,504 Q822.1,507.6 820,512 Z" class="f-weed-2"/>
+    <path d="M820,512 Q819.7,509.8 826,508 Q822.7,509.8 820,512 Z" class="f-weed"/>
+    <ellipse cx="1100" cy="613" rx="7" ry="2" class="f-crack"/>
+    <path d="M1100,612 Q1097.3,609.25 1094,607 Q1100.3,609.25 1100,612 Z" class="f-weed"/>
+    <path d="M1100,612 Q1097.9,607.05 1097,603 Q1100.9,607.05 1100,612 Z" class="f-weed-2"/>
+    <path d="M1100,612 Q1098.5,605.95 1100,601 Q1101.5,605.95 1100,612 Z" class="f-weed"/>
+    <path d="M1100,612 Q1099.1,607.6 1103,604 Q1102.1,607.6 1100,612 Z" class="f-weed-2"/>
+    <path d="M1100,612 Q1099.7,609.8 1106,608 Q1102.7,609.8 1100,612 Z" class="f-weed"/>
+    <ellipse cx="1162" cy="669" rx="7" ry="2" class="f-crack"/>
+    <path d="M1162,668 Q1159.3,665.25 1156,663 Q1162.3,665.25 1162,668 Z" class="f-weed"/>
+    <path d="M1162,668 Q1159.9,663.05 1159,659 Q1162.9,663.05 1162,668 Z" class="f-weed-2"/>
+    <path d="M1162,668 Q1160.5,661.95 1162,657 Q1163.5,661.95 1162,668 Z" class="f-weed"/>
+    <path d="M1162,668 Q1161.1,663.6 1165,660 Q1164.1,663.6 1162,668 Z" class="f-weed-2"/>
+    <path d="M1162,668 Q1161.7,665.8 1168,664 Q1164.7,665.8 1162,668 Z" class="f-weed"/>
+    <ellipse cx="1120" cy="673" rx="7" ry="2" class="f-crack"/>
+    <path d="M1120,672 Q1117.3,669.25 1114,667 Q1120.3,669.25 1120,672 Z" class="f-weed"/>
+    <path d="M1120,672 Q1117.9,667.05 1117,663 Q1120.9,667.05 1120,672 Z" class="f-weed-2"/>
+    <path d="M1120,672 Q1118.5,665.95 1120,661 Q1121.5,665.95 1120,672 Z" class="f-weed"/>
+    <path d="M1120,672 Q1119.1,667.6 1123,664 Q1122.1,667.6 1120,672 Z" class="f-weed-2"/>
+    <path d="M1120,672 Q1119.7,669.8 1126,668 Q1122.7,669.8 1120,672 Z" class="f-weed"/>
+    <ellipse cx="884" cy="599" rx="7" ry="2" class="f-crack"/>
+    <path d="M884,598 Q881.3,595.25 878,593 Q884.3,595.25 884,598 Z" class="f-weed"/>
+    <path d="M884,598 Q881.9,593.05 881,589 Q884.9,593.05 884,598 Z" class="f-weed-2"/>
+    <path d="M884,598 Q882.5,591.95 884,587 Q885.5,591.95 884,598 Z" class="f-weed"/>
+    <path d="M884,598 Q883.1,593.6 887,590 Q886.1,593.6 884,598 Z" class="f-weed-2"/>
+    <path d="M884,598 Q883.7,595.8 890,594 Q886.7,595.8 884,598 Z" class="f-weed"/>
+    <ellipse cx="1150" cy="345" rx="7" ry="2" class="f-crack"/>
+    <path d="M1150,344 Q1147.3,341.25 1144,339 Q1150.3,341.25 1150,344 Z" class="f-weed"/>
+    <path d="M1150,344 Q1147.9,339.05 1147,335 Q1150.9,339.05 1150,344 Z" class="f-weed-2"/>
+    <path d="M1150,344 Q1148.5,337.95 1150,333 Q1151.5,337.95 1150,344 Z" class="f-weed"/>
+    <path d="M1150,344 Q1149.1,339.6 1153,336 Q1152.1,339.6 1150,344 Z" class="f-weed-2"/>
+    <path d="M1150,344 Q1149.7,341.8 1156,340 Q1152.7,341.8 1150,344 Z" class="f-weed"/>
+    <ellipse cx="600" cy="513" rx="7" ry="2" class="f-crack"/>
+    <path d="M600,512 Q597.3,509.25 594,507 Q600.3,509.25 600,512 Z" class="f-weed"/>
+    <path d="M600,512 Q597.9,507.05 597,503 Q600.9,507.05 600,512 Z" class="f-weed-2"/>
+    <path d="M600,512 Q598.5,505.95 600,501 Q601.5,505.95 600,512 Z" class="f-weed"/>
+    <path d="M600,512 Q599.1,507.6 603,504 Q602.1,507.6 600,512 Z" class="f-weed-2"/>
+    <path d="M600,512 Q599.7,509.8 606,508 Q602.7,509.8 600,512 Z" class="f-weed"/>
+    <ellipse cx="210" cy="513" rx="7" ry="2" class="f-crack"/>
+    <path d="M210,512 Q207.3,509.25 204,507 Q210.3,509.25 210,512 Z" class="f-weed"/>
+    <path d="M210,512 Q207.9,507.05 207,503 Q210.9,507.05 210,512 Z" class="f-weed-2"/>
+    <path d="M210,512 Q208.5,505.95 210,501 Q211.5,505.95 210,512 Z" class="f-weed"/>
+    <path d="M210,512 Q209.1,507.6 213,504 Q212.1,507.6 210,512 Z" class="f-weed-2"/>
+    <path d="M210,512 Q209.7,509.8 216,508 Q212.7,509.8 210,512 Z" class="f-weed"/>
+    <ellipse cx="700" cy="793" rx="7" ry="2" class="f-crack"/>
+    <path d="M700,792 Q697.3,789.25 694,787 Q700.3,789.25 700,792 Z" class="f-weed"/>
+    <path d="M700,792 Q697.9,787.05 697,783 Q700.9,787.05 700,792 Z" class="f-weed-2"/>
+    <path d="M700,792 Q698.5,785.95 700,781 Q701.5,785.95 700,792 Z" class="f-weed"/>
+    <path d="M700,792 Q699.1,787.6 703,784 Q702.1,787.6 700,792 Z" class="f-weed-2"/>
+    <path d="M700,792 Q699.7,789.8 706,788 Q702.7,789.8 700,792 Z" class="f-weed"/>
+    <ellipse cx="395" cy="796" rx="7" ry="2" class="f-crack"/>
+    <path d="M395,795 Q392.3,792.25 389,790 Q395.3,792.25 395,795 Z" class="f-weed"/>
+    <path d="M395,795 Q392.9,790.05 392,786 Q395.9,790.05 395,795 Z" class="f-weed-2"/>
+    <path d="M395,795 Q393.5,788.95 395,784 Q396.5,788.95 395,795 Z" class="f-weed"/>
+    <path d="M395,795 Q394.1,790.6 398,787 Q397.1,790.6 395,795 Z" class="f-weed-2"/>
+    <path d="M395,795 Q394.7,792.8 401,791 Q397.7,792.8 395,795 Z" class="f-weed"/>
+    <polygon points="180,150 278.17083746728116,91.0974975196313 568.1708374672811,91.0974975196313 568.1708374672811,351.0974975196313 470,410 180,410" class="f-shadow"/>
+    <polygon points="440,372 462.7896586977617,358.326204781343 490.7896586977617,358.326204781343 490.7896586977617,394.326204781343 468,408 440,408" class="f-shadow"/>
+    <polygon points="530,170 639.565666816162,104.26059991030279 799.565666816162,104.26059991030279 799.565666816162,344.2605999103028 690,410 530,410" class="f-shadow"/>
+    <polygon points="700,180 802.5534641399277,118.46792151604342 972.5534641399277,118.46792151604342 972.5534641399277,348.4679215160434 870,410 700,410" class="f-shadow"/>
+    <polygon points="60,525 82.7896586977617,511.326204781343 182.7896586977617,511.326204781343 182.7896586977617,545.326204781343 160,559 60,559" class="f-shadow"/>
+    <polygon points="180,525 206.29576003587889,509.2225439784727 250.29576003587889,509.2225439784727 250.29576003587889,553.2225439784727 224,569 180,569" class="f-shadow"/>
+    <polygon points="380,530 483.42998947445693,467.94200631532584 683.429989474457,467.94200631532584 683.429989474457,697.9420063153258 580,760 380,760" class="f-shadow"/>
+    <polygon points="680,530 763.7958219810007,479.72250681139957 808.7958219810007,479.72250681139957 808.7958219810007,649.7225068113996 725,700 680,700" class="f-shadow"/>
+    <polygon points="725,530 808.7958219810007,479.72250681139957 853.7958219810007,479.72250681139957 853.7958219810007,649.7225068113996 770,700 725,700" class="f-shadow"/>
+    <polygon points="770,530 853.7958219810007,479.72250681139957 898.7958219810007,479.72250681139957 898.7958219810007,649.7225068113996 815,700 770,700" class="f-shadow"/>
+    <polygon points="815,530 898.7958219810007,479.72250681139957 943.7958219810007,479.72250681139957 943.7958219810007,649.7225068113996 860,700 815,700" class="f-shadow"/>
+    <polygon points="1110,620 1138.0488107049375,603.1707135770375 1184.0488107049375,603.1707135770375 1184.0488107049375,649.1707135770375 1156,666 1110,666" class="f-shadow"/>
+    <polygon points="1095,316 1130.0610133811717,294.9633919712969 1190.0610133811717,294.9633919712969 1190.0610133811717,300.9633919712969 1155,322 1095,322" class="f-shadow"/>
+    <polygon points="688,762 705.1798965567742,751.6920620659355 727.1798965567742,751.6920620659355 727.1798965567742,769.6920620659355 710,780 688,780" class="f-shadow"/>
+    <polygon points="733,762 750.1798965567742,751.6920620659355 772.1798965567742,751.6920620659355 772.1798965567742,769.6920620659355 755,780 733,780" class="f-shadow"/>
+    <polygon points="778,762 795.1798965567742,751.6920620659355 817.1798965567742,751.6920620659355 817.1798965567742,769.6920620659355 800,780 778,780" class="f-shadow"/>
+    <polygon points="823,762 840.1798965567742,751.6920620659355 862.1798965567742,751.6920620659355 862.1798965567742,769.6920620659355 845,780 823,780" class="f-shadow"/>
+    <polygon points="540,75 554.7256256200922,66.16462462794469 584.7256256200922,66.16462462794469 584.7256256200922,110.16462462794469 570,119 540,119" class="f-shadow"/>
+    <polygon points="660,75 674.7256256200922,66.16462462794469 704.7256256200922,66.16462462794469 704.7256256200922,110.16462462794469 690,119 660,119" class="f-shadow"/>
+    <polygon points="780,75 794.7256256200922,66.16462462794469 824.7256256200922,66.16462462794469 824.7256256200922,110.16462462794469 810,119 780,119" class="f-shadow"/>
+    <polygon points="560,433 574.7256256200922,424.1646246279447 618.7256256200922,424.1646246279447 618.7256256200922,444.1646246279447 604,453 560,453" class="f-shadow"/>
+    <polygon points="730,433 744.7256256200922,424.1646246279447 788.7256256200922,424.1646246279447 788.7256256200922,444.1646246279447 774,453 730,453" class="f-shadow"/>
+    <polygon points="900,350 924.5427093668203,335.27437437990784 979.5427093668203,335.27437437990784 979.5427093668203,395.27437437990784 955,410 900,410" class="f-shadow"/>
+    <polygon points="965,350 989.5427093668203,335.27437437990784 1044.5427093668202,335.27437437990784 1044.5427093668202,395.27437437990784 1020,410 965,410" class="f-shadow"/>
+    <polygon points="1030,350 1054.5427093668202,335.27437437990784 1109.5427093668202,335.27437437990784 1109.5427093668202,395.27437437990784 1085,410 1030,410" class="f-shadow"/>
+    <polygon points="1095,350 1119.5427093668202,335.27437437990784 1174.5427093668202,335.27437437990784 1174.5427093668202,395.27437437990784 1150,410 1095,410" class="f-shadow"/>
+    <polygon points="900,530 924.5427093668203,515.2743743799078 979.5427093668203,515.2743743799078 979.5427093668203,575.2743743799078 955,590 900,590" class="f-shadow"/>
+    <polygon points="965,530 989.5427093668203,515.2743743799078 1044.5427093668202,515.2743743799078 1044.5427093668202,575.2743743799078 1020,590 965,590" class="f-shadow"/>
+    <polygon points="1030,530 1054.5427093668202,515.2743743799078 1109.5427093668202,515.2743743799078 1109.5427093668202,575.2743743799078 1085,590 1030,590" class="f-shadow"/>
+    <polygon points="1095,530 1119.5427093668202,515.2743743799078 1174.5427093668202,515.2743743799078 1174.5427093668202,575.2743743799078 1150,590 1095,590" class="f-shadow"/>
+    <polygon points="180,150 470,150 340,280 310,280" class="f-terracotta"/>
+    <polygon points="180,150 470,150 340,280 310,280" class="shade-2"/>
+    <polygon points="470,150 470,410 340,280" class="f-terracotta"/>
+    <polygon points="470,150 470,410 340,280" class="shade-1"/>
+    <polygon points="180,150 310,280 180,410" class="f-terracotta"/>
+    <polygon points="180,410 470,410 340,280 310,280" class="f-terracotta" data-anchor="roof-hall"/>
+    <polygon points="180,150 470,150 470,410 180,410" fill="none"/>
+    <polygon points="300,410 350,410 350,418 300,418" class="f-stone" data-anchor="door-hall"/>
+    <circle cx="325" cy="398" r="9" class="f-clock"/>
+    <polygon points="440,372 468,372 468,408 440,408" class="f-ochre-dim"/>
+    <polygon points="440,372 468,372 468,408 440,408" fill="none"/>
+    <polygon points="530,170 610,170 610,410 530,410" class="f-bakery"/>
+    <polygon points="610,170 690,170 690,410 610,410" class="f-bakery" data-anchor="roof-bakery"/>
+    <polygon points="610,170 690,170 690,410 610,410" class="shade-1"/>
+    <polygon points="530,170 690,170 690,410 530,410" fill="none"/>
+    <polygon points="640,182 660,182 660,202 640,202" class="f-brick"/>
+    <polygon points="590,410 630,410 630,418 590,418" class="f-stone" data-anchor="door-bakery"/>
+    <polygon points="700,180 870,180 785,265" class="f-blue"/>
+    <polygon points="707.6,182.5 768.9,182.5 738.3,213.2" class="f-grime"/>
+    <polygon points="700,180 870,180 785,265" class="shade-2"/>
+    <polygon points="870,180 870,410 785,325 785,265" class="f-blue"/>
+    <polygon points="863.1,198.6 863.1,264.9 838.6,240.4 838.6,223.1" class="f-grime"/>
+    <polygon points="870,180 870,410 785,325 785,265" class="shade-1"/>
+    <polygon points="700,180 785,265 785,325 700,410" class="f-blue"/>
+    <polygon points="704.9,193.1 733.4,221.7 733.4,241.8 704.9,270.4" class="f-moss"/>
+    <polygon points="700,410 870,410 785,325" class="f-blue" data-anchor="roof-sale-room"/>
+    <polygon points="707,407.7 769.5,407.7 738.3,376.4" class="f-grime"/>
+    <polygon points="700,180 870,180 870,410 700,410" fill="none"/>
+    <polygon points="765,410 805,410 805,418 765,418" class="f-stone" data-anchor="door-sale-room"/>
+    <polygon points="60,525 160,525 160,559 60,559" class="f-wood"/>
+    <polygon points="65.4,526.8 99.6,526.8 99.6,538.5 65.4,538.5" class="f-moss"/>
+    <polygon points="60,525 160,525 160,559 60,559" fill="none"/>
+    <polygon points="180,525 224,525 224,569 180,569" class="f-terracotta"/>
+    <polygon points="180,525 224,525 224,569 180,569" fill="none"/>
+    <polygon points="380,530 580,530 480,630" class="f-library"/>
+    <polygon points="380,530 580,530 480,630" class="shade-2"/>
+    <polygon points="580,530 580,760 480,660 480,630" class="f-library"/>
+    <polygon points="580,530 580,760 480,660 480,630" class="shade-1"/>
+    <polygon points="380,530 480,630 480,660 380,760" class="f-library"/>
+    <polygon points="380,760 580,760 480,660" class="f-library" data-anchor="roof-library"/>
+    <polygon points="380,530 580,530 580,760 380,760" fill="none"/>
+    <polygon points="680,530 702.5,530 702.5,700 680,700" class="f-terracotta"/>
+    <polygon points="702.5,530 725,530 725,700 702.5,700" class="f-terracotta" data-anchor="roof-houses"/>
+    <polygon points="702.5,530 725,530 725,700 702.5,700" class="shade-1"/>
+    <polygon points="680,530 725,530 725,700 680,700" fill="none"/>
+    <polygon points="725,530 747.5,530 747.5,700 725,700" class="f-wood"/>
+    <polygon points="725.7,535.4 734.4,535.4 734.4,601.1 725.7,601.1" class="f-grime"/>
+    <polygon points="747.5,530 770,530 770,700 747.5,700" class="f-wood"/>
+    <polygon points="749.2,542.9 755.9,542.9 755.9,593.6 749.2,593.6" class="f-moss"/>
+    <polygon points="747.5,530 770,530 770,700 747.5,700" class="shade-1"/>
+    <polygon points="725,530 770,530 770,700 725,700" fill="none"/>
+    <polygon points="770,530 792.5,530 792.5,700 770,700" class="f-terracotta"/>
+    <polygon points="792.5,530 815,530 815,700 792.5,700" class="f-terracotta"/>
+    <polygon points="792.5,530 815,530 815,700 792.5,700" class="shade-1"/>
+    <polygon points="770,530 815,530 815,700 770,700" fill="none"/>
+    <polygon points="815,530 837.5,530 837.5,700 815,700" class="f-wood"/>
+    <polygon points="815.9,537 824.2,537 824.2,599.5 815.9,599.5" class="f-moss"/>
+    <polygon points="821.2,636.1 823.5,636.1 823.5,653.4 821.2,653.4" class="f-battens"/>
+    <polygon points="837.5,530 860,530 860,700 837.5,700" class="f-wood"/>
+    <polygon points="839.2,543.2 845.9,543.2 845.9,593.3 839.2,593.3" class="f-grime"/>
+    <polygon points="851.7,577.7 853.7,577.7 853.7,592.8 851.7,592.8" class="f-battens"/>
+    <polygon points="837.5,530 860,530 860,700 837.5,700" class="shade-1"/>
+    <polygon points="815,530 860,530 860,700 815,700" fill="none"/>
+    <polygon points="1110,620 1156,620 1156,666 1110,666" class="f-wood"/>
+    <polygon points="1113.8,623.8 1126.9,623.8 1126.9,636.9 1113.8,636.9" class="f-moss"/>
+    <polygon points="1110,620 1156,620 1156,666 1110,666" fill="none"/>
+    <polygon points="1095,316 1155,316 1155,322 1095,322" class="f-wood" data-anchor="billboard-1"/>
+    <polygon points="1095,316 1155,316 1155,322 1095,322" fill="none"/>
+    <polygon points="688,762 710,762 710,771 688,771" class="f-wood"/>
+    <polygon points="689.2,762.5 696.7,762.5 696.7,765.5 689.2,765.5" class="f-grime"/>
+    <polygon points="688,762 710,762 710,771 688,771" class="shade-2"/>
+    <polygon points="688,771 710,771 710,780 688,780" class="f-wood"/>
+    <polygon points="688.7,771.3 697.2,771.3 697.2,774.8 688.7,774.8" class="f-moss"/>
+    <polygon points="688,762 710,762 710,780 688,780" fill="none"/>
+    <polygon points="733,762 755,762 755,771 733,771" class="f-wood"/>
+    <polygon points="734.6,762.7 741.3,762.7 741.3,765.4 734.6,765.4" class="f-moss"/>
+    <polygon points="733,762 755,762 755,771 733,771" class="shade-2"/>
+    <polygon points="733,771 755,771 755,780 733,780" class="f-wood"/>
+    <polygon points="734.1,771.4 741.8,771.4 741.8,774.6 734.1,774.6" class="f-grime"/>
+    <polygon points="746.8,773.5 748.9,773.5 748.9,774.4 746.8,774.4" class="f-battens"/>
+    <polygon points="733,762 755,762 755,780 733,780" fill="none"/>
+    <polygon points="778,762 800,762 800,771 778,771" class="f-wood"/>
+    <polygon points="779.8,762.7 786.1,762.7 786.1,765.3 779.8,765.3" class="f-grime"/>
+    <polygon points="778,762 800,762 800,771 778,771" class="shade-2"/>
+    <polygon points="778,771 800,771 800,780 778,780" class="f-wood"/>
+    <polygon points="779.3,771.5 786.6,771.5 786.6,774.5 779.3,774.5" class="f-grime"/>
+    <polygon points="784.3,776.7 786,776.7 786,777.4 784.3,777.4" class="f-battens"/>
+    <polygon points="778,762 800,762 800,780 778,780" fill="none"/>
+    <polygon points="823,762 845,762 845,771 823,771" class="f-wood"/>
+    <polygon points="823.7,762.3 832.2,762.3 832.2,765.8 823.7,765.8" class="f-grime"/>
+    <polygon points="823,762 845,762 845,771 823,771" class="shade-2"/>
+    <polygon points="823,771 845,771 845,780 823,780" class="f-wood"/>
+    <polygon points="824.5,771.6 831.4,771.6 831.4,774.4 824.5,774.4" class="f-moss"/>
+    <polygon points="836.9,776.7 838.8,776.7 838.8,777.5 836.9,777.5" class="f-battens"/>
+    <polygon points="823,762 845,762 845,780 823,780" fill="none"/>
+    <polygon points="540,75 570,75 570,119 540,119" class="f-terracotta"/>
+    <polygon points="540,75 570,75 570,119 540,119" fill="none"/>
+    <polygon points="660,75 690,75 690,119 660,119" class="f-blue"/>
+    <polygon points="660,75 690,75 690,119 660,119" fill="none"/>
+    <polygon points="780,75 810,75 810,119 780,119" class="f-sage"/>
+    <polygon points="780,75 810,75 810,119 780,119" fill="none"/>
+    <polygon points="560,433 604,433 604,453 560,453" class="f-ochre-dim"/>
+    <polygon points="560,433 604,433 604,453 560,453" fill="none"/>
+    <polygon points="730,433 774,433 774,453 730,453" class="f-blue"/>
+    <polygon points="730,433 774,433 774,453 730,453" fill="none"/>
+    <polygon points="900,350 927.5,350 927.5,410 900,410" class="f-terracotta"/>
+    <polygon points="927.5,350 955,350 955,410 927.5,410" class="f-terracotta" data-anchor="awning-1"/>
+    <polygon points="927.5,350 955,350 955,410 927.5,410" class="shade-1"/>
+    <polygon points="900,350 955,350 955,410 900,410" fill="none"/>
+    <polygon points="965,350 992.5,350 992.5,410 965,410" class="f-sage"/>
+    <polygon points="992.5,350 1020,350 1020,410 992.5,410" class="f-sage" data-anchor="awning-2"/>
+    <polygon points="992.5,350 1020,350 1020,410 992.5,410" class="shade-1"/>
+    <polygon points="965,350 1020,350 1020,410 965,410" fill="none"/>
+    <polygon points="1030,350 1057.5,350 1057.5,410 1030,410" class="f-ochre-dim"/>
+    <polygon points="1057.5,350 1085,350 1085,410 1057.5,410" class="f-ochre-dim" data-anchor="awning-3"/>
+    <polygon points="1057.5,350 1085,350 1085,410 1057.5,410" class="shade-1"/>
+    <polygon points="1030,350 1085,350 1085,410 1030,410" fill="none"/>
+    <polygon points="1095,350 1122.5,350 1122.5,410 1095,410" class="f-blue"/>
+    <polygon points="1122.5,350 1150,350 1150,410 1122.5,410" class="f-blue" data-anchor="awning-4"/>
+    <polygon points="1122.5,350 1150,350 1150,410 1122.5,410" class="shade-1"/>
+    <polygon points="1095,350 1150,350 1150,410 1095,410" fill="none"/>
+    <polygon points="900,530 927.5,530 927.5,590 900,590" class="f-ochre-dim"/>
+    <polygon points="927.5,530 955,530 955,590 927.5,590" class="f-ochre-dim" data-anchor="awning-5"/>
+    <polygon points="927.5,530 955,530 955,590 927.5,590" class="shade-1"/>
+    <polygon points="900,530 955,530 955,590 900,590" fill="none"/>
+    <polygon points="965,530 992.5,530 992.5,590 965,590" class="f-blue"/>
+    <polygon points="992.5,530 1020,530 1020,590 992.5,590" class="f-blue" data-anchor="awning-6"/>
+    <polygon points="992.5,530 1020,530 1020,590 992.5,590" class="shade-1"/>
+    <polygon points="965,530 1020,530 1020,590 965,590" fill="none"/>
+    <polygon points="1030,530 1057.5,530 1057.5,590 1030,590" class="f-terracotta"/>
+    <polygon points="1057.5,530 1085,530 1085,590 1057.5,590" class="f-terracotta" data-anchor="awning-7"/>
+    <polygon points="1057.5,530 1085,530 1085,590 1057.5,590" class="shade-1"/>
+    <polygon points="1030,530 1085,530 1085,590 1030,590" fill="none"/>
+    <polygon points="1095,530 1122.5,530 1122.5,590 1095,590" class="f-sage"/>
+    <polygon points="1122.5,530 1150,530 1150,590 1122.5,590" class="f-sage" data-anchor="awning-8"/>
+    <polygon points="1122.5,530 1150,530 1150,590 1122.5,590" class="shade-1"/>
+    <polygon points="1095,530 1150,530 1150,590 1095,590" fill="none"/>
+    <polygon points="870,260 874,260 874,330 870,330" class="f-poster" data-anchor="billboard-2"/>
+    <polygon points="160,528 164,528 164,556 160,556" class="f-poster" data-anchor="billboard-3"/>
+    <circle cx="178" cy="516" r="5" class="f-bin-public"/>
+    <circle cx="178" cy="516" r="2.6" class="f-bin-lid"/>
+    <circle cx="358" cy="433" r="5" class="f-bin-public"/>
+    <circle cx="358" cy="433" r="2.6" class="f-bin-lid"/>
+    <circle cx="886" cy="605" r="5" class="f-bin-public"/>
+    <circle cx="886" cy="605" r="2.6" class="f-bin-lid"/>
+    <circle cx="1152" cy="605" r="5" class="f-bin-public"/>
+    <circle cx="1152" cy="605" r="2.6" class="f-bin-lid"/>
+    <polygon points="712,769 722,769 722,781 712,781" class="f-bin-lid"/>
+    <polygon points="757,769 767,769 767,781 757,781" class="f-bin-lid"/>
+    <polygon points="802,769 812,769 812,781 802,781" class="f-bin-lid"/>
+    <polygon points="847,769 857,769 857,781 847,781" class="f-bin-lid"/>
+    <polygon points="523,397 533,397 533,409 523,409" class="f-bin-lid"/>
+    <polygon points="868,410 774.8,552.2 759.4,540.8 745.4,527.8 733,513.3 722.2,497.5 713.3,480.5 706.4,462.7 701.5,444.3 698.7,425.4" class="f-cone"/>
+    <circle cx="868" cy="410" r="5" class="f-camera"/>
+    <polygon points="532,410 681.2,425.4 678.9,440.2 675.2,454.7 670,468.8 663.4,482.3 655.6,495 646.5,507 636.2,517.9 624.9,527.8" class="f-cone"/>
+    <circle cx="532" cy="410" r="5" class="f-camera"/>
+    <polygon points="792,530 709.2,443.2 718.9,434.9 729.4,427.6 740.6,421.6 752.4,416.7 764.6,413.2 777.1,410.9 789.8,410 802.6,410.5" class="f-cone"/>
+    <circle cx="792" cy="530" r="5" class="f-camera"/>
+    <polygon points="112,411 148,411 148,417 112,417" class="f-sign"/>
+    <text x="115" y="415.6" font-size="4.6" class="sign-words">Lantern Row</text>
+    <polygon points="842,411 878,411 878,417 842,417" class="f-sign"/>
+    <text x="845" y="415.6" font-size="4.6" class="sign-words">Lantern Row</text>
+    <polygon points="455,522 505,522 505,530 455,530" class="f-stone" data-anchor="door-library"/>
+    <line x1="918" y1="350" x2="918" y2="410" class="thin"/>
+    <line x1="936" y1="350" x2="936" y2="410" class="thin"/>
+    <line x1="983" y1="350" x2="983" y2="410" class="thin"/>
+    <line x1="1001" y1="350" x2="1001" y2="410" class="thin"/>
+    <line x1="1048" y1="350" x2="1048" y2="410" class="thin"/>
+    <line x1="1066" y1="350" x2="1066" y2="410" class="thin"/>
+    <line x1="1113" y1="350" x2="1113" y2="410" class="thin"/>
+    <line x1="1131" y1="350" x2="1131" y2="410" class="thin"/>
+    <line x1="918" y1="530" x2="918" y2="590" class="thin"/>
+    <line x1="936" y1="530" x2="936" y2="590" class="thin"/>
+    <line x1="983" y1="530" x2="983" y2="590" class="thin"/>
+    <line x1="1001" y1="530" x2="1001" y2="590" class="thin"/>
+    <line x1="1048" y1="530" x2="1048" y2="590" class="thin"/>
+    <line x1="1066" y1="530" x2="1066" y2="590" class="thin"/>
+    <line x1="1113" y1="530" x2="1113" y2="590" class="thin"/>
+    <line x1="1131" y1="530" x2="1131" y2="590" class="thin"/>
+    <circle cx="275" cy="549.1" r="15.1" class="f-plane cloud-edge"/>
+    <circle cx="262" cy="557.4" r="14.3" class="f-plane cloud-edge"/>
+    <circle cx="288.5" cy="557.9" r="13.5" class="f-plane cloud-edge"/>
+    <circle cx="269.3" cy="568.3" r="14.6" class="f-plane cloud-edge"/>
+    <circle cx="282.8" cy="568.8" r="13.5" class="f-plane cloud-edge"/>
+    <circle cx="275" cy="560.5" r="15.6" class="f-plane cloud-edge"/>
+    <circle cx="275" cy="549.1" r="15.1" class="f-plane cloud-fill"/>
+    <path d="M290.1,549.1 A15.1,15.1 0 0 1 275,564.2 A12.4,12.4 0 0 0 290.1,549.1 Z" class="shade-2"/>
+    <circle cx="269.7" cy="543.8" r="4.8" class="f-leaf-light"/>
+    <circle cx="262" cy="557.4" r="14.3" class="f-plane cloud-fill"/>
+    <path d="M276.3,557.4 A14.3,14.3 0 0 1 262,571.7 A11.7,11.7 0 0 0 276.3,557.4 Z" class="shade-2"/>
+    <circle cx="257" cy="552.4" r="4.6" class="f-leaf-light"/>
+    <circle cx="288.5" cy="557.9" r="13.5" class="f-plane cloud-fill"/>
+    <path d="M302,557.9 A13.5,13.5 0 0 1 288.5,571.4 A11.1,11.1 0 0 0 302,557.9 Z" class="shade-2"/>
+    <circle cx="283.8" cy="553.2" r="4.3" class="f-leaf-light"/>
+    <circle cx="269.3" cy="568.3" r="14.6" class="f-plane cloud-fill"/>
+    <path d="M283.9,568.3 A14.6,14.6 0 0 1 269.3,582.9 A12,12 0 0 0 283.9,568.3 Z" class="shade-2"/>
+    <circle cx="264.2" cy="563.2" r="4.7" class="f-leaf-light"/>
+    <circle cx="282.8" cy="568.8" r="13.5" class="f-plane cloud-fill"/>
+    <path d="M296.3,568.8 A13.5,13.5 0 0 1 282.8,582.3 A11.1,11.1 0 0 0 296.3,568.8 Z" class="shade-2"/>
+    <circle cx="278.1" cy="564.1" r="4.3" class="f-leaf-light"/>
+    <circle cx="275" cy="560.5" r="15.6" class="f-plane cloud-fill" data-anchor="tree-plane-1"/>
+    <path d="M290.6,560.5 A15.6,15.6 0 0 1 275,576.1 A12.8,12.8 0 0 0 290.6,560.5 Z" class="shade-2"/>
+    <circle cx="269.5" cy="555" r="5" class="f-leaf-light"/>
+    <path d="M335,567.8 L314.2,547" fill="none" class="branch"/>
+    <path d="M335,567.8 L354.5,545.7" fill="none" class="branch"/>
+    <path d="M335,567.8 L337.6,536.6" fill="none" class="branch"/>
+    <path d="M335,567.8 L319.4,563.9" fill="none" class="branch"/>
+    <path d="M335,567.8 L351.9,562.6" fill="none" class="branch"/>
+    <circle cx="323.3" cy="553.5" r="10.9" class="f-leaf-dry cloud-edge"/>
+    <circle cx="345.4" cy="557.4" r="10.4" class="f-leaf-dry cloud-edge"/>
+    <circle cx="333.7" cy="567.8" r="11.4" class="f-leaf-dry cloud-edge"/>
+    <circle cx="323.3" cy="553.5" r="10.9" class="f-leaf-dry cloud-fill"/>
+    <path d="M334.2,553.5 A10.9,10.9 0 0 1 323.3,564.4 A8.9,8.9 0 0 0 334.2,553.5 Z" class="shade-2"/>
+    <circle cx="319.5" cy="549.7" r="3.5" class="f-leaf-light"/>
+    <circle cx="345.4" cy="557.4" r="10.4" class="f-leaf-dry cloud-fill"/>
+    <path d="M355.8,557.4 A10.4,10.4 0 0 1 345.4,567.8 A8.5,8.5 0 0 0 355.8,557.4 Z" class="shade-2"/>
+    <circle cx="341.8" cy="553.8" r="3.3" class="f-leaf-light"/>
+    <circle cx="333.7" cy="567.8" r="11.4" class="f-leaf-dry cloud-fill" data-anchor="tree-plane-2"/>
+    <path d="M345.1,567.8 A11.4,11.4 0 0 1 333.7,579.2 A9.3,9.3 0 0 0 345.1,567.8 Z" class="shade-2"/>
+    <circle cx="329.7" cy="563.8" r="3.6" class="f-leaf-light"/>
+    <circle cx="625" cy="554.4" r="24.4" class="f-lime cloud-edge"/>
+    <circle cx="604" cy="567.8" r="23.1" class="f-lime cloud-edge"/>
+    <circle cx="646.8" cy="568.6" r="21.8" class="f-lime cloud-edge"/>
+    <circle cx="615.8" cy="585.4" r="23.5" class="f-lime cloud-edge"/>
+    <circle cx="637.6" cy="586.3" r="21.8" class="f-lime cloud-edge"/>
+    <circle cx="625" cy="572.8" r="25.2" class="f-lime cloud-edge"/>
+    <circle cx="625" cy="554.4" r="24.4" class="f-lime cloud-fill"/>
+    <path d="M649.4,554.4 A24.4,24.4 0 0 1 625,578.8 A20,20 0 0 0 649.4,554.4 Z" class="shade-2"/>
+    <circle cx="616.5" cy="545.9" r="7.8" class="f-leaf-light"/>
+    <circle cx="604" cy="567.8" r="23.1" class="f-lime cloud-fill"/>
+    <path d="M627.1,567.8 A23.1,23.1 0 0 1 604,590.9 A18.9,18.9 0 0 0 627.1,567.8 Z" class="shade-2"/>
+    <circle cx="595.9" cy="559.7" r="7.4" class="f-leaf-light"/>
+    <circle cx="646.8" cy="568.6" r="21.8" class="f-lime cloud-fill"/>
+    <path d="M668.6,568.6 A21.8,21.8 0 0 1 646.8,590.4 A17.9,17.9 0 0 0 668.6,568.6 Z" class="shade-2"/>
+    <circle cx="639.2" cy="561" r="7" class="f-leaf-light"/>
+    <circle cx="615.8" cy="585.4" r="23.5" class="f-lime cloud-fill"/>
+    <path d="M639.3,585.4 A23.5,23.5 0 0 1 615.8,608.9 A19.3,19.3 0 0 0 639.3,585.4 Z" class="shade-2"/>
+    <circle cx="607.6" cy="577.2" r="7.5" class="f-leaf-light"/>
+    <circle cx="637.6" cy="586.3" r="21.8" class="f-lime cloud-fill"/>
+    <path d="M659.4,586.3 A21.8,21.8 0 0 1 637.6,608.1 A17.9,17.9 0 0 0 659.4,586.3 Z" class="shade-2"/>
+    <circle cx="630" cy="578.7" r="7" class="f-leaf-light"/>
+    <circle cx="625" cy="572.8" r="25.2" class="f-lime cloud-fill" data-anchor="tree-lime"/>
+    <path d="M650.2,572.8 A25.2,25.2 0 0 1 625,598 A20.7,20.7 0 0 0 650.2,572.8 Z" class="shade-2"/>
+    <circle cx="616.2" cy="564" r="8.1" class="f-leaf-light"/>
+    <ellipse cx="631.3" cy="539.2" rx="12.6" ry="5.9" class="f-nest"/>
+    <path d="M619.54,537.2 L643.06,541.2" fill="none" class="thin"/>
+    <path d="M619.54,539.2 L643.06,539.2" fill="none" class="thin"/>
+    <path d="M619.54,541.2 L643.06,537.2" fill="none" class="thin"/>
+    <ellipse cx="634.3" cy="533.2" rx="6" ry="4.5" class="f-bird"/>
+    <circle cx="639.3" cy="530.2" r="3" class="f-bird"/>
+    <circle cx="700" cy="728.3" r="9.3" class="f-plane cloud-edge"/>
+    <circle cx="692" cy="733.4" r="8.8" class="f-plane cloud-edge"/>
+    <circle cx="708.3" cy="733.7" r="8.3" class="f-plane cloud-edge"/>
+    <circle cx="696.5" cy="740.1" r="9" class="f-plane cloud-edge"/>
+    <circle cx="704.8" cy="740.4" r="8.3" class="f-plane cloud-edge"/>
+    <circle cx="700" cy="735.3" r="9.6" class="f-plane cloud-edge"/>
+    <circle cx="700" cy="728.3" r="9.3" class="f-plane cloud-fill"/>
+    <path d="M709.3,728.3 A9.3,9.3 0 0 1 700,737.6 A7.6,7.6 0 0 0 709.3,728.3 Z" class="shade-2"/>
+    <circle cx="696.7" cy="725" r="3" class="f-leaf-light"/>
+    <circle cx="692" cy="733.4" r="8.8" class="f-plane cloud-fill"/>
+    <path d="M700.8,733.4 A8.8,8.8 0 0 1 692,742.2 A7.2,7.2 0 0 0 700.8,733.4 Z" class="shade-2"/>
+    <circle cx="688.9" cy="730.3" r="2.8" class="f-leaf-light"/>
+    <circle cx="708.3" cy="733.7" r="8.3" class="f-plane cloud-fill"/>
+    <path d="M716.6,733.7 A8.3,8.3 0 0 1 708.3,742 A6.8,6.8 0 0 0 716.6,733.7 Z" class="shade-2"/>
+    <circle cx="705.4" cy="730.8" r="2.7" class="f-leaf-light"/>
+    <circle cx="696.5" cy="740.1" r="9" class="f-plane cloud-fill"/>
+    <path d="M705.5,740.1 A9,9 0 0 1 696.5,749.1 A7.4,7.4 0 0 0 705.5,740.1 Z" class="shade-2"/>
+    <circle cx="693.4" cy="737" r="2.9" class="f-leaf-light"/>
+    <circle cx="704.8" cy="740.4" r="8.3" class="f-plane cloud-fill"/>
+    <path d="M713.1,740.4 A8.3,8.3 0 0 1 704.8,748.7 A6.8,6.8 0 0 0 713.1,740.4 Z" class="shade-2"/>
+    <circle cx="701.9" cy="737.5" r="2.7" class="f-leaf-light"/>
+    <circle cx="700" cy="735.3" r="9.6" class="f-plane cloud-fill"/>
+    <path d="M709.6,735.3 A9.6,9.6 0 0 1 700,744.9 A7.9,7.9 0 0 0 709.6,735.3 Z" class="shade-2"/>
+    <circle cx="696.6" cy="731.9" r="3.1" class="f-leaf-light"/>
+    <circle cx="692.8" cy="735.8" r="2.4" class="f-fruit-red"/>
+    <circle cx="703.2" cy="730.2" r="2.4" class="f-fruit-red"/>
+    <circle cx="707.2" cy="739" r="2.4" class="f-fruit-red"/>
+    <circle cx="697.6" cy="741.4" r="2.4" class="f-fruit-red"/>
+    <circle cx="700.8" cy="735.8" r="2.4" class="f-fruit-red"/>
+    <circle cx="691.2" cy="729.4" r="2.4" class="f-fruit-red"/>
+    <circle cx="845" cy="727.4" r="10.4" class="f-lime cloud-edge"/>
+    <circle cx="836" cy="733.2" r="9.9" class="f-lime cloud-edge"/>
+    <circle cx="854.4" cy="733.6" r="9.4" class="f-lime cloud-edge"/>
+    <circle cx="841" cy="740.8" r="10.1" class="f-lime cloud-edge"/>
+    <circle cx="850.4" cy="741.1" r="9.4" class="f-lime cloud-edge"/>
+    <circle cx="845" cy="735.4" r="10.8" class="f-lime cloud-edge"/>
+    <circle cx="845" cy="727.4" r="10.4" class="f-lime cloud-fill"/>
+    <path d="M855.4,727.4 A10.4,10.4 0 0 1 845,737.8 A8.5,8.5 0 0 0 855.4,727.4 Z" class="shade-2"/>
+    <circle cx="841.4" cy="723.8" r="3.3" class="f-leaf-light"/>
+    <circle cx="836" cy="733.2" r="9.9" class="f-lime cloud-fill"/>
+    <path d="M845.9,733.2 A9.9,9.9 0 0 1 836,743.1 A8.1,8.1 0 0 0 845.9,733.2 Z" class="shade-2"/>
+    <circle cx="832.5" cy="729.7" r="3.2" class="f-leaf-light"/>
+    <circle cx="854.4" cy="733.6" r="9.4" class="f-lime cloud-fill"/>
+    <path d="M863.8,733.6 A9.4,9.4 0 0 1 854.4,743 A7.7,7.7 0 0 0 863.8,733.6 Z" class="shade-2"/>
+    <circle cx="851.1" cy="730.3" r="3" class="f-leaf-light"/>
+    <circle cx="841" cy="740.8" r="10.1" class="f-lime cloud-fill"/>
+    <path d="M851.1,740.8 A10.1,10.1 0 0 1 841,750.9 A8.3,8.3 0 0 0 851.1,740.8 Z" class="shade-2"/>
+    <circle cx="837.5" cy="737.3" r="3.2" class="f-leaf-light"/>
+    <circle cx="850.4" cy="741.1" r="9.4" class="f-lime cloud-fill"/>
+    <path d="M859.8,741.1 A9.4,9.4 0 0 1 850.4,750.5 A7.7,7.7 0 0 0 859.8,741.1 Z" class="shade-2"/>
+    <circle cx="847.1" cy="737.8" r="3" class="f-leaf-light"/>
+    <circle cx="845" cy="735.4" r="10.8" class="f-lime cloud-fill"/>
+    <path d="M855.8,735.4 A10.8,10.8 0 0 1 845,746.2 A8.9,8.9 0 0 0 855.8,735.4 Z" class="shade-2"/>
+    <circle cx="841.2" cy="731.6" r="3.5" class="f-leaf-light"/>
+    <circle cx="836.9" cy="735.9" r="2.4" class="f-fruit-orange"/>
+    <circle cx="848.6" cy="729.6" r="2.4" class="f-fruit-orange"/>
+    <circle cx="853.1" cy="739.5" r="2.4" class="f-fruit-orange"/>
+    <circle cx="842.3" cy="742.2" r="2.4" class="f-fruit-orange"/>
+    <circle cx="845.9" cy="735.9" r="2.4" class="f-fruit-orange"/>
+    <circle cx="835.1" cy="728.7" r="2.4" class="f-fruit-orange"/>
+    <path d="M1170,694.8 L1157.2,682" fill="none" class="branch"/>
+    <path d="M1170,694.8 L1182,681.2" fill="none" class="branch"/>
+    <path d="M1170,694.8 L1171.6,675.6" fill="none" class="branch"/>
+    <path d="M1170,694.8 L1160.4,692.4" fill="none" class="branch"/>
+    <path d="M1170,694.8 L1180.4,691.6" fill="none" class="branch"/>
+    <circle cx="1162.8" cy="686" r="6.7" class="f-leaf-dry cloud-edge"/>
+    <circle cx="1176.4" cy="688.4" r="6.4" class="f-leaf-dry cloud-edge"/>
+    <circle cx="1169.2" cy="694.8" r="7" class="f-leaf-dry cloud-edge"/>
+    <circle cx="1162.8" cy="686" r="6.7" class="f-leaf-dry cloud-fill"/>
+    <path d="M1169.5,686 A6.7,6.7 0 0 1 1162.8,692.7 A5.5,5.5 0 0 0 1169.5,686 Z" class="shade-2"/>
+    <circle cx="1160.5" cy="683.7" r="2.1" class="f-leaf-light"/>
+    <circle cx="1176.4" cy="688.4" r="6.4" class="f-leaf-dry cloud-fill"/>
+    <path d="M1182.8,688.4 A6.4,6.4 0 0 1 1176.4,694.8 A5.2,5.2 0 0 0 1182.8,688.4 Z" class="shade-2"/>
+    <circle cx="1174.2" cy="686.2" r="2" class="f-leaf-light"/>
+    <circle cx="1169.2" cy="694.8" r="7" class="f-leaf-dry cloud-fill"/>
+    <path d="M1176.2,694.8 A7,7 0 0 1 1169.2,701.8 A5.7,5.7 0 0 0 1176.2,694.8 Z" class="shade-2"/>
+    <circle cx="1166.8" cy="692.3" r="2.2" class="f-leaf-light"/>
+    <path d="M60,649 L42,629" fill="none" class="branch"/>
+    <path d="M42,629 l-8.7,-5.9" fill="none" class="twig"/>
+    <path d="M42,629 l-3.8,-5.9" fill="none" class="twig"/>
+    <path d="M60,649 L77,628" fill="none" class="branch"/>
+    <path d="M77,628 l3.5,-6.3" fill="none" class="twig"/>
+    <path d="M77,628 l8.4,-6.3" fill="none" class="twig"/>
+    <path d="M60,649 L61,619" fill="none" class="branch"/>
+    <path d="M61,619 l-2.1,-9.4" fill="none" class="twig"/>
+    <path d="M61,619 l2.8,-9.4" fill="none" class="twig"/>
+    <path d="M60,649 L49,639" fill="none" class="branch"/>
+    <path d="M49,639 l-6.3,-2.4" fill="none" class="twig"/>
+    <path d="M49,639 l-1.4,-2.4" fill="none" class="twig"/>
+    <path d="M60,649 L72,640" fill="none" class="branch"/>
+    <path d="M72,640 l1.8,-2.1" fill="none" class="twig"/>
+    <path d="M72,640 l6.7,-2.1" fill="none" class="twig"/>
+    <circle cx="100" cy="424" r="24" class="glow"/>
+    <circle cx="100" cy="424" r="6" class="f-ochre" data-anchor="lamp-1"/>
+    <circle cx="420" cy="424" r="24" class="glow"/>
+    <circle cx="420" cy="424" r="6" class="f-ochre" data-anchor="lamp-2"/>
+    <circle cx="700" cy="424" r="24" class="glow"/>
+    <circle cx="700" cy="424" r="6" class="f-ochre" data-anchor="lamp-3"/>
+    <circle cx="880" cy="334" r="24" class="glow"/>
+    <circle cx="880" cy="334" r="6" class="f-ochre" data-anchor="lamp-4"/>
+    <circle cx="240" cy="516" r="24" class="glow"/>
+    <circle cx="240" cy="516" r="6" class="f-ochre" data-anchor="lamp-5"/>
+    <circle cx="600" cy="516" r="24" class="glow"/>
+    <circle cx="600" cy="516" r="6" class="f-ochre" data-anchor="lamp-6"/>
+    <circle cx="880" cy="606" r="24" class="glow"/>
+    <circle cx="880" cy="606" r="6" class="f-ochre" data-anchor="lamp-7"/>
+    <circle cx="1160" cy="606" r="24" class="glow"/>
+    <circle cx="1160" cy="606" r="6" class="f-ochre" data-anchor="lamp-8"/>
+    <polygon points="200,20 360,20 360,110 200,110" fill="none" stroke="none" data-anchor="sky-1"/>
+    <polygon points="900,80 1100,80 1100,260 900,260" fill="none" stroke="none" data-anchor="sky-2"/>
+    <polygon points="40,600 340,600 340,760 40,760" fill="none" stroke="none" data-anchor="sky-3"/>
+  </g>
+  <g fill="none" stroke="none">
+    <circle data-place="street" cx="560" cy="470" r="1"/>
+    <circle data-place="bus-stop" cx="110" cy="542" r="1"/>
+    <circle data-place="tea-kiosk" cx="202" cy="547" r="1"/>
+    <circle data-place="hall" cx="330" cy="250" r="1"/>
+    <circle data-place="store-room" cx="225" cy="190" r="1"/>
+    <circle data-place="committee-room" cx="420" cy="195" r="1"/>
+    <circle data-place="caretaker-desk" cx="454" cy="390" r="1"/>
+    <circle data-place="side-door" cx="180" cy="305" r="1"/>
+    <circle data-place="notice-board" cx="250" cy="409" r="1"/>
+    <circle data-place="yard" cx="670" cy="95" r="1"/>
+    <circle data-place="alley" cx="160" cy="330" r="1"/>
+    <circle data-place="library" cx="480" cy="645" r="1"/>
+    <circle data-place="bakery" cx="610" cy="300" r="1"/>
+    <circle data-place="art-room" cx="610" cy="220" r="1"/>
+    <circle data-place="sale-room" cx="785" cy="295" r="1"/>
+    <circle data-place="houses" cx="760" cy="615" r="1"/>
+    <circle data-place="market-row" cx="1020" cy="470" r="1"/>
+    <circle data-place="watchman-hut" cx="1133" cy="643" r="1"/>
+    <circle data-place="depot" cx="24" cy="470" r="1"/>
+    <circle data-place="night-stall" cx="1176" cy="455" r="1"/>
+    <circle data-place="secretary-house" cx="1176" cy="490" r="1"/>
+  </g>
+</svg>
+</body>
+</html>

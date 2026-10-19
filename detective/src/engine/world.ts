@@ -1,4 +1,4 @@
-// Lantern Row as places (design/WORLD.md), each with its spot on the map of the street (design/sketches/the-street.html,
+// Lantern Row as places (design/WORLD.md), each with its spot on the map of the street (design/sketches/map/the-street.html,
 // 1200 by 800). A case and each of its steps name a place here, and checkChapter refuses one that does not, so no story
 // happens off the street. A place too far to walk to sits at an edge of the map, where its road leaves.
 // Pure: data and nothing else. A test keeps every spot the same as the drawing's.
@@ -46,6 +46,9 @@ export const ANCHORS = [
   'lamp-1', 'lamp-2', 'lamp-3', 'lamp-4', 'lamp-5', 'lamp-6', 'lamp-7', 'lamp-8',
   'awning-1', 'awning-2', 'awning-3', 'awning-4', 'awning-5', 'awning-6', 'awning-7', 'awning-8',
   'market-square',
+  // The 3 billboards: a hoarding, a poster on the sale room's wall, a panel on the bus shelter. A case or a season
+  // puts its poster here.
+  'billboard-1', 'billboard-2', 'billboard-3',
   // Open sky over the rooftops, for what flies or hangs in the air: bats at Halloween, lanterns at New Year.
   'sky-1', 'sky-2', 'sky-3',
 ] as const;

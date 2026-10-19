@@ -115,7 +115,7 @@ export const CHAIN_OPTIONS = 3;
 export type RoomThing = { name: string; box: [number, number, number, number]; evidence?: boolean };
 export type Room = { scene: string; things: RoomThing[] };
 
-/** The size every room is drawn at (design/sketches). */
+/** The size every room is drawn at (design/sketches/rooms). */
 export const SCENE_W = 1200;
 export const SCENE_H = 900;
 /** How many things in a room are evidence, and how many ordinary things a room has at least, to look past. */

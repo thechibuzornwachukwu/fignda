@@ -39,7 +39,8 @@ src/styles/tokens.css
 src/engine/      pure TS: chapter (cases, their methods and kinds of work), hiddenWords, mirror, sums, stars
 src/copy/        pools + picker
 src/games/       chapters (the written cases), registry of the boards a step is played on
-src/scenes/      the drawn rooms a case is searched in, copied from design/sketches
+src/scenes/      the drawn rooms a case is searched in, copied from design/sketches/rooms
+src/map/         the street as blocks: the plan and the 30 degree view, sun, moon, weather (npm run street:render)
 src/components/  Icon Button TextLink Stars Skeleton PartnerNote CaseBoard StepResult MobileBar WordList Segmented
 src/routes/      Landing Cases Brief Step (and each method's screen) Ending Notebook SignIn
 src/lib/         supabase, api, storage, cold

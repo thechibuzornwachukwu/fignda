@@ -80,7 +80,10 @@ At the end of what is written the game never just stops: cold cases, then a seas
 
 In this order. Together they make case 1 something worth putting an ad on.
 
-- [ ] **Set 1-map. Cases is the map of Lantern Row.** The drawn street (`design/sketches/the-street.html`), with each case a pin at its `where`: closed with a tick, a gold seal when worked cold, the open one lit, the rest dim. Inside a case, the places of its steps light up on the same map as they are worked, joined by a route drawn from place to place, and Your Notebook shows each case's route. A place off the street is reached down the road at the edge. The light theme is the street by day, the dark theme the same street at night: cream ink, the lamps and the hall clock lit (`--map-*` colours in the sketch, moved into `tokens.css`).
+- [ ] **Set 1-map. Cases is the map of Lantern Row.** The 30 degree view (`src/map/street.ts`, drawn as `design/sketches/map/the-street-iso.html`) with each case a pin at its `where`: closed with a tick, a gold seal when worked cold, the open one lit, the rest dim. On a phone it frames the part of the street round the open case. Inside a case, the places of its steps light up as they are worked, joined by a route drawn on the plan (`the-street.html`, made from the same blocks), and Your Notebook shows each case's route. Built into the drawing and to keep: light theme by day, dark theme at night (lamps, the hall clock and some windows lit); the sky dial in the corner, the sun on its arc by the player's own hour and the moon in tonight's real phase (`sunAt`, `moonPhase`); clouds over the open land with their shadows; birds at morning and evening; the case's weather (`clear`, `rain`, `fog`, `snow`, `storm`, `flood`); worn roofs on the old buildings; 2 billboards a case or a season puts its poster on. Colours move from `MAP_COLOURS` into `tokens.css`.
+- [ ] **Set 1-town. Trails cross town.** A case can lead streets away, not only next door. Lantern Row becomes 1 street on a town map; the places now at the map's edge (the depot, Rosa's night stall, the secretary's house) become places on it. A route is drawn at the scale it needs: the street for a short hop, the town for a long one.
+- [ ] **Set 1-travel. How the detective gets there.** By distance: on the street they walk with their pet; across town they ride. The ride is the player's own: a bicycle to start, then others to earn or buy (a car, a horse). Cosmetic only: no ride arrives sooner.
+- [ ] **Set 1-visits. Been here before.** Every place a step is worked in is kept. Back at a place in a later case, the map says so, and the places collected are a badge set. Earned only.
 
 - [ ] **Set 1a. Every case from its story.** A story file for each of the 8 cases (`the-long-spoon.md` is the first), then each chapter file rewritten from it until the case is off the `OWED` list in `src/engine/chapter.test.ts`: 6 cases have no find work, and case 5 brings 2 new methods. With it, buried sums is made of the case's own figures (the till roll's real sales, the gate book's real cars) in place of a row the engine makes up.
 - [ ] **Set 1b. Talking to people.** The talk kind (`CASE_WRITING.md` section 3), engine first: *Question them* (pick what to ask; a pin shown against what they said makes them say more; a question with no reason behind it ends the talk early) and then *Sit with them* (a real game or a meal: chess first, an endgame from a position they set, legal moves checked by a chess rules library chosen in this set for a licence that allows sale). Each first used in a chapter, and once built, every case needs talk work.
@@ -96,7 +99,7 @@ In this order. Together they make case 1 something worth putting an ad on.
 | What does not belong | A scene holds what a visitor brought and forgot | Among the finds, pick the 1 nobody who uses the room owns | The finds, and 1 line on who uses the room |
 | Piece it together | A print or a pattern comes off in pieces | Lift the marks from the glass and set them into the print they make (the friend's glove print) | The pieces, drawn |
 
-Rooms are drawn as `design/sketches` shows: warm cream ground, 1 ink line weight with a slight wobble, flat muted fills, even light, no lime. The evidence is fixed by the chapter; take it out and the room no longer tells the story.
+Rooms are drawn as `design/sketches/rooms` shows: warm cream ground, 1 ink line weight with a slight wobble, flat muted fills, even light, no lime. The evidence is fixed by the chapter; take it out and the room no longer tells the story.
 
 ### 2. After the essentials
 
@@ -109,11 +112,13 @@ Rooms are drawn as `design/sketches` shows: warm cream ground, 1 ink line weight
 | Line of sight | A witness can only have seen what was in view | From where they stood: tap what blocks the view, or say nothing does | The same plan |
 | Who could reach it | A shelf has a height and a person has a reach | Set each suspect against the hook, with or without the ladder found | Words and numbers |
 | Bag and tag | Evidence is useless until it is sorted | Each find goes in 1 of 3 bags: how, why, when | The finds of the case |
+| The recording | A camera keeps what crossed its view, with the time | Scrub the footage: stop on who passes, read the time off the frame. What the camera's wedge does not cover, it cannot clear | The 3 cameras on the map (`CAMERAS`) |
 
 - [ ] **Set 2b. Call a friend.** On any step, besides the pet's tip-off: a friend called into the step to look with you.
 - [ ] **Set 2c. Walk it back, the room.** The scene was tidied before it was photographed, so the only record is the detective's walk. A room seen once in a fixed order, then each thing put back, or the stop tapped where something moved. 4 to 6 things. On screen "Walk it back", never "memory".
 - [ ] **Set 2d. Photos on the board**, for `item` pins, with the photo store and a credits page. Then 4 pictures and 1 word, invisible ink, rub the pad, ink not word, what stood here.
 - [ ] **Set 2e. Progress on the account.** Which cases are open, cold seals and Your Notebook move from this browser to the account.
+- [ ] **Set 2g. Weather cases.** A case's weather is in its story and its chapter (`weather`), and the engine refuses a step that needs what the weather rules out (a wet print on a dry night). Then 2 cases of their own: *the storm*, where the street says the wind took it and the evidence says it lies upwind of where the wind would have left it; and *the flood*, where the water was blamed for what was moved before it came.
 - [ ] **Set 2f. Casebook 2.** Its place chosen by the owner. "Theft of the Ember award" (a friend's draft, `design/MYSTERY STORIES-WPS Office.docx`) is a candidate, finished story first, with the security head locked out of his office in place of the blow to the head.
 
 ### 3. Later
