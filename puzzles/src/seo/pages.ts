@@ -15,7 +15,10 @@ const games = [...data.games].sort((a, b) => data.filters.indexOf(a.category) - 
 export const SITE = 'Gazecraft';
 export const TAGLINE = 'Find it. Figure it out.';
 export const PITCH =
-  'A free puzzle game, played a few minutes at a time. Words and numbers are hiding in plain sight. Find them a puzzle at a time.';
+  'A free word puzzle game in your browser. Words and numbers hide in plain sight inside ordinary sentences. Lock in for 3 minutes and find them all.';
+
+/** What people type when they look for a game like this. Honest about what it is: a word puzzle, never a promise. */
+export const SEARCH_TERMS = ['word puzzle', 'hidden words', 'word search', 'word game', 'brain teaser', 'puzzle game', 'free online game', 'number puzzle', 'play with friends'];
 
 export type ProfileSummary = {
   handle: string;
@@ -61,7 +64,12 @@ export const FAQ: Array<[string, string]> = [
     'How do you play?',
     'Read the paragraph and drag across the letters of a hidden word. On a phone, swipe across the letters, or tap the first letter and then the last. Answers can run across spaces and punctuation.',
   ],
-  ['Is Gazecraft free?', 'Yes. Every puzzle is free to play in your browser. There is nothing to download.'],
+  ['Is Gazecraft free?', 'Yes. Every puzzle is free to play in your browser, on a phone or a laptop. There is nothing to download.'],
+  [
+    'Is it like word search, Wordle or 4 Pics 1 Word?',
+    'It is its own game. Like a word search, you find hidden words, but they hide across the gaps in real sentences, not in a grid of letters. Like Wordle, each puzzle is short. It takes focus: most players read straight past a few.',
+  ],
+  ['Can I play with friends?', 'Yes. Open a puzzle, choose Play together and send the link. Everyone finds words on the same board at once, and there is a weekly league.'],
   ['Do I need an account?', 'No. You can play as a guest. Sign in to keep your streak, get on the leaderboard and follow other players.'],
   [
     'How is the score counted?',
@@ -74,11 +82,12 @@ const GAME_LD = {
   '@type': 'VideoGame',
   name: SITE,
   description: PITCH,
-  genre: ['Word game', 'Puzzle'],
+  genre: ['Word game', 'Puzzle', 'Word search', 'Brain teaser'],
+  keywords: SEARCH_TERMS.join(', '),
   gamePlatform: 'Web browser',
   applicationCategory: 'Game',
   operatingSystem: 'Any',
-  playMode: 'SinglePlayer',
+  playMode: ['SinglePlayer', 'MultiPlayer'],
   inLanguage: 'en',
   isAccessibleForFree: true,
   offers: { '@type': 'Offer', price: 0, priceCurrency: 'USD' },
@@ -98,8 +107,8 @@ const faqHtml = () =>
 function home(origin: string): Page {
   const list = games.map((g) => `<li><a href="/play/${g.id}">${esc(question(g))}</a> ${esc(g.category)}, ${esc(level(g))}.</li>`).join('');
   return {
-    title: "Think you read carefully? You don't. · Gazecraft",
-    description: '"Pat omitted" hides ATOM. You just read past it. One paragraph a day, every answer in plain sight. Slow down. Look closer.',
+    title: 'Gazecraft: free hidden word puzzle game',
+    description: '"Pat omitted" hides ATOM. A free word puzzle game: words hide across the gaps in real sentences. Lock in for 3 minutes. Slow down. Look closer.',
     image: '/og/default.png',
     imageAlt: 'Gazecraft. Find it. Figure it out.',
     canonical: '/',
@@ -113,7 +122,8 @@ function home(origin: string): Page {
       },
     ],
     body:
-      `<h1>${SITE}. ${TAGLINE}</h1><p>${esc(PITCH)}</p>` +
+      `<h1>${SITE}: a free hidden word puzzle game</h1><p>${esc(PITCH)}</p>` +
+      `<p>Short word puzzles and number puzzles, a few minutes each. Play alone, or play with friends in a room and a weekly league. No download, no account needed.</p>` +
       `<h2>How to play</h2><ol><li>Open a pack.</li><li>Read the paragraph.</li><li>Drag across the letters of each hidden word. They can run across spaces and punctuation.</li></ol>` +
       `<p>Example: in "Pat omitted nothing", the letters "Pat omitted" hide ATOM.</p>` +
       `<h2>Puzzles</h2><ul>${list}</ul>` +

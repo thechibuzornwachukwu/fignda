@@ -6,9 +6,15 @@ const O = 'https://fignda.pages.dev';
 const allCopy = (p: Page) => [p.title, p.description, p.imageAlt, p.body, JSON.stringify(p.jsonLd)].join('\n');
 
 describe('page metadata', () => {
-  it('home leads with the hook and carries game, site and FAQ data', () => {
+  it('home names what people search for, and carries game, site and FAQ data', () => {
     const p = pageFor('/', O);
-    expect(p.title).toBe("Think you read carefully? You don't. · Gazecraft");
+    expect(p.title).toBe('Gazecraft: free hidden word puzzle game');
+    expect(p.title.length).toBeLessThanOrEqual(60);
+    expect(p.description).toMatch(/word puzzle game/);
+    expect(p.body).toMatch(/<h1>Gazecraft: a free hidden word puzzle game<\/h1>/);
+    expect(JSON.stringify(p.jsonLd)).toContain('word search');
+    // A game that takes focus, never one that promises it.
+    expect([p.title, p.description, p.body].join(' ')).not.toMatch(/improves? (your )?focus|boosts?|sharpen/i);
     expect(p.jsonLd.map((o) => (o as { '@type': string })['@type'])).toEqual(['VideoGame', 'WebSite', 'FAQPage']);
     expect(p.body).toContain('Pat omitted');
     // No single topic leads: general knowledge comes before the Bible puzzles.
