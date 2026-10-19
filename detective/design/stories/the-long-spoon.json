@@ -12,7 +12,7 @@
   "brief": [
     "Tonight at 6 is the 20th cook-off final. The Long Spoon has 19 burns on its handle and 18 names. One was planed flat years ago, and nobody talks about it.",
     "At 7 this morning the committee opened the cabinet in the hall store room to polish it. The cabinet was locked, and empty.",
-    "A card was left on the hooks: one open eye. The room smells faintly of burnt wood.",
+    "A card was left on the hooks, with a lantern drawn on it. The room smells faintly of burnt wood.",
     "4 people were near the hall last night. Each has said where they were."
   ],
   "board": {
@@ -32,7 +32,7 @@
       },
       {
         "kind": "left",
-        "label": "A card with one open eye"
+        "label": "A card with a lantern"
       },
       {
         "kind": "faces"
@@ -133,8 +133,7 @@
     {
       "place": "The hall notice board",
       "method": "hidden-words",
-      "eye": true,
-      "thing": "A notice nobody remembers pinning up: a room to let, oddly worded. It is a message passed in plain sight, to the Open Eye.",
+      "thing": "A notice nobody remembers pinning up: a room to let, oddly worded. Read closely, it says something else.",
       "text": "Room to let. Last let 2 years ago. Estate road, quiet. The light is on a meter. A tub, urn and stove are included. Ask Phoebe for entry.",
       "words": [
         "goes",
@@ -142,7 +141,7 @@
         "burn",
         "before"
       ],
-      "fact": "Read the way the Open Eye teaches, it says: \"Her name goes back before the 20th is burned. I have stood at 9 finals with my back to the crowd.\" It is signed \"her son\".",
+      "fact": "Read word by word, it says: \"Her name goes back before the 20th is burned. I have stood at 9 finals with my back to the crowd.\" It is signed \"her son\".",
       "pin": "Her name goes back",
       "gives": "motive",
       "lead": "A key, a reel and 2 hours. A mother's name. 9 finals. They fit 1 of the 4.",

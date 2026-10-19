@@ -23,8 +23,8 @@ export function Header() {
         <NavLink to="/cases" className={link}>
           Cases
         </NavLink>
-        <NavLink to="/open-eye" className={link}>
-          Open Eye
+        <NavLink to="/notebook" className={link}>
+          Notebook
         </NavLink>
         <NavLink to="/ranks" className={link}>
           Ranks

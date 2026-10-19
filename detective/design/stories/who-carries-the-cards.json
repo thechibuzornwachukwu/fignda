@@ -7,11 +7,11 @@
   "ask": "Who carries the cards?",
   "item": {
     "name": "The cards",
-    "line": "7 plain cream cards, each with an open eye drawn on it, found in 7 cases on Lantern Row."
+    "line": "7 plain cream cards, each with a lantern drawn on it, found in 7 cases on Lantern Row."
   },
   "place": "Lantern Row",
   "brief": [
-    "The letter that came to the art room had no name on it, and an open eye. That makes 7 cards in 7 cases, and the committee has had enough.",
+    "The letter that came to the art room had no name on it, and the lantern card. That makes 7 cards in 7 cases, and the committee has had enough.",
     "Every card was handed over in person, by somebody who knew each time what was about to happen on the street.",
     "5 people were close to every case: Rosa, Marco, Otto, Bea and Mr Cole.",
     "Before the committee cuts the ribbon on 2011, it wants to know whose hand it has been."
@@ -20,7 +20,7 @@
     "pins": [
       {
         "kind": "left",
-        "label": "7 cards, 1 open eye"
+        "label": "7 cards, 1 lantern"
       },
       {
         "kind": "note",
@@ -164,8 +164,7 @@
     {
       "place": "The notice board",
       "method": "hidden-words",
-      "eye": true,
-      "thing": "This morning's card on the hall notice board. It carries a line in plain sight, to the Open Eye.",
+      "thing": "This morning's card on the hall notice board. It reads as a lost and found. Read closely, it is not.",
       "text": "Walk up Lane 4, past the rich old yew. Fair is fair.",
       "words": [
         "walk",
@@ -173,7 +172,7 @@
         "hold",
         "fair"
       ],
-      "fact": "Read the way the Open Eye teaches, it says: \"Walk. Hold the plane. Fair.\" Whoever carries the cards held the plane in 2011, and wants the street to look again.",
+      "fact": "Read word by word, it says: \"Walk. Hold the plane. Fair.\" Whoever carries the cards held the plane in 2011, and wants the street to look again.",
       "pin": "Held the plane in 2011",
       "gives": "motive",
       "lead": "Walk the 7 cards back, from the first hooks to this morning's board, before anybody is named.",
@@ -199,6 +198,6 @@
   "ending": {
     "found": "7 cards are gone from a stack of 40 in the hall store, cut on the hall guillotine. Mr Cole keeps the only key. The committee cuts the ribbon on 2011: the vote was 9 to 9, and the chair broke the tie.",
     "confession": "I held the plane because the committee told me to. I waited 15 years for somebody to ask. I only made sure the street kept finding reasons to.",
-    "after": "R. MARLOW stays burned on the spoon. Asked who taught him the cards, Mr Cole will not say. He says only that he was asked once, by an open eye, and that he was glad to be."
+    "after": "R. MARLOW stays burned on the spoon. Asked who taught him the cards, Mr Cole will not say. He says only that he was asked once, by a card like these, years ago, and that he was glad to be."
   }
 }

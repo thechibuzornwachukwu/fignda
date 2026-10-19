@@ -10,7 +10,7 @@
   },
   "place": "The bus stop",
   "brief": [
-    "The card from the ballot box has an open eye on it. Nobody on the committee will say whose it is, and the street has a louder complaint.",
+    "The card from the ballot box has a lantern drawn on it, like the one on the spoon's hooks. Nobody on the committee will say whose it is, and the street has a louder complaint.",
     "On the night of the final the last bus left Lantern Row at 10.21 pm. The timetable says 10.30. 14 people walked home.",
     "The driver says he left by the hall clock, as he has for 11 years, and that the hall clock was fast.",
     "The clock is right this morning. 1 man and 1 alibi, and the alibi is a clock. What happened to it?"
@@ -113,8 +113,7 @@
     {
       "place": "The cab",
       "method": "hidden-words",
-      "eye": true,
-      "thing": "A postcard kept behind the sun visor. It is a message passed in plain sight, to the Open Eye, and he kept the copy.",
+      "thing": "A postcard kept behind the sun visor. Its words say one thing to a passenger and another to whoever it was meant for. He kept the copy.",
       "text": "Half light suits the hotel evening shift. Come, Etta, the music locker is open.",
       "words": [
         "flight",
@@ -122,7 +121,7 @@
         "meet",
         "clock"
       ],
-      "fact": "Read the way the Open Eye teaches, it says: \"Her flight lands at eleven. I will meet it. Show me the clock.\" His daughter flew home that night, for the first time in 6 years.",
+      "fact": "Read word by word, it says: \"Her flight lands at eleven. I will meet it. Show me the clock.\" His daughter flew home that night, for the first time in 6 years.",
       "pin": "A flight lands at 11",
       "gives": "motive",
       "lead": "A hatch, a cup, 4 minutes and a flight at 11. 3 accounts of that night are going round the stop. Only 1 can be true.",
@@ -152,6 +151,6 @@
   "ending": {
     "found": "The hall clock was put on 9 minutes just after 10 pm and put back before dawn. Cup 31 was still on the ledge. At 11.05 pm Kwame was at the airport gate, holding a card with his daughter's name on it.",
     "confession": "6 years since she left. The depot does not swap a Friday. I told myself 9 minutes hurts nobody, and I did not count the walk home.",
-    "after": "The depot will decide about his Fridays. He drove 3 of the 14 home himself the next night, off the clock. Asked how he knew about the hatch, he says a card came under his wiper: a drawing of the rod, and an open eye."
+    "after": "The depot will decide about his Fridays. He drove 3 of the 14 home himself the next night, off the clock. Asked how he knew about the hatch, he says a card came under his wiper: a drawing of the rod, and a lantern."
   }
 }

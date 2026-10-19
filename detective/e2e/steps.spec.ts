@@ -223,7 +223,7 @@ test('could it be done: the fact that decides and the verdict end the step on it
   await expect(page).toHaveURL(/\/case\/the-early-bus\/5$/);
 });
 
-// Case 4, the casebook, cold cases and the interlude (SPEC section 6).
+// Case 4, the casebook and cold cases (SPEC section 6).
 
 test('the trail: each find is pinned to a place, and the walk ends on its lead', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 700 });
@@ -256,18 +256,6 @@ test('Cases is the casebook: closed files fold, and the open one leads in', asyn
   await expect(page).toHaveURL(/\/cold\/the-long-spoon\/1$/);
   await expect(page.locator('[data-mobile-bar]').getByRole('button', { name: 'Tip-off' })).toHaveCount(0);
   await expect(page.locator('[data-mobile-bar]').getByRole('button', { name: 'Done' })).toBeVisible();
-});
-
-test('the interlude opens once case 4 is closed, and is 1 board', async ({ page }) => {
-  await seedCases(page, { 'the-long-spoon': ALL, 'the-open-box': ALL, 'the-early-bus': ALL, 'the-year-that-is-missing': ALL });
-  await page.goto('/cases');
-  await page.getByRole('link', { name: 'The bookmark' }).click();
-  await expect(page).toHaveURL(/\/interlude\/the-bookmark$/);
-  await expect(page.getByRole('heading', { level: 1 })).toHaveText('The bookmark');
-  await page.getByRole('button', { name: "I'm done" }).click();
-  await expect(page.locator('[data-fact]')).toContainText('Hall. Glow. Key. Dark.');
-  await page.getByRole('link', { name: 'Back to cases' }).click();
-  await expect(page.locator('[data-interlude="the-bookmark"]')).toHaveAttribute('data-state', 'read');
 });
 
 test('the missing step: the thing that fits fills the gap', async ({ page }) => {

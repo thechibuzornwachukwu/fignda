@@ -111,11 +111,11 @@ describe('names and handles', () => {
 
 describe('which pages are a step', () => {
   it('a step has the whole screen; anything else has the dock but the landing page', () => {
-    for (const p of ['/case/the-long-spoon/1', '/case/the-long-spoon/12/', '/cold/the-long-spoon/3', '/interlude/the-bookmark']) {
+    for (const p of ['/case/the-long-spoon/1', '/case/the-long-spoon/12/', '/cold/the-long-spoon/3']) {
       expect(isStep(p)).toBe(true);
       expect(hasTabBar(p)).toBe(false);
     }
-    for (const p of ['/case/the-long-spoon', '/case/the-long-spoon/x', '/case//1', '/interlude/a/b', '/cases', '/ranks']) expect(isStep(p)).toBe(false);
+    for (const p of ['/case/the-long-spoon', '/case/the-long-spoon/x', '/case//1', '/interlude/the-bookmark', '/cases', '/ranks']) expect(isStep(p)).toBe(false);
     expect(hasTabBar('/')).toBe(false);
     expect(hasTabBar('/cases')).toBe(true);
     expect(hasTabBar('/case/the-long-spoon')).toBe(true);

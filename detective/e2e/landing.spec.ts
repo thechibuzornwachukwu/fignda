@@ -40,10 +40,10 @@ test('every case closed: the way in is the casebook, and it ends on the next one
 test.describe('on a phone', () => {
   test.use({ viewport: { width: 320, height: 700 }, hasTouch: true });
 
-  test('the dock: Cases, Open Eye, Play, Ranks with no account set up, Settings', async ({ page }) => {
+  test('the dock: Cases, Notebook, Play, Ranks with no account set up, Settings', async ({ page }) => {
     await page.goto('/cases');
     const dock = page.getByRole('navigation', { name: 'Tabs' });
-    await expect(dock.getByRole('link')).toHaveText(['Cases', 'Open Eye', 'Play', 'Ranks', 'Settings']);
+    await expect(dock.getByRole('link')).toHaveText(['Cases', 'Notebook', 'Play', 'Ranks', 'Settings']);
     await expect(dock.getByRole('link', { name: 'Open your case' })).toHaveAttribute('href', '/case/the-long-spoon');
     expect(await noSideScroll(page)).toBe(true);
     // No account to rank: Ranks goes back to the cases.
@@ -62,7 +62,7 @@ test('settings: any of the 4 pets, free, and it is the pet on every screen', asy
   await expect(page.locator('[data-pet]')).toHaveCount(4);
   await page.locator('[data-pet="robot"]').click();
   await expect(page.locator('[data-pet="robot"]')).toHaveAttribute('aria-pressed', 'true');
-  await page.goto('/open-eye');
+  await page.goto('/notebook');
   await expect(page.locator('[data-partner="robot"]').first()).toBeVisible();
 });
 

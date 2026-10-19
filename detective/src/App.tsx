@@ -12,8 +12,7 @@ import styles from './App.module.css';
 const Cases = lazy(() => import('./routes/Cases').then((m) => ({ default: m.Cases })));
 const Brief = lazy(() => import('./routes/Brief').then((m) => ({ default: m.Brief })));
 const Step = lazy(() => import('./routes/Step').then((m) => ({ default: m.Step })));
-const OpenEye = lazy(() => import('./routes/OpenEye').then((m) => ({ default: m.OpenEye })));
-const Interlude = lazy(() => import('./routes/Interlude').then((m) => ({ default: m.Interlude })));
+const Notebook = lazy(() => import('./routes/Notebook').then((m) => ({ default: m.Notebook })));
 const Ranks = lazy(() => import('./routes/Ranks').then((m) => ({ default: m.Ranks })));
 const SignIn = lazy(() => import('./routes/SignIn').then((m) => ({ default: m.SignIn })));
 const Settings = lazy(() => import('./routes/Settings').then((m) => ({ default: m.Settings })));
@@ -56,8 +55,7 @@ export function App() {
         {/* A closed case worked again, with no tip-offs: the same screens, with stars of their own. */}
         <Route path="cold/:id" element={<Brief />} />
         <Route path="cold/:id/:n" element={<Step />} />
-        <Route path="interlude/:id" element={<Interlude />} />
-        <Route path="open-eye" element={<OpenEye />} />
+        <Route path="notebook" element={<Notebook />} />
         <Route path="ranks" element={<Ranks />} />
         <Route path="signin" element={<SignIn />} />
         <Route path="settings" element={<Settings />} />

@@ -121,7 +121,7 @@ Streak resets on a wrong pick and on a tip-off. `onFound` picks: first find, las
 - What a pet does in play: it chooses which answer a tip-off marks.
 
 **Tab bar (phones, app pages):** a floating dock, 12 from the sides and the bottom plus the safe area, `--tabbar-h` 64 high, `--surface` with a 1px `--line-3` border, radius `--radius-dock` 22 and a hard lower edge of `--ledge` 4 in `--line-3`. Tabs: icon 20 inside a 48 by 28 pill over an 11/800 label, `--muted`; the active tab is `--fg` with the pill filled `--surface-2` (shape and weight, never colour alone).
-- 5 slots: Cases, Open Eye, Play, Ranks, Settings. The Open Eye slot becomes Your Notebook in BUILD_PLAN set 1a.
+- 5 slots: Cases, Notebook, Play, Ranks, Settings.
 - Play, in the middle: a 60 disc raised above the dock, `--fg` fill with a `--bg` Play icon and its own ledge, sinking by the ledge when pressed.
 ## 6. Screens
 
@@ -214,22 +214,17 @@ Events in order with 1 gap, and 3 things that could have happened in it. Only 1 
 - Done, it ends as any step does: the stars, `<StepResult>`, the lead, the way on and "Play it again", with the events and the filled gap under them.
 - Stars: 3 at once, 2 after 1 wrong pick, 1 after 2.
 
-**The Open Eye file** (`/open-eye`, `src/engine/openEye.ts`). Built, and leaving in BUILD_PLAN set 1a for Your Notebook.
-Every message to the Open Eye a player has read, in the order of the story: the steps marked `eye` in each chapter (a line passed in plain sight, intercepted) and the interludes after the case they follow.
-- Top to bottom: the title "The Open Eye", then the file.
-- Nothing read yet: the pet, large and centred, "Nothing filed yet", an `eyeEmpty` line and "Open your case".
-- The way in: on Cases, at the right of the casebook's banner, once 1 message is read: a pill on `--board` with the eye and "The Open Eye".
+**Your Notebook** (`/notebook`, `src/routes/Notebook.tsx`)
+Everything found, in 1 place. Every case with a step done, in the order of the casebook, each as its own case board (`<CaseBoard>`): the clues pinned, the people met, who is cleared.
+- Top to bottom: PageHeader "Your Notebook", then the cases. Each: its title (`h3`, a link to its brief), its board, then the lead that is open on a leaning slip of `--paper`, or a "Case closed" stamp.
+- Nothing in it yet: the pet, large and centred, "Nothing in it yet", a `notebookEmpty` line and "Open your case".
+- The way in: the Notebook tab on the dock, and "Notebook" in the wide header.
 
 **Cold case** (`/cold/:id`, `/cold/:id/:n`, `src/lib/cold.ts`)
 A closed case worked again with no tip-offs, for a gold seal. The same screens as the case, from the same chapter.
 - It opens only for a closed case: any other leads to that case's brief.
 - A board step has no "Ask for a tip-off" and no Tip-off on the phone bar.
 - Closed cold, the ending shows a gold seal (Award at 18 on a `--medal-gold` disc, named "Gold seal") before the stars, and the file on Cases carries it.
-
-**Interlude** (`/interlude/:id`, `design/stories/interludes`). Built, and leaving in BUILD_PLAN set 1a.
-1 message to the Open Eye, intercepted between 2 cases. 1 sitting on 1 hidden-words board.
-- It is played as a step is (`<Play>`): "Cases" as the way back, no marks, the title, the thing in hand and what to find, the board, the tip-off and "I'm done".
-- It opens when the case it follows is closed, and never blocks the next case.
 
 **Ending** (`<Ending>`, a closed case, whatever its shape and whichever step closed it)
 - "The board" and the stars, "Case closed" (`gameTitle`), then the ending a card at a time, never as 1 page of text. 3 cards in a row that scrolls sideways and stops on each (scroll snap): the culprit's photo (avatar at 96, name, role) pinned beside what was found on a slip; the confession in quotation marks (`itemTitle`); what came after (`body`, `--muted`).

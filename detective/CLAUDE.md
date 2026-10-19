@@ -36,12 +36,12 @@ Design: `/design`. Read `SPEC.md` before UI work, `SECURITY.md` before data, aut
 ## Code
 ```
 src/styles/tokens.css
-src/engine/      pure TS: chapter (cases, their methods and kinds of work), interlude, openEye, hiddenWords, mirror, sums, stars
+src/engine/      pure TS: chapter (cases, their methods and kinds of work), hiddenWords, mirror, sums, stars
 src/copy/        pools + picker
 src/games/       chapters (the written cases), registry of the boards a step is played on
 src/scenes/      the drawn rooms a case is searched in, copied from design/sketches
 src/components/  Icon Button TextLink Stars Skeleton PartnerNote CaseBoard StepResult MobileBar WordList Segmented
-src/routes/      Landing Cases Brief Step (and each method's screen) Ending OpenEye Interlude SignIn
+src/routes/      Landing Cases Brief Step (and each method's screen) Ending Notebook SignIn
 src/lib/         supabase, api, storage, cold
 design/stories/  a story (.md) and a chapter (.json) a case, checked by src/engine/chapter.ts
 worker/          /api/plays (steps of cases, checked), the case board

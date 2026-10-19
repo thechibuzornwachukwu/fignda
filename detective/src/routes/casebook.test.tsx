@@ -1,15 +1,12 @@
 // @vitest-environment jsdom
-import { readdirSync, readFileSync } from 'node:fs';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
-import { checkInterlude, interludeChapter, type Interlude as File } from '../engine/interlude';
-import { chapters, interludes } from '../games/chapters';
+import { chapters } from '../games/chapters';
 import { Brief } from './Brief';
 import { Casebook } from './Casebook';
-import { Interlude } from './Interlude';
 import { Step } from './Step';
 
-// The casebook on Cases, cold cases and interludes (SPEC section 6).
+// The casebook on Cases and cold cases (SPEC section 6).
 
 vi.mock('../lib/auth', () => ({ useAuth: () => ({ enabled: false, loading: false, profile: null, session: null }) }));
 
@@ -25,7 +22,6 @@ const open = (path: string) =>
         <Route path="case/:id/:n" element={<Step />} />
         <Route path="cold/:id" element={<Brief />} />
         <Route path="cold/:id/:n" element={<Step />} />
-        <Route path="interlude/:id" element={<Interlude />} />
       </Routes>
     </MemoryRouter>,
   );
@@ -42,7 +38,6 @@ describe('the casebook on Cases', () => {
     expect(container.querySelectorAll('[data-state="locked"][data-file]')).toHaveLength(chapters.length - 1);
     // Every case in the casebook is written, so no file is left shut for want of one.
     expect(container.querySelector('[data-next-file]')).toBeNull();
-    expect([...container.querySelectorAll('[data-interlude]')].map((e) => e.getAttribute('data-state'))).toEqual(['locked', 'locked']);
   });
 
   it('half way: the steps are marks, closed files fold to a row, and the way in is Carry on', () => {
@@ -56,11 +51,10 @@ describe('the casebook on Cases', () => {
     expect(screen.getByRole('link', { name: 'Work The long spoon cold, with no tip-offs' })).toHaveAttribute('href', '/cold/the-long-spoon');
   });
 
-  it('every written case closed: no file is open, and the interlude can be read', () => {
+  it('every written case closed: no file is open', () => {
     keep(Object.fromEntries(chapters.map((c) => [c.id, all])));
     const { container } = open('/cases');
     expect(container.querySelector('[data-chapter]')).toBeNull();
-    expect(screen.getByRole('link', { name: 'The bookmark' })).toHaveAttribute('href', '/interlude/the-bookmark');
   });
 });
 
@@ -95,42 +89,5 @@ describe('a cold case', () => {
     first.unmount();
     const { container } = open('/cases');
     expect(container.querySelector('[data-file="the-long-spoon"] [data-seal]')).toBeInTheDocument();
-  });
-});
-
-describe('an interlude', () => {
-  const files = readdirSync('design/stories/interludes').filter((f) => f.endsWith('.json'));
-  const read = (f: string) => JSON.parse(readFileSync(`design/stories/interludes/${f}`, 'utf8')) as File;
-
-  it.each(files)('%s can be played, is named as its file, and follows a written case', (f) => {
-    const i = read(f);
-    expect(checkInterlude(i)).toEqual([]);
-    expect(`${i.id}.json`).toBe(f);
-    expect(chapters.some((c) => c.number === i.after && c.casebook === i.casebook)).toBe(true);
-    expect(interludeChapter(i).steps).toHaveLength(1);
-  });
-
-  it('one that is not an interlude, or hides a word the engine cannot find, is refused', () => {
-    expect(checkInterlude(null)).toEqual(['not an interlude']);
-    expect(checkInterlude({ ...read(files[0]!), words: ['hall', 'spoon'] })).toContain('the engine does not find spoon');
-    expect(checkInterlude({ ...read(files[0]!), fact: 'Read it!' }).join(' ')).toMatch(/exclamation/);
-  });
-
-  it('is shut until the case before it is closed', () => {
-    const { container } = open('/interlude/the-bookmark');
-    expect(container.querySelector('[data-step]')).toBeNull();
-  });
-
-  it('is 1 board, ends on what it says, and leads back to Cases', () => {
-    keep(Object.fromEntries(chapters.map((c) => [c.id, all])));
-    const { container } = open('/interlude/the-bookmark');
-    expect(interludes.map((i) => i.id)).toEqual(['the-bookmark', 'the-envelope']);
-    expect(screen.getByRole('heading', { level: 1, name: 'The bookmark' })).toBeInTheDocument();
-    expect(container.querySelector('[data-marks]')).toBeNull();
-    expect(screen.getByRole('link', { name: 'Cases' })).toHaveAttribute('href', '/cases');
-    fireEvent.click(screen.getByRole('button', { name: "I'm done" }));
-    expect(container.querySelector('[data-fact]')).toHaveTextContent('Hall. Glow. Key. Dark.');
-    expect(screen.getByRole('link', { name: 'Back to cases' })).toHaveAttribute('href', '/cases');
-    expect(kept()['the-bookmark']![1]).toBe(1);
   });
 });

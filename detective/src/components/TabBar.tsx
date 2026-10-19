@@ -1,6 +1,6 @@
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useRef, type ReactNode } from 'react';
-import { Check, Eye, FolderSearch, Play, Settings, Trophy } from 'lucide-react';
+import { Check, FolderSearch, Notebook, Play, Settings, Trophy } from 'lucide-react';
 import { playNext } from '../lib/playNext';
 import { hasTabBar } from '../lib/routes';
 import { useTucked } from '../lib/useTucked';
@@ -10,7 +10,7 @@ import styles from './TabBar.module.css';
 /**
  * Phones only: a floating dock within thumb reach. Desktop has the same places in the header.
  * - Play, raised in the middle: the step of the case that is open, one tap from anywhere.
- * - Cases first, where the game lives. The Open Eye file beside it. Ranks and Settings on the far side.
+ * - Cases first, where the game lives. Your Notebook beside it. Ranks and Settings on the far side.
  * It slides below the screen on a scroll down and back on any scroll up.
  */
 export function TabBar() {
@@ -22,7 +22,7 @@ export function TabBar() {
   return (
     <nav ref={ref} className={[styles.bar, tucked && styles.tucked].filter(Boolean).join(' ')} aria-label="Tabs" data-tucked={tucked || undefined}>
       <Tab to="/cases" icon={<Icon icon={FolderSearch} size={20} />} label="Cases" />
-      <Tab to="/open-eye" icon={<Icon icon={Eye} size={20} />} label="Open Eye" />
+      <Tab to="/notebook" icon={<Icon icon={Notebook} size={20} />} label="Notebook" />
       <Link to={play.to} className={styles.play} data-done={play.kind === 'done' || undefined} data-play={play.kind} aria-label={play.name}>
         <span className={styles.disc}>
           <Icon icon={play.kind === 'done' ? Check : Play} size="em" />

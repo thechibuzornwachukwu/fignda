@@ -15,7 +15,7 @@ for (const scheme of ['dark', 'light'] as const) {
     // Reduced motion: colours switch instantly, so axe never measures a colour mid-fade.
     test.use({ colorScheme: scheme, reducedMotion: 'reduce' });
 
-    for (const path of ['/', '/cases', '/case/the-long-spoon', '/case/the-long-spoon/1', '/open-eye', '/settings', '/signin', '/privacy']) {
+    for (const path of ['/', '/cases', '/case/the-long-spoon', '/case/the-long-spoon/1', '/notebook', '/settings', '/signin', '/privacy']) {
       test(`page ${path}`, async ({ page }) => {
         await page.goto(path);
         await page.evaluate(() => document.fonts.ready);

@@ -143,8 +143,6 @@ export type Step = {
   /** The room searched, on a "sweep the room" step. */
   room?: Room;
   /** The page, line by line, on a "torn page" step. The engine tears it. */
-  /** A message to the Open Eye, passed in plain sight: filed in the Open Eye file once it is read. */
-  eye?: boolean;
   page?: string[];
   /** What the step leaves behind once it is done. */
   fact: string;
@@ -308,7 +306,6 @@ export function checkChapter(raw: unknown, roles: readonly string[]): string[] {
       else if (new Set(tornOf({ id: text(c.id), steps }, i + 1)!.rights).size !== lines.length) out.push(`${at}: 2 torn halves read the same`);
       if (lines.some((l) => /[\u2014!]/.test(l))) out.push(`${at}: a torn page breaks the copy rules`);
     }
-    if (s.eye && (s.method !== 'hidden-words' || !text(s.text))) out.push(`${at}: only a hidden-words step with its text is a message to the Open Eye`);
     if (s.method === 'trail' && !trailOf({ id: text(c.id), steps }, i + 1)) out.push(`${at}: a trail needs ${TRAIL_MIN} finds or more behind it, each at a place of its own`);
     // Written evidence is checked by the engine that will grade it: every word is there, and no other.
     if (s.text != null || s.words != null) {

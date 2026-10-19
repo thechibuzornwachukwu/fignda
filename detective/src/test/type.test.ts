@@ -4,7 +4,7 @@ import { join, relative } from 'node:path';
 // BUILD_PLAN 3a: every text style on the 4 tabs comes from src/styles/type.module.css.
 // A size written in one of these files is a one-off, and this fails on it.
 const ROOT = join(__dirname, '..', '..');
-const TABS = ['Cases', 'Ranks', 'Settings', 'OpenEye', 'Landing'].map((n) => join(ROOT, 'src', 'routes', `${n}.module.css`));
+const TABS = ['Cases', 'Ranks', 'Settings', 'Notebook', 'Landing'].map((n) => join(ROOT, 'src', 'routes', `${n}.module.css`));
 const FILES = [...TABS, join(ROOT, 'src', 'components', 'PageHeader.module.css')];
 
 /** Lines that set a size: `font-size`, or the `font` shorthand with a number in it. Comments do not count. */

@@ -14,7 +14,7 @@ What is built, in 1 line each, so `BUILD_PLAN.md` holds only what is left. Read 
 
 ## Screens
 - Landing, Cases (the casebook), Brief, Step (a screen per method), Ending (3 cards), Ranks, Settings, Sign in, Privacy.
-- Cold cases with a gold seal. (The Open Eye file and the 2 interludes are built and leave in set 1a.)
+- Your Notebook: every case worked, as its board, with the lead that is open. Cold cases with a gold seal.
 - The guest wall after 2 steps, the step that is not open yet, empty and failed states with the pet.
 - The phone dock with the Play disc, the phone bar on board steps, skeletons for everything that loads.
 

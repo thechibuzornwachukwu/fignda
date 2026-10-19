@@ -1,11 +1,10 @@
-import { Award, Check, Eye, Lock } from 'lucide-react';
+import { Award, Check, Lock } from 'lucide-react';
 import { useId, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
 import { chapterProgress } from '../engine/chapter';
-import { openEyeFile } from '../engine/openEye';
-import { CASEBOOK, chapters, interludes } from '../games/chapters';
+import { CASEBOOK, chapters } from '../games/chapters';
 import { loadChapterStars } from '../lib/chapterStore';
 import { caseClosed, coldSealed } from '../lib/cold';
 import styles from './Casebook.module.css';
@@ -13,7 +12,7 @@ import styles from './Casebook.module.css';
 /**
  * The casebook on Cases (SPEC section 6, Casebook): a place and its cases, in order, on 1 path. Each case is a
  * file. Closed files fold to a row, with a gold seal once worked cold. The open one shows its steps as marks and
- * the way in. The rest are shut. An interlude is a small mark between 2 files.
+ * the way in. The rest are shut.
  */
 export function Casebook() {
   const headId = useId();
@@ -23,12 +22,9 @@ export function Casebook() {
     return chapters.map((chapter, n) => {
       const closed = caseClosed(chapter);
       const state = closed ? ('closed' as const) : n === at ? ('open' as const) : ('locked' as const);
-      const between = interludes.filter((i) => i.after === chapter.number).map((i) => ({ i, read: (loadChapterStars(i.id)[1] ?? 0) > 0 }));
-      return { chapter, state, sealed: closed && coldSealed(chapter), solved: chapterProgress(chapter, loadChapterStars(chapter.id)).solved, between };
+      return { chapter, state, sealed: closed && coldSealed(chapter), solved: chapterProgress(chapter, loadChapterStars(chapter.id)).solved };
     });
   }, []);
-  // The file opens once there is something in it.
-  const eyes = useMemo(() => openEyeFile(chapters, interludes, (id, n) => (loadChapterStars(id)[n] ?? 0) > 0).filter((e) => e.read).length, []);
   if (rows.length === 0) return null;
   const written = rows.length;
   // Art never blocks the path: a later case can be released first, so the file still shut is the lowest number missing.
@@ -41,15 +37,9 @@ export function Casebook() {
         <h2 id={headId} className={styles.banner}>
           {CASEBOOK.name}
         </h2>
-        {eyes > 0 && (
-          <Link to="/open-eye" className={styles.eyeLink} data-eye-link>
-            <Icon icon={Eye} size={16} />
-            The Open Eye
-          </Link>
-        )}
       </div>
       <ol className={styles.files}>
-        {rows.map(({ chapter, state, sealed, solved, between }) => {
+        {rows.map(({ chapter, state, sealed, solved }) => {
           const steps = chapter.steps.length;
           return (
             <li key={chapter.id} className={styles.slot}>
@@ -94,18 +84,6 @@ export function Casebook() {
                   </span>
                   <span className={styles.name}>{chapter.title}</span>
                 </div>
-              )}
-              {between.map(({ i, read }) =>
-                state === 'closed' ? (
-                  <Link key={i.id} to={`/interlude/${i.id}`} className={styles.mark} data-interlude={i.id} data-state={read ? 'read' : 'open'}>
-                    <Icon icon={Eye} size={16} />
-                    {i.title}
-                  </Link>
-                ) : (
-                  <span key={i.id} className={styles.mark} data-interlude={i.id} data-state="locked">
-                    <Icon icon={Eye} size={16} label="An intercept, not open yet" />
-                  </span>
-                ),
               )}
             </li>
           );

@@ -23,7 +23,7 @@ describe('CaseBoard', () => {
     expect([...container.querySelectorAll('[data-kind]')].map((p) => p.getAttribute('data-kind'))).toEqual(['item', 'note', 'left', 'faces']);
     expect(screen.getByText('the Long Spoon')).toBeInTheDocument();
     expect(screen.getByText('Smells of burnt wood.')).toBeInTheDocument();
-    expect(screen.getByRole('img', { name: 'Left behind: A card with one open eye' })).toBeInTheDocument();
+    expect(screen.getByRole('img', { name: 'Left behind: A card with a lantern' })).toBeInTheDocument();
     expect(screen.getByText('4 were near. 1 of them.')).toBeInTheDocument();
     expect(container.querySelector('[data-find]')).toBeNull();
   });

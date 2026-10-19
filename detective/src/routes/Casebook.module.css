@@ -3,26 +3,13 @@
   flex-direction: column;
   gap: var(--space-3);
 }
-/* The banner, with the way into the Open Eye file at its right. */
+/* The banner. */
 .head {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2) var(--space-4);
-}
-.eyeLink {
-  composes: small from '../styles/type.module.css';
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-1h);
-  min-height: var(--space-10);
-  padding: 0 var(--space-3);
-  border-radius: var(--radius-pill);
-  background: var(--board);
-  color: var(--board-ink);
-  font-weight: 700;
-  text-decoration: none;
 }
 .banner {
   composes: h2 from '../styles/type.module.css';
@@ -138,26 +125,4 @@
   background: var(--medal-gold);
   color: var(--paper-ink);
   box-shadow: inset 0 0 0 2px var(--medal-gold-rim);
-}
-/* An interlude: a small mark between 2 files. */
-.mark {
-  composes: small from '../styles/type.module.css';
-  display: inline-flex;
-  align-items: center;
-  align-self: flex-start;
-  gap: var(--space-2);
-  min-height: var(--space-8);
-  margin-left: var(--space-4);
-  padding: 0 var(--space-3);
-  border-radius: var(--radius-pill);
-  box-shadow: inset 0 0 0 1px var(--line-3);
-  color: var(--fg);
-  font-weight: 700;
-  text-decoration: none;
-}
-.mark[data-state='read'] {
-  color: var(--muted);
-}
-.mark[data-state='locked'] {
-  color: var(--subtle);
 }

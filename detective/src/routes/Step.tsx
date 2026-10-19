@@ -99,10 +99,7 @@ export function Step() {
   return <Play key={`${chapter.id}~${at}`} chapter={chapter} at={at} def={def} solved={progress.solved} />;
 }
 
-/** An interlude is 1 step by itself: its own way back and way on, no marks, and nothing sent. */
-export type Alone = { back: string; backLabel: string; on: string; onLabel: string };
-
-export function Play({ chapter, at, def, solved, alone }: { chapter: Chapter; at: number; def: StepPuzzle; solved: number; alone?: Alone }) {
+export function Play({ chapter, at, def, solved }: { chapter: Chapter; at: number; def: StepPuzzle; solved: number }) {
   const step = chapter.steps[at - 1]!;
   const { cold, sid, base } = useCase(chapter.id);
   const name = `${sid}~${at}`;
@@ -129,7 +126,7 @@ export function Play({ chapter, at, def, solved, alone }: { chapter: Chapter; at
   // Signed in, a finished step is sent once to be checked and kept on the account. A result opened again was
   // sent when it was earned. A guest keeps theirs in this browser.
   useEffect(() => {
-    if (!g.finished || !signedIn || endAt == null || sent || cold || alone) return;
+    if (!g.finished || !signedIn || endAt == null || sent || cold) return;
     markSent();
     void submitPlay({ game: { type: 'case', id: chapter.id, step: at }, log: { events: log?.events ?? [], hints: log?.hints ?? [], finish: Math.max(1, endAt - startAt) } });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -169,8 +166,8 @@ export function Play({ chapter, at, def, solved, alone }: { chapter: Chapter; at
   return (
     <div className={styles.screen} data-step={at} data-finished={finished || undefined}>
       <div className={styles.top}>
-        <TextLink to={alone?.back ?? base}>{alone?.backLabel ?? 'The board'}</TextLink>
-        {!alone && <Marks chapter={chapter} at={at} solved={Math.max(solved, finished ? at : 0)} />}
+        <TextLink to={base}>The board</TextLink>
+        <Marks chapter={chapter} at={at} solved={Math.max(solved, finished ? at : 0)} />
       </div>
       <h1 className={styles.title}>{step.place}</h1>
 
@@ -188,7 +185,7 @@ export function Play({ chapter, at, def, solved, alone }: { chapter: Chapter; at
               {step.lead}
             </p>
           )}
-          <Onward to={alone?.on ?? `${base}/${at + 1}`} label={alone?.onLabel ?? wayOn(chapter, at)} stars={best} onAgain={g.replay} />
+          <Onward to={`${base}/${at + 1}`} label={wayOn(chapter, at)} stars={best} onAgain={g.replay} />
         </div>
       ) : (
         <p id={instructionId} className={styles.thing}>

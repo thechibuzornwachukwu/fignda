@@ -51,5 +51,4 @@ The spoon is in Theo's lamp case, with the soldering iron. The patch reads R. MA
 
 ## What this case still owes
 
-- The chapter file still has the old open eye card and an `eye` step (set 1a).
 - No find work: no step searches the store room itself. A sweep of the store room (the hooks, the card, the reel on the floor, the scorch on the bench) would be step 1, before the key book.
