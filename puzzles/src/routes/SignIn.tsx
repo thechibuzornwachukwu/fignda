@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/Button';
 import { Field } from '../components/Field';
 import { TextLink } from '../components/TextLink';
+import { SkeletonPage } from '../components/Skeleton';
 import { fetchProfileByHandle, saveProfile } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import { withTail } from '../lib/onboarding';
@@ -299,7 +300,7 @@ export function SignIn() {
     );
   }
   // A stored session, or a profile on its way: wait, so an existing player is never sent to the first minute.
-  if (auth.loading || (auth.session && !auth.profile && auth.checking)) return <div className={styles.screen} aria-busy="true" />;
+  if (auth.loading || (auth.session && !auth.profile && auth.checking)) return <SkeletonPage />;
 
   if (auth.session && auth.profile) {
     if (!editing) return <Navigate to={next} replace />;

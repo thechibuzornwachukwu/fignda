@@ -7,6 +7,7 @@ import { Avatar } from '../components/Avatar';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
 import { Partner } from '../components/Partner';
+import { SkeletonPage } from '../components/Skeleton';
 import { Ring } from '../components/Ring';
 import { TextLink } from '../components/TextLink';
 import { PARTNERS } from '../engine/partners';
@@ -53,7 +54,7 @@ export function Welcome() {
 
   if (left) return <Navigate to={left} replace />;
   // Still finding out who this is: a stored session, or a profile on its way. Never guess a step meanwhile.
-  if (closing || auth.loading || (auth.session && !auth.profile && auth.checking)) return <div className={styles.screen} aria-busy="true" />;
+  if (closing || auth.loading || (auth.session && !auth.profile && auth.checking)) return <SkeletonPage />;
   // An existing player. Back to where they were, with nothing asked.
   if (account.hasProfile) return <Navigate to={from || endOf(asked, '/play')} replace />;
   // Nothing left to ask a guest who has been through it: what they want now is to sign in.

@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Copy, X } from 'lucide-react';
 import { puzzleCards, resultCard, type Ratio } from '../engine/cards';
 import type { SpanAnswer } from '../engine/excerpt';
 import { formatTime } from '../engine/time';
@@ -178,8 +178,8 @@ export function ShareSheet({ open, onClose, game, result, player, onShared }: Pr
         <div className={styles.controls}>
           <div className={styles.head}>
             <h2 className={styles.title}>Share</h2>
-            <button type="button" className={styles.close} onClick={onClose}>
-              Close
+            <button type="button" className={styles.close} onClick={onClose} aria-label="Close">
+              <Icon icon={X} size={18} />
             </button>
           </div>
           <Segmented
@@ -236,6 +236,7 @@ export function ShareSheet({ open, onClose, game, result, player, onShared }: Pr
               {cards.length > 1 ? `Share ${cards.length} images` : 'Share image'}
             </Button>
             <Button variant="secondary" onClick={copy}>
+              <Icon icon={Copy} size={18} />
               Copy link
             </Button>
           </div>

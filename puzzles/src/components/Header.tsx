@@ -2,15 +2,13 @@ import { useRef } from 'react';
 import { hasTabBar } from '../lib/routes';
 import { useTucked } from '../lib/useTucked';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { Bell } from 'lucide-react';
 import { useAuth } from '../lib/auth';
 import { playNext } from '../lib/playNext';
-import { useUnread } from '../lib/useUnread';
 import { Button } from './Button';
-import { Icon } from './Icon';
 import { Logo, LogoMark } from './Logo';
 import { ThemeToggle } from './ThemeToggle';
 import { Avatar } from './Avatar';
+import { Skeleton } from './Skeleton';
 import styles from './Header.module.css';
 
 const navCls = ({ isActive }: { isActive: boolean }) =>
@@ -29,35 +27,12 @@ function AccountLink() {
       </Link>
     );
   }
-  // A session is being read: nobody knows yet who this is, so the link does not guess "Sign in".
-  if (loading) return null;
+  // A session is being read: nobody knows yet who this is, so a face is held for them instead of a guess at "Sign in".
+  if (loading) return <Skeleton width={28} height={28} round />;
   const next = pathname.startsWith('/signin') ? '' : `?next=${encodeURIComponent(pathname)}`;
   return (
     <Link to={`/signin${next}`} className={styles.account}>
       Sign in
-    </Link>
-  );
-}
-
-/** The bell. Signed in only. A count sits on it while there is something new. */
-export function NotificationsLink() {
-  const { profile } = useAuth();
-  const { pathname } = useLocation();
-  const unread = useUnread(pathname);
-  if (!profile) return null;
-  return (
-    <Link
-      to="/notifications"
-      className={styles.bell}
-      aria-label={unread ? `Notifications, ${unread} new` : 'Notifications'}
-      aria-current={pathname === '/notifications' ? 'page' : undefined}
-    >
-      <Icon icon={Bell} size={18} />
-      {unread > 0 && (
-        <span className={styles.count} aria-hidden="true">
-          {unread > 9 ? '9+' : unread}
-        </span>
-      )}
     </Link>
   );
 }
@@ -93,13 +68,13 @@ export function Header() {
         ) : (
           <nav className={styles.nav} aria-label="Main">
             <NavLink to="/play" className={navCls}>
-              Packs
+              Puzzles
             </NavLink>
             <NavLink to="/players" className={navCls}>
-              Squad
+              People
             </NavLink>
             <NavLink to="/leaderboard" className={navCls}>
-              Ranks
+              League
             </NavLink>
           </nav>
         )}
@@ -108,7 +83,6 @@ export function Header() {
           <span className={landing ? styles.acct : `${styles.acct} ${styles.appOnly}`}>
             <AccountLink />
           </span>
-          <NotificationsLink />
           <ThemeToggle />
           {landing ? (
             <Button to="/play" size="sm">

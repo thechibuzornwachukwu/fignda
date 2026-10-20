@@ -60,7 +60,7 @@ export function Circles() {
     <div className={board.page}>
       <Link to="/players" className={board.back}>
         <Icon icon={ChevronLeft} size={16} />
-        Squad
+        Your People
       </Link>
       <h1 className={board.title}>
         Circles.

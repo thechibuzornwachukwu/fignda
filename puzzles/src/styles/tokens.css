@@ -73,8 +73,7 @@
   --dur-fast: 150ms; --dur-base: 200ms; --dur-slow: 250ms; --dur-slower: 400ms;
   --ease-std: ease; --ease-out: cubic-bezier(.23,1,.32,1);
   --icon-stroke: 1.75;
-  --tabbar-h: 64px; /* Phone dock height, above the safe area */
-  --tabbar-disc: 60px; --tabbar-disc-icon: 24px; /* The raised daily button and its icon */
+  --tabbar-h: 56px; /* Phone dock height, above the safe area: icons only, so slim */
   --radius-dock: 22px; /* Phone dock corners */
   --ledge: 4px; /* The hard lower edge on the dock and the daily button: what makes them look pressable */
   --space-6h: 28px;
@@ -89,6 +88,8 @@
   --pack-naija: #3ec486; --pack-football: #4fd1dc; --pack-general: #6aa3ff; --pack-science: #9b8cff;
   --pack-ai: #d48cff; --pack-health: #ff8bb0; --pack-bible: #f06a5a; --pack-names: #ff9f43;
   --pack-history: #f2c94c; --pack-other: #6aa3ff;
+  /* A cheer on a medal: warm, and the one red on Your People. */
+  --cheer: var(--pack-bible);
   /* Medals: the metal a tier is struck in, with the darker rim that gives it weight. A thing, so the same in both themes. */
   --medal-bronze: #c98a4b; --medal-bronze-rim: #8f5a26; --medal-silver: #cfd3da; --medal-silver-rim: #8d93a0; --medal-gold: #e9b93c; --medal-gold-rim: #a97b12;
   --medal-jade: #5fc29a; --medal-jade-rim: #2f7d5f; --medal-onyx: #1c1c1f;

@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom';
 import { Download } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
+import { SkeletonPage } from '../components/Skeleton';
 import { Dialog } from '../components/Dialog';
 import { Field } from '../components/Field';
 import { Segmented } from '../components/Segmented';
@@ -39,9 +40,9 @@ export function Settings() {
     setHandle(auth.profile.handle);
   }
 
-  if (leaving) return <div className={styles.page} aria-busy="true" />;
+  if (leaving) return <SkeletonPage />;
   if (!auth.enabled) return <Navigate to="/signin" replace />;
-  if (auth.loading) return <div className={styles.page} aria-busy="true" />;
+  if (auth.loading) return <SkeletonPage />;
   if (!auth.session || !auth.profile) return <Navigate to="/signin?next=%2Fsettings" replace />;
   const p = auth.profile;
   const changed = name.trim() !== p.name || handle.trim().toLowerCase() !== p.handle;
@@ -76,7 +77,7 @@ export function Settings() {
   return (
     <div className={styles.page}>
       <div className={styles.head}>
-        <h1 className={styles.title}>Settings.</h1>
+        <h1 className={styles.title}>Your settings.</h1>
         <Link to={`/u/${p.handle}`} className={styles.back}>
           View your profile
         </Link>

@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, Navigate, useParams } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "../components/Button";
+import { IconLink } from "../components/IconLink";
 import { PageHeader } from "../components/PageHeader";
 import { PartnerNote } from "../components/PartnerNote";
 import { Skeleton, SkeletonGroup, SkeletonList } from "../components/Skeleton";
-import { TextLink } from "../components/TextLink";
 import { dayNo } from "../engine/daily";
 import { formatTime } from "../engine/time";
 import { getGameDef } from "../games/catalog";
@@ -105,7 +106,7 @@ export function Profile() {
   if (!auth.enabled) return <Navigate to="/play" replace />;
   const title = "Player";
   // Your own public page leads back to You, where everything about you is changed.
-  const settings = own ? <TextLink to="/me">Back to You</TextLink> : undefined;
+  const settings = own ? <IconLink to="/me" icon={ArrowLeft} label="Back to You" /> : undefined;
   if (state.status === "loading") {
     return (
       <div className={styles.page}>

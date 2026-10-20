@@ -105,9 +105,9 @@ describe('Header', () => {
     at('/play');
     const nav = screen.getByRole('navigation', { name: 'Main' });
     // The dock's places, in the dock's order.
-    expect(nav).toHaveTextContent('PacksSquadRanks');
+    expect(nav).toHaveTextContent('PuzzlesPeopleLeague');
     expect(nav).not.toHaveTextContent('How it works');
-    expect(screen.getByRole('link', { name: 'Packs' }).className).toContain('active');
+    expect(screen.getByRole('link', { name: 'Puzzles' }).className).toContain('active');
     expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/signin?next=%2Fplay');
     expect(screen.getByRole('button', { name: /Switch to/ })).toBeInTheDocument();
     // The same Play as the dock: it knows what is next. The case that is open.

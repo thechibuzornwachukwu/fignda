@@ -56,3 +56,12 @@
     animation: none;
   }
 }
+
+/* A page on its way: the same width and top as a page, title then rows. */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  padding: var(--screen-top) 0 var(--space-10);
+  max-width: 760px;
+}

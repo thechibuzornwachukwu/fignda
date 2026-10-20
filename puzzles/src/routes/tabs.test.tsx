@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 // The 4 tabs: one header each, less at once, and a deliberate line wherever there is nothing to show.
-import { render, screen, within, cleanup } from '@testing-library/react';
+import { render, screen, within, cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { vi } from 'vitest';
 import { dayNo } from '../engine/daily';
@@ -47,6 +47,11 @@ vi.mock('../lib/api', async (original) => {
     'searchPlayers',
     'topPlayers',
     'newPlayers',
+    'squadFeed',
+    'fetchNotifications',
+    'markNotificationsRead',
+    'fetchUnread',
+    'cheer',
   ];
   const fakes = Object.fromEntries(names.map((n) => [n, (...a: unknown[]) => world.api[n]!(...a)]));
   return { ...real, ...fakes };
@@ -78,6 +83,11 @@ function emptyWorld() {
     fetchDailyBoard: ok([]),
     fetchGameBoard: ok([]),
     fetchMyLeague: ok(null),
+    squadFeed: ok([]),
+    fetchNotifications: ok([]),
+    markNotificationsRead: ok(undefined),
+    fetchUnread: ok(0),
+    cheer: ok(1),
     joinLeague: ok(undefined),
     leaveLeague: ok(undefined),
     fetchDailyRank: ok(null),
@@ -119,7 +129,7 @@ beforeEach(() => emptyWorld());
 describe('Games', () => {
   it('a first visit shows the crew and the path, and no daily and no list of games', async () => {
     open('/play');
-    expect(title()).toBe('Packs');
+    expect(title()).toBe('Your Puzzles');
     expect(screen.queryByRole('link', { name: /Daily #\d+/ })).toBeNull();
     expect(within(screen.getByRole('region', { name: 'Your path' })).getAllByRole('link').length).toBeGreaterThan(0);
     expect(screen.queryByRole('region', { name: 'All games' })).toBeNull();
@@ -150,7 +160,7 @@ describe('Games', () => {
 
   it('an old filter in the address changes nothing: there is no list to filter', () => {
     open('/play?f=Nothing');
-    expect(title()).toBe('Packs');
+    expect(title()).toBe('Your Puzzles');
     expect(screen.queryByRole('group', { name: 'Filter games' })).toBeNull();
     expect(screen.getByRole('region', { name: 'Your path' })).toBeInTheDocument();
   });
@@ -198,7 +208,7 @@ describe('Leaders', () => {
       { rank: 2, handle: 'ada', score: 900, secs: 300, found: 8, total: 12 },
     ]);
     open('/leaderboard?board=pack');
-    expect(title()).toBe('Ranks');
+    expect(title()).toBe('Your League');
     const board = await screen.findByRole('list', { name: 'Top scores' });
     const rows = within(board).getAllByRole('listitem');
     expect(rows.map((r) => r.textContent)).toEqual(['01@bisi12/121:351,650', '02@adaYou8/125:00900']);
@@ -245,7 +255,7 @@ describe('Leaders', () => {
 describe('Players', () => {
   it('a guest in an empty place: one line per list, no lone heading, and the way to sign in', async () => {
     open('/players');
-    expect(title()).toBe('Squad');
+    expect(title()).toBe('Your People');
     expect(await screen.findByText('Nobody else has joined yet. Invite a friend and they will show up here.')).toBeInTheDocument();
     expect(await screen.findByText("No streaks yet. Finish a puzzle today to start one.")).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/signin?next=%2Fplayers');
@@ -258,15 +268,45 @@ describe('Players', () => {
   it('leads with one section, and the top lists are one more', async () => {
     open('/players');
     await screen.findByText(/Nobody else has joined yet/);
-    // The boards first, then who to follow: suggestions never push the people you play with down.
-    expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)).toEqual(['Top players', 'People to follow']);
+    // What your people did first, then who to follow, then the best players.
+    expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)).toEqual(['Lately', 'People to follow', 'Top players']);
+  });
+
+  it('one feed: medals won and what happened to you, newest first; a medal of a friend can be cheered, yours shows its cheers', async () => {
+    world.me = { id: 'u1', handle: 'me', name: 'Me' } as Me;
+    world.api.squadFeed = ok([
+      { handle: 'ada', name: 'Ada', code: 'streak_30', earned_at: '2026-10-19T10:00:00Z', cheers: 2, cheered: false, mine: false },
+      { handle: 'me', name: 'Me', code: 'rare_eye', earned_at: '2026-10-18T10:00:00Z', cheers: 1, cheered: false, mine: true },
+      { handle: 'bo', name: 'Bo', code: 'nope', earned_at: '2026-10-19T09:00:00Z', cheers: 0, cheered: false, mine: false },
+    ]);
+    world.api.fetchNotifications = ok([
+      { id: 1, kind: 'follow', handle: 'kemi', name: 'Kemi', data: {}, created_at: '2026-10-19T11:00:00Z', unread: true },
+      { id: 2, kind: 'badge', handle: null, name: null, data: { code: 'rare_eye' }, created_at: '2026-10-18T10:00:00Z', unread: false },
+    ]);
+    const cheered = vi.fn(ok(3));
+    world.api.cheer = cheered;
+    const read = vi.fn(ok(undefined));
+    world.api.markNotificationsRead = read;
+    open('/players');
+    const feed = within((await screen.findByRole('heading', { level: 2, name: 'Lately' })).closest('section')!);
+    await feed.findByText('Kemi followed you.');
+    // An unknown medal and the note that repeats your own medal are left out.
+    expect(feed.getAllByRole('listitem').map((li) => li.textContent?.slice(0, 12))).toEqual(['Kemi followe', 'Ada30 day ru', 'YouRare eye ']);
+    expect(read).toHaveBeenCalled();
+    expect(feed.getByLabelText('1 cheer')).toBeInTheDocument();
+    const button = feed.getByRole('button', { name: 'Cheer Ada, 2 cheers' });
+    expect(button).toHaveAttribute('aria-pressed', 'false');
+    fireEvent.click(button);
+    await waitFor(() => expect(feed.getByRole('button', { name: 'Cheer Ada, 3 cheers' })).toHaveAttribute('aria-pressed', 'true'));
+    expect(cheered).toHaveBeenCalledWith('ada', 'streak_30', true);
   });
 
   it('lists that did not load say so, and never claim to be empty', async () => {
     world.api.suggestedPlayers = fail;
     world.api.topPlayers = fail;
+    world.api.squadFeed = fail;
     open('/players');
-    expect(await screen.findAllByText('This list did not load. Try again in a moment.')).toHaveLength(2);
+    expect(await screen.findAllByText('This list did not load. Try again in a moment.')).toHaveLength(3);
     expect(screen.queryByText(/Nobody else has joined yet/)).toBeNull();
   });
 
@@ -433,7 +473,7 @@ describe('A player\'s page', () => {
   });
 });
 
-describe('the league on Ranks', () => {
+describe('the league on Your League', () => {
   const LEAGUE = {
     tier: 1,
     players: 7,
@@ -444,7 +484,7 @@ describe('the league on Ranks', () => {
     ],
   };
 
-  it('signed in, Ranks opens on the league: the tier, the table, the top 5 marked up and nothing marked down', async () => {
+  it('signed in, Your League opens on the league: the tier, the table, the top 5 marked up and nothing marked down', async () => {
     world.me = ADA;
     world.api.fetchMyLeague = ok(LEAGUE);
     open('/leaderboard');
@@ -453,7 +493,7 @@ describe('the league on Ranks', () => {
     expect(rows.map((r) => r.hasAttribute('data-up'))).toEqual([true, true, false]);
     expect(rows[1]).toHaveAttribute('data-mine');
     expect(document.body.textContent).not.toMatch(/down|drop|relegat/i);
-    expect(screen.getByRole('radio', { name: 'League' })).toHaveAttribute('aria-checked', 'true');
+    expect(screen.getByRole('radio', { name: 'This week' })).toHaveAttribute('aria-checked', 'true');
     expectNoHoles();
   });
 
@@ -472,7 +512,7 @@ describe('the league on Ranks', () => {
     world.api.fetchMyLeague = ok(LEAGUE);
     open('/leaderboard');
     await screen.findByText(/Guest scores stay on this device/);
-    expect(screen.queryByRole('radio', { name: 'League' })).toBeNull();
+    expect(screen.queryByRole('radio', { name: 'This week' })).toBeNull();
     expect(screen.queryByRole('heading', { name: /league/ })).toBeNull();
   });
 });

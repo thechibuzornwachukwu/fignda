@@ -210,9 +210,10 @@ describe('the dock’s Play button', () => {
       </MemoryRouter>,
     );
   const play = () => screen.getByRole('navigation', { name: 'Tabs' }).querySelector('[data-play]')!;
-  it('order is Cases, You, Play, Squad, Ranks, and Play opens the next clue', () => {
+  it('icons only, in the order Home, Your People, Your League, Play, You, and Play opens the next clue', () => {
     dock();
-    expect(within(screen.getByRole('navigation', { name: 'Tabs' })).getAllByRole('link').map((a) => a.textContent)).toEqual(['Packs', 'You', 'Play', 'Squad', 'Ranks']);
+    expect(within(screen.getByRole('navigation', { name: 'Tabs' })).getAllByRole('link').map((a) => a.getAttribute('aria-label'))).toEqual(['Home', 'Your People', 'Your League', 'Play the next puzzle', 'You']);
+    expect(within(screen.getByRole('navigation', { name: 'Tabs' })).getAllByRole('link').every((a) => a.textContent === '')).toBe(true);
     expect(play().getAttribute('data-play')).toBe('clue');
     expect(play().getAttribute('href')).toMatch(/^\/play\/[a-z0-9-]+\/1$/);
     expect(play()).toHaveAccessibleName('Play the next puzzle');

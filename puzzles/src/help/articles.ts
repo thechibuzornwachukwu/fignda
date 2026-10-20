@@ -146,7 +146,7 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
       'A week starts on Monday at 00:00 UTC.',
       `The bottom 5 move down a tier, but never in a table of fewer than ${LEAGUE_DOWN_FROM}.`,
       'Replaying a puzzle earns no league points.',
-      'You can leave from Ranks, and join again any time.',
+      'You can leave from Your League, and join again any time.',
     ],
     related: ['points'],
   },
@@ -207,7 +207,7 @@ export const HELP_ARTICLES: readonly HelpArticle[] = [
     slug: 'friend-streaks',
     group: 'Friends',
     title: 'What is a friend streak?',
-    answer: 'A run you keep with one friend: it grows on every day you both finish a puzzle. Start one from Squad or from their page.',
+    answer: 'A run you keep with one friend: it grows on every day you both finish a puzzle. Start one from Your People or from their page.',
     related: ['runs-and-rest-days'],
   },
 

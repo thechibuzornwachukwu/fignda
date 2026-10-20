@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import { Avatar } from '../components/Avatar';
 import { Button } from '../components/Button';
+import { SkeletonPage } from '../components/Skeleton';
 import { joinStreakLink, streakLinkInfo, type PlayerRef } from '../lib/api';
 import { useAuth } from '../lib/auth';
 import styles from './StreakInvite.module.css';
@@ -29,7 +30,7 @@ export function StreakInvite() {
   }, [code]);
 
   if (!auth.enabled) return <Navigate to="/play" replace />;
-  if (from === undefined || auth.loading) return <div className={styles.page} aria-busy="true" />;
+  if (from === undefined || auth.loading) return <SkeletonPage />;
   if (!from) {
     return (
       <div className={styles.page}>

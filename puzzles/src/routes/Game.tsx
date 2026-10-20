@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate, useParams, useSearchParams } from 'react-r
 import { ArrowLeft, UsersRound } from 'lucide-react';
 import { BigClock, Elapsed } from '../components/BigClock';
 import { Icon } from '../components/Icon';
+import { SkeletonPage } from '../components/Skeleton';
 import { MobileBar } from '../components/MobileBar';
 import { Ring } from '../components/Ring';
 import { TextLink } from '../components/TextLink';
@@ -108,7 +109,7 @@ export function GameByCode() {
       alive = false;
     };
   }, [code]);
-  if (def === undefined) return <div className={styles.screen} aria-busy="true" />;
+  if (def === undefined) return <SkeletonPage rows={4} />;
   if (!def) return <Navigate to="/play" replace />;
   return <Gated key={def.id} def={def} />;
 }
@@ -125,7 +126,7 @@ function Gated(props: ScreenProps) {
   const [blocked] = useState(() => guestBlocked(playKey(props.def.id, props.dailyN, props.part?.n)));
   if (!auth.enabled || !blocked) return <GameScreen {...props} />;
   // Still finding out who this is: never wall someone who is signed in.
-  if (auth.loading) return <div aria-busy="true" />;
+  if (auth.loading) return <SkeletonPage rows={4} />;
   return auth.session ? <GameScreen {...props} /> : <GuestWall />;
 }
 

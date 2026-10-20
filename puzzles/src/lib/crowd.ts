@@ -1,4 +1,4 @@
-// Ranks opens on your crowd: people you follow if there are any, else everyone. A circle's board is on the circle (Squad).
+// Ranks opens on your crowd: people you follow if there are any, else everyone. A circle's board is on the circle (Your People).
 
 import { countOf } from './unlocks';
 

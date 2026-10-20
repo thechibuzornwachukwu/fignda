@@ -20,6 +20,7 @@ describe('notification text and links', () => {
     [{ kind: 'nudge' }, 'Ada has played today and nudged you.', '/play'],
     [{ kind: 'badge', handle: null, name: null, data: { code: 'streak_7' } }, 'New badge: 7 day run.', '/me#badges'],
     [{ kind: 'badge', handle: null, name: null, data: { code: 'points_1000' } }, 'New badge: 1,000 points.', '/me#badges'],
+    [{ kind: 'cheer', handle: 'ada', name: 'Ada', data: { code: 'streak_30' } }, 'Ada cheered your 30 day run.', '/me#badges'],
   ] as const)('%o', (over, text, to) => {
     expect(say(note(over as Partial<Note>), NOW)).toEqual({ text, to });
   });

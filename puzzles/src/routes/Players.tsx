@@ -6,7 +6,13 @@ import { PageHeader } from '../components/PageHeader';
 import { PartnerNote } from '../components/PartnerNote';
 import { Segmented } from '../components/Segmented';
 import { SkeletonList } from '../components/Skeleton';
-import { follow, isFollowing, myCircles, newPlayers, searchPlayers, suggestedPlayers, topPlayers, unfollow, type PlayerRef, type Suggested } from '../lib/api';
+import { cheer, fetchNotifications, follow, isFollowing, markNotificationsRead, myCircles, newPlayers, searchPlayers, squadFeed, suggestedPlayers, topPlayers, unfollow, type FeedItem, type PlayerRef, type Suggested } from '../lib/api';
+import { medalsOf } from '../lib/medals';
+import { ago, describe, type Note } from '../lib/notifications';
+import { announceRead } from '../lib/useUnread';
+import { Heart, UserCheck, UserPlus } from 'lucide-react';
+import { Icon } from '../components/Icon';
+import { MedalFace } from '../components/Medals';
 import { useStreak } from '../lib/useStreak';
 import { keepUnlocked, useUnlocks } from '../lib/useUnlocks';
 import { useAuth } from '../lib/auth';
@@ -40,7 +46,7 @@ function FollowButton({ me, handle, name, check }: { me: string; handle: string;
   };
   return (
     <button type="button" className={styles.follow} aria-pressed={on} aria-label={`${on ? 'Following' : 'Follow'} ${name}`} disabled={busy} onClick={() => void toggle()}>
-      {on ? 'Following' : 'Follow'}
+      <Icon icon={on ? UserCheck : UserPlus} size={18} />
     </button>
   );
 }
@@ -132,6 +138,138 @@ function TopPlayers({ points }: { points: boolean }) {
 
 type CircleRef = { code: string; name: string; members: number };
 
+type Scope = 'friends' | 'world';
+
+/** The medal a badge code is a tier of, or null for a code this build does not know. */
+const medalOf = (code: string) => medalsOf([code]).find((m) => m.tier >= 0 && m.key !== 'first') ?? null;
+
+/** One line of the feed: a medal someone won, or something that happened to you. Newest first. */
+type Entry = { at: string; medal: FeedItem } | { at: string; note: Note };
+
+/** A medal's cheers. Yours: the count. Anyone else's: a button, pressed once you have cheered. */
+function Cheer({ item, me }: { item: FeedItem; me?: string }) {
+  const [on, setOn] = useState(item.cheered);
+  const [n, setN] = useState(item.cheers);
+  const [busy, setBusy] = useState(false);
+  const label = `${n} ${n === 1 ? 'cheer' : 'cheers'}`;
+  if (item.mine || !me) {
+    if (n === 0) return null;
+    return (
+      <span className={styles.cheers} aria-label={label}>
+        <Icon icon={Heart} size={16} />
+        {n}
+      </span>
+    );
+  }
+  const toggle = async () => {
+    setBusy(true);
+    setOn(!on);
+    setN(n + (on ? -1 : 1));
+    const next = await cheer(item.handle, item.code, !on).catch(() => null);
+    setBusy(false);
+    if (next == null) {
+      setOn(on);
+      setN(n);
+    } else setN(next);
+  };
+  return (
+    <button type="button" className={styles.cheer} aria-pressed={on} aria-label={`Cheer ${item.name || item.handle}, ${label}`} disabled={busy} onClick={() => void toggle()}>
+      <Icon icon={Heart} size={18} />
+      {n > 0 && <span className={styles.cheerCount}>{n}</span>}
+    </button>
+  );
+}
+
+/**
+ * The feed: medals lately won by you, the people you follow, or the top players, with what happened to you
+ * (follows, streak asks, nudges, invites, cheers) in among them. Opening it reads your notifications.
+ */
+function Feed({ me }: { me?: string }) {
+  const [scope, setScope] = useState<Scope>(me ? 'friends' : 'world');
+  const [lists, setLists] = useState<Partial<Record<Scope, Entry[] | 'failed'>>>({});
+  const list = lists[scope];
+  useEffect(() => {
+    if (list !== undefined) return;
+    let alive = true;
+    const notes = scope === 'friends' && me ? fetchNotifications().catch(() => [] as Note[]) : Promise.resolve([] as Note[]);
+    Promise.all([squadFeed(scope), notes])
+      .then(([medals, ns]) => {
+        if (!alive) return;
+        const won: Entry[] = clean<FeedItem>(medals)
+          .filter((f) => typeof f.code === 'string' && medalOf(f.code))
+          .map((f) => ({ at: f.earned_at, medal: f }));
+        // Your own medals are already in the feed; the note that you won one would say it twice.
+        const told: Entry[] = (Array.isArray(ns) ? ns : []).filter((n) => n && n.kind !== 'badge').map((n) => ({ at: n.created_at, note: n }));
+        setLists((l) => ({ ...l, [scope]: [...won, ...told].sort((a, b) => b.at.localeCompare(a.at)) }));
+        if (ns.some((n) => n.unread)) void markNotificationsRead().then(announceRead);
+      })
+      .catch(() => alive && setLists((l) => ({ ...l, [scope]: 'failed' })));
+    return () => {
+      alive = false;
+    };
+  }, [scope, list, me]);
+  const empty = scope === 'friends' ? 'Nothing from your people this month. Follow a few players and their medals show up here.' : 'No medals won this month yet.';
+  return (
+    <section className={styles.section} aria-labelledby="feed-title">
+      <h2 id="feed-title" className={styles.h2}>
+        Lately
+      </h2>
+      {me && (
+        <div className={styles.switch}>
+          <Segmented label="Whose news" hideLabel options={[['friends', 'Your people'], ['world', 'Top players']] as const} value={scope} onChange={setScope} />
+        </div>
+      )}
+      {list === undefined ? (
+        <SkeletonList rows={4} avatar={40} sub />
+      ) : list === 'failed' || list.length === 0 ? (
+        <p className={styles.muted}>{list === 'failed' ? 'This list did not load. Try again in a moment.' : empty}</p>
+      ) : (
+        <ul className={styles.list}>
+          {list.map((e) => {
+            if ('note' in e) {
+              const n = e.note;
+              const d = describe(n);
+              return (
+                <li key={`n${n.id}`} className={styles.item} data-unread={n.unread || undefined}>
+                  <Link to={d.to} className={styles.row}>
+                    {n.handle ? <Avatar handle={n.handle} size={40} /> : <span className={styles.avatarGap} />}
+                    <span className={styles.who}>
+                      <span className={styles.told}>
+                        {d.text}
+                        {n.unread && <span className={styles.srOnly}> New.</span>}
+                      </span>
+                      <time className={styles.handle} dateTime={n.created_at}>
+                        {ago(n.created_at)}
+                      </time>
+                    </span>
+                  </Link>
+                </li>
+              );
+            }
+            const f = e.medal;
+            const medal = medalOf(f.code)!;
+            return (
+              <li key={`m${f.handle}-${f.code}`} className={styles.item}>
+                <Link to={f.mine ? '/me#badges' : `/u/${f.handle}`} className={styles.row}>
+                  <Avatar handle={f.handle} size={40} />
+                  <span className={styles.who}>
+                    <span className={styles.name}>{f.mine ? 'You' : f.name || `@${f.handle}`}</span>
+                    <span className={styles.handle}>
+                      {medal.name} · <time dateTime={f.earned_at}>{ago(f.earned_at)}</time>
+                    </span>
+                  </span>
+                  <MedalFace medal={medal} />
+                </Link>
+                <Cheer item={f} me={me} />
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 /**
  * Your circles: the private tables you sit at. They are people, so they live on Squad, and each circle's board is on the circle.
  * `quiet`: not offered yet, so it shows only for a player who is already in one.
@@ -185,7 +323,7 @@ function YourCircles({ quiet }: { quiet: boolean }) {
   );
 }
 
-/** /players. The people you play with: friend streaks, your circles, the top players, people to follow, then search. */
+/** /players, Your People. Search first, then what your people won lately, friend streaks, your circles, people to follow, the top players. */
 export function Players() {
   const auth = useAuth();
   const run = useStreak();
@@ -255,7 +393,27 @@ export function Players() {
 
   return (
     <div className={styles.page}>
-      <PageHeader title="Squad" />
+      <PageHeader title="Your People" />
+
+      <section className={styles.section} aria-label="Search players">
+        <Field
+          label="Find people"
+          prefix="@"
+          placeholder="ada"
+          autoCapitalize="none"
+          autoCorrect="off"
+          spellCheck={false}
+          maxLength={20}
+          value={q}
+          onChange={(e) => {
+            setQ(e.target.value.replace(/^@/, ''));
+            setHits(null);
+          }}
+        />
+        {searching && <List rows={hits} empty={`No handle starts with @${q.trim().toLowerCase()}.`} me={me} myHandle={myHandle} check pet />}
+      </section>
+
+      {!searching && <Feed me={me} />}
 
       {/* Friend streaks appear after the first daily. A player already in one, or asked into one, sees it at once. */}
       {!searching && me && <FriendStreaks quiet={!open.friendStreaks && !asked} />}
@@ -263,7 +421,6 @@ export function Players() {
       {/* Circles are offered after the first daily too. A player already in one sees them whatever the count says. */}
       {!searching && me && <YourCircles quiet={!open.circles && !askedCircles} />}
 
-      {!searching && <TopPlayers points={open.points} />}
       {/* Suggestions only when there is someone to suggest: an empty list is one more thing to read. */}
       {!searching && !(me && Array.isArray(suggested) && suggested.length === 0) && (
         <section className={styles.section} aria-labelledby="suggested-title">
@@ -280,23 +437,8 @@ export function Players() {
         </section>
       )}
 
-      <section className={styles.section} aria-label="Search players">
-        <Field
-          label="Find a player by handle"
-          prefix="@"
-          placeholder="ada"
-          autoCapitalize="none"
-          autoCorrect="off"
-          spellCheck={false}
-          maxLength={20}
-          value={q}
-          onChange={(e) => {
-            setQ(e.target.value.replace(/^@/, ''));
-            setHits(null);
-          }}
-        />
-        {searching && <List rows={hits} empty={`No handle starts with @${q.trim().toLowerCase()}.`} me={me} myHandle={myHandle} check pet />}
-      </section>
+      {!searching && <TopPlayers points={open.points} />}
+
 
     </div>
   );

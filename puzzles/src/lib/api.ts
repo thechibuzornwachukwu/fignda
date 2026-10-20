@@ -4,9 +4,9 @@ import { readLeague, type League } from './league';
 import type { SavedSession } from '../games/session';
 import type { PlayRow } from './profileStats';
 import { storage } from './storage';
-import type { Note } from './notifications';
 import type { WordStat } from './wordStats';
 import { getSupabase } from './supabase';
+import type { Note } from './notifications';
 
 export type Profile = { id: string; name: string; handle: string; /** Avatar design code, or null before the player designs one. */ avatar?: string | null };
 
@@ -232,6 +232,22 @@ export async function suggestedPlayers(limit = 12): Promise<Suggested[]> {
   const { data, error } = await (await client()).rpc('players_suggested', { p_limit: limit });
   if (error) throw error;
   return data ?? [];
+}
+
+/** A medal lately won by you or someone you follow ('friends'), or by a top scorer ('world'), and its cheers. */
+export type FeedItem = PlayerRef & { code: string; earned_at: string; cheers: number; cheered: boolean; mine: boolean };
+
+export async function squadFeed(scope: 'friends' | 'world', limit = 20): Promise<FeedItem[]> {
+  const { data, error } = await (await client()).rpc('squad_feed', { p_scope: scope, p_limit: limit });
+  if (error) throw error;
+  return data ?? [];
+}
+
+/** Cheer a medal, or take the cheer back. Returns its new count. */
+export async function cheer(handle: string, code: string, on: boolean): Promise<number> {
+  const { data, error } = await (await client()).rpc('cheer', { p_handle: handle, p_code: code, p_on: on });
+  if (error) throw error;
+  return typeof data === 'number' ? data : 0;
 }
 
 // Circles: a private daily table for a family, class, church or office. Members only; joined by a link.

@@ -2,7 +2,7 @@
 // (written by triggers, never by a client); this file only turns them into words.
 
 
-export type NoteKind = 'follow' | 'streak_ask' | 'streak_start' | 'room_invite' | 'nudge' | 'badge';
+export type NoteKind = 'follow' | 'streak_ask' | 'streak_start' | 'room_invite' | 'nudge' | 'badge' | 'cheer';
 
 export type Note = {
   id: number;
@@ -63,6 +63,8 @@ export function describe(n: Note, now = Date.now()): { text: string; to: string 
     }
     case 'badge':
       return { text: `New badge: ${badgeLabel(n.data.code)}.`, to: '/me#badges' };
+    case 'cheer':
+      return { text: `${who} cheered your ${badgeLabel(n.data.code)}.`, to: '/me#badges' };
   }
 }
 

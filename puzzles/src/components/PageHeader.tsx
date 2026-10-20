@@ -1,5 +1,4 @@
 import type { ReactNode } from 'react';
-import { NotificationsLink } from './Header';
 import styles from './PageHeader.module.css';
 
 type Props = {
@@ -10,7 +9,6 @@ type Props = {
 
 /**
  * The top of each tab: the title in the same place at the same size, and one action slot. SPEC section 4.
- * On a phone there is no bar above it, so the bell sits here, last on the right.
  */
 export function PageHeader({ title, action }: Props) {
   return (
@@ -18,9 +16,6 @@ export function PageHeader({ title, action }: Props) {
       <h1 className={styles.title}>{title}</h1>
       <div className={styles.side}>
         {action ? <div className={styles.action}>{action}</div> : null}
-        <span className={styles.bell}>
-          <NotificationsLink />
-        </span>
       </div>
     </header>
   );

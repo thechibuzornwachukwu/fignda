@@ -251,10 +251,10 @@ export function pageFor(path: string, origin: string): Page {
 
   if (clean === '/play') {
     const list = games.map((g) => `<li><a href="/play/${g.id}">${esc(question(g))}</a></li>`).join('');
-    return simple('/play', 'Packs · Gazecraft', `${games.length} packs, a puzzle at a time. Every answer is in plain sight. You will still miss some.`, `<ul>${list}</ul>`);
+    return simple('/play', 'Your Puzzles · Gazecraft', `${games.length} packs, a puzzle at a time. Every answer is in plain sight. You will still miss some.`, `<ul>${list}</ul>`);
   }
-  if (clean === '/leaderboard') return simple('/leaderboard', 'Ranks · Gazecraft', 'The best scores on the pack you are on, on Gazecraft.', '');
-  if (clean === '/players') return simple('/players', 'Players · Gazecraft', 'Find players to follow on Gazecraft: longest runs, most points and new players.', '');
+  if (clean === '/leaderboard') return simple('/leaderboard', 'Your League · Gazecraft', 'The best scores on the pack you are on, on Gazecraft.', '');
+  if (clean === '/players') return simple('/players', 'Your People · Gazecraft', 'What your friends and the best players on Gazecraft have won lately, and people to follow.', '');
   if (clean === '/privacy') return simple('/privacy', 'Privacy · Gazecraft', 'What Gazecraft keeps, why, and how to delete it.', '');
   if (clean === '/help') {
     const list = HELP_ARTICLES.map((a) => `<li><a href="/help/${a.slug}">${esc(a.title)}</a></li>`).join('');
@@ -302,7 +302,7 @@ export function llmsTxt(origin: string): string {
     '## Key pages',
     `- [Home](${origin}/): what Gazecraft is and a playable example`,
     `- [Packs](${origin}/play): every pack, a puzzle at a time`,
-    `- [Ranks](${origin}/leaderboard): the best scores on the pack you are on`,
+    `- [Your League](${origin}/leaderboard): the best scores on the pack you are on`,
     `- [Players](${origin}/players): find players to follow`,
     `- [Privacy](${origin}/privacy): what is stored and how to delete it`,
     '',

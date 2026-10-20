@@ -5,7 +5,7 @@ import { Button } from '../components/Button';
 import { Field } from '../components/Field';
 import { Icon } from '../components/Icon';
 import { PartnerNote } from '../components/PartnerNote';
-import { SkeletonList } from '../components/Skeleton';
+import { SkeletonList, SkeletonPage } from '../components/Skeleton';
 import { TextLink } from '../components/TextLink';
 import { TopicIcon } from '../components/TopicIcon';
 import { TOPIC_ICONS } from '../components/topicIcons';
@@ -203,7 +203,7 @@ export function Make() {
   const check = useMemo(() => checkDraft(draft?.text ?? '', words), [draft?.text, words]);
 
   if (!auth.enabled) return <Navigate to="/play" replace />;
-  if (auth.loading) return <div className={styles.page} aria-busy="true" />;
+  if (auth.loading) return <SkeletonPage />;
   if (!auth.profile) return <Navigate to="/signin?next=%2Fmake" replace />;
 
   const set = (patch: Partial<Draft>) => setDraft((d) => (d ? { ...d, ...patch } : d));
@@ -247,7 +247,7 @@ export function Make() {
               className={styles.text}
               rows={3}
               maxLength={MAKE.maxText}
-              placeholder="Lagos, football, 🍲, or a paragraph of your own"
+              placeholder="Lagos, football, jollof, or a paragraph of your own"
               value={box}
               onChange={(e) => {
                 setBox(e.target.value);

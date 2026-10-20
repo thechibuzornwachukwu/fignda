@@ -44,7 +44,7 @@ export function Games() {
   return (
     <div className={styles.screen}>
       {/* One thing to do, then the path. Who is on the case sits small in the corner, and leads to the stage. */}
-      <PageHeader title="Packs" action={<Crew />} />
+      <PageHeader title="Your Puzzles" action={<Crew />} />
 
       <GameInvites />
 

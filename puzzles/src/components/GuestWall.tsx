@@ -1,4 +1,6 @@
 import { useLocation } from 'react-router-dom';
+import { ArrowLeft } from 'lucide-react';
+import { Icon } from './Icon';
 import { GUEST_GAMES } from '../lib/guestLimit';
 import { Button } from './Button';
 import { Partner } from './Partner';
@@ -18,7 +20,10 @@ export function GuestWall() {
       <Button variant="accent" to={`/welcome?from=${encodeURIComponent(pathname)}`}>
         Sign in
       </Button>
-      <TextLink to="/play">Back to packs</TextLink>
+      <TextLink to="/play">
+        <Icon icon={ArrowLeft} size={16} />
+        Back to packs
+      </TextLink>
     </div>
   );
 }

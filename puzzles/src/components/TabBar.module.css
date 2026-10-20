@@ -12,7 +12,7 @@
     z-index: 10;
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    align-items: end;
+    align-items: center;
     height: var(--tabbar-h);
     padding: 0 var(--space-1);
     background: var(--surface);
@@ -26,29 +26,20 @@
     transform: translateY(calc(100% + var(--space-3) + var(--ledge) + env(safe-area-inset-bottom)));
   }
 }
-.tab,
-.play {
+.tab {
   height: var(--tabbar-h);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-0h);
+  display: grid;
+  place-items: center;
   color: var(--muted);
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
   -webkit-tap-highlight-color: transparent;
-}
-.label {
-  line-height: 1;
 }
 /* The active place: a filled pill behind the icon and full-strength ink. Shape and weight, not colour alone. */
 .pill {
+  position: relative;
   display: grid;
   place-items: center;
   width: var(--space-12);
-  height: var(--space-6h);
+  height: var(--space-8);
   border-radius: var(--radius-pill);
   transition:
     background var(--dur-base) var(--ease-std),
@@ -69,42 +60,13 @@
     transform: scale(0.8);
   }
 }
-
-/* Today's daily: a raised disc that pushes down when pressed. Ink, not lime: lime means found. */
-.play {
-  justify-content: flex-end;
-  padding-bottom: var(--space-2h);
-  color: var(--fg);
-}
-.disc {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: var(--tabbar-disc);
-  height: var(--tabbar-disc);
-  margin-bottom: var(--space-1);
-  border-radius: 50%;
-  background: var(--fg);
-  color: var(--bg);
-  font-size: var(--tabbar-disc-icon);
-  border: var(--space-1) solid var(--bg);
-  box-shadow: 0 var(--ledge) 0 var(--line-4);
-  transition:
-    transform var(--dur-fast) var(--ease-out),
-    box-shadow var(--dur-fast) var(--ease-out);
-}
-.disc svg {
-  fill: currentColor;
-}
-.play:active .disc {
-  transform: translateY(var(--ledge));
-  box-shadow: 0 0 0 var(--line-4);
-}
-/* Played today: the disc turns lime with a tick. Lime is success. */
-.play[data-done] .disc {
-  background: var(--accent);
-  color: var(--on-accent);
-}
-.play[data-done] .disc svg {
-  fill: none;
+.dot {
+  position: absolute;
+  top: var(--space-1);
+  right: var(--space-3);
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--cheer);
+  box-shadow: 0 0 0 2px var(--surface);
 }

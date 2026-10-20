@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { Share2 } from 'lucide-react';
 import { Button } from '../components/Button';
+import { Icon } from '../components/Icon';
 import {
   askFriendStreak,
   fetchFollowers,
@@ -139,6 +141,7 @@ export function SocialActions({
           </Button>
         ))}
       <Button variant="secondary" size="sm" onClick={share}>
+        <Icon icon={Share2} size={18} />
         Share
       </Button>
     </div>

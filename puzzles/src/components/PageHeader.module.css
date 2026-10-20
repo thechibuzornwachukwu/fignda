@@ -26,12 +26,3 @@
   display: flex;
   align-items: center;
 }
-/* The bell is in the header bar on wide screens, and here on phones, where that bar is left out. */
-.bell {
-  display: none;
-}
-@media (max-width: 640px) {
-  .bell {
-    display: contents;
-  }
-}

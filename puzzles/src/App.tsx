@@ -5,6 +5,7 @@ import { Footer } from './components/Footer';
 import { TabBar } from './components/TabBar';
 import { useDelayedWaiting } from './components/useDelayedWaiting';
 import { Waiting } from './components/Waiting';
+import { SkeletonPage } from './components/Skeleton';
 import { hasTabBar, isPuzzle } from './lib/routes';
 import { Landing } from './routes/Landing';
 import { OpenByCode } from './routes/OpenByCode';
@@ -26,7 +27,6 @@ const GameLeaderboard = lazy(() => import('./routes/Leaderboard').then((m) => ({
 const Players = lazy(() => import('./routes/Players').then((m) => ({ default: m.Players })));
 const Circles = lazy(() => import('./routes/Circles').then((m) => ({ default: m.Circles })));
 const Circle = lazy(() => import('./routes/Circles').then((m) => ({ default: m.Circle })));
-const Notifications = lazy(() => import('./routes/Notifications').then((m) => ({ default: m.Notifications })));
 const OwnerPuzzles = lazy(() => import('./routes/OwnerPuzzles').then((m) => ({ default: m.OwnerPuzzles })));
 const Make = lazy(() => import('./routes/Make').then((m) => ({ default: m.Make })));
 const Made = lazy(() => import('./routes/Made').then((m) => ({ default: m.Made })));
@@ -41,7 +41,7 @@ const CardsHarness = import.meta.env.VITE_E2E === '1' ? lazy(() => import('./rou
 const MedalsHarness = import.meta.env.VITE_E2E === '1' ? lazy(() => import('./routes/CardsHarness').then((m) => ({ default: m.MedalsHarness }))) : null;
 const OgHarness = import.meta.env.VITE_E2E === '1' ? lazy(() => import('./routes/CardsHarness').then((m) => ({ default: m.OgHarness }))) : null;
 
-const blank = <div className={styles.loading} aria-busy="true" />;
+const blank = <SkeletonPage />;
 
 /** A page that is still being fetched. Blank for the first second, then the waiting screen. */
 function SlowLoad() {
@@ -109,7 +109,7 @@ export function App() {
         <Route path="make" element={<Make />} />
         <Route path="made" element={<Made />} />
         <Route path="owner/puzzles" element={<OwnerPuzzles />} />
-        <Route path="notifications" element={<Notifications />} />
+        <Route path="notifications" element={<Navigate to="/players" replace />} />
         <Route path="privacy" element={<Privacy />} />
         <Route path="help" element={<Help />} />
         <Route path="help/:slug" element={<HelpArticlePage />} />

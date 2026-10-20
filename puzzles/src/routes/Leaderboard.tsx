@@ -127,14 +127,14 @@ export function Leaderboard() {
   const board = signedIn && params.get('board') !== 'pack' ? 'league' : 'pack';
   return (
     <div className={styles.page}>
-      <PageHeader title="Ranks" />
+      <PageHeader title="Your League" />
       {signedIn && (
         <div className={styles.switch}>
           <Segmented
             label="Board"
             hideLabel
             options={[
-              ['league', 'League'],
+              ['league', 'This week'],
               ['pack', 'This pack'],
             ]}
             value={board}

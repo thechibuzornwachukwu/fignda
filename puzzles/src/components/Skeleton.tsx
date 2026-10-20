@@ -49,3 +49,18 @@ export function SkeletonPills({ count = 4 }: { count?: number }) {
     </SkeletonGroup>
   );
 }
+
+/**
+ * A whole page on its way: its title, then rows. Used wherever a page waits (a lazy screen, the session, a
+ * puzzle by link), so no wait is ever a blank screen.
+ */
+export function SkeletonPage({ rows = 6 }: { rows?: number }) {
+  return (
+    <div className={styles.page} data-skeleton-page>
+      <SkeletonGroup>
+        <Skeleton width="42%" height={36} />
+      </SkeletonGroup>
+      <SkeletonList rows={rows} sub stat={false} />
+    </div>
+  );
+}

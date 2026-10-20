@@ -8,9 +8,7 @@
 }
 
 /* The stage carries the dock's pressable edge: it is the thing on this screen. */
-/* A floor under the cast: the lower part of the stage is a shade deeper, so the 2 stand on something. */
 .stage {
-  background-image: linear-gradient(to bottom, transparent 0, transparent 128px, var(--surface-2) 128px, var(--surface-2) 100%);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -20,6 +18,7 @@
   padding: var(--space-6) var(--space-4) var(--space-5);
   background: var(--surface);
   border: 1px solid var(--line-3);
+  border-bottom: 1px solid var(--line-2);
   border-radius: var(--radius-dock);
   box-shadow: 0 var(--ledge) 0 var(--line-3);
 }

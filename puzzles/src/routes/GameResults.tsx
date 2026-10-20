@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ArrowRight, ChevronDown, ChevronUp, Share2 } from 'lucide-react';
+import { ArrowRight, ChevronDown, ChevronUp, Copy, Share2 } from 'lucide-react';
 import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
 import { Partner } from '../components/Partner';
@@ -106,8 +106,8 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
         ) : (
           <>
             <Button variant="accent" onClick={onShare}>
+              <Icon icon={Share2} size={18} />
               Share
-              <Icon icon={ArrowRight} size={16} />
             </Button>
             <Button variant="secondary" to="/play">
               Packs
@@ -150,6 +150,7 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
               </Button>
             )}
             <Button variant="secondary" onClick={() => void onText().then(setNote)}>
+              <Icon icon={Copy} size={18} />
               Copy result
             </Button>
             {boardPath && (
