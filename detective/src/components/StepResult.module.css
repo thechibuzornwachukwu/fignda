@@ -118,7 +118,7 @@
   box-shadow: inset 0 0 0 2px var(--fg);
   color: var(--fg);
 }
-/* Found on this step. Lime means found. */
+/* Found on this step. Brass means found. */
 .tag[data-state='new'] {
   background: var(--accent);
   color: var(--on-accent);

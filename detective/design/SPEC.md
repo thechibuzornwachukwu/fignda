@@ -61,7 +61,7 @@ Two faces. Bungee (`--font-display`, 400 only, capitals only) for headings.
 | Button secondary | 1px `--line-3`, text `--fg`, hover bg `--surface-2` |
 | TextLink | 14/600 `--muted`, underline offset 4 `--line-3`, hover `--fg` |
 | PageHeader | One per tab page (Cases, Ranks, Settings). Title is the `h1` at `resultTitle`, left; one action slot on the right (a TextLink, or nothing), baseline aligned, wraps under the title when it does not fit. Same top padding (`--screen-top-game`) on all 3, phone and desktop |
-| Ring | An open circle that fills clockwise from 12 o'clock. SVG, 20, stroke 2.5, track `--line-3`, fill `--fg`. Closed (value 1) it turns `--accent-ink`: the only time it is lime, since lime means found. `value` 0 to 1 is a `progressbar`. `parts` makes a segmented ring (an `img` with a label), 12 degrees open between parts: done `--fg` 2.5, rest `--muted` 1.5 in 3 dashes, empty `--line-3` 1.5, so a rest day never reads by colour alone. A segmented ring closes when no part is empty and at least 1 is done |
+| Ring | An open circle that fills clockwise from 12 o'clock. SVG, 20, stroke 2.5, track `--line-3`, fill `--fg`. Closed (value 1) it turns `--accent-ink`: the only time it is brass, since brass means found. `value` 0 to 1 is a `progressbar`. `parts` makes a segmented ring (an `img` with a label), 12 degrees open between parts: done `--fg` 2.5, rest `--muted` 1.5 in 3 dashes, empty `--line-3` 1.5, so a rest day never reads by colour alone. A segmented ring closes when no part is empty and at least 1 is done |
 | WordList | 2px `--fg` top rule. Header title + count. Rows 10 0, 1px `--line`, index 01 left. Chip: found `--accent`/`--on-accent`, missed `--miss`, unfound one • per letter `--line-4`. Chip 2 6, r4. Desktop sticky top 24, max-h min(62vh,640) scroll |
 | Segmented | track p4 r10 `--surface` 1px `--line`. Option h36 r7 14/700. Active `--fg`/`--bg` |
 | Toggle | 44x26 r13. Off `--line-2`, on `--accent`. Knob 20 |
@@ -161,7 +161,7 @@ A case opens on its board. It is reached from the landing page and from Cases wh
 
 **Step `/case/:id/:n`** (one step of a written chapter)
 A step is played on the board its method has today, from the puzzle `stepPuzzle` builds: written evidence for hidden words and the blotter, a row from the sums engine for records. Steps open in order.
-- Top to bottom: the way back "The board" with the marks at the right (one a step, a records step square, the last largest; done `--fg`, this one a lime pill ringed in `--fg`), the place as the title (`gameTitle`), nothing above it.
+- Top to bottom: the way back "The board" with the marks at the right (one a step, a records step square, the last largest; done `--fg`, this one a brass pill ringed in `--fg`), the place as the title (`gameTitle`), nothing above it.
 - Finished, the paragraph gives way to the result, and the board stays under it, switched off, with what was missed shaded: the stars at 20, `<StepResult>`, a `stepNotCleared` line when the step clears somebody and the player has under 2 stars, the lead (`body`, 700, `--fg`), then the way on (`<Onward>`): one accent button to the next step at the right, where the thumb goes on, the width of the row on a phone ("Go to the bakery", and before the last "To the line-up" or "Weigh the accounts").
 - `<StepResult>` is drawn as the case board is, never as a box of text: the fact on a pinned slip of `--paper`, leaning.
 - The lead is given, the clearing is earned: finishing a step always opens the next, and clearing its suspect takes 2 stars or more (`CLEAR_STARS`, `chapterProgress`).
@@ -205,7 +205,7 @@ The case told once more: each find goes back to the place it was found. It is ma
 A drawn room, and the player taps what could matter. Most of it is only the room.
 - Top to bottom: "The board" and the marks, the place as the title, then the room: its drawing (`src/scenes`, copied from `design/sketches/rooms`, a test keeps them the same) the width of the screen at 4 by 3 on `--paper` with a `--ledge` edge, and a button over every thing in it, named for it ("The torch on the piano").
 - A small thing is still 40 wide to tap: its hit area grows round it, the drawing does not.
-- Evidence tapped: ringed in `--accent` with a tick, because lime means found.
+- Evidence tapped: ringed in `--accent` with a tick, because brass means found.
 - A tip-off rings the quarter of the room that holds the next piece not found (`sweepHint`), dashed in `--paper-ink`, never the thing.
 - It ends when every piece is found, or on "I'm done".
 - Stars as for any board (`starsFor`): 3 with everything found, no tip-off and no tap on the room; 2 for 80% found; else 1.
@@ -220,7 +220,7 @@ A page torn top to bottom (`tornOf`). The left halves are on the page in order, 
 **The missing step** (`<Chain>`, a step inside a case, `/case/:id/:n`)
 Events in order with 1 gap, and 3 things that could have happened in it. Only 1 fits.
 - Top to bottom: "The board" and the marks, the place as the title, the events on a line top to bottom (a `--fg` dot and 1 line each, `small` 700) with the gap among them as an empty dashed slip beside a hollow dot, then the 3 things that could fill it as slips of `--paper`, each a button the width of the screen, and the tries as 2 pips.
-- The one that fits goes into the gap, with a tick in a lime disc (named "This fits").
+- The one that fits goes into the gap, with a tick in a brass disc (named "This fits").
 - Done, it ends as any step does: the stars, `<StepResult>`, the lead, the way on and "Play it again", with the events and the filled gap under them.
 - Stars: 3 at once, 2 after 1 wrong pick, 1 after 2.
 

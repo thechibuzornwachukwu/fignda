@@ -19,7 +19,7 @@ const R = 10;
 const GAP = 12;
 const DASHES = 3;
 
-/** An open circle that fills. Lime only when it closes, since lime means found. */
+/** An open circle that fills. Brass only when it closes, since brass means found. */
 export function Ring({ value = 0, parts, label, size = 20, className }: Props) {
   const cls = [styles.ring, className].filter(Boolean).join(' ');
 

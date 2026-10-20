@@ -42,7 +42,11 @@ export function StreetMap() {
   const { camera, scene, spots } = useMemo(() => {
     if (width === 0) return { camera: null, scene: null, spots: [] };
     const built = buildStreet({ view: 'iso', hour, date: new Date(), weather: 'clear', aspect });
-    if (phone && open) focus(built.camera, PLACES[open.chapter.where].at, 1.3);
+    if (phone && open) {
+      // A place off the street is framed where its road leaves the town, never on the empty fields past it.
+      const [x, y] = PLACES[open.chapter.where].at;
+      focus(built.camera, [Math.min(1000, Math.max(200, x)), y], 1.3);
+    }
     return { ...built, spots: spotsOf(built.camera, rows.map((r) => PLACES[r.chapter.where].at)) };
   }, [width, phone, aspect, hour, open, rows]);
 

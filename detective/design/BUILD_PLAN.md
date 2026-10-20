@@ -37,7 +37,7 @@ In this order. Together they make case 1 something worth putting an ad on.
 | Look under it | Things are hidden where nobody dusts | Lift, slide and open. Each thing moved shows what was behind it | Layers in the drawing |
 | What does not belong | A scene holds what a visitor brought and forgot | Among the finds, pick the 1 nobody who uses the room owns | The finds, and 1 line on who uses the room |
 
-Rooms are drawn as `design/sketches/rooms` shows: warm cream ground, 1 ink line weight with a slight wobble, flat muted fills, even light, no lime. The evidence is fixed by the chapter; take it out and the room no longer tells the story.
+Rooms are drawn as `design/sketches/rooms` shows: warm cream ground, 1 ink line weight with a slight wobble, flat muted fills, even light, no brass. The evidence is fixed by the chapter; take it out and the room no longer tells the story.
 
 ### 2. After the essentials
 

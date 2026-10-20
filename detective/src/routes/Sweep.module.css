@@ -55,7 +55,7 @@
 .thing[data-evidence] {
   z-index: 1;
 }
-/* Found. Lime means found. */
+/* Found. Brass means found. */
 .thing[data-state='found'] {
   box-shadow: inset 0 0 0 var(--space-1) var(--accent);
 }

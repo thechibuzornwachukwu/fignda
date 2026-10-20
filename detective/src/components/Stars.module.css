@@ -8,7 +8,7 @@
 .off {
   display: inline-flex;
 }
-/* Earned: filled. Not earned: an outline. Ink, never lime. */
+/* Earned: filled. Not earned: an outline. Ink, never brass. */
 .on {
   color: var(--fg);
 }

@@ -1,57 +1,59 @@
 /* Lantern Row tokens. Single source. Components read var(--*) only; never hard-code hex.
    Manrope and Bungee are self-hosted via @fontsource (imported in src/main.tsx), no third-party font request. */
 
+/* The colours of the street (src/map3d): warm ink and cream paper by day, the street at night after dark, and
+   lantern brass, the light in its windows, for found. Nothing cool or neon: the screens and the map are 1 place. */
 :root, [data-theme="dark"] {
   color-scheme: dark;
-  --bg: #0d0d0e;
-  --surface: #151517;
-  --surface-2: #1c1c1f;
-  --line: #232327;
-  --line-2: #2a2a2f;
-  --line-3: #34343a;
-  --line-4: #3a3a40;
-  --fg: #ededee;
-  --fg-strong: #ffffff;
-  --ink-display: #c0c0c1; /* Bungee is heavy: display type sits at 80% of --fg, headings at 88% */
-  --ink-heading: #d2d2d3;
-  --text-puzzle: #cfcfd4;
-  --muted: #a1a1a8;
-  --subtle: #7d7d85;
-  --sel: #3a3a40;
-  --sel-fg: #ffffff;
-  --miss: #2c2c31;
-  --accent: #d4f04c;
-  --accent-hover: #e0f56e;
-  --on-accent: #0d0d0e;
-  --accent-ink: #d4f04c;
-  --hint-bg: rgba(212, 240, 76, 0.16); /* Hinted letter: lime wash, ringed, never a found fill */
+  --bg: #15110d;
+  --surface: #1e1914;
+  --surface-2: #272019;
+  --line: #2d261e;
+  --line-2: #362e25;
+  --line-3: #43392e;
+  --line-4: #4f4436;
+  --fg: #efe6d6;
+  --fg-strong: #fbf6ec;
+  --ink-display: #cfc4b2; /* Bungee is heavy: display type sits at 80% of --fg, headings at 88% */
+  --ink-heading: #ddd3c2;
+  --text-puzzle: #ddd3c2;
+  --muted: #b3a690;
+  --subtle: #8f8370;
+  --sel: #4f4436;
+  --sel-fg: #fbf6ec;
+  --miss: #33291f;
+  --accent: #dca54a;
+  --accent-hover: #e6b664;
+  --on-accent: #1c150d;
+  --accent-ink: #e2b05c;
+  --hint-bg: rgba(220, 165, 74, 0.18); /* Hinted letter: a wash of lamp light, ringed, never a found fill */
 
-  --scrim: rgba(0,0,0,0.62);
+  --scrim: rgba(10,7,4,0.66);
 }
 [data-theme="light"] {
   color-scheme: light;
-  --bg: #f6f6f7;
-  --surface: #ffffff;
-  --surface-2: #ececef;
-  --line: #e3e3e7;
-  --line-2: #d6d6db;
-  --line-3: #c4c4ca;
-  --line-4: #a8a8b0;
-  --fg: #111113;
-  --fg-strong: #000000;
-  --ink-display: #3f3f41;
-  --ink-heading: #2c2c2e;
-  --text-puzzle: #2a2a2e;
-  --muted: #55555c;
-  --subtle: #6a6a72;
-  --sel: #111113;
-  --sel-fg: #ffffff;
-  --miss: #dcdce1;
-  --accent: #d4f04c;
-  --accent-hover: #e0f56e;
-  --on-accent: #0d0d0e;
-  --accent-ink: #5a6b00;
-  --hint-bg: rgba(212, 240, 76, 0.38);
+  --bg: #f0e8d9;
+  --surface: #faf5eb;
+  --surface-2: #e6dccb;
+  --line: #e0d5c2;
+  --line-2: #d3c6b0;
+  --line-3: #bfb09a;
+  --line-4: #a39480;
+  --fg: #1f1a14;
+  --fg-strong: #110d09;
+  --ink-display: #3d3428;
+  --ink-heading: #2c251c;
+  --text-puzzle: #2c251c;
+  --muted: #5e5346;
+  --subtle: #6c604f;
+  --sel: #1f1a14;
+  --sel-fg: #faf5eb;
+  --miss: #ddd0bb;
+  --accent: #d39a3a;
+  --accent-hover: #ddab52;
+  --on-accent: #1c150d;
+  --accent-ink: #7a5214;
+  --hint-bg: rgba(211, 154, 58, 0.32);
 }
 :root {
   --font: 'Manrope', system-ui, sans-serif;

@@ -70,7 +70,7 @@
   }
 }
 
-/* Today's daily: a raised disc that pushes down when pressed. Ink, not lime: lime means found. */
+/* Today's daily: a raised disc that pushes down when pressed. Ink, not brass: brass means found. */
 .play {
   justify-content: flex-end;
   padding-bottom: var(--space-2h);
@@ -100,7 +100,7 @@
   transform: translateY(var(--ledge));
   box-shadow: 0 0 0 var(--line-4);
 }
-/* Played today: the disc turns lime with a tick. Lime is success. */
+/* Played today: the disc turns brass with a tick. Brass is success. */
 .play[data-done] .disc {
   background: var(--accent);
   color: var(--on-accent);

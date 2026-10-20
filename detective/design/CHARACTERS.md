@@ -10,7 +10,7 @@ A grown-up, grounded look. A detective of the street who moves through it unnoti
 - Proportions about 6.5 heads tall. Never chibi, never a muscle figure.
 - A calm, watchful face. No snarl, no smirk.
 - Layered cloth that looks worn: a coat, a waistcoat or jumper under it, a scarf, a satchel.
-- Muted colour: ink, slate, olive, oxblood, ochre, cream. Lime is never worn: it means "found".
+- Muted colour: ink, slate, olive, oxblood, ochre, cream. Brass is never worn: it means "found".
 - No weapons, no blades, no armour, no blood. Tools only: a notebook, a lantern, a lens, a torch, a key ring.
 - Real: skin, hair and cloth that read as themselves, no outline, no cartoon eyes, nothing toy-like.
 

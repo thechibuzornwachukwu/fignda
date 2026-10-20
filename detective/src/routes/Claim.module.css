@@ -63,14 +63,14 @@
   font-weight: 700;
   overflow-wrap: anywhere;
 }
-/* Picked: ringed in ink and lime, as a face is in the line-up, so it reads without colour. */
+/* Picked: ringed in ink and brass, as a face is in the line-up, so it reads without colour. */
 .fact[data-state='picked'] {
   outline: var(--space-1) solid var(--accent);
   box-shadow:
     0 0 0 var(--space-0h) var(--paper-ink),
     0 var(--ledge) 0 var(--board-edge);
 }
-/* The fact that decides it. Lime means found. */
+/* The fact that decides it. Brass means found. */
 .tick {
   position: absolute;
   top: calc(var(--space-3) * -1);

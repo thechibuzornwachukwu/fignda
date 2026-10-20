@@ -37,7 +37,7 @@
 .tab[data-state='struck'] {
   text-decoration: line-through;
 }
-/* The one left standing. Lime means found. */
+/* The one left standing. Brass means found. */
 .tab[data-state='stands'] {
   background: var(--accent);
   color: var(--on-accent);

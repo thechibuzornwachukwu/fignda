@@ -69,7 +69,7 @@
 .slip {
   flex: 1 1 auto;
 }
-/* The one that fits. Lime means found. */
+/* The one that fits. Brass means found. */
 .tick {
   position: absolute;
   top: calc(var(--space-2) * -1);

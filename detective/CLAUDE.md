@@ -22,8 +22,8 @@ Design: `/design`. Read `SPEC.md` before UI work, `SECURITY.md` before data, aut
 - Bungee is capitals only and its digits are not tabular. Not for clocks, scores, stats, buttons, inputs, names or evidence text.
 - Bungee is heavy. Headings use `--ink-display` or `--ink-heading`, never `--fg-strong`.
 - Icons: `lucide-react` through one `<Icon>` wrapper. Stroke 1.75. Sizes 16 inline, 18 controls, 20 cards.
-- Lime `--accent` = found or success. Never body text, never large fills. One accent button per screen.
-- Crime scenes, evidence and the board are drawn in ink (`design/sketches`). People and pets are realistic 3D figures in the 3D street, as `CHARACTERS.md` says. Screens are the detective's desk: cream paper and manila files on dark wood and cork. All share lime for found.
+- Colours come from the street (`src/map3d`): warm ink, cream paper, the night street, and lantern brass `--accent` = found or success. Never body text, never large fills. One accent button per screen.
+- Crime scenes, evidence and the board are drawn in ink (`design/sketches`). People and pets are realistic 3D figures in the 3D street, as `CHARACTERS.md` says. Screens are the detective's desk: cream paper and manila files on dark wood and cork. All share brass for found.
 - The player is the detective: seen in their own coat on the path, the ending and Settings, never inside a scene.
 
 ## Copy
