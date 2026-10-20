@@ -38,6 +38,7 @@ import { copyText, sharePath, shareUrl } from '../lib/share';
 import { readPast } from '../engine/reveal';
 import { shareText, storyMarks } from '../engine/shareText';
 import * as copy from '../copy';
+import { mateSlots } from '../lib/mates';
 import { joinRoom, newRoomCode, ROOM_RE, type Peer, type Room, type RoomStats, type RoomStatus } from '../lib/room';
 import { Challenge } from './Challenge';
 import { RoomBar } from './RoomBar';
@@ -325,6 +326,9 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
   const ended = end && end.at === s.startAt ? end : null;
 
   const foundSpans = useMemo(() => s.found.map((f) => f.span), [s.found]);
+  // In a room, each teammate's finds in their own colour, in the order they came in; yours stay lime.
+  const mates = useMemo(() => mateSlots([...peers.filter((p) => p.id !== roomId).map((p) => p.name), ...s.found.flatMap((f) => (f.by ? [f.by] : []))]), [peers, roomId, s.found]);
+  const foundBy = useMemo(() => s.found.map((f) => (f.by ? (mates.get(f.by) ?? 1) : 0)), [s.found, mates]);
   const missed = useMemo(() => (finished ? mod.missed(puzzle, foundSet) : []), [finished, mod, puzzle, foundSet]);
 
   const rows = useMemo<WordRow[]>(() => {
@@ -483,9 +487,8 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
     <div className={styles.screen} style={{ '--pack': packHue(def.category) } as CSSProperties}>
       <div className={styles.top}>
         <div className={styles.meta}>
-          <Link to="/play" className={styles.back}>
-            <Icon icon={ArrowLeft} size={16} />
-            Packs
+          <Link to="/play" className={styles.back} aria-label="Packs">
+            <Icon icon={ArrowLeft} size={20} />
           </Link>
           <span className={styles.metaEnd}>
             {part ? (
@@ -516,7 +519,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
         {holdsLine && <p className={styles.holds}>{holdsLine}</p>}
       </div>
 
-      {inRoom && <RoomBar gameId={def.id} code={roomCode} peers={peers} status={roomStatus} me={myStats} you={{ id: roomId, handle: myHandle, partner: loadPartner().current }} path={sharePath({ id: def.id, code: def.id.startsWith('c-') ? def.id.slice(2).toUpperCase() : undefined })} />}
+      {inRoom && <RoomBar gameId={def.id} code={roomCode} peers={peers} mates={mates} status={roomStatus} me={myStats} you={{ id: roomId, handle: myHandle, partner: loadPartner().current }} path={sharePath({ id: def.id, code: def.id.startsWith('c-') ? def.id.slice(2).toUpperCase() : undefined })} />}
 
       {challenge && !inRoom && (
         <Challenge
@@ -588,6 +591,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
           <Board
             {...mod.boardProps(puzzle)}
             found={foundSpans}
+            foundBy={foundBy}
             missed={missed}
             hintLi={s.hintLi}
             disabled={finished}

@@ -92,6 +92,13 @@
   border-radius: 50%;
   background: var(--accent);
 }
+/* Each teammate's dot is the colour their finds are drawn in. */
+.dot[data-mate='1'] { background: var(--mate-1); }
+.dot[data-mate='2'] { background: var(--mate-2); }
+.dot[data-mate='3'] { background: var(--mate-3); }
+.dot[data-mate='4'] { background: var(--mate-4); }
+.dot[data-mate='5'] { background: var(--mate-5); }
+.dot[data-mate='6'] { background: var(--mate-6); }
 .player[data-away] .dot {
   background: var(--line-4);
 }

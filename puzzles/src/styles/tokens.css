@@ -90,6 +90,10 @@
   --pack-history: #f2c94c; --pack-other: #6aa3ff;
   /* A cheer on a medal: warm, and the one red on Your People. */
   --cheer: var(--pack-bible);
+  /* Teammates in a room, first come first: never lime, which is yours. Each 5:1 or more with --paper-ink. */
+  --mate-1: #ff9f43; --mate-2: #ff8bb0; --mate-3: #4fd1dc; --mate-4: #9b8cff; --mate-5: #6aa3ff; --mate-6: #f2c94c;
+  /* The dock's 4 colours, one a tab, the same in both themes (Duolingo's dock is coloured the same way). */
+  --tab-home: #3ec486; --tab-people: #4f8dff; --tab-league: #f2b632; --tab-you: #d48cff;
   /* Medals: the metal a tier is struck in, with the darker rim that gives it weight. A thing, so the same in both themes. */
   --medal-bronze: #c98a4b; --medal-bronze-rim: #8f5a26; --medal-silver: #cfd3da; --medal-silver-rim: #8d93a0; --medal-gold: #e9b93c; --medal-gold-rim: #a97b12;
   --medal-jade: #5fc29a; --medal-jade-rim: #2f7d5f; --medal-onyx: #1c1c1f;

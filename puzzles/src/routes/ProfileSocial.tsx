@@ -140,9 +140,8 @@ export function SocialActions({
             {mine?.state === 'outgoing' ? 'Streak asked' : mine?.state === 'incoming' ? 'Accept streak' : 'Start a streak'}
           </Button>
         ))}
-      <Button variant="secondary" size="sm" onClick={share}>
-        <Icon icon={Share2} size={18} />
-        Share
+      <Button variant="secondary" size="icon" onClick={share} aria-label="Share">
+        <Icon icon={Share2} size={20} />
       </Button>
     </div>
   );

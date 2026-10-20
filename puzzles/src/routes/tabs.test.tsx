@@ -45,13 +45,12 @@ vi.mock('../lib/api', async (original) => {
     'fetchFollowingBoard',
     'suggestedPlayers',
     'searchPlayers',
-    'topPlayers',
-    'newPlayers',
     'squadFeed',
     'fetchNotifications',
     'markNotificationsRead',
     'fetchUnread',
     'cheer',
+    'fetchFriendsBoard',
   ];
   const fakes = Object.fromEntries(names.map((n) => [n, (...a: unknown[]) => world.api[n]!(...a)]));
   return { ...real, ...fakes };
@@ -88,14 +87,13 @@ function emptyWorld() {
     markNotificationsRead: ok(undefined),
     fetchUnread: ok(0),
     cheer: ok(1),
+    fetchFriendsBoard: ok([]),
     joinLeague: ok(undefined),
     leaveLeague: ok(undefined),
     fetchDailyRank: ok(null),
     fetchFollowingBoard: ok([]),
     suggestedPlayers: ok([]),
     searchPlayers: ok([]),
-    topPlayers: ok([]),
-    newPlayers: ok([]),
   };
 }
 
@@ -253,26 +251,23 @@ describe('Leaders', () => {
 });
 
 describe('Players', () => {
-  it('a guest in an empty place: one line per list, no lone heading, and the way to sign in', async () => {
+  it('a guest: the top players feed, people to follow in it, and search behind an icon', async () => {
+    world.api.suggestedPlayers = ok([{ handle: 'bisi', name: 'Bisi', plays: 0, followers: 0, mutuals: 0 }]);
     open('/players');
     expect(title()).toBe('Your People');
-    expect(await screen.findByText('Nobody else has joined yet. Invite a friend and they will show up here.')).toBeInTheDocument();
-    expect(await screen.findByText("No streaks yet. Finish a puzzle today to start one.")).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/signin?next=%2Fplayers');
-    expect(screen.queryByRole('region', { name: 'Friend streaks' })).toBeNull();
-    // Points wait for a first verified play.
-    expect(screen.queryByRole('radio', { name: 'Points' })).toBeNull();
+    expect(await screen.findByText('No medals won this month yet.')).toBeInTheDocument();
+    const strip = screen.getByRole('region', { name: 'People to follow' });
+    expect(within(strip).getByRole('link', { name: 'Sign in to follow Bisi' })).toHaveAttribute('href', '/signin?next=%2Fu%2Fbisi');
+    // Icons, not words, for every action here.
+    const find = screen.getByRole('link', { name: 'Find people' });
+    expect(find).toHaveAttribute('href', '/players#find');
+    expect(find.textContent).toBe('');
+    expect(screen.queryByRole('textbox')).toBeNull();
+    expect(screen.queryByRole('radio', { name: 'Your people' })).toBeNull();
     expectNoHoles();
   });
 
-  it('leads with one section, and the top lists are one more', async () => {
-    open('/players');
-    await screen.findByText(/Nobody else has joined yet/);
-    // What your people did first, then who to follow, then the best players.
-    expect(screen.getAllByRole('heading', { level: 2 }).map((h) => h.textContent)).toEqual(['Lately', 'People to follow', 'Top players']);
-  });
-
-  it('one feed: medals won and what happened to you, newest first; a medal of a friend can be cheered, yours shows its cheers', async () => {
+  it('one feed of cards: medals won and what happened to you, newest first; a medal of a friend can be cheered, yours shows its cheers', async () => {
     world.me = { id: 'u1', handle: 'me', name: 'Me' } as Me;
     world.api.squadFeed = ok([
       { handle: 'ada', name: 'Ada', code: 'streak_30', earned_at: '2026-10-19T10:00:00Z', cheers: 2, cheered: false, mine: false },
@@ -288,11 +283,17 @@ describe('Players', () => {
     const read = vi.fn(ok(undefined));
     world.api.markNotificationsRead = read;
     open('/players');
-    const feed = within((await screen.findByRole('heading', { level: 2, name: 'Lately' })).closest('section')!);
+    const feed = within(await screen.findByRole('region', { name: 'Feed' }));
     await feed.findByText('Kemi followed you.');
     // An unknown medal and the note that repeats your own medal are left out.
-    expect(feed.getAllByRole('listitem').map((li) => li.textContent?.slice(0, 12))).toEqual(['Kemi followe', 'Ada30 day ru', 'YouRare eye ']);
+    const cards = feed.getAllByRole('article').map((a) => a.textContent ?? '');
+    expect(cards).toHaveLength(3);
+    expect(cards[0]).toMatch(/^Kemi followed you/);
+    expect(cards[1]).toMatch(/^Ada.*30 day run/);
+    expect(cards[2]).toMatch(/^You.*Rare eye/);
     expect(read).toHaveBeenCalled();
+    // A follow is answered from the card, by an icon.
+    expect(feed.getByRole('button', { name: 'Follow Kemi' }).textContent).toBe('');
     expect(feed.getByLabelText('1 cheer')).toBeInTheDocument();
     const button = feed.getByRole('button', { name: 'Cheer Ada, 2 cheers' });
     expect(button).toHaveAttribute('aria-pressed', 'false');
@@ -301,36 +302,26 @@ describe('Players', () => {
     expect(cheered).toHaveBeenCalledWith('ada', 'streak_30', true);
   });
 
-  it('lists that did not load say so, and never claim to be empty', async () => {
-    world.api.suggestedPlayers = fail;
-    world.api.topPlayers = fail;
+  it('a feed that did not load says so, and never claims to be quiet', async () => {
     world.api.squadFeed = fail;
     open('/players');
-    expect(await screen.findAllByText('This list did not load. Try again in a moment.')).toHaveLength(3);
-    expect(screen.queryByText(/Nobody else has joined yet/)).toBeNull();
+    expect(await screen.findByText('The feed did not load. Try again in a moment.')).toBeInTheDocument();
+    expect(screen.queryByText(/No medals won/)).toBeNull();
   });
 
-  it('rows with missing fields are dropped or filled, never printed as undefined', async () => {
+  it('suggestions with missing fields are dropped, never printed as undefined', async () => {
     world.api.suggestedPlayers = ok([null, { handle: 'bisi', name: '', plays: undefined, mutuals: null }, { name: 'No handle' }]);
-    world.api.topPlayers = ok([{ handle: 'ada', name: 'Ada', value: undefined }]);
     open('/players');
-    const list = await screen.findByRole('region', { name: 'People to follow' });
-    expect(await within(list).findAllByRole('listitem')).toHaveLength(1);
-    expect(list).toHaveTextContent('New here');
-    expect(await screen.findByText('0 days')).toBeInTheDocument();
+    const strip = await screen.findByRole('region', { name: 'People to follow' });
+    expect(within(strip).getAllByRole('listitem')).toHaveLength(1);
+    expect(strip).toHaveTextContent('@bisi');
     expectNoHoles();
-  });
-
-  it('a single player in a list reads in the singular', async () => {
-    world.api.topPlayers = ok([{ handle: 'ada', name: 'Ada', value: 1 }]);
-    open('/players');
-    expect(await screen.findByText('1 day')).toBeInTheDocument();
   });
 
   it('signed in and new: friend streaks wait, unless the link asks for them', async () => {
     world.me = ADA;
     const first = open('/players');
-    await screen.findByRole('heading', { level: 2, name: 'Top players' });
+    await screen.findByRole('region', { name: 'Feed' });
     // Nobody to suggest: the section is left out, not shown empty.
     expect(screen.queryByText(/You follow everyone here/)).toBeNull();
     expect(screen.queryByRole('heading', { level: 2, name: 'People to follow' })).toBeNull();
@@ -344,7 +335,7 @@ describe('Players', () => {
   it('circles wait for the first daily, unless the link asks for them', async () => {
     world.me = ADA;
     const first = open('/players');
-    await screen.findByRole('heading', { level: 2, name: 'Top players' });
+    await screen.findByRole('region', { name: 'Feed' });
     expect(screen.queryByRole('region', { name: 'Circles' })).toBeNull();
     first.unmount();
     open('/players#circles');
@@ -483,6 +474,22 @@ describe('the league on Your League', () => {
       { place: 6, handle: 'chidi', name: 'Chidi', points: 0, me: false },
     ],
   };
+
+  it('Friends: you and the people you follow on the points of this week; alone, the way to find people', async () => {
+    world.me = ADA;
+    world.api.fetchFriendsBoard = ok([
+      { place: 1, handle: 'kemi', name: 'Kemi', points: 1200, me: false },
+      { place: 2, handle: 'ada', name: 'Ada', points: 900, me: true },
+    ]);
+    open('/leaderboard?board=friends');
+    const board = await screen.findByRole('list', { name: 'Friends this week' });
+    expect(within(board).getAllByRole('listitem').map((li) => li.textContent)).toEqual(['01@kemi1,200', '02@adaYou900']);
+    expect(screen.getByRole('radio', { name: 'Friends' })).toHaveAttribute('aria-checked', 'true');
+    cleanup();
+    world.api.fetchFriendsBoard = ok([{ place: 1, handle: 'ada', name: 'Ada', points: 0, me: true }]);
+    open('/leaderboard?board=friends');
+    expect(await screen.findByRole('link', { name: 'Find people' })).toHaveAttribute('href', '/players#find');
+  });
 
   it('signed in, Your League opens on the league: the tier, the table, the top 5 marked up and nothing marked down', async () => {
     world.me = ADA;

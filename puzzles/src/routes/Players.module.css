@@ -4,9 +4,6 @@
   flex-direction: column;
   gap: var(--screen-gap-game);
 }
-.switch {
-  max-width: 420px;
-}
 .section {
   display: flex;
   flex-direction: column;
@@ -20,14 +17,6 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--space-2) var(--space-4);
-}
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: var(--space-10);
-}
-.grid .section {
-  max-width: none;
 }
 .h2 {
   composes: h3 from '../styles/type.module.css';
@@ -129,83 +118,4 @@
   color: var(--fg);
   text-decoration: underline;
   text-underline-offset: 3px;
-}
-/* Something that happened to you, unread: a bar on the leading edge. */
-.item[data-unread] {
-  box-shadow: inset 2px 0 0 var(--fg);
-}
-.item[data-unread] .row {
-  padding-left: var(--space-3);
-}
-.told {
-  composes: itemTitle from '../styles/type.module.css';
-  overflow-wrap: anywhere;
-}
-.avatarGap {
-  width: 40px;
-  flex: none;
-}
-.cheer {
-  flex: none;
-  min-width: var(--tap);
-  height: var(--tap);
-  padding: 0 var(--space-2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-1);
-  border: 0;
-  border-radius: var(--radius-pill);
-  background: transparent;
-  color: var(--subtle);
-  font: inherit;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  cursor: pointer;
-  transition: color var(--dur-base) var(--ease-std), transform var(--dur-base) var(--ease-out);
-}
-.cheer:hover {
-  color: var(--fg);
-}
-.cheer[aria-pressed='true'] {
-  color: var(--fg);
-}
-/* The heart carries the red; the count stays in ink, readable on both themes. */
-.cheer[aria-pressed='true'] svg {
-  color: var(--cheer);
-  fill: currentColor;
-}
-.cheer:active {
-  transform: scale(0.9);
-}
-.cheerCount {
-  composes: small from '../styles/type.module.css';
-  font-weight: 700;
-}
-.cheers {
-  composes: small from '../styles/type.module.css';
-  flex: none;
-  display: flex;
-  align-items: center;
-  gap: var(--space-1);
-  padding-right: var(--space-2);
-  font-weight: 700;
-  color: var(--fg);
-}
-.cheers svg {
-  color: var(--cheer);
-  fill: currentColor;
-}
-.srOnly {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip-path: inset(50%);
-  white-space: nowrap;
-}
-@media (prefers-reduced-motion: reduce) {
-  .cheer:active {
-    transform: none;
-  }
 }

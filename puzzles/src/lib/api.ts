@@ -1,6 +1,6 @@
 // Data calls. Everything here runs as the signed-in user; RLS decides what is allowed.
 
-import { readLeague, type League } from './league';
+import { readLeague, type League, type LeagueRow } from './league';
 import type { SavedSession } from '../games/session';
 import type { PlayRow } from './profileStats';
 import { storage } from './storage';
@@ -393,21 +393,6 @@ export async function searchPlayers(prefix: string): Promise<PlayerRef[]> {
   return data as PlayerRef[];
 }
 
-export async function topPlayers(kind: 'streak' | 'perfect' | 'points'): Promise<Array<PlayerRef & { value: number }>> {
-  const { data, error } =
-    kind === 'points'
-      ? await (await client()).rpc('players_points', { p_limit: 10 })
-      : await (await client()).rpc('players_top', { p_kind: kind, p_limit: 10 });
-  if (error) throw error;
-  return data as Array<PlayerRef & { value: number }>;
-}
-
-export async function newPlayers(): Promise<Array<PlayerRef & { created_at: string }>> {
-  const { data, error } = await (await client()).rpc('players_new', { p_limit: 10 });
-  if (error) throw error;
-  return data as Array<PlayerRef & { created_at: string }>;
-}
-
 /** Day numbers of the user's stored dailies. */
 export async function fetchDailyDays(): Promise<number[]> {
   // The days a run is counted from: dailies, and days a checked step or clue was finished. A server that does
@@ -775,6 +760,13 @@ export async function fetchPublicPuzzles(limit = 50): Promise<PublicPuzzle[]> {
   return (Array.isArray(data) ? data : [])
     .filter((r) => r && typeof r.code === 'string' && typeof r.maker === 'string')
     .map((r) => ({ code: r.code, title: String(r.title ?? ''), icon: typeof r.icon === 'string' ? r.icon : null, maker: r.maker, words: Number(r.words) || 0, plays: Number(r.plays) || 0, ups: Number(r.ups) || 0 }));
+}
+
+/** You and the people you follow, on this week's league points (`friends_board`). */
+export async function fetchFriendsBoard(): Promise<LeagueRow[]> {
+  const { data, error } = await (await client()).rpc('friends_board');
+  if (error) throw error;
+  return readLeague(data)?.rows ?? [];
 }
 
 /** The signed in player's league table this week, seated on first look (`my_league`). Null: they left. */

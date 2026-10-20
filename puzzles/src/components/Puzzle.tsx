@@ -16,6 +16,8 @@ export type PuzzleProps = {
   letters: number;
   /** Found selections, in find order. */
   found: readonly Span[];
+  /** Who found each, in the same order: 0 is you (lime), 1 to 6 a teammate's colour. Left out: all yours. */
+  foundBy?: readonly number[];
   /** Shaded after finish. */
   missed: readonly Span[];
   /** Letter index carrying the hint mark, or -1. */
@@ -76,6 +78,7 @@ export function Puzzle({
   chars,
   letters,
   found,
+  foundBy,
   missed,
   hintLi,
   disabled,
@@ -466,6 +469,16 @@ export function Puzzle({
     });
   }, [chars, letters, found, missed, sel]);
 
+  // A teammate's find is drawn in their colour: the letter's owner span says whose it was.
+  const mates = useMemo(() => {
+    if (!foundBy?.some((b) => b > 0)) return null;
+    const by = new Int8Array(letters);
+    found.forEach(([a, b], i) => {
+      for (let k = a; k <= b; k++) by[k] = foundBy[i] ?? 0;
+    });
+    return chars.map((c) => (c.li >= 0 ? by[c.li]! : c.prev != null && c.prev >= 0 ? by[c.prev]! : 0));
+  }, [chars, letters, found, foundBy]);
+
   return (
     <div
       ref={boardRef}
@@ -485,6 +498,7 @@ export function Puzzle({
           ch={c.ch}
           li={c.li}
           state={states[i]!}
+          mate={states[i] === 'found' ? (mates?.[i] ?? 0) : 0}
           hint={c.li >= 0 && c.li === hintLi}
           caret={c.li >= 0 && c.li === caret}
         />

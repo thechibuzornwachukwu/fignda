@@ -71,3 +71,9 @@
     background: var(--surface-2);
   }
 }
+/* An icon alone, for actions everyone reads at a glance (share, copy, edit). Its name is its aria-label. */
+.icon {
+  width: var(--tap);
+  height: var(--tap);
+  padding: 0;
+}

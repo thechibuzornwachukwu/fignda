@@ -58,9 +58,8 @@ export function Circles() {
 
   return (
     <div className={board.page}>
-      <Link to="/players" className={board.back}>
-        <Icon icon={ChevronLeft} size={16} />
-        Your People
+      <Link to="/players" className={board.back} aria-label="Your People">
+        <Icon icon={ChevronLeft} size={20} />
       </Link>
       <h1 className={board.title}>
         Circles.
@@ -214,9 +213,8 @@ export function Circle() {
 
   return (
     <div className={board.page}>
-      <Link to="/circles" className={board.back}>
-        <Icon icon={ChevronLeft} size={16} />
-        Circles
+      <Link to="/circles" className={board.back} aria-label="Circles">
+        <Icon icon={ChevronLeft} size={20} />
       </Link>
       <h1 className={board.title}>
         {info.name}.

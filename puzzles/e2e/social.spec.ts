@@ -105,6 +105,7 @@ test('make a puzzle: every word is checked as you type', async ({ page }) => {
   await page.goto('/make');
   await expect(page).toHaveURL(/\/make$/);
 
+  await page.getByRole('button', { name: 'Write it myself' }).click();
   await page.getByLabel('Title').fill('House keys');
   await page.getByLabel('What is hidden').fill('short words');
   await page.getByLabel(/^Paragraph/).fill('It was a most ordinary day until Pat omitted the big old key from each drawer in the house.');
@@ -139,7 +140,7 @@ test('puzzle board switches between Solo and Together', async ({ page }) => {
 test('Your People: a follow puts a dot on the tab and a line in the feed; a cheer reaches the medal', async ({ page, browser }) => {
   const me = await newPlayer(page, 'Zainab');
   await page.goto('/players');
-  await expect(page.getByRole('heading', { level: 2, name: 'Lately' })).toBeVisible();
+  await expect(page.getByRole('region', { name: 'Feed' })).toBeVisible();
   await audit(page, 'your people empty');
 
   // Someone follows Zainab.
@@ -152,7 +153,7 @@ test('Your People: a follow puts a dot on the tab and a line in the feed; a chee
   await ctx.close();
 
   await page.goto('/players');
-  const row = page.getByRole('listitem').filter({ hasText: 'Emeka followed you.' });
+  const row = page.getByRole('article').filter({ hasText: 'Emeka followed you.' });
   await expect(row).toBeVisible();
   await expect(row.getByRole('link')).toHaveAttribute('href', /^\/u\/emeka_/);
   await audit(page, 'your people');
@@ -179,7 +180,7 @@ test.describe('phone', () => {
     const tabs = page.getByRole('navigation', { name: 'Tabs' });
     await tabs.getByRole('link', { name: 'Your People, 1 new' }).click();
     await expect(page).toHaveURL(/\/players$/);
-    await expect(page.getByRole('listitem').filter({ hasText: 'Kemi followed you.' })).toBeVisible();
+    await expect(page.getByRole('article').filter({ hasText: 'Kemi followed you.' })).toBeVisible();
     await page.goto('/play');
     await expect(tabs.getByRole('link', { name: 'Your People', exact: true })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);

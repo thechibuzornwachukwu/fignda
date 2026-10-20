@@ -5,8 +5,8 @@ import { Button } from '../components/Button';
 import { Icon } from '../components/Icon';
 import { formatTime } from '../engine/time';
 import { getGameDef } from '../games/catalog';
-import { fetchGameBoard, fetchMyLeague, fetchTogetherBoard, joinLeague, leaveLeague, type BoardRow, type MyRank, type TeamRow } from '../lib/api';
-import { goesUp, tierName, type League } from '../lib/league';
+import { fetchFriendsBoard, fetchGameBoard, fetchMyLeague, fetchTogetherBoard, joinLeague, leaveLeague, type BoardRow, type MyRank, type TeamRow } from '../lib/api';
+import { goesUp, tierName, type League, type LeagueRow } from '../lib/league';
 import { TextLink } from '../components/TextLink';
 import { nextClueTo } from '../games/path';
 import { games } from '../games/catalog';
@@ -124,7 +124,8 @@ export function Leaderboard() {
   if (!auth.enabled) return <Navigate to="/play" replace />;
   const signedIn = !!auth.profile;
   // Signed in, Ranks opens on the league; the board of the pack is one tap away. A guest has the pack's board.
-  const board = signedIn && params.get('board') !== 'pack' ? 'league' : 'pack';
+  const asked = params.get('board');
+  const board = !signedIn ? 'pack' : asked === 'pack' || asked === 'friends' ? asked : 'league';
   return (
     <div className={styles.page}>
       <PageHeader title="Your League" />
@@ -135,14 +136,15 @@ export function Leaderboard() {
             hideLabel
             options={[
               ['league', 'This week'],
+              ['friends', 'Friends'],
               ['pack', 'This pack'],
             ]}
             value={board}
-            onChange={(v) => setParams(v === 'pack' ? { board: 'pack' } : {}, { replace: true })}
+            onChange={(v) => setParams(v === 'league' ? {} : { board: v }, { replace: true })}
           />
         </div>
       )}
-      {board === 'league' ? <LeagueBoard /> : <CaseRanks myHandle={auth.profile?.handle} />}
+      {board === 'league' ? <LeagueBoard /> : board === 'friends' ? <FriendsBoard /> : <CaseRanks myHandle={auth.profile?.handle} />}
       <GuestNote next="/leaderboard" />
     </div>
   );
@@ -154,6 +156,56 @@ type LeagueLoad = { status: 'loading' } | { status: 'error' } | { status: 'left'
  * This week's league table (BUILD_PLAN set 3g): up to 20 players, ranked by points from first clears. The top 5
  * carry an up mark: they go up a tier when the week ends. Nothing marks the bottom. A player can leave, and join again.
  */
+/**
+ * Friends: you and the people you follow on this week's points, the way the league counts them. A friend you
+ * invited to play is here as soon as they play signed in. Nobody followed yet: the way to find people.
+ */
+function FriendsBoard() {
+  const [rows, setRows] = useState<LeagueRow[] | null | 'failed'>(null);
+  useEffect(() => {
+    let alive = true;
+    fetchFriendsBoard()
+      .then((r) => alive && setRows(r))
+      .catch(() => alive && setRows('failed'));
+    return () => {
+      alive = false;
+    };
+  }, []);
+  if (rows == null) return <SkeletonList rows={6} avatar={28} />;
+  if (rows === 'failed') {
+    return (
+      <PartnerNote moment="error" layout="screen" className={styles.empty}>
+        <p>Your friends did not load. Try again in a moment.</p>
+      </PartnerNote>
+    );
+  }
+  if (rows.length <= 1) {
+    return (
+      <PartnerNote layout="screen" title="Just you so far" className={styles.empty}>
+        <Button to="/players#find">Find people</Button>
+      </PartnerNote>
+    );
+  }
+  return (
+    <section className={styles.section} aria-label="Friends">
+      <ol className={styles.board} aria-label="Friends this week">
+        {rows.map((r) => (
+          <li key={r.handle} className={styles.leagueRow} data-mine={r.me || undefined}>
+            <span className={styles.rank}>{String(r.place).padStart(2, '0')}</span>
+            <Link to={`/u/${r.handle}`} className={styles.handle}>
+              <Avatar handle={r.handle} size={28} />
+              @{r.handle}
+              {r.me && <span className={styles.you}>You</span>}
+            </Link>
+            <span className={styles.upMark} />
+            <span className={styles.score}>{r.points.toLocaleString('en-US')}</span>
+          </li>
+        ))}
+      </ol>
+    </section>
+  );
+}
+
 function LeagueBoard() {
   const [load, setLoad] = useState<LeagueLoad>({ status: 'loading' });
   const [busy, setBusy] = useState(false);
@@ -279,9 +331,8 @@ export function GameLeaderboard() {
 
   return (
     <div className={styles.page}>
-      <Link to="/leaderboard" className={styles.back}>
-        <Icon icon={ChevronLeft} size={16} />
-        Leaderboard
+      <Link to="/leaderboard" className={styles.back} aria-label="Your League">
+        <Icon icon={ChevronLeft} size={20} />
       </Link>
       <h1 className={styles.title}>
         {g.title}.

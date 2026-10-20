@@ -30,13 +30,12 @@ async function clickPair(page: Page, a: number, b: number) {
 test.describe('phone tab bar', () => {
   test.use({ viewport: { width: 375, height: 740 }, hasTouch: true, isMobile: true });
 
-  test('app pages get the icon dock: Home, Your People, Your League, Play, You; landing and puzzles do not', async ({ page }) => {
+  test('app pages get the icon dock: Home, Your People, Your League, You; landing and puzzles do not', async ({ page }) => {
     await page.goto('/play');
     const tabs = page.getByRole('navigation', { name: 'Tabs' });
     await expect(tabs).toBeVisible();
-    await expect(tabs.getByRole('link')).toHaveCount(5);
-    for (const name of ['Home', 'Your People', 'Your League', 'Play the next puzzle', 'You']) await expect(tabs.getByRole('link', { name, exact: true })).toBeVisible();
-    await expect(tabs.getByRole('link', { name: 'Play the next puzzle' })).toHaveAttribute('href', /^\/play\/[a-z0-9-]+\/1$/);
+    await expect(tabs.getByRole('link')).toHaveCount(4);
+    for (const name of ['Home', 'Your People', 'Your League', 'You']) await expect(tabs.getByRole('link', { name, exact: true })).toBeVisible();
     await expect(tabs.getByRole('link', { name: 'Home' })).toHaveAttribute('aria-current', 'page');
     await expect(page.getByRole('navigation', { name: 'Main' })).toBeHidden();
     await tabs.getByRole('link', { name: 'Your League' }).click();

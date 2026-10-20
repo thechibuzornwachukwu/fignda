@@ -3,7 +3,6 @@ import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testi
 import { MemoryRouter } from 'react-router-dom';
 import { vi } from 'vitest';
 import { TabBar } from '../components/TabBar';
-import { dayNo } from '../engine/daily';
 import { games } from '../games/catalog';
 import { forgetPartner, PARTNER_KEY } from '../lib/partner';
 import { Me } from './Me';
@@ -202,40 +201,25 @@ describe('You holds everything about you', () => {
   });
 });
 
-describe('the dock’s Play button', () => {
+describe('the dock', () => {
   const dock = () =>
     render(
       <MemoryRouter initialEntries={['/play']}>
         <TabBar />
       </MemoryRouter>,
     );
-  const play = () => screen.getByRole('navigation', { name: 'Tabs' }).querySelector('[data-play]')!;
-  it('icons only, in the order Home, Your People, Your League, Play, You, and Play opens the next clue', () => {
+  const links = () => within(screen.getByRole('navigation', { name: 'Tabs' })).getAllByRole('link');
+  it('4 coloured icons, no words, and no second door to Home', () => {
     dock();
-    expect(within(screen.getByRole('navigation', { name: 'Tabs' })).getAllByRole('link').map((a) => a.getAttribute('aria-label'))).toEqual(['Home', 'Your People', 'Your League', 'Play the next puzzle', 'You']);
-    expect(within(screen.getByRole('navigation', { name: 'Tabs' })).getAllByRole('link').every((a) => a.textContent === '')).toBe(true);
-    expect(play().getAttribute('data-play')).toBe('clue');
-    expect(play().getAttribute('href')).toMatch(/^\/play\/[a-z0-9-]+\/1$/);
-    expect(play()).toHaveAccessibleName('Play the next puzzle');
+    expect(links().map((a) => a.getAttribute('aria-label'))).toEqual(['Home', 'Your People', 'Your League', 'You']);
+    expect(links().map((a) => a.getAttribute('data-hue'))).toEqual(['home', 'people', 'league', 'you']);
+    expect(links().every((a) => a.textContent === '')).toBe(true);
+    expect(new Set(links().map((a) => a.getAttribute('href'))).size).toBe(4);
   });
 
-  it('it never leads to a daily, played or not, and broken storage is never a dead button', () => {
-    localStorage.setItem(`gazecraft-daily-${dayNo()}`, '{broken');
-    localStorage.setItem('gazecraft-finished', '{broken');
-    dock();
-    expect(play().getAttribute('href')).toMatch(/^\/play\/[a-z0-9-]+\/1$/);
-  });
   it('guests have a You tab of their own, not a sign in link', () => {
     dock();
     expect(screen.getByRole('link', { name: 'You' })).toHaveAttribute('href', '/me');
-  });
-
-  it('with every case closed it is a tick back to Cases', () => {
-    localStorage.setItem('gazecraft-finished', JSON.stringify(games.map((g) => g.id)));
-    dock();
-    expect(play().getAttribute('data-play')).toBe('done');
-    expect(play().getAttribute('href')).toBe('/play');
-    expect(play()).toHaveAttribute('data-done', 'true');
   });
 });
 

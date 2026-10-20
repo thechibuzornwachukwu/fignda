@@ -9,15 +9,13 @@ test('players page: search by handle, wildcards find nothing, lists render', asy
 
   await page.goto('/players');
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Your People');
-  // One section leads. The 4 top lists are one section with a switch.
+  // The feed leads, with people to follow inside it. Search is behind an icon.
+  await expect(page.getByRole('region', { name: 'Feed' })).toBeVisible();
   await expect(page.getByRole('region', { name: 'People to follow' })).toBeVisible();
-  const top = page.getByRole('region', { name: 'Top players' });
-  await expect(top.getByRole('radio', { name: 'Streaks' })).toHaveAttribute('aria-checked', 'true');
-  await top.getByRole('radio', { name: 'New' }).click();
-  await expect(top.getByRole('listitem').first()).toBeVisible();
-  await page.getByLabel('Find people').fill(handle.slice(0, 7));
+  await page.getByRole('link', { name: 'Find people' }).click();
+  await page.getByRole('textbox', { name: 'Find people' }).fill(handle);
   await expect(page.getByRole('link', { name: new RegExp(`@${handle}`) })).toBeVisible();
-  await page.getByLabel('Find people').fill('%');
+  await page.getByRole('textbox', { name: 'Find people' }).fill('%');
   await expect(page.getByText('No handle starts with @%.')).toBeVisible();
 });
 
@@ -32,15 +30,6 @@ test('follow, counts, lists, remove a follower, following board', async ({ page,
   await expect(page.getByRole('button', { name: 'Following' })).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByRole('link', { name: /1 follower$/ })).toBeVisible();
   await expect(page.locator('#followers').getByRole('link', { name: new RegExp(`@${a}`) })).toBeVisible();
-
-  // The board opens on your crowd: A follows someone and has no circle, so it opens on Following.
-  await page.goto('/leaderboard');
-  await expect(page.getByRole('radio', { name: 'Following' })).toHaveAttribute('aria-checked', 'true');
-  // Everyone is one tap away, and the choice is kept in the address.
-  await page.getByRole('radio', { name: 'Everyone' }).click();
-  await expect(page).toHaveURL(/board=everyone/);
-  await page.getByRole('radio', { name: 'Following' }).click();
-  await expect(page).toHaveURL(/board=following/);
 
   // B removes A from their followers.
   await bPage.goto(`/u/${b}`);
@@ -89,10 +78,11 @@ test('people to follow: follow from the list without opening a profile', async (
   const suggested = page.getByRole('region', { name: 'People to follow' });
   await expect(suggested.getByRole('listitem').first()).toBeVisible();
   // Nobody is offered themselves.
-  await expect(suggested.getByText(`@${me}`, { exact: true })).toHaveCount(0);
+  await expect(suggested.locator(`a[href="/u/${me}"]`)).toHaveCount(0);
 
   // Follow straight from a search row.
-  await page.getByLabel('Find people').fill(b);
+  await page.goto('/players#find');
+  await page.getByRole('textbox', { name: 'Find people' }).fill(b);
   const row = page.getByRole('listitem').filter({ hasText: `@${b}` });
   await row.getByRole('button', { name: 'Follow Bola' }).click();
   await expect(row.getByRole('button', { name: 'Following Bola' })).toHaveAttribute('aria-pressed', 'true');
@@ -101,14 +91,14 @@ test('people to follow: follow from the list without opening a profile', async (
   await page.goto(`/u/${b}`);
   await expect(page.getByRole('button', { name: 'Following' })).toHaveAttribute('aria-pressed', 'true');
   await expect(page.getByRole('link', { name: /1 follower$/ })).toBeVisible();
-  await page.goto('/players');
-  await page.getByLabel('Find people').fill(b);
+  await page.goto('/players#find');
+  await page.getByRole('textbox', { name: 'Find people' }).fill(b);
   await expect(page.getByRole('listitem').filter({ hasText: `@${b}` }).getByRole('button', { name: 'Following Bola' })).toBeVisible();
   // And once followed, they leave the suggestions.
-  await page.getByLabel('Find people').fill('');
+  await page.getByRole('textbox', { name: 'Find people' }).fill('');
   const list = page.getByRole('region', { name: 'People to follow' });
   await expect(list.getByRole('listitem').first()).toBeVisible();
-  await expect(list.getByText(`@${b}`, { exact: true })).toHaveCount(0);
+  await expect(list.locator(`a[href="/u/${b}"]`)).toHaveCount(0);
 });
 
 test('guests see people to follow and are asked to sign in', async ({ page }) => {
@@ -116,7 +106,7 @@ test('guests see people to follow and are asked to sign in', async ({ page }) =>
   const suggested = page.getByRole('region', { name: 'People to follow' });
   await expect(suggested.getByRole('listitem').first()).toBeVisible();
   await expect(suggested.getByRole('button')).toHaveCount(0);
-  await expect(suggested.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/signin?next=%2Fplayers');
+  await expect(suggested.getByRole('link', { name: /^Sign in to follow / }).first()).toHaveAttribute('href', /^\/signin\?next=%2Fu%2F/);
 });
 
 test('your records are on You and never on a public page, and a new player sees a calm line', async ({ page, browser }) => {
@@ -129,7 +119,6 @@ test('your records are on You and never on a public page, and a new player sees 
   // You holds them. None yet: one calm line.
   await page.goto('/me');
   await expect(page.getByRole('heading', { name: 'Your records' })).toHaveCount(0);
-  await expect(page.getByText('Records are kept in this browser.', { exact: false })).toBeVisible();
 
   // Records live in this browser. Unreadable ones are dropped, never shown.
   await page.evaluate(() => localStorage.setItem('gazecraft-records', '{not json'));

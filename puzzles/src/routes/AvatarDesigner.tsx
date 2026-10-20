@@ -97,9 +97,8 @@ export function AvatarDesigner({ id, handle, code, onSaved }: Props) {
       <div className={styles.summaryText}>
         <p className={styles.summaryLine}>This is you on every board, profile and room.</p>
         <div>
-          <Button variant="secondary" onClick={() => setOpen(true)}>
-            <Icon icon={Pencil} size={16} />
-            Edit character
+          <Button variant="secondary" size="icon" onClick={() => setOpen(true)} aria-label="Edit character">
+            <Icon icon={Pencil} size={20} />
           </Button>
         </div>
       </div>

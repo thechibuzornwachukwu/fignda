@@ -41,6 +41,17 @@
   background: var(--accent);
   color: var(--on-accent);
 }
+/* A teammate's find: their colour, as names are coloured in a group chat. Yours stay lime. */
+.letter[data-state='found'][data-mate] {
+  background: var(--mate);
+  color: var(--paper-ink);
+}
+.letter[data-mate='1'] { --mate: var(--mate-1); }
+.letter[data-mate='2'] { --mate: var(--mate-2); }
+.letter[data-mate='3'] { --mate: var(--mate-3); }
+.letter[data-mate='4'] { --mate: var(--mate-4); }
+.letter[data-mate='5'] { --mate: var(--mate-5); }
+.letter[data-mate='6'] { --mate: var(--mate-6); }
 .letter[data-state='missed'] {
   background: var(--miss);
   color: var(--fg);

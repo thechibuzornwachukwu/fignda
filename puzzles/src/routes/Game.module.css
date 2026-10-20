@@ -46,6 +46,9 @@
   display: flex;
   align-items: center;
   gap: var(--space-1h);
+  justify-content: center;
+  min-width: var(--tap);
+  min-height: var(--tap);
   white-space: nowrap;
   color: var(--muted);
   transition: color var(--dur-base) var(--ease-std);

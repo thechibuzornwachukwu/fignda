@@ -1,9 +1,8 @@
 import { NavLink, useLocation } from 'react-router-dom';
 import { useMemo, useRef, type ReactNode } from 'react';
-import { Check, House, Play, Trophy, Users } from 'lucide-react';
+import { House, Trophy, Users } from 'lucide-react';
 import { guestAvatar } from '../avatar/guest';
 import { useAuth } from '../lib/auth';
-import { playNext } from '../lib/playNext';
 import { hasTabBar } from '../lib/routes';
 import { useTucked } from '../lib/useTucked';
 import { useUnread } from '../lib/useUnread';
@@ -13,8 +12,8 @@ import styles from './TabBar.module.css';
 
 /**
  * Phones only: a slim dock of icons, as Duolingo has. Each tab says what it is by its icon alone, and carries its
- * name for screen readers. Home, Your People, Your League, Play, You. Play is one tab among the 5: it leads to the next
- * puzzle, and nothing on the bar is raised above the rest. Desktop keeps the header links.
+ * name for screen readers. Home, Your People, Your League, You. No Play tab: Home leads with the next puzzle, so a
+ * Play tab would be a second door to the same place. Desktop keeps the header links.
  * It slides below the screen on a scroll down and back on any scroll up, as the header does.
  */
 export function TabBar() {
@@ -29,20 +28,18 @@ export function TabBar() {
   const starter = useMemo(() => guestAvatar(), []);
   if (!hasTabBar(pathname)) return null;
   const onYou = pathname === '/me' || pathname.startsWith('/u/') || pathname === '/settings' || pathname === '/signin';
-  const play = playNext();
   return (
     <nav ref={ref} className={[styles.bar, tucked && styles.tucked].filter(Boolean).join(' ')} aria-label="Tabs" data-tucked={tucked || undefined}>
-      <Tab to="/play" icon={<Icon icon={House} size={20} />} label="Home" />
-      <Tab to="/players" icon={<Icon icon={Users} size={20} />} label={news ? `Your People, ${unread} new` : 'Your People'} dot={news} />
-      <Tab to="/leaderboard" icon={<Icon icon={Trophy} size={20} />} label="Your League" />
-      {/* Every pack finished: a tick, back to the packs. */}
-      <Tab to={play.to} icon={<Icon icon={play.kind === 'done' ? Check : Play} size={20} />} label={play.name} data={{ 'data-play': play.kind, ...(play.kind === 'done' ? { 'data-done': 'true' } : {}) }} />
-      <Tab to="/me" icon={profile ? <Avatar handle={profile.handle} size={24} /> : <Avatar parts={starter} size={24} />} label="You" active={onYou} />
+      <Tab to="/play" icon={<Icon icon={House} size={20} />} label="Home" hue="home" />
+      <Tab to="/players" icon={<Icon icon={Users} size={20} />} hue="people" label={news ? `Your People, ${unread} new` : 'Your People'} dot={news} />
+      <Tab to="/leaderboard" icon={<Icon icon={Trophy} size={20} />} label="Your League" hue="league" />
+      <Tab to="/me" icon={profile ? <Avatar handle={profile.handle} size={28} /> : <Avatar parts={starter} size={28} />} label="You" hue="you" active={onYou} />
     </nav>
   );
 }
 
-function Tab({ to, icon, label, active, dot, data }: { to: string; icon: ReactNode; label: string; active?: boolean; dot?: boolean; data?: Record<string, string> }) {
+/** Each tab is drawn in its own colour, as Duolingo's are, so it is found by colour before it is read. */
+function Tab({ to, icon, label, hue, active, dot }: { to: string; icon: ReactNode; label: string; hue: 'home' | 'people' | 'league' | 'you'; active?: boolean; dot?: boolean }) {
   return (
     <NavLink
       to={to}
@@ -50,7 +47,7 @@ function Tab({ to, icon, label, active, dot, data }: { to: string; icon: ReactNo
       className={({ isActive }) => [styles.tab, (active ?? isActive) && styles.on].filter(Boolean).join(' ')}
       aria-label={label}
       aria-current={active ? 'page' : undefined}
-      {...data}
+      data-hue={hue}
     >
       <span className={styles.pill}>
         {icon}

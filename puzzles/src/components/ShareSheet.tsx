@@ -235,9 +235,8 @@ export function ShareSheet({ open, onClose, game, result, player, onShared }: Pr
             <Button variant="primary" onClick={send} disabled={busy} className={styles.send}>
               {cards.length > 1 ? `Share ${cards.length} images` : 'Share image'}
             </Button>
-            <Button variant="secondary" onClick={copy}>
-              <Icon icon={Copy} size={18} />
-              Copy link
+            <Button variant="secondary" size="icon" onClick={copy} aria-label="Copy link">
+              <Icon icon={Copy} size={20} />
             </Button>
           </div>
           {waiting ? (

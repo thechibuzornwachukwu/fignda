@@ -11,7 +11,7 @@
     bottom: calc(var(--space-3) + env(safe-area-inset-bottom));
     z-index: 10;
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     align-items: center;
     height: var(--tabbar-h);
     padding: 0 var(--space-1);
@@ -30,26 +30,42 @@
   height: var(--tabbar-h);
   display: grid;
   place-items: center;
-  color: var(--muted);
+  color: var(--tab-hue);
   -webkit-tap-highlight-color: transparent;
 }
-/* The active place: a filled pill behind the icon and full-strength ink. Shape and weight, not colour alone. */
+/* Every icon in its own colour, always, filled a shade lighter: the dock reads as toys, not text. */
+.tab[data-hue='home'] {
+  --tab-hue: var(--tab-home);
+}
+.tab[data-hue='people'] {
+  --tab-hue: var(--tab-people);
+}
+.tab[data-hue='league'] {
+  --tab-hue: var(--tab-league);
+}
+.tab[data-hue='you'] {
+  --tab-hue: var(--tab-you);
+}
+.tab :global(.lucide) {
+  fill: color-mix(in srgb, var(--tab-hue) 35%, transparent);
+}
 .pill {
   position: relative;
   display: grid;
   place-items: center;
-  width: var(--space-12);
-  height: var(--space-8);
-  border-radius: var(--radius-pill);
+  width: var(--space-14);
+  height: var(--space-10);
+  border: 2px solid transparent;
+  border-radius: var(--radius-xl);
   transition:
     background var(--dur-base) var(--ease-std),
+    border-color var(--dur-base) var(--ease-std),
     transform var(--dur-fast) var(--ease-out);
 }
-.on {
-  color: var(--fg);
-}
+/* The active place: outlined and tinted in its own colour. */
 .on .pill {
-  background: var(--surface-2);
+  border-color: var(--tab-hue);
+  background: color-mix(in srgb, var(--tab-hue) 14%, transparent);
   animation: pop var(--dur-slow) var(--ease-out);
 }
 .tab:active .pill {

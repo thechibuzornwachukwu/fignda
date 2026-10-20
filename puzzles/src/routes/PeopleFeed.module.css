@@ -1,0 +1,336 @@
+.feed {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+  max-width: 560px;
+}
+.switch {
+  max-width: 420px;
+}
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+/* A card carries the dock's pressable edge: each one is a thing that happened. */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--line-3);
+  border-radius: var(--radius-dock);
+  box-shadow: 0 var(--ledge) 0 var(--line-3);
+}
+.byline {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  color: var(--fg);
+}
+.who {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+.name {
+  composes: itemTitle from '../styles/type.module.css';
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.when {
+  composes: label from '../styles/type.module.css';
+  font-weight: 500;
+  color: var(--subtle);
+  font-variant-numeric: tabular-nums;
+}
+.avatarGap {
+  width: 40px;
+  height: 40px;
+  flex: none;
+}
+
+/* The medal is the picture: large, on a floor of its own. */
+.won {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-5) 0 var(--space-4);
+  border-radius: var(--radius-xl);
+  background: var(--surface-2);
+}
+.medalName {
+  composes: h3 from '../styles/type.module.css';
+  margin: 0;
+  text-align: center;
+}
+.foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: var(--tap);
+}
+
+.cheer {
+  min-width: var(--tap);
+  height: var(--tap);
+  padding: 0 var(--space-3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1h);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--fg);
+  font: inherit;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-base) var(--ease-std),
+    transform var(--dur-base) var(--ease-out);
+}
+.cheer:hover {
+  background: var(--surface-2);
+}
+/* The heart carries the red; the count stays in ink, readable on both themes. */
+.cheer[aria-pressed='true'] svg {
+  color: var(--cheer);
+  fill: currentColor;
+  animation: beat var(--dur-slow) var(--ease-out);
+}
+.cheer:active {
+  transform: scale(0.92);
+}
+.cheers {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1h);
+  padding: 0 var(--space-2);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg);
+}
+.cheers svg {
+  color: var(--cheer);
+  fill: currentColor;
+}
+.cheers[data-none] svg {
+  color: var(--subtle);
+  fill: none;
+}
+@keyframes beat {
+  50% {
+    transform: scale(1.25);
+  }
+}
+
+/* Something that happened to you: one line, flat, with a bar while it is new. */
+.note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-xl);
+  background: var(--bg);
+}
+.note[data-unread] {
+  border-color: var(--fg);
+  box-shadow: inset 3px 0 0 var(--fg);
+}
+.noteMain {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--fg);
+}
+.told {
+  composes: itemTitle from '../styles/type.module.css';
+  overflow-wrap: anywhere;
+}
+
+.follow {
+  flex: none;
+  width: var(--tap);
+  height: var(--tap);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line-2);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+  transition: background-color var(--dur-base) var(--ease-std);
+}
+.follow:hover {
+  background: var(--surface-2);
+}
+.follow[aria-pressed='true'] {
+  background: var(--fg);
+  border-color: var(--fg);
+  color: var(--bg);
+}
+
+/* People to follow: small cards in a row that scrolls sideways, inside the feed. */
+.strip {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+}
+.stripTitle {
+  composes: h3 from '../styles/type.module.css';
+  margin: 0;
+}
+.stripList {
+  display: flex;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0 0 var(--ledge);
+  list-style: none;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.stripList::-webkit-scrollbar {
+  display: none;
+}
+.person {
+  flex: none;
+  width: 136px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-4) var(--space-3);
+  background: var(--surface);
+  border: 1px solid var(--line-3);
+  border-radius: var(--radius-xl);
+  scroll-snap-align: start;
+}
+.personLink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+  width: 100%;
+  color: var(--fg);
+}
+.personName {
+  composes: small from '../styles/type.module.css';
+  max-width: 100%;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.muted {
+  composes: body from '../styles/type.module.css';
+  margin: 0;
+  color: var(--muted);
+}
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+@media (prefers-reduced-motion: reduce) {
+  .cheer:active {
+    transform: none;
+  }
+  .cheer[aria-pressed='true'] svg {
+    animation: none;
+  }
+}
+.stripHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+/* Online now: green, the colour of live things, and the count says it in words too. */
+.online {
+  composes: small from '../styles/type.module.css';
+  display: flex;
+  align-items: center;
+  gap: var(--space-1h);
+  font-weight: 700;
+  color: var(--fg);
+}
+.liveDot {
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--tab-home);
+  animation: live 2s var(--ease-loop) infinite;
+}
+@keyframes live {
+  50% {
+    opacity: 0.4;
+  }
+}
+.face {
+  position: relative;
+  display: grid;
+}
+.onDot {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: var(--space-3);
+  height: var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--tab-home);
+  box-shadow: 0 0 0 3px var(--surface);
+}
+.actions {
+  display: flex;
+  gap: var(--space-2);
+}
+.invite {
+  flex: none;
+  width: var(--tap);
+  height: var(--tap);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--accent);
+  color: var(--paper-ink);
+  cursor: pointer;
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.invite:active {
+  transform: scale(0.92);
+}
+.invite[data-failed] {
+  background: var(--surface-2);
+  color: var(--fg);
+  box-shadow: inset 0 0 0 1px var(--cheer);
+}
+@media (prefers-reduced-motion: reduce) {
+  .liveDot {
+    animation: none;
+  }
+}

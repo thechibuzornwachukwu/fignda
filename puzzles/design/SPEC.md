@@ -200,7 +200,11 @@ Profile section Badges (`#badges`): earned ones as `--fg` pills; on your own pag
 
 **Records on the account:** signed in, every visit brings the account's records (`my_records`, worked out from verified plays): the fastest clean read in each pack, the longest word found, and the best week (most points in one Monday to Sunday week, UTC). The browser keeps the better of each (`mergeRecords`); nothing goes down.
 
-**Leagues:** signed in, Your League opens on the league (Segmented This week / This pack, `?board=pack`). A table of up to 20, seated on first look each week (Monday 00:00 UTC), in 1 of 5 tiers named for the medal metals: Bronze, Silver, Gold, Jade, Onyx (`src/lib/league.ts`).
+**Friends board:** Your League's middle option (`?board=friends`): you and the people you follow on this week's league points (`friends_board()`). A friend you invited shows as soon as they play signed in. Alone on it: a Find people button.
+
+**Room colours:** in a room your finds stay lime; each teammate's are drawn in their own colour (`--mate-1` to `--mate-6`: orange, pink, sky, violet, blue, yellow), first come first, and their dot in the room list matches (`src/lib/mates.ts`).
+
+**Leagues:** signed in, Your League opens on the league (Segmented This week / Friends / This pack, `?board=pack`). A table of up to 20, seated on first look each week (Monday 00:00 UTC), in 1 of 5 tiers named for the medal metals: Bronze, Silver, Gold, Jade, Onyx (`src/lib/league.ts`).
 
 **Rare finds:** a word fewer than 1 in 10 of a puzzle's players found, once 20 or more have played it (`plays_rare`, from the counts in `word_finds` and `puzzle_players`). Fixed when the play is saved.
 
@@ -227,9 +231,9 @@ Profile section Badges (`#badges`): earned ones as `--fg` pills; on your own pag
 
 **Avatars:** drawn from parts in `src/avatar` . Saved as a code of positions, so part lists are append only.
 
-**Tab bar (phones, app pages):** a floating dock, 12 from the sides and the bottom plus the safe area, `--tabbar-h` 56 high, `--surface` with a 1px `--line-3` border, radius `--radius-dock` 22 and a hard lower edge of `--ledge` 4 in `--line-3`. Icons only, as Duolingo has: each tab is an icon 20 in a 48 by 32 pill, `--muted`, its name for screen readers only; the active tab is `--fg` with the pill filled `--surface-2` (shape and weight, never colour alone).
-- 5 slots: Home (house, `/play`), Your People (people, `/players`), Your League (trophy, `/leaderboard`), Play (the next puzzle; a tick once every pack is done), You (the player's own face).
-- Nothing on the dock is raised: Play is one tab among the 5.
+**Tab bar (phones, app pages):** a floating dock, 12 from the sides and the bottom plus the safe area, `--tabbar-h` 56 high, `--surface` with a 1px `--line-3` border, radius `--radius-dock` 22 and a hard lower edge of `--ledge` 4 in `--line-3`. Icons only, as Duolingo has: each tab is an icon 20 in its own colour (`--tab-home`, `--tab-people`, `--tab-league`, `--tab-you`), filled a shade lighter, its name for screen readers only; the active tab's 56 by 40 pill is outlined and tinted in its colour.
+- 4 slots: Home (house, `/play`), Your People (people, `/players`), Your League (trophy, `/leaderboard`), You (the player's own face).
+- No Play tab: Home leads with the next puzzle, so a Play tab would be a second door to the same place.
 
 **Outfits, earned:** 5 player pieces are earned and nothing else is: everything that helps someone look like themselves stays free, always. The rules are in `src/avatar/earned.ts`, the drawings in `src/avatar/parts/kit.ts` and the outfit list, all append only.
 - An avatar part, Extras (letter `d`), worn one at a time and drawn on top: Star pin (finish 1 pack), Headphones (finish 5 packs), Crown (reach the rank of Keen), Gold set, the crown and the pin together (finish 10 packs).
@@ -490,7 +494,7 @@ Navigation, on a phone: no bar across the top. Each screen is its title and one 
 | Puzzle, clue | Find the words | Done | Built |
 | Result | Say what happened and lead on | Next clue, or Share | Built: a popup at the finish of a clue, then one line and 2 buttons, the rest behind "More" |
 | You `/me` | Who you are: character and pet | Select, or Wear | Built. Holds the week, badges and records. `/u/HANDLE` is only what others see |
-| Your People `/players` | What your people did, and finding more | Cheer, or follow | Built in order: find people, Lately (your notifications and the medals of you and the people you follow, or of the top players), friend streaks, circles, people to follow, top players |
+| Your People `/players` | What your people did, and finding more | Cheer, follow, or play together | Built: a feed of cards (medals large, with a heart to cheer; notifications with their action as an icon), Your people / Top players. People to follow is a strip inside it: anyone on the game, online players first with a green dot and the count online; each card follows, or opens a room on your next puzzle and invites them (following them first). Friend streaks above, circles below, search behind the search icon (`#find`) |
 | Your League `/leaderboard` | Where you stand today | None: it is read | Built: one board at a time, your own row pinned in view |
 | Settings | The account | Save | Built: account only. Reached from the gear on You |
 | First minute `/welcome` | Make a new player someone | Keep this look | Built: a new player lands in a clue, and the character and pet are asked after the first result |

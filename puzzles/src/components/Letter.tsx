@@ -11,6 +11,8 @@ type Props = {
   /** Index in the letter stream, or -1 for a non letter. */
   li: number;
   state: LetterState;
+  /** A found letter's teammate colour, 1 to 6, or 0 for yours. */
+  mate?: number;
   hint: boolean;
   caret: boolean;
 };
@@ -19,7 +21,7 @@ type Props = {
 const HINT_EDGE = 120;
 
 /** One character of the puzzle. Only letters carry `data-li`. */
-export const Letter = memo(function Letter({ ch, li, state, hint, caret }: Props) {
+export const Letter = memo(function Letter({ ch, li, state, mate = 0, hint, caret }: Props) {
   const ref = useRef<HTMLSpanElement>(null);
   // A hint is no help off screen: on a long puzzle the letter is brought into view, the phone bar cleared.
   useEffect(() => {
@@ -35,6 +37,7 @@ export const Letter = memo(function Letter({ ch, li, state, hint, caret }: Props
       className={styles.letter}
       data-li={li >= 0 ? li : undefined}
       data-state={state || undefined}
+      data-mate={mate > 0 ? mate : undefined}
       data-hint={hint || undefined}
       data-caret={caret || undefined}
     >

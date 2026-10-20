@@ -105,9 +105,8 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
           </>
         ) : (
           <>
-            <Button variant="accent" onClick={onShare}>
-              <Icon icon={Share2} size={18} />
-              Share
+            <Button variant="accent" size="icon" onClick={onShare} aria-label="Share">
+              <Icon icon={Share2} size={20} />
             </Button>
             <Button variant="secondary" to="/play">
               Packs
@@ -149,9 +148,8 @@ export function GameResults({ title, line, score, found, total, secs, canReplay,
                 Play again
               </Button>
             )}
-            <Button variant="secondary" onClick={() => void onText().then(setNote)}>
-              <Icon icon={Copy} size={18} />
-              Copy result
+            <Button variant="secondary" size="icon" onClick={() => void onText().then(setNote)} aria-label="Copy result">
+              <Icon icon={Copy} size={20} />
             </Button>
             {boardPath && (
               <Button variant="secondary" to={boardPath}>
