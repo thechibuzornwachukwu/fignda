@@ -1,0 +1,86 @@
+{
+  "id": "the-ember-award",
+  "casebook": "lantern-row",
+  "number": 1,
+  "writing": true,
+  "shape": "who-did-it",
+  "title": "The Ember award",
+  "item": { "name": "the Ember award", "line": "A bronze flame on a stand, given in 1997. It stood in a glass case in the display room." },
+  "place": "The Baker house",
+  "where": "baker-house",
+  "brief": [
+    "A gala at the Baker house. At 9:30 pm every light went out.",
+    "At 9:33 the lights came back, and the 1997 Ember award was gone from its glass.",
+    "Mrs Baker has sent for you and your pet."
+  ],
+  "board": {
+    "pins": [
+      { "kind": "item", "label": "The Ember award" },
+      { "kind": "note", "title": "The display room", "lines": ["Lights out 9:30.", "Back on 9:33.", "The glass is empty."] },
+      { "kind": "faces" }
+    ],
+    "scrawl": ["3 minutes of dark."]
+  },
+  "suspects": [
+    { "who": "the security head", "name": "Mr Lankey", "look": "masculine", "line": "Runs the house's security, cameras and locks.", "says": "In his office, watching the cameras." },
+    { "who": "the head cleaner", "name": "Mrs Okafor", "look": "feminine", "line": "Runs the cleaning crew at the gala.", "says": "Clearing the dining room with her crew." }
+  ],
+  "culprit": "",
+  "steps": [
+    {
+      "place": "The display room",
+      "where": "baker-house",
+      "method": "piece",
+      "thing": "The empty glass case. Grey marks where a hand held it while the award was lifted.",
+      "print": { "of": "rubber-glove", "pieces": 6 },
+      "fact": "The marks make 1 print: the diamond grip of a rubber cleaning glove.",
+      "pin": "Rubber glove print",
+      "gives": "means",
+      "lead": "Your pet knows that grip. And a power cut that takes the cameras and the locks for 3 minutes is no accident. To the power box.",
+      "to": "The power box"
+    },
+    {
+      "place": "The power box",
+      "where": "baker-house",
+      "method": "chain",
+      "thing": "The house's power box by the back stairs. The fuses are whole.",
+      "chain": {
+        "events": [
+          "9:29. The band stops for the toast.",
+          "9:30. Every light goes out, and the cameras and the locks with them.",
+          "9:33. The lights come back. The glass is empty."
+        ],
+        "gap": 1,
+        "options": [
+          { "text": "A gloved hand pulls the main switch down. The same grey grip is on it.", "fits": true },
+          { "text": "Wind brings down the line to the house. The night was still." },
+          { "text": "A fuse blows under the gala lights. Every fuse is whole." }
+        ]
+      },
+      "fact": "Nothing failed. The main switch was pulled by hand at 9:30, in the same gloves.",
+      "pin": "Switch pulled by hand",
+      "gives": "chance",
+      "lead": "Mr Lankey runs the cameras. He was in the security office.",
+      "to": "The security office"
+    },
+    {
+      "place": "The security office",
+      "where": "baker-house",
+      "method": "question",
+      "thing": "Mr Lankey, at his desk of dark screens. He got out of the office at 9:44.",
+      "talk": {
+        "name": "Mr Lankey",
+        "says": "I was watching the cameras when a man in a cloak came in. He threw a coat over me and shut me in. I got out at 9:44.",
+        "asks": [
+          { "text": "Say you are sorry for his night.", "answer": "He thanks you. He has a house to look after, he says, and shows you to the door.", "ends": true },
+          { "text": "Ask what the man looked like.", "answer": "About 6 feet. Broad. The face covered. He saw him for a moment." }
+        ],
+        "show": { "from": 2, "answer": "He looks at the switch, then at you. The screens went dark at 9:30 with the rest. He saw nobody on them. He was afraid to say so." }
+      },
+      "fact": "Mr Lankey saw nobody on the cameras. They were dark from 9:30.",
+      "pin": "Screens dark from 9:30",
+      "lead": "The cleaners sign in and out at the back door. Their book is in the staff room.",
+      "to": "The staff room"
+    }
+  ]
+}

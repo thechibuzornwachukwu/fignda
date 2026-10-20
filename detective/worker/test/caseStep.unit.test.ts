@@ -16,10 +16,10 @@ const log = (events: PlayEvent[]) => ({ events, hints: [], finish: Math.max(0, .
 const none = log([]);
 
 describe('the chapters the Worker is built with', () => {
-  it('are every file in design/stories', () => {
+  it('are every fixture in src/test/stories', () => {
     // A draft is not open to players, so the Worker does not take plays of it.
-    const files = readdirSync('design/stories')
-      .filter((f) => f.endsWith('.json') && !(JSON.parse(readFileSync(`design/stories/${f}`, 'utf8')) as { draft?: boolean }).draft)
+    const files = readdirSync('src/test/stories')
+      .filter((f) => f.endsWith('.json') && !(JSON.parse(readFileSync(`src/test/stories/${f}`, 'utf8')) as { draft?: boolean }).draft)
       .map((f) => f.replace(/\.json$/, ''));
     expect(Object.keys(CHAPTERS).sort()).toEqual(files.sort());
   });

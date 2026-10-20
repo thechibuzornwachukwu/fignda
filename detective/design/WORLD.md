@@ -28,7 +28,7 @@ Numbers: odd on the hall's side (the hall 1, the bakery 3, the sale room 5), eve
 
 Pavements run both sides of the road. Cars park at the kerb, and in the yard on Friday nights. Fields lie round the town. The hall's roof is kept; the sale room's, the bus shelter's and the watchman's hut's are not.
 
-Off the street, and further than a walk: Rosa's night stall (20 minutes' drive), the bus depot, the committee secretary's house (40 minutes from the hall).
+Off the street, and further than a walk: Rosa's night stall (20 minutes' drive), the bus depot, the committee secretary's house (40 minutes from the hall), the Baker house up the hill road (10 minutes' drive).
 
 ## The hall
 
@@ -66,6 +66,9 @@ They live and work here, and return from case to case. A cleared suspect can be 
 | Tomas | Gardener, Green Fingers | The market row | Rosa's neighbour on the row |
 | Bea | Art teacher | The art room | Her class burns letters into oak |
 | The committee | 5 neighbours and a secretary | The committee room | Runs the cook-off, the votes and the hall |
+| Louis and Louise Baker | Collectors | The Baker house | Hold a display gala. Own the 1997 Ember award |
+| Mr Lankey | Scott Lankey, head of security | The Baker house | Runs the house's cameras and the doors that lock from his office |
+| Mrs Okafor | Runs the cleaning crew | The Baker house | Her crew works the Bakers' galas |
 
 ## The year
 
@@ -79,7 +82,7 @@ They live and work here, and return from case to case. A cleared suspect can be 
 ## The thread
 
 - In 2011 the committee planed R. MARLOW off the Long Spoon: said to have bought her stew base, never proved. The minute book for 2011 records what was decided.
-- Somebody hands a plain cream card with a lantern drawn on it to each culprit, before they act. Each card is left at the scene. Case 8 finds out who: Mr Cole, who held the plane, and wants the street to look again.
+- Somebody hands a plain cream card with a lantern drawn on it to each culprit, before they act. Each card is left at the scene. Who hands them out, and why, is for the casebook to find.
 
 ## Rules for a new case
 

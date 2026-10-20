@@ -9,7 +9,9 @@ The case comes first. The puzzles are made from it, never the other way. A case 
 4. **The chapter file**, `design/stories/<id>.json`, checked by the engine.
 5. **The read**: somebody who did not write it plays it as a player, and the story file is fixed before the JSON.
 
-`design/stories/the-long-spoon.md` is the worked example.
+`design/stories/the-ember-award.md` is the worked example.
+
+A case can start from an unfinished story. Its chapter says `"writing": true` and is played as far as it is written: each written step is fair and leads on, the last to a place still to come, which shows the player that the rest is being written. Who did it, the closer and the ending can wait. The story file lists what is still to write; add to it first, then the chapter.
 
 ## 1. The story file
 
@@ -98,14 +100,7 @@ Casebook 1, Lantern Row:
 
 | # | Case | Shape | Suspects | New method | The loose end it leaves |
 |---|---|---|---|---|---|
-| 1 | The long spoon | Who did it | 4 | Blotter, buried sums, hidden words, line-up | Does the 19th name stay |
-| 2 | The open box | Nothing was taken | 2 | Which account fits | 1 card in the box is not a vote: it is the lantern card |
-| 3 | The early bus | Prove it | 1 | Could it be done | The hall clock can be set from outside |
-| 4 | The year that is missing | Where is it | 3 | Walk it back, the trail | The 2011 page, found uncut |
-| 5 | The light in the hall | What is it really | 4 | Sweep the room, the missing step | A key nobody signed for |
-| 6 | The 2 signs | Who did it | 2 | None | Both signs repainted by 1 hand |
-| 7 | The other spoon | Prove it | 1 | The torn page | The seller was sent the names by post |
-| 8 | Who carries the cards | Who did it | 5 | None | The card-giver is named, and the 2011 page is read |
+| 1 | The Ember award (being written) | Who did it | 2 so far | Piece it together, the missing step, question them | Still to write |
 
 ## Sources
 

@@ -24,7 +24,7 @@ export function Landing() {
     <div className={styles.page}>
       <section className={styles.hero}>
         <h1 className={styles.name}>{GAME_NAME}</h1>
-        <p className={styles.line}>8 cases on 1 street. Something is hidden in plain sight.</p>
+        <p className={styles.line}>Cases on 1 street. Something is hidden in plain sight.</p>
         <Button variant="accent" to={play.to}>
           {play.kind === 'done' ? 'See your cases' : play.name}
         </Button>

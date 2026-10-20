@@ -26,7 +26,7 @@ export function caseOpen(chapter: Chapter): boolean {
 export function openCase(): OpenCase | null {
   for (const chapter of chapters) {
     const stars = loadChapterStars(chapter.id);
-    if ((stars[chapter.steps.length] ?? 0) > 0) continue;
+    if (!chapter.writing && (stars[chapter.steps.length] ?? 0) > 0) continue;
     const { solved } = chapterProgress(chapter, stars);
     return { chapter, to: `/case/${chapter.id}`, solved, started: solved > 0 };
   }

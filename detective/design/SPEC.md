@@ -135,7 +135,7 @@ Streak resets on a wrong pick and on a tip-off. `onFound` picks: first find, las
 - Play, in the middle: a 60 disc raised above the dock, `--fg` fill with a `--bg` Play icon and its own ledge, sinking by the ledge when pressed.
 ## 6. Screens
 
-**Landing `/`:** the name (h1), one line ("8 cases on 1 street. Something is hidden in plain sight."), the accent Play button from `playNext` ("Open your case", "Carry on your case", or "See your cases" once every case is closed), a TextLink "All the cases", then the case board of the case that is open.
+**Landing `/`:** the name (h1), one line ("Cases on 1 street. Something is hidden in plain sight."), the accent Play button from `playNext` ("Open your case", "Carry on your case", or "See your cases" once every case is closed), a TextLink "All the cases", then the case board of the case that is open.
 **Cases:** PageHeader "Cases", the street with a pin per case (`<StreetMap>`), then the casebook.
 
 **One job a screen:** every screen has one job and one main action, and the fewest taps to it (`BUILD_PLAN.md`, Screens). What is not the job moves to the screen whose job it is.
@@ -170,7 +170,7 @@ A step is played on the board its method has today, from the puzzle `stepPuzzle`
 
 **Line-up** (the last step of a "who did it", `/case/:id/N`)
 Name who is left. It opens when the step before it is done.
-- Top to bottom: "The board" with the tries at the right as 2 pips (`--fg` while held, a hollow ring once spent, named "2 tries left"), the title "Who took the Long Spoon?" from the item (or the chapter's own `ask` where nothing was taken: "Who changed the 2 signs?"), the case board, the step's fact on a slip with the 3 tags, then one accent button and a feedback line.
+- Top to bottom: "The board" with the tries at the right as 2 pips (`--fg` while held, a hollow ring once spent, named "2 tries left"), the title "Who took the Ember award?" from the item (or the chapter's own `ask` where nothing was taken: "Who changed the 2 signs?"), the case board, the step's fact on a slip with the 3 tags, then one accent button and a feedback line.
 - On the board every suspect who is not cleared is a button the size of their photo.
 - A wrong name: "Not them" is taped across that photo, a `lineupWrong` line, a try is spent.
 - Stars (`lineupStars`): 3 for the right name at once, 2 after 1 wrong name, 1 when the tries ran out.
@@ -224,6 +224,21 @@ Events in order with 1 gap, and 3 things that could have happened in it. Only 1 
 - Done, it ends as any step does: the stars, `<StepResult>`, the lead, the way on and "Play it again", with the events and the filled gap under them.
 - Stars: 3 at once, 2 after 1 wrong pick, 1 after 2.
 
+**Piece it together** (`<Piece>`, a step inside a case, `/case/:id/:n`)
+Marks lifted from a surface in pieces (`piecesOf`): set back, they make the print they were (a rubber glove's diamond grip, drawn by `PrintArt`).
+- Top to bottom: "The board" and the marks, the place as the title, the glass (`--board` with a `--ledge` edge) as a grid of empty places, then the pieces as squares of lifting tape, out of order.
+- The places fill in reading order. Tap a piece and it goes in the place that is open. A place gets 1 pick: a wrong piece is swapped for the right one, and the place is marked.
+- Stars (`pieceStars`): 3 with every piece in its place, 2 with 1 wrong, else 1.
+
+**Question them** (`<Question>`, a step inside a case, `/case/:id/:n`)
+What a person says, and what to put to them (`talk`).
+- Top to bottom: "The board" and the marks, the place as the title, their name and what they said on ruled notebook paper (`--paper`, `--font-mono`), the talk so far under it, then the questions as buttons and the board's pins as paper scraps with a red pin.
+- A question with a reason behind it is answered and costs nothing. One with none ends the talk: a `talkOver` line and a round restart button. A pin that proves nothing gets a `talkShrug` line and is struck through. The right pin makes them say more, and the step is done.
+- Stars (`talkStars`): 3 with no wrong move, 2 after 1, 1 after 2; after 2 they say it anyway.
+
+**A case still being written** (`/case/:id/:n` past its last written step)
+The pet, large and centred, the place the lead named as the title, a `caseWriting` line and "Back to the board". The case never closes while it is written.
+
 **Your Notebook** (`/notebook`, `src/routes/Notebook.tsx`)
 Everything found, in 1 place. Every case with a step done, in the order of the casebook, each as its own case board (`<CaseBoard>`): the clues pinned, the people met, who is cleared.
 - Top to bottom: PageHeader "Your Notebook", then the cases. Each: its title (`h3`, a link to its brief), its board, then the lead that is open on a leaning slip of `--paper`, or a "Case closed" stamp.
@@ -275,7 +290,7 @@ Rules for any new motion (from Emil Kowalski's design engineering skill, linked 
 | WordList reorder | FLIP translateY. Found row 520ms z2, others 420ms, `--ease-out`. Scroll list to top first |
 | Finish | smooth scroll to top 400ms after last find |
 | Skeleton | opacity 1 to 0.5 and back, `--dur-skeleton` each way, `--ease-loop`. A second loop allowed past 300ms, because it only says "still coming". Still under reduced motion |
-| Waiting | the other loop outside the landing, so it is allowed past 300ms. The pet bobs up `--space-1` and back, `--dur-bob` each way, `--ease-loop`. 3 dots in `--muted` hop `--space-1h` one after the other, a `--dur-bounce` cycle, each `--dur-bounce-step` behind the last, `--ease-loop`. Only `transform` moves. No blink: the avatar is drawn by `<Avatar>` and is not redrawn. The line changes every 20 seconds with no motion. Shown after 1 second, kept at least 600ms. Reduced motion: no bob, no hop, the line still changes |
+| Waiting | the other loop outside the landing, so it is allowed past 300ms. The pet bobs up `--space-1` and back, `--dur-bob` each way, `--ease-loop`. 3 dots in `--muted` hop `--space-1h` one after the other, a `--dur-bounce` cycle, each `--dur-bounce-step` behind the last, `--ease-loop`. Only `transform` moves. No blink: the avatar is drawn by `<Avatar>` and is not redrawn. The line is a fact: about the street or the game (`waiting`), or 1 time in 3 one the open case has already given. It changes every 20 seconds with no motion. Shown after 1 second, kept at least 600ms. Reduced motion: no bob, no hop, the line still changes |
 | Stars | on a step's result and on the ending: earned stars pop in one at a time, each from 0.8 scale and 0 opacity, `--dur-star` `--ease-out`, each `--dur-star-step` behind the last. Stars already seen do not move. Reduced motion: all shown at once |
 | Sums tile | a tile being selected lifts by `--space-1`, `--dur-fast`. A found run's tiles settle from 1.18 scale, `--dur-slow` `--ease-out`. The meter fills by `transform`, `--dur-base`. Reduced motion: none of it |
 | Dock quick return | phones: the dock slides below the screen on a scroll down and back on any scroll up, `transform` only, `--dur-slow` `--ease-out`, the same rule as the header (8px of scroll before it moves). Always shown near the top, at the end of the page, on a new page, and while focus is inside it. Reduced motion: it is there or not, with no slide |

@@ -1,0 +1,117 @@
+/* What they said, written up in the detective's notebook: ruled cream paper, a red margin, the talk under it. */
+.notebook {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-8);
+  background:
+    linear-gradient(90deg, transparent calc(var(--space-6) - 1px), color-mix(in srgb, var(--pin) 55%, transparent) calc(var(--space-6) - 1px), color-mix(in srgb, var(--pin) 55%, transparent) var(--space-6), transparent var(--space-6)),
+    repeating-linear-gradient(transparent 0, transparent calc(var(--space-6) - 1px), color-mix(in srgb, var(--paper-ink) 12%, transparent) calc(var(--space-6) - 1px), color-mix(in srgb, var(--paper-ink) 12%, transparent) var(--space-6)),
+    var(--paper);
+  color: var(--paper-ink);
+  box-shadow: 0 var(--ledge) 0 var(--board-edge);
+}
+.name {
+  composes: label from '../styles/type.module.css';
+  color: var(--paper-muted);
+}
+.says {
+  composes: body from '../styles/type.module.css';
+  margin: var(--space-1) 0 0;
+  font-family: var(--font-mono);
+}
+.talk {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.line {
+  composes: small from '../styles/type.module.css';
+  font-family: var(--font-mono);
+}
+.line[data-by='you'] {
+  color: var(--paper-muted);
+  font-style: italic;
+}
+
+.asks,
+.pins {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.ask {
+  composes: small from '../styles/type.module.css';
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--tap);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--line-3);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--fg);
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+.ask:disabled {
+  color: var(--subtle);
+  cursor: default;
+}
+/* The board's pins, as the scraps they are: tap one to show it. */
+.pins {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.pin {
+  composes: small from '../styles/type.module.css';
+  position: relative;
+  min-height: var(--tap);
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-6);
+  border: 0;
+  background: var(--paper);
+  color: var(--paper-ink);
+  font-family: var(--font-mono);
+  font-weight: 700;
+  box-shadow: 0 var(--ledge) 0 var(--board-edge);
+  cursor: pointer;
+}
+.pin::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: var(--space-2);
+  width: var(--space-2);
+  height: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--pin);
+  transform: translateY(-50%);
+}
+.pin[data-struck] {
+  text-decoration: line-through;
+  opacity: 0.6;
+}
+.over {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+.restart {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: var(--tap);
+  height: var(--tap);
+  border: 1px solid var(--line-3);
+  border-radius: var(--radius-pill);
+  background: none;
+  color: var(--fg);
+  cursor: pointer;
+}

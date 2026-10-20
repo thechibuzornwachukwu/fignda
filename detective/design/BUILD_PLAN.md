@@ -24,11 +24,11 @@ In this order. Together they make case 1 something worth putting an ad on.
 - [ ] **Set 1-travel. How the detective gets there.** Between places the player watches the detective and the pet go on the 3D street, never controls it: a walk for a short hop; for a long one a skateboard, a bicycle, a car or a horse. The ride is the player's own, a few earned and the rest bought once payments are in. Cosmetic only: no ride arrives sooner. A tap skips it.
 - [ ] **Set 1-visits. Been here before.** Every place a step is worked in is kept. Back at a place in a later case, the map says so, and the places collected are a badge set. Earned only.
 
-- [ ] **Set 1a. Every case from its story.** A story file for each case (`the-long-spoon.md` done), then its chapter rewritten from it until it is off `OWED` in `src/engine/chapter.test.ts` (6 cases lack find work; case 5 brings 2 new methods). Buried sums is made of the case's own figures (the till roll's real sales, the gate book's real cars) in place of a row the engine makes up.
-- [ ] **Set 1b. Talking to people.** The talk kind (`CASE_WRITING.md` section 3), engine first: *Question them* (pick what to ask; a pin shown against what they said makes them say more; a question with no reason behind it ends the talk early) and then *Sit with them* (a real game or a meal: chess first, an endgame from a position they set, legal moves checked by a chess rules library chosen in this set for a licence that allows sale). Each first used in a chapter, and once built, every case needs talk work.
+- [ ] **Set 1a. The Ember award, to its end.** The story first (`the-ember-award.md`, its "Still to write"), then the chapter, a few steps at a time: the staff room, Mrs Okafor, who did it, the closer and the ending. When it closes, `writing` comes off and the engine holds it to the whole rules. Then case 2 the same way.
+- [ ] **Set 1b. Sit with them.** The second talk method (`CASE_WRITING.md` section 3): a real game or a meal, chess first, an endgame from a position they set, legal moves checked by a chess rules library chosen in this set for a licence that allows sale.
 - [ ] **Set 1c. The cast as figures.** `CHARACTERS.md`: the detective (overcoat, brimmed hat, lantern, satchel), the 14 suspects and the 4 working pets (bloodhound, parrot, capuchin, Agent 404) as realistic 3D figures in the 3D street. Then the board's photos, the empty states and `<Partner>` moods rendered from them, replacing `src/avatar` and `design/characters`. Free animation library and any models licence-checked for sale first.
 - [ ] **Set 1d. Answers stay on the server.** Today every chapter, culprit included, is bundled into the page. The Worker serves a step's playable part when it opens and the ending once earned, guests included.
-- [ ] **Set 1e. 5 people play it.** The long spoon, from brief to ending, on a phone, by 5 people who have never seen the game. What stops them is fixed.
+- [ ] **Set 1e. 5 people play it.** The Ember award, from brief to ending, on a phone, by 5 people who have never seen the game. What stops them is fixed.
 - [ ] **Set 1f. Search the scene.** More find methods, so not every case sweeps a room. No clock, and a tip-off points at a quarter of the room, never at the thing:
 
 | Method | Why it is real | What the player does | Needs |
@@ -36,7 +36,6 @@ In this order. Together they make case 1 something worth putting an ad on.
 | By torchlight | The power is off, or it is night | Move a circle of light over a dark room and tap what it shows | The same room, dimmed |
 | Look under it | Things are hidden where nobody dusts | Lift, slide and open. Each thing moved shows what was behind it | Layers in the drawing |
 | What does not belong | A scene holds what a visitor brought and forgot | Among the finds, pick the 1 nobody who uses the room owns | The finds, and 1 line on who uses the room |
-| Piece it together | A print or a pattern comes off in pieces | Lift the marks from the glass and set them into the print they make (the friend's glove print) | The pieces, drawn |
 
 Rooms are drawn as `design/sketches/rooms` shows: warm cream ground, 1 ink line weight with a slight wobble, flat muted fills, even light, no lime. The evidence is fixed by the chapter; take it out and the room no longer tells the story.
 

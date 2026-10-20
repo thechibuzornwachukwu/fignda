@@ -27,6 +27,7 @@ export const PLACES = {
   'watchman-hut': { name: "The watchman's hut", at: [1133, 643] },
   depot: { name: 'The depot', at: [24, 470], edge: 'west' },
   'night-stall': { name: "Rosa's night stall", at: [1176, 455], edge: 'east' },
+  'baker-house': { name: 'The Baker house', at: [1176, 300], edge: 'east' },
   'secretary-house': { name: "The secretary's house", at: [1176, 490], edge: 'east' },
 } as const satisfies Record<string, { name: string; at: readonly [number, number]; edge?: 'west' | 'east' }>;
 

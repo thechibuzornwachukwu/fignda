@@ -12,7 +12,7 @@ export const SHAPES = ['who-did-it', 'prove-it', 'what-is-it-really', 'where-is-
 export type Shape = (typeof SHAPES)[number];
 
 /** The methods a step can use today. A new method joins this list in the set that builds its engine. */
-export const METHODS = ['hidden-words', 'mirror', 'buried-sums', 'line-up', 'accounts', 'claim', 'trail', 'chain', 'sweep', 'torn'] as const;
+export const METHODS = ['hidden-words', 'mirror', 'buried-sums', 'line-up', 'accounts', 'claim', 'trail', 'chain', 'sweep', 'torn', 'piece', 'question'] as const;
 export type Method = (typeof METHODS)[number];
 
 /**
@@ -22,9 +22,10 @@ export type Method = (typeof METHODS)[number];
 export const KINDS = ['find', 'read', 'talk', 'weigh'] as const;
 export type Kind = (typeof KINDS)[number];
 export const KIND_OF: Readonly<Record<Method, Kind>> = {
-  sweep: 'find',
+  sweep: 'find', piece: 'find',
   'hidden-words': 'read', mirror: 'read', 'buried-sums': 'read', torn: 'read',
   'line-up': 'weigh', accounts: 'weigh', claim: 'weigh', chain: 'weigh', trail: 'weigh',
+  question: 'talk',
 };
 /** A method is met at most this often in 1 case, so no case is the same puzzle in a new coat. */
 export const METHOD_MAX = 2;
@@ -123,6 +124,25 @@ export const SWEEP_MIN = 5;
 export const SWEEP_MAX = 7;
 export const SWEEP_ROOM_MIN = 6;
 
+/**
+ * Piece it together: marks lifted from a surface come off in pieces, and set back in their places they make the
+ * print they were. `of` is what made the print; the game draws it and cuts it into `pieces`.
+ */
+export type Print = { of: 'rubber-glove'; pieces: number };
+export const PIECES_MIN = 4;
+export const PIECES_MAX = 6;
+
+/**
+ * Question them: what a person says, the questions a player can put, and the pin from a step before (counted from
+ * 1) that, shown against what they said, makes them say more. A question with no reason behind it (`ends`) ends
+ * the talk, and it has to be started again.
+ */
+export type Talk = { name: string; says: string; asks: Array<{ text: string; answer: string; ends?: boolean }>; show: { from: number; answer: string } };
+export const ASKS_MIN = 2;
+export const ASKS_MAX = 3;
+/** Wrong moves (a talk ended, a pin that proves nothing) before they say it anyway. */
+export const TALK_TRIES = 2;
+
 export type Step = {
   place: string;
   /** Where on Lantern Row it happens: a place on the map (`src/engine/world.ts`). */
@@ -147,6 +167,10 @@ export type Step = {
   room?: Room;
   /** The page, line by line, on a "torn page" step. The engine tears it. */
   page?: string[];
+  /** The print set back together, on a "piece it together" step. */
+  print?: Print;
+  /** The talk, on a "question them" step. */
+  talk?: Talk;
   /** What the step leaves behind once it is done. */
   fact: string;
   /** The fact as a few words, pinned to the board when the step is solved. Every step but the last has one. */
@@ -168,6 +192,12 @@ export type Chapter = {
   number?: number;
   /** Written and checked, but not yet open to players: a method it uses has no screen yet. */
   draft?: boolean;
+  /**
+   * The story is still being written (`design/stories/<id>.md`). The case is played as far as it is written: every
+   * written step is fair and leads on, the last to a place still being written. Who did it, the closer and the
+   * ending come when the story does.
+   */
+  writing?: boolean;
   shape: Shape;
   title: string;
   /** The question the line-up asks, where nothing was taken: "Who changed the 2 signs?" */
@@ -244,13 +274,15 @@ export function checkChapter(raw: unknown, roles: readonly string[]): string[] {
     if (text(s.name).length > NAME_MAX) out.push(`${s.name} is longer than ${NAME_MAX} letters`);
   }
   // Nobody new turns up at the end.
-  if (!culprit) out.push('the culprit is not one of the suspects');
+  const writing = c.writing === true;
+  if (!culprit && !(writing && !text(c.culprit))) out.push('the culprit is not one of the suspects');
 
-  if (steps.length < STEPS_MIN || steps.length > STEPS_MAX) out.push(`${STEPS_MIN} to ${STEPS_MAX} steps are needed`);
+  if (steps.length < (writing ? 1 : STEPS_MIN) || steps.length > STEPS_MAX) out.push(`${STEPS_MIN} to ${STEPS_MAX} steps are needed`);
   const cleared: string[] = [];
   const given: Proof[] = [];
   steps.forEach((s, i) => {
-    const last = i === steps.length - 1;
+    // While the story is being written, no written step is the last: each leads on.
+    const last = !writing && i === steps.length - 1;
     const at = `step ${i + 1}`;
     if (!METHODS.includes(s.method)) out.push(`${at}: unknown method`);
     if (!text(s.place) || !text(s.thing) || !text(s.fact)) out.push(`${at}: a place, a thing and a fact are needed`);
@@ -314,6 +346,22 @@ export function checkChapter(raw: unknown, roles: readonly string[]): string[] {
       else if (new Set(tornOf({ id: text(c.id), steps }, i + 1)!.rights).size !== lines.length) out.push(`${at}: 2 torn halves read the same`);
       if (lines.some((l) => /[\u2014!]/.test(l))) out.push(`${at}: a torn page breaks the copy rules`);
     }
+    if (s.method === 'piece' || s.print != null) {
+      if (s.method !== 'piece') out.push(`${at}: only a "piece it together" step has a print`);
+      else if (s.print?.of !== 'rubber-glove' || !Number.isInteger(s.print.pieces) || s.print.pieces < PIECES_MIN || s.print.pieces > PIECES_MAX) out.push(`${at}: a print is of a thing the game draws, in ${PIECES_MIN} to ${PIECES_MAX} pieces`);
+    }
+    if (s.method === 'question' || s.talk != null) {
+      const k = s.talk;
+      const asks = Array.isArray(k?.asks) ? k.asks : [];
+      if (s.method !== 'question') out.push(`${at}: only a "question them" step has a talk`);
+      else if (!text(k?.name) || !text(k?.says) || !text(k?.show?.answer) || asks.length < ASKS_MIN || asks.length > ASKS_MAX || asks.some((a) => !text(a.text) || !text(a.answer))) out.push(`${at}: a talk needs a name, what they say, ${ASKS_MIN} to ${ASKS_MAX} questions with answers, and what a pin makes them say`);
+      else {
+        if (!asks.some((a) => a.ends) || asks.every((a) => a.ends)) out.push(`${at}: a talk has a question that ends it, and one that does not`);
+        // The pin is one already on the board: a step before this one.
+        if (!(Number.isInteger(k!.show.from) && k!.show.from >= 1 && k!.show.from <= i)) out.push(`${at}: the pin shown comes from a step before this one`);
+        if ([k!.says, k!.show.answer, ...asks.flatMap((a) => [a.text, a.answer])].some((l) => text(l).length > LINE_MAX || /[\u2014!]/.test(l))) out.push(`${at}: a talk breaks the copy rules`);
+      }
+    }
     if (s.method === 'trail' && !trailOf({ id: text(c.id), steps }, i + 1)) out.push(`${at}: a trail needs ${TRAIL_MIN} finds or more behind it, each at a place of its own`);
     // Written evidence is checked by the engine that will grade it: every word is there, and no other.
     if (s.text != null || s.words != null) {
@@ -335,7 +383,7 @@ export function checkChapter(raw: unknown, roles: readonly string[]): string[] {
     // Every step ends on a lead, and the lead is to the next place.
     if (!text(s.lead)) out.push(`${at}: no lead`);
     if (!text(s.pin) || text(s.pin).length > PIN_MAX) out.push(`${at}: a pin of ${PIN_MAX} letters at most is needed`);
-    if (text(s.to) !== text(steps[i + 1]!.place)) out.push(`${at}: its lead does not go to the next step's place`);
+    if (steps[i + 1] ? text(s.to) !== text(steps[i + 1]!.place) : !text(s.to)) out.push(`${at}: its lead does not go to the next step's place`);
     if (s.clears) cleared.push(s.clears);
     if (s.gives) given.push(s.gives);
     if (s.gives && !PROOFS.includes(s.gives)) out.push(`${at}: gives is means, motive or chance`);
@@ -345,12 +393,16 @@ export function checkChapter(raw: unknown, roles: readonly string[]): string[] {
 
   for (const s of suspects) {
     const n = cleared.filter((w) => w === s.who).length;
-    if (s.who === c.culprit ? n !== 0 : n !== 1) out.push(s.who === c.culprit ? 'the culprit is cleared' : `${s.who} is cleared ${n} times, not once`);
+    // While the story is being written an innocent may not be cleared yet, but never twice.
+    if (s.who === c.culprit ? n !== 0 : writing ? n > 1 : n !== 1) out.push(s.who === c.culprit ? 'the culprit is cleared' : `${s.who} is cleared ${n} times, not once`);
   }
   for (const w of cleared) if (!suspects.some((s) => s.who === w)) out.push(`${w} is cleared and is not a suspect`);
-  for (const p of PROOFS) if (given.filter((g) => g === p).length !== 1) out.push(`${p} is given ${given.filter((g) => g === p).length} times, not once`);
+  for (const p of PROOFS) {
+    const n = given.filter((g) => g === p).length;
+    if (writing ? n > 1 : n !== 1) out.push(`${p} is given ${n} times, not once`);
+  }
 
-  if (!text(c.ending?.found) || !text(c.ending?.confession) || !text(c.ending?.after)) out.push('the ending needs what was found, a confession and what came after');
+  if (!writing && (!text(c.ending?.found) || !text(c.ending?.confession) || !text(c.ending?.after))) out.push('the ending needs what was found, a confession and what came after');
 
   // The copy rules, and one look a line.
   const lines = [
@@ -595,3 +647,46 @@ export function tornWrongs(torn: Torn, picks: readonly number[]): number {
 /** Stars for a torn page: 3 with every line whole, 2 with 1 set wrong, else 1. */
 export const tornStars = trailStars;
 
+
+/** Piece it together: the pieces of step `n`'s print handed out of order, the same on every device. `order[k]` is the piece that belongs in place k. */
+export type Pieces = { of: Print['of']; count: number; deal: number[]; order: number[] };
+
+export function piecesOf(chapter: Pick<Chapter, 'id' | 'steps'>, n: number): Pieces | null {
+  const print = chapter.steps[n - 1]?.print;
+  if (!print) return null;
+  const k = [...Array(print.pieces).keys()];
+  const deal = [...k].sort((a, b) => hash(`${chapter.id}~${n}~${a}~piece`) - hash(`${chapter.id}~${n}~${b}~piece`));
+  // Handed back in the order of the print, it would be no test: turn the hand by 1.
+  if (deal.every((v, i) => v === i)) deal.push(deal.shift()!);
+  return { of: print.of, count: print.pieces, deal, order: k.map((p) => deal.indexOf(p)) };
+}
+
+/** The places set wrong, from the piece picked (by its place in the deal) for each place in order. 1 pick a place. -1 for picks nobody could have made. */
+export function pieceWrongs(pieces: Pieces, picks: readonly number[]): number {
+  if (picks.length !== pieces.count || picks.some((p) => !Number.isInteger(p) || p < 0 || p >= pieces.count)) return -1;
+  return picks.filter((p, k) => p !== pieces.order[k]).length;
+}
+
+/** Stars for a print: 3 with every piece in its place, 2 with 1 set wrong, else 1. */
+export const pieceStars = trailStars;
+
+/**
+ * A talk, from its moves in order: a question by its place in `asks`, or a pin shown, as `asks.length` plus the step
+ * it came from counted from 0 (`before` steps lie behind it). A question that ends the talk, or a pin that proves
+ * nothing, is a wrong move; the other questions cost nothing. The right pin ends it, or the tries run out and they
+ * say it anyway. The wrong moves, or -1 for moves nobody could have made.
+ */
+export function talkWrongs(talk: Talk, before: number, moves: readonly number[]): number {
+  const options = talk.asks.length + before;
+  const right = talk.asks.length + talk.show.from - 1;
+  if (moves.length === 0 || new Set(moves).size !== moves.length || moves.some((m) => !Number.isInteger(m) || m < 0 || m >= options)) return -1;
+  const wrong = (m: number) => (m < talk.asks.length ? talk.asks[m]!.ends === true : m !== right);
+  const at = moves.indexOf(right);
+  if (at >= 0 && at !== moves.length - 1) return -1;
+  const n = moves.filter(wrong).length;
+  if (n > TALK_TRIES || (at < 0 && n !== TALK_TRIES)) return -1;
+  return n;
+}
+
+/** Stars for a talk: 3 with no wrong move, 2 after 1, 1 after 2. */
+export const talkStars = accountStars;

@@ -6,7 +6,7 @@ import { buildHiddenWords } from './hiddenWords';
 import { buildMirror } from './mirror';
 import { buildSums } from './sums';
 
-const DIR = 'design/stories';
+const DIR = 'src/test/stories';
 const files = readdirSync(DIR).filter((f) => f.endsWith('.json'));
 const read = (f: string) => JSON.parse(readFileSync(join(DIR, f), 'utf8')) as Chapter;
 const roles = pools.culpritWho;
@@ -31,13 +31,16 @@ describe('written chapters', () => {
 
   // The cases written before the balance rules, and what each still owes. Rewriting a case from its story
   // (BUILD_PLAN set 1a) takes it off this list. A case not on it must be balanced, so a new case lands balanced.
+  // The fixtures were written before talking had a method, so each owes talk work, and most owe find work.
   const OWED: Record<string, string[]> = {
-    'the-long-spoon': ['no find work'],
-    'the-open-box': ['no find work'],
-    'the-early-bus': ['no find work'],
-    'the-year-that-is-missing': ['no find work'],
-    'the-2-signs': ['no find work'],
-    'who-carries-the-cards': ['no find work'],
+    'the-long-spoon': ['no find work', 'no talk work'],
+    'the-open-box': ['no find work', 'no talk work'],
+    'the-early-bus': ['no find work', 'no talk work'],
+    'the-year-that-is-missing': ['no find work', 'no talk work'],
+    'the-2-signs': ['no find work', 'no talk work'],
+    'who-carries-the-cards': ['no find work', 'no talk work'],
+    'the-light-in-the-hall': ['no talk work'],
+    'the-other-spoon': ['no talk work'],
   };
   it.each(files)('%s is balanced, or owes exactly what is listed', (f) => {
     const c = read(f);
@@ -47,7 +50,7 @@ describe('written chapters', () => {
   it('a method met 3 times, or a kind of work left out, is thin', () => {
     const c = spoon();
     c.steps[0]!.method = 'buried-sums';
-    expect(balanceOf(c)).toEqual(['no find work', 'buried-sums is met 3 times, 2 at most']);
+    expect(balanceOf(c)).toEqual(['no find work', 'no talk work', 'buried-sums is met 3 times, 2 at most']);
   });
 
   it('a case and every step happen at a place on the map', () => {

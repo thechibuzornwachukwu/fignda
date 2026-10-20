@@ -1,0 +1,69 @@
+/* The glass of the case, the marks lifted off it, and where each goes back. */
+.defs {
+  /* A pattern takes its colour from where it is defined: lifted powder, pale against the dark cloth. */
+  fill: var(--photo);
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+.glass {
+  display: grid;
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  padding: var(--space-3);
+  list-style: none;
+  border-radius: var(--radius-sm);
+  /* Glass on a dark cloth: the powder shows pale on it. */
+  background: var(--board);
+  box-shadow:
+    inset 0 0 0 1px var(--board-edge),
+    0 var(--ledge) 0 var(--board-edge);
+}
+.place {
+  aspect-ratio: 1;
+  box-sizing: border-box;
+  border: 1px dashed color-mix(in srgb, var(--board-ink) 18%, transparent);
+}
+.glass[data-whole] .place {
+  border-color: transparent;
+}
+.place[data-state='open'] {
+  border: 2px dashed var(--board-ink);
+}
+/* A place set wrong first: the right piece is in, and the place is marked. */
+.place[data-state='mended'] {
+  box-shadow: inset 0 calc(var(--space-0h) * -1) 0 var(--miss);
+}
+.cut {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+/* Each piece: a square of lifting tape, as it was peeled off the glass. */
+.pile {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.piece {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  aspect-ratio: 1;
+  margin: 0;
+  padding: var(--space-1);
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: var(--board);
+  box-shadow: 0 var(--ledge) 0 var(--board-edge);
+  cursor: pointer;
+}
+.piece:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}

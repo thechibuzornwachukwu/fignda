@@ -31,6 +31,8 @@ import { LineUp } from './LineUp';
 import styles from './Step.module.css';
 import { Onward } from './Onward';
 import { Marks } from './StepMarks';
+import { Piece } from './Piece';
+import { Question } from './Question';
 import { Sweep } from './Sweep';
 import { TornPage } from './TornPage';
 import { wayOn } from './stepWay';
@@ -47,6 +49,7 @@ export function Step() {
   const step = chapter && Number.isInteger(at) ? chapter.steps[at - 1] : undefined;
   const locked = useMemo(() => pick('stepLocked'), []);
   const soon = useMemo(() => pick('lineupSoon'), []);
+  const writingLine = useMemo(() => pick('caseWriting'), []);
   const auth = useAuth();
   const cold = useCold();
   // A guest plays 2 games, and a step is a game. Decided when it opens, so a result is never walled.
@@ -56,6 +59,17 @@ export function Step() {
   const { sid, base } = caseWay(chapter.id, cold);
   // A cold case is a closed case, worked again.
   if (cold && !caseClosed(chapter)) return <Navigate to={`/case/${chapter.id}`} replace />;
+  // A case still being written: past its last written step, the place the lead named is still to come.
+  const ahead = chapter.writing && at === chapter.steps.length + 1 && chapterProgress(chapter, loadChapterStars(sid)).solved === chapter.steps.length;
+  if (ahead)
+    return (
+      <div className={styles.screen} data-step="writing">
+        <PartnerNote moment="empty" layout="screen" title={chapter.steps[at - 2]!.to ?? chapter.title}>
+          <p>{writingLine}</p>
+          <TextLink to={base}>Back to the board</TextLink>
+        </PartnerNote>
+      </div>
+    );
   if (!step || !caseOpen(chapter)) return <Navigate to={base} replace />;
 
   const progress = chapterProgress(chapter, loadChapterStars(sid));
@@ -82,6 +96,8 @@ export function Step() {
   if (step.method === 'chain') return <Chain key={`${chapter.id}~${at}`} chapter={chapter} at={at} solved={progress.solved} />;
   if (step.method === 'trail') return <Trail key={`${chapter.id}~${at}`} chapter={chapter} at={at} solved={progress.solved} />;
   if (step.method === 'claim') return <Claim key={`${chapter.id}~${at}`} chapter={chapter} at={at} solved={progress.solved} />;
+  if (step.method === 'piece') return <Piece key={`${chapter.id}~${at}`} chapter={chapter} at={at} solved={progress.solved} />;
+  if (step.method === 'question') return <Question key={`${chapter.id}~${at}`} chapter={chapter} at={at} solved={progress.solved} />;
 
   const def = stepPuzzle(chapter, at);
   // Evidence that is not written yet: the board as filled, and a line saying so.

@@ -9,7 +9,8 @@ import { loadChapterStars } from './chapterStore';
 export const coldId = (id: string): string => `cold~${id}`;
 
 /** A chapter is closed once its last step is done, whatever that step is. */
-export const caseClosed = (chapter: Chapter): boolean => (loadChapterStars(chapter.id)[chapter.steps.length] ?? 0) > 0;
+/** A case closes on its last step. One still being written never closes: its story goes on. */
+export const caseClosed = (chapter: Chapter): boolean => !chapter.writing && (loadChapterStars(chapter.id)[chapter.steps.length] ?? 0) > 0;
 
 /** The gold seal: every step of the case done again, cold. Steps open in order, so the last one says it. */
 export const coldSealed = (chapter: Chapter): boolean => (loadChapterStars(coldId(chapter.id))[chapter.steps.length] ?? 0) > 0;

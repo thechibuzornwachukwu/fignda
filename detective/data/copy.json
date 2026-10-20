@@ -127,15 +127,27 @@
     "Next time."
   ],
   "waiting": [
-    "Getting it ready.",
-    "One moment.",
-    "Still working on it.",
-    "Nearly there.",
-    "This one takes a little longer.",
-    "Hang on. It is coming.",
-    "Putting the last pieces in place.",
-    "Thanks for waiting.",
-    "Not stuck. Just careful."
+    "Lantern Row is named for the gas lamps it once had. None of them are left.",
+    "The last bus from Lantern Row is the 10.30.",
+    "Marco lights the bakery ovens at 4 am.",
+    "The library keeps the street's minute books, and never lends them.",
+    "The hall clock can be set from outside, through a hatch, with a rod.",
+    "The lime tree outside the library is the oldest thing on the street.",
+    "Market day on Lantern Row is Friday.",
+    "Somebody sits in the watchman's hut from 10 pm to 6 am.",
+    "3 cameras watch the street. Each sees only its own wedge of ground.",
+    "Odd numbers are on the hall's side of the street. Even ones are on the library's.",
+    "The sale room holds its auctions on Saturdays.",
+    "The street is cobbled at the top and tarmac below the hall.",
+    "The plane trees at the top of the street are cut back every winter.",
+    "The Baker house is 10 minutes' drive up the hill road.",
+    "A suspect is cleared only by a step done with 2 stars or more.",
+    "A tip-off costs 25 points. It never costs you the lead.",
+    "Work a closed case cold, with no tip-offs, and it earns a gold seal.",
+    "The line-up gives you 2 tries. Then the mask comes off anyway.",
+    "Nothing in a case expires. It waits as you left it.",
+    "Stars are yours to keep. Points only order the Ranks.",
+    "Every clue you find goes into Your Notebook."
   ],
   "reveal": [
     "{w} was hiding there."
@@ -148,6 +160,18 @@
   "cleanRead": [
     "A clean read. No tip-offs, no wrong picks.",
     "Clean read. No tip-off, nothing wrong."
+  ],
+  "caseWriting": [
+    "The story goes on from here, and it is still being written. Everything you found is kept.",
+    "This part of the case is still being written. Your board waits as you left it."
+  ],
+  "talkShrug": [
+    "He looks at it, and back at you. It proves nothing to him.",
+    "A shrug. That changes nothing he said."
+  ],
+  "talkOver": [
+    "The talk is over. Start it again, and ask what has a reason behind it.",
+    "That ended the talk. Try again, with a better question."
   ],
   "stepLocked": [
     "That step opens when the one before it is done.",
@@ -211,7 +235,9 @@
     "the stall owner",
     "the coach",
     "the art teacher",
-    "the neighbour from 2 doors down"
+    "the neighbour from 2 doors down",
+    "the security head",
+    "the head cleaner"
   ],
   "confession": [
     "It was {who}. \"I hid the {secret}. It was meant to be a surprise.\"",

@@ -2,15 +2,8 @@
 // engine the client made it with, and the play log is replayed against it, so the stars and the score are the
 // server's own. The line-up and a step answered by picking have no board: they are checked against the chapter.
 
-import twoSigns from '../../design/stories/the-2-signs.json';
-import lightInTheHall from '../../design/stories/the-light-in-the-hall.json';
-import otherSpoon from '../../design/stories/the-other-spoon.json';
-import earlyBus from '../../design/stories/the-early-bus.json';
-import longSpoon from '../../design/stories/the-long-spoon.json';
-import openBox from '../../design/stories/the-open-box.json';
-import missingYear from '../../design/stories/the-year-that-is-missing.json';
-import cards from '../../design/stories/who-carries-the-cards.json';
-import { LINEUP_TRIES, lineupStars, pickStep, pickWrongs, stepPuzzle, sweepResult, tornOf, tornStars, tornWrongs, trailOf, trailStars, trailWrongs, type Chapter } from '../../src/engine/chapter';
+import { STORIES } from '../../src/games/stories';
+import { LINEUP_TRIES, lineupStars, pickStep, pickWrongs, pieceStars, pieceWrongs, piecesOf, stepPuzzle, talkStars, talkWrongs, sweepResult, tornOf, tornStars, tornWrongs, trailOf, trailStars, trailWrongs, type Chapter } from '../../src/engine/chapter';
 import { EVALUATE } from '../../src/engine/evaluate';
 import { buildHiddenWords } from '../../src/engine/hiddenWords';
 import { buildMirror } from '../../src/engine/mirror';
@@ -18,8 +11,8 @@ import { starsFor } from '../../src/engine/stars';
 import { buildSums } from '../../src/engine/sums';
 import { replay, type PlayLog } from './replay';
 
-/** Every written chapter, by id. A new file in `design/stories` is added here: a test fails until it is. */
-export const CHAPTERS: Readonly<Record<string, Chapter>> = Object.fromEntries(([longSpoon, openBox, earlyBus, missingYear, lightInTheHall, twoSigns, otherSpoon, cards] as unknown as Chapter[]).map((c) => [c.id, c]));
+/** Every written chapter, by id: the same list the app ships (`src/games/stories.ts`), less the drafts nobody can play yet. */
+export const CHAPTERS: Readonly<Record<string, Chapter>> = Object.fromEntries(STORIES.filter((c) => !c.draft).map((c) => [c.id, c]));
 
 export type StepCheck =
   | { ok: true; stars: 1 | 2 | 3; score: number; found: number; total: number; hints: number; secs: number }
@@ -55,6 +48,17 @@ export function checkStep(chapter: Chapter, step: number, log: PlayLog, named?: 
     return { ok: true, stars, score: 0, found: r.found, total: r.total, hints: log.hints.length, secs: 0 };
   }
 
+  if (s.method === 'piece') {
+    const pieces = piecesOf(chapter, step);
+    const wrong = pieces ? pieceWrongs(pieces, picked ?? []) : -1;
+    if (!pieces || wrong < 0 || named) return { ok: false, status: 400, reason: 'bad_request' };
+    return { ok: true, stars: pieceStars(wrong), score: 0, found: pieces.count - wrong, total: pieces.count, hints: 0, secs: 0 };
+  }
+  if (s.method === 'question') {
+    const wrong = s.talk ? talkWrongs(s.talk, step - 1, picked ?? []) : -1;
+    if (wrong < 0 || named) return { ok: false, status: 400, reason: 'bad_request' };
+    return { ok: true, stars: talkStars(wrong), score: 0, found: 1, total: 1, hints: 0, secs: 0 };
+  }
   if (s.method === 'torn') {
     const torn = tornOf(chapter, step);
     const wrong = torn ? tornWrongs(torn, picked ?? []) : -1;

@@ -3,14 +3,15 @@
 What is built, in 1 line each, so `BUILD_PLAN.md` holds only what is left. Read this only when you need to know whether something exists. The detail of each is in `SPEC.md`; the history is in git.
 
 ## Cases
-- Casebook 1, Lantern Row: 8 cases, written and open, in `design/stories`.
+- Casebook 1, Lantern Row: case 1, The Ember award, played as far as its story is written (`design/stories`, `"writing": true`). The 8 cases first written are test fixtures now (`src/test/stories`), so every method stays tested.
 - The case engine (`src/engine/chapter.ts`): `checkChapter` (a fair fight), `balanceOf` (every built kind of work, no method more than twice), `checkCasebook` (shapes and suspects rotate, 1 new method a case). A test runs all 3 over every file.
 - The street itself (`design/WORLD.md`): its places, the hall, people, the year and the thread. The street in 3D (three.js): its blocks as data (`src/map/street.ts`), built by `src/map3d` as a model village, with storybook and realistic looks kept to compare, seen from above, at 30 degrees, from the front and at eye level, by day and at night, in 6 weathers, with the sun by the hour, tonight's moon, clouds, birds, shopfronts, cars and street furniture (dev page `/__street`, pictures by `npm run street3d:render` into `design/sketches/map/3d`); every place has a spot on the plan (`src/engine/world.ts`). On Cases the street at the player's hour, each case a pin at its place (`src/routes/StreetMap.tsx`), framed round the open case on a phone, its photo shown while it loads; every case and step names its place.
-- The story file and the case-writing rules (`design/CASE_WRITING.md`), with case 1's story as the worked example.
+- The story file and the case-writing rules (`design/CASE_WRITING.md`), with The Ember award as the worked example: a story that is still being written.
 
 ## Methods
 - Read: hidden words, the blotter (mirror), buried sums, the torn page.
-- Find: sweep the room, on the drawn hall and sale room (`src/scenes`).
+- Find: sweep the room, on the drawn hall and sale room (`src/scenes`); piece it together (a print lifted in pieces).
+- Talk: question them (a pin shown against what they said).
 - Weigh: could it be done, the missing step, walk it back (the trail), which account fits, the line-up.
 
 ## Screens

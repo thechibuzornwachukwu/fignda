@@ -2,10 +2,9 @@
 // brief never waits on the network. `checkChapter` has passed every one of them in the unit tests.
 
 import type { Chapter } from '../engine/chapter';
+import { STORIES } from '../games/stories';
 
-const files = import.meta.glob<Chapter>('../../design/stories/*.json', { eager: true, import: 'default' });
-
-const all: readonly Chapter[] = Object.values(files);
+const all: readonly Chapter[] = STORIES;
 
 /** The chapters a player can open, in the order of their casebook. A draft is written and not yet open. */
 export const chapters: readonly Chapter[] = all.filter((c) => !c.draft).sort((a, b) => (a.number ?? 0) - (b.number ?? 0));
