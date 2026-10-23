@@ -135,7 +135,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
   const mod = registry[def.type];
   const puzzle = useMemo(() => mod.build(def), [mod, def]);
   // Words are what records and skill lines are about. A run of digits or a letter is not one.
-  const wordy = def.type === 'hidden-words' || def.type === 'mirror';
+  const wordy = def.type === 'hidden-words' || def.type === 'mirror' || def.type === 'typos';
   const listRef = useRef<WordListHandle>(null);
   const auth = useAuth();
   const [params] = useSearchParams();
@@ -580,6 +580,10 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
               ? coarse
                 ? 'Swipe across digits in a row. Or tap the first digit of a run, then the last.'
                 : 'Drag across digits in a row. A run is 2 or more digits that add up to the target.'
+              : def.type === 'typos'
+                ? coarse
+                  ? 'Some words here are misspelled. Swipe across a whole misspelled word, or tap its first letter, then its last.'
+                  : 'Some words here are misspelled. Drag across a whole misspelled word.'
               : def.type === 'mirror'
                 ? coarse
                   ? 'These words read right to left. Swipe across one, or tap one end, then the other.'
@@ -617,7 +621,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
 
         <WordList
           ref={listRef}
-          title={finished ? 'Answers' : 'Hidden above'}
+          title={finished ? 'Answers' : def.type === 'typos' ? 'Misspelled above' : 'Hidden above'}
           count={count}
           rows={rows}
           moreHiding={daily && !finished}
@@ -660,7 +664,20 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
           progress={hideProgress ? null : progress}
           left={leftLine}
           time={<Elapsed startAt={s.startAt} endAt={s.endAt} />}
-          message={s.msg || (def.type === 'buried-sums' ? (coarse ? 'Swipe across digits, or tap first then last' : 'Drag across the digits') : coarse ? 'Swipe across letters, or tap first then last' : 'Drag across the letters')}
+          message={
+            s.msg ||
+            (def.type === 'buried-sums'
+              ? coarse
+                ? 'Swipe across digits, or tap first then last'
+                : 'Drag across the digits'
+              : def.type === 'typos'
+                ? coarse
+                  ? 'Swipe across a misspelled word'
+                  : 'Drag across a misspelled word'
+                : coarse
+                  ? 'Swipe across letters, or tap first then last'
+                  : 'Drag across the letters')
+          }
           pet={pet}
           onHint={g.hint}
           onDone={g.finish}

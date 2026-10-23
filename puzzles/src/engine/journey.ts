@@ -8,24 +8,30 @@ import { answerDepth } from './depth';
 import { buildHiddenWords, type Difficulty, type HiddenWordsPuzzle } from './hiddenWords';
 import { mirrorClue } from './mirror';
 import { passages } from './passages';
+import { typoClue } from './typos';
 
 export type CatalogueItem = { id: string; category: string; text: string; dict: readonly string[] };
 
 /**
  * A clue's number says what it is, and it is what the account keeps the clue under, so it never moves:
- * 0 the whole puzzle, 1 to 19 a passage, 21 to 29 a sums clue, 31 the Mirror clue.
+ * 0 the whole puzzle, 1 to 19 a passage, 21 to 29 a sums clue, 31 the Mirror clue, 32 the Typo hunt.
  */
 export const SUMS_FROM = 21;
 export const MIRROR_N = 31;
-export type ClueKind = 'whole' | 'words' | 'sums' | 'mirror';
-export const clueKind = (n: number): ClueKind => (n === 0 ? 'whole' : n === MIRROR_N ? 'mirror' : n >= SUMS_FROM && n < MIRROR_N ? 'sums' : 'words');
+export const TYPOS_N = 32;
+export type ClueKind = 'whole' | 'words' | 'sums' | 'mirror' | 'typos';
+export const clueKind = (n: number): ClueKind =>
+  n === 0 ? 'whole' : n === MIRROR_N ? 'mirror' : n === TYPOS_N ? 'typos' : n >= SUMS_FROM && n < MIRROR_N ? 'sums' : 'words';
+
+/** The seed a pack's Typo hunt is planted from: its own clue id, so it is the same on every device and the server. */
+export const typoSeed = (puzzle: string): string => `${puzzle}~${TYPOS_N}`;
 
 /**
  * The clues of a pack in the order they are played, by number. The rhythm is fixed: word, word, number, word.
- * So a sums clue follows passages 2, 5, 8 and so on. Then the Mirror clue, when the pack has one. A pack ends on its
- * last clue. A puzzle that is not cut is a pack of 1 clue: the whole puzzle.
+ * So a sums clue follows passages 2, 5, 8 and so on. Then the Mirror clue and the Typo hunt, when the pack has them.
+ * A pack ends on its last clue. A puzzle that is not cut is a pack of 1 clue: the whole puzzle.
  */
-export function caseOrder(passageCount: number, mirror = false): number[] {
+export function caseOrder(passageCount: number, mirror = false, typos = false): number[] {
   if (passageCount < 2) return [0];
   const out: number[] = [];
   for (let i = 1; i <= passageCount && i < SUMS_FROM - 1; i++) {
@@ -33,6 +39,7 @@ export function caseOrder(passageCount: number, mirror = false): number[] {
     if (i % 3 === 2 && SUMS_FROM + (i - 2) / 3 < MIRROR_N) out.push(SUMS_FROM + (i - 2) / 3);
   }
   if (mirror) out.push(MIRROR_N);
+  if (typos) out.push(TYPOS_N);
   return out;
 }
 
@@ -74,7 +81,7 @@ export function buildPath(catalogue: readonly CatalogueItem[], mirrorWords: Read
     .map((item) => {
       const puzzle = buildHiddenWords(item);
       const cut = passages(puzzle).length;
-      return { id: item.id, cat: cats.indexOf(item.category), h: hardness(puzzle), order: caseOrder(cut, !!mirrorClue(puzzle, mirrorWords)) };
+      return { id: item.id, cat: cats.indexOf(item.category), h: hardness(puzzle), order: caseOrder(cut, !!mirrorClue(puzzle, mirrorWords), !!typoClue(puzzle, mirrorWords, typoSeed(item.id))) };
     })
     .sort((a, b) => a.cat - b.cat || a.h - b.h || (a.id < b.id ? -1 : 1));
 

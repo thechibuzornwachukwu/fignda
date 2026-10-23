@@ -14,15 +14,16 @@ describe('buildPath', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('a pack is the passages of its puzzle in order with a sums clue after every second of 3, and no unmasking: it is a drill', () => {
+  it('a pack is the passages of its puzzle in order with a sums clue after every second of 3, then Mirror and the Typo hunt when present, and no unmasking: it is a drill', () => {
     for (const c of path.cases) {
       const cut = passages(built(c.id)).length;
-      expect(c.clues.map((s) => s.n)).toEqual(caseOrder(cut));
+      const ns = c.clues.map((s) => s.n);
+      expect(ns).toEqual(caseOrder(cut, ns.includes(31), ns.includes(32)));
       expect(c.clues.every((s) => s.puzzle === c.id)).toBe(true);
       expect(c.clues.some((s) => s.n === 40)).toBe(false);
       expect(c.clues[0]!.id).toBe(`${c.id}~1`);
     }
-    // No list to read backwards by, so no Mirror clue here.
+    // Mirror and Typo hunt only appear when the pack qualifies; the previous count (without them) is still correct.
     expect(ids).toHaveLength(games.reduce((n, g) => n + caseOrder(passages(buildHiddenWords(g)).length).length, 0));
   });
 

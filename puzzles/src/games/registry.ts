@@ -9,6 +9,7 @@ import { hintAnswer, type HintKind } from '../engine/hint';
 import { buildMirror } from '../engine/mirror';
 import { revealParts, type RevealPart } from '../engine/reveal';
 import { buildSums, sumsTarget } from '../engine/sums';
+import { buildTypos } from '../engine/typos';
 import type { GameDef, GameType } from './catalog';
 
 export type { Evaluation };
@@ -89,6 +90,7 @@ export const registry: Record<GameType, GameModule<Built>> = {
     },
   }),
   mirror: spans({ family: 'verbal', build: (def) => buildMirror(def), evaluate: EVALUATE.mirror, backwards: true, listOrder: byPlace }),
+  typos: spans({ family: 'verbal', build: (def) => buildTypos(def), evaluate: EVALUATE.typos, listOrder: byPlace }),
   'buried-sums': {
     ...spans({ family: 'quantitative', build: (def) => buildSums(def), evaluate: EVALUATE['buried-sums'], listOrder: byPlace }),
     // Digits as tiles, with the target and a running total above them.

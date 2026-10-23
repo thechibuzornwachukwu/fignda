@@ -13,7 +13,7 @@ One set at a time. Each set is small, works on its own and leaves the live game 
 
 ### 10. New game types
 
-- [ ] **Opus** (engine, server checks), **Haiku** (tests, copy, screenshots), **Free model** (Liar's statements, checked by you). **Set 10a. A third family.** SPEC section 9, Families: Liar or Relay (words), number series (numbers), Trace (shapes). One type at a time, engine first, through the registry.
+- [ ] **Opus** (engine, server checks), **Haiku** (tests, copy, screenshots), **Free model** (Liar's statements, checked by you). **Set 10a. A third family.** SPEC section 9, Families: Liar or Relay (words), number series (numbers). One type at a time, engine first, through the registry.
 
 - [ ] **Free model** drafts paragraphs, the engine keeps only those whose words truly hide, **Haiku** adds them to `data/games.json`. **Set 10b. More packs,** 5 at a time, on topics players ask Make for most.
 

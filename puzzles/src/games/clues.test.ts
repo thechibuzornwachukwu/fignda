@@ -1,18 +1,20 @@
-import { buildPath, caseOrder, clueKind, MIRROR_N, SUMS_FROM } from '../engine/journey';
+import { buildPath, caseOrder, clueKind, MIRROR_N, SUMS_FROM, TYPOS_N } from '../engine/journey';
 import { HINT_OF, mixedSquad, PARTNERS } from '../engine/partners';
 import { games, getPassage, getPuzzle, MIRROR_WORDS } from './catalog';
 import { familyOf, registry } from './registry';
 
 describe('the rhythm of a pack', () => {
-  it('is word, word, number, word, then Mirror, and nothing after it', () => {
+  it('is word, word, number, word, then Mirror and the Typo hunt, and nothing after them', () => {
     expect(caseOrder(1)).toEqual([0]);
     expect(caseOrder(2)).toEqual([1, 2, 21]);
     expect(caseOrder(3, true)).toEqual([1, 2, 21, 3, 31]);
+    expect(caseOrder(3, false, true)).toEqual([1, 2, 21, 3, 32]);
     expect(caseOrder(6)).toEqual([1, 2, 21, 3, 4, 5, 22, 6]);
-    expect([0, 1, 19, 21, 29, 31, 40].map(clueKind)).toEqual(['whole', 'words', 'words', 'sums', 'sums', 'mirror', 'words']);
+    expect([0, 1, 19, 21, 29, 31, 32, 40].map(clueKind)).toEqual(['whole', 'words', 'words', 'sums', 'sums', 'mirror', 'typos', 'words']);
     expect(familyOf('hidden-words')).toBe('verbal');
     expect(familyOf('buried-sums')).toBe('quantitative');
     expect(familyOf('mirror')).toBe('verbal');
+    expect(familyOf('typos')).toBe('verbal');
   });
 
   it('every catalogue case follows it, and every clue on the path can be played', () => {
@@ -20,10 +22,11 @@ describe('the rhythm of a pack', () => {
     const seen: string[] = [];
     let sums = 0;
     let mirrors = 0;
+    let typos = 0;
     for (const c of path.cases) {
       const cut = getPassage(c.id, 1)?.part.count ?? 0;
       const ns = c.clues.map((x) => x.n);
-      expect(ns).toEqual(caseOrder(cut, ns.includes(MIRROR_N)));
+      expect(ns).toEqual(caseOrder(cut, ns.includes(MIRROR_N), ns.includes(TYPOS_N)));
       // The account keeps a clue under a number from 1 to 40.
       expect(Math.max(...ns)).toBeLessThanOrEqual(40);
       expect(cut).toBeLessThan(SUMS_FROM - 1);
@@ -33,6 +36,7 @@ describe('the rhythm of a pack', () => {
         const built = registry[clue.def.type].build(clue.def);
         expect(built.answers.length, `${c.id}~${n}`).toBeGreaterThanOrEqual(3);
         if (clueKind(n) === 'sums') sums++;
+        if (clueKind(n) === 'typos') typos++;
         if (clueKind(n) === 'mirror') {
           mirrors++;
           expect(getPuzzle(c.id)!.text).toContain(clue.def.text.slice(0, 40));
@@ -44,6 +48,7 @@ describe('the rhythm of a pack', () => {
     if (process.env.LOOK) console.log(seen.join('\n'), '\n', sums, 'sums clues,', mirrors, 'mirror clues,', path.cases.length, 'cases');
     expect(sums).toBeGreaterThanOrEqual(path.cases.length);
     expect(mirrors).toBeGreaterThan(0);
+    expect(typos).toBeGreaterThan(0);
   });
 });
 
@@ -108,8 +113,8 @@ describe('edges', () => {
 });
 
 describe('no story', () => {
-  it('no pack has an unmasking, and no clue number past the Mirror opens anything', () => {
-    for (const g of games) for (const n of [32, 39, 40]) expect(getPassage(g.id, n)).toBeUndefined();
-    expect(Object.keys(registry).sort()).toEqual(['buried-sums', 'hidden-words', 'mirror']);
+  it('no pack has an unmasking, and no clue number past the Typo hunt opens anything', () => {
+    for (const g of games) for (const n of [33, 39, 40]) expect(getPassage(g.id, n)).toBeUndefined();
+    expect(Object.keys(registry).sort()).toEqual(['buried-sums', 'hidden-words', 'mirror', 'typos']);
   });
 });

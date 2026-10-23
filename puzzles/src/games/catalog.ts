@@ -5,13 +5,14 @@ import rawHolidays from '../../data/holidays.json';
 import { dailyGameId, holidayOn, type Calendar, type Holiday } from '../engine/daily';
 import rawMirror from '../../data/mirrorWords.json';
 import { buildHiddenWords, type Difficulty, type HiddenWordsPuzzle } from '../engine/hiddenWords';
-import { caseOrder, clueKind, SUMS_FROM } from '../engine/journey';
+import { caseOrder, clueKind, SUMS_FROM, typoSeed } from '../engine/journey';
 import { mirrorClue } from '../engine/mirror';
+import { typoClue } from '../engine/typos';
 import { sumsClue, sumsTarget } from '../engine/sums';
 import { passages } from '../engine/passages';
 import { sponsorOf, type Sponsor } from '../engine/sponsor';
 
-export type GameType = 'hidden-words' | 'buried-sums' | 'mirror';
+export type GameType = 'hidden-words' | 'buried-sums' | 'mirror' | 'typos';
 
 
 /** The everyday words Mirror reads by. */
@@ -80,7 +81,8 @@ export function getPassage(id: string, n: number): { def: GameDef; part: Part } 
     if (!def || !puzzle) return undefined;
     const cut = passages(puzzle);
     const mirror = mirrorClue(puzzle, MIRROR_WORDS);
-    const order = caseOrder(cut.length, !!mirror);
+    const typos = typoClue(puzzle, MIRROR_WORDS, typoSeed(id));
+    const order = caseOrder(cut.length, !!mirror, !!typos);
     order.forEach((k, i) => {
       if (k === 0) return;
       const part: Part = { n: k, count: cut.length, at: i + 1, of: order.length, next: order[i + 1] ?? 0 };
@@ -89,6 +91,8 @@ export function getPassage(id: string, n: number): { def: GameDef; part: Part } 
       else if (kind === 'sums') {
         const made = sumsClue(`${id}~${k}`, k - SUMS_FROM);
         list!.set(k, { def: { ...def, type: 'buried-sums', noun: `runs that add up to ${sumsTarget(made)}`, text: made.text, dict: [...made.dict], expectedAnswers: [] }, part });
+      } else if (kind === 'typos') {
+        if (typos) list!.set(k, { def: { ...def, type: 'typos', noun: 'misspelled words', text: typos.text, dict: [...typos.dict], expectedAnswers: [] }, part });
       } else if (mirror) {
         list!.set(k, { def: { ...def, type: 'mirror', noun: 'words that read right to left', text: mirror.text, dict: [...mirror.dict], expectedAnswers: [] }, part });
       }

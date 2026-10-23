@@ -5,12 +5,13 @@ import { z } from 'zod';
 import { dayNo } from '../../src/engine/daily';
 import { EVALUATE } from '../../src/engine/evaluate';
 import { buildHiddenWords } from '../../src/engine/hiddenWords';
-import { caseOrder, clueKind, SUMS_FROM } from '../../src/engine/journey';
+import { caseOrder, clueKind, SUMS_FROM, typoSeed } from '../../src/engine/journey';
 import { checkDraft, crossesWords, MAKE, WORD_RE } from '../../src/engine/make';
 import { buildMirror, mirrorClue } from '../../src/engine/mirror';
 import { passages } from '../../src/engine/passages';
 import { starsFor } from '../../src/engine/stars';
 import { buildSums, sumsClue } from '../../src/engine/sums';
+import { buildTypos, typoClue } from '../../src/engine/typos';
 import pools from '../../data/copy.json';
 import mirrorFile from '../../data/mirrorWords.json';
 import iconTable from '../../data/topicIcons.json';
@@ -617,13 +618,16 @@ async function plays(req: Request, deps: Deps) {
     if (room) throw new HttpError(400, 'bad_request');
     const cut = g.data.kind === 'curated' ? passages(puzzle) : [];
     const mirror = cut.length < 2 ? null : mirrorClue(puzzle, MIRROR_WORDS);
-    if (!caseOrder(cut.length, !!mirror).includes(game.clue) || game.clue === 0) throw new HttpError(404, 'unknown_clue');
+    const typos = cut.length < 2 ? null : typoClue(puzzle, MIRROR_WORDS, typoSeed(gameId));
+    if (!caseOrder(cut.length, !!mirror, !!typos).includes(game.clue) || game.clue === 0) throw new HttpError(404, 'unknown_clue');
     const kind = clueKind(game.clue);
     const c =
       kind === 'sums'
         ? replay(buildSums(sumsClue(`${gameId}~${game.clue}`, game.clue - SUMS_FROM)), log, false, EVALUATE['buried-sums'])
         : kind === 'mirror'
           ? replay(buildMirror(mirror!), log, false, EVALUATE.mirror)
+          : kind === 'typos'
+            ? replay(buildTypos(typos!), log, false, EVALUATE.typos)
           : replay(buildHiddenWords({ text: cut[game.clue - 1]!.text, dict: g.data.dict as string[] }), log, false);
     if (!c.ok) throw new HttpError(422, c.reason);
     const stars = starsFor({ finished: true, found: c.found, total: c.total, hints: c.hints, wrongs: c.wrongs });

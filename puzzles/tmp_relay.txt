@@ -1,0 +1,17 @@
+RELAY</span><span class="game-tag">Verbal</span></div>
+      <div class="game-meta">1 find, 3 links</div>
+      <div class="progress"><i style="width:100%"></i></div>
+      <div class="board">
+        <p>At <span class="lit">the end dog</span>s bark at nothing, and the cat sleeps by the gate.</p>
+      </div>
+      <div class="list">
+        <div class="list-head"><span>3 links</span><span>1 of 1</span></div>
+        <div class="list-row"><span class="idx">1</span><span class="chip">The</span></div>
+        <div class="list-row"><span class="idx">2</span><span class="chip">End</span></div>
+        <div class="list-row"><span class="idx">3</span><span class="chip">Dog</span></div>
+      </div>
+      <div class="done">Done</div>
+    </div>
+    <div>
+      <div class="head"><h2>Relay</h2><span>Verbal</span></div>
+      <p class="sub">A chain of words passes a letter to the next: each word's last letter is the next word's first. The shared letter is counted once, so <b>THE + END + DOG</b> 

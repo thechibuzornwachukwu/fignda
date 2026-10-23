@@ -46,4 +46,17 @@ export const evalSums: Evaluate = (p, a, b, found) => {
   return near ? { kind: 'close' } : { kind: 'wrong' };
 };
 
-export const EVALUATE = { 'hidden-words': evalWords, mirror: evalMirror, 'buried-sums': evalSums } as const;
+/**
+ * Typo hunt: the word picked is a misspelled one, whole. A pick inside one, or running past it, is a near miss;
+ * a word spelled right is wrong.
+ */
+export const evalTypos: Evaluate = (p, a, b, found) => {
+  const [x, y] = a <= b ? [a, b] : [b, a];
+  const hit = p.answers.find((k) => k.spans[0]![0] === x && k.spans[0]![1] === y);
+  if (hit) return found.has(hit.key) ? { kind: 'already' } : { kind: 'hit', key: hit.key, label: hit.label, span: [x, y] };
+  if (x === y) return { kind: 'ignore' };
+  const near = unfound(p, found).some(({ spans: [s] }) => x <= s![1] && y >= s![0]);
+  return near ? { kind: 'close' } : { kind: 'wrong' };
+};
+
+export const EVALUATE = { 'hidden-words': evalWords, mirror: evalMirror, 'buried-sums': evalSums, typos: evalTypos } as const;
