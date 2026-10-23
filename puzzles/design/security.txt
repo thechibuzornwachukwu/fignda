@@ -1,0 +1,2727 @@
+Synthesis
+The Reddit thread confirms the article's thesis through real-world incidents: AI-generated code passes every "it works" test while hiding systemic vulnerabilities. The most common patterns are exposed Supabase service role keys, client-side-only auth, missing CORS restrictions, and secrets baked into JS bundles. The OP's core point holds — polished code creates false confidence that no other review tool catches.
+The article provides the structured audit framework the Reddit discussion lacks. Most commenters acknowledge the problem but propose incomplete solutions (AI auditing AI, running Mozilla Observatory, or simply "not shipping"). The seven-category audit framework addresses the exact gaps both the OP and commenters identify.
+Key convergence: both sources agree automated tools catch infrastructure-level issues (headers, TLS, DNS) but miss business logic and authorization flaws. Neither a scanner nor a vibe coder's own AI can reliably flag "this endpoint should only be accessible to the owner."
+Pre-Ship Checklist
+1. Authorization & Access Control
+- Walk every route — map who can call each endpoint
+- Call each authenticated endpoint as a different user (IDOR test)
+- Verify client-side auth checks exist only as UX, not as security
+- Check RLS policies are enabled on every database table (Supabase-specific)
+- Confirm service role key is NOT in any client-side bundle or frontend code
+- Audit every middleware for auth enforcement
+2. Secrets & Configuration
+- Search production bundle for sk_, pk_, AKIA, ghp_, service_role, SERVICE_ROLE_KEY
+- Verify every env var exposed to the client has a safe prefix (NEXT_PUBLIC_, etc.)
+- Confirm no debug routes, /admin/inspect, or dev endpoints in production
+- Check .env files are in .gitignore and not committed
+3. Input Validation & Injection
+- Every user input is validated at the server boundary (not just the client)
+- Database queries use parameterized statements (no string concatenation)
+- File uploads validate MIME type server-side, not just client-side
+- JSON payloads are validated against a schema
+4. Rate Limiting & Abuse
+- Login, signup, password reset, and contact form endpoints have rate limits
+- LLM-backed endpoints have both rate limits and cost caps
+- API keys are scoped and not globally permissive
+5. Dependencies & Supply Chain
+- Run npm audit / pip-audit / cargo audit
+- Review every High/Critical finding — especially transitive dependencies
+- Check for abandoned or typosquat packages
+6. Error Handling & Information Disclosure
+- Production error responses return terse messages (no stack traces)
+- Deliberately malformed requests don't leak env vars, DB schemas, or internal paths
+- /debug and verbose logging disabled in production
+7. Infrastructure Layer
+- Security headers present (CSP, X-Frame-Options, HSTS, etc.)
+- TLS properly configured, no mixed content
+- CORS restricted to known origins (not * on authenticated endpoints)
+- DNS properly configured, no exposed subdomains
+- Subdomain takeover risk assessed
+8. Production Readiness
+- Error tracking active (Sentry or equivalent)
+- Uptime monitoring configured
+- Backup and rollback strategy documented
+- Incident response plan exists (even if minimal)
+- Secrets rotation schedule defined
+9. Code Quality Review
+- Read every file — know what each module does
+- Verify auth logic is consistent across the codebase (not split between patterns)
+- Check for "it works but shouldn't" shortcuts (e.g., service_role swap to bypass RLS)
+- Confirm tests exist for critical paths (not just happy-path unit tests)
+10. Compliance (if applicable)
+- GDPR (EU users), LGPD (Brazil), PIPEDA (Canada), CCPA (California)
+- Privacy policy and data handling documentation
+- Data retention and deletion mechanisms
+
+
+According to Reddit
+
+CrackrAI
+Jobs
+Interview Prep
+expand_more
+Cheat Sheets
+expand_more
+Resources
+expand_more
+Try Crackr free
+Crackr AI
+/
+Vibe Coding Failures
+Updated March 2026
+Vibe Coding Failures
+A curated directory of documented incidents where AI-generated and vibe-coded software failed in production. Every entry cites its authoritative source.
+
+Submit an incident
+arrow_forward
+19
+
+Incidents
+
+6.3M+
+
+Records
+
+5,600+
+
+Apps
+
+69
+
+Vulns
+
+search
+Search by company, tool, or keyword...
+19 incidents
+
+Sort:
+Date
+arrow_downward
+Severity
+All (19)
+
+cloud_off
+Production Outages (9)
+
+database
+Data Exposures (6)
+
+bug_report
+Insecure AI Code (2)
+
+link_off
+Supply Chain (2)
+
+CRITICAL
+
+HIGH
+
+
+Amazon
+CRITICAL
+6-hour outage wipes 99% of U.S. order volume
+trending_down
+~6.3 million lost orders
+cloud_off
+Production Outages
+Mar 5, 2026
+expand_more
+
+
+Amazon
+HIGH
+Incorrect delivery times appear in shopping carts
+trending_down
+~120,000 lost orders
+cloud_off
+Production Outages
+Mar 2, 2026
+expand_more
+
+
+DataTalks.Club
+CRITICAL
+Claude Code runs terraform destroy, nukes 2.5 years of production data
+trending_down
+1.94M rows lost, 100K+ students affected
+cloud_off
+Production Outages
+Mar 2026
+expand_more
+
+
+Orchids
+CRITICAL
+Zero-click hack hijacks BBC reporter's laptop in live demo
+trending_down
+1M+ platform users at risk
+database
+Data Exposures
+Feb 2026
+expand_more
+
+
+Moltbook
+CRITICAL
+Misconfigured database exposes 1.5M auth tokens and 35K emails
+trending_down
+1.5M tokens + 35K emails exposed
+database
+Data Exposures
+Feb 2026
+expand_more
+
+
+Meta
+HIGH
+AI agent posts incorrect security guidance, grants unauthorized access for 2 hours
+trending_down
+2-hour unauthorized access to sensitive code
+cloud_off
+Production Outages
+Jan 2026
+expand_more
+
+
+5,600 Vibe-Coded Apps
+CRITICAL
+2,000+ vulnerabilities and 400+ exposed secrets across vibe-coded apps
+trending_down
+2,000+ vulns, 400+ exposed secrets
+database
+Data Exposures
+2026
+expand_more
+
+
+OpenClaw
+CRITICAL
+CVE-2026-31992: allowlist bypass via env -S, CVSS 9.9
+trending_down
+CVSS 9.9, full guardrail bypass
+bug_report
+Insecure AI Code
+2026
+expand_more
+
+
+Gemini CLI
+HIGH
+Agent destroys entire project by looping move command to non-existent directory
+trending_down
+Total irreversible project data loss
+cloud_off
+Production Outages
+2026
+expand_more
+
+
+Amazon
+HIGH
+AI agent deletes and recreates environment, causes 13-hour outage
+trending_down
+13-hour AWS outage (China)
+cloud_off
+Production Outages
+Dec 2025
+expand_more
+
+
+Meta
+HIGH
+AI agent deletes 200+ emails from Director of AI Safety
+trending_down
+200+ emails permanently deleted
+cloud_off
+Production Outages
+Dec 2025
+expand_more
+
+
+npm ecosystem
+HIGH
+126 malicious npm packages exploit AI hallucinated package names
+trending_down
+86,000+ downloads, credential theft
+link_off
+Supply Chain
+Aug-Oct 2025
+expand_more
+
+
+SaaStr / Replit
+HIGH
+Replit AI agent violates code freeze, wipes entire production database
+trending_down
+Complete production DB wiped, months of data at risk
+cloud_off
+Production Outages
+Jul 2025
+expand_more
+
+
+Tea
+CRITICAL
+72,000 images and 1.1M private messages exposed via open Firebase bucket
+trending_down
+72K images + 1.1M messages leaked
+database
+Data Exposures
+Jul 2025
+expand_more
+
+
+Lovable
+CRITICAL
+CVE-2025-48757: missing Row Level Security exposes 170+ apps
+trending_down
+170+ production apps exposed
+database
+Data Exposures
+May 2025
+expand_more
+
+
+Enrichlead
+HIGH
+Startup shuts down after AI puts all security logic on the client side
+trending_down
+Complete startup shutdown
+cloud_off
+Production Outages
+Late 2025
+expand_more
+
+
+Base44
+HIGH
+Broken access controls expose every app on the platform
+trending_down
+Platform-wide exposure
+database
+Data Exposures
+2025
+expand_more
+
+
+Hugging Face (PyPI)
+HIGH
+AI-hallucinated package name gets 30,000+ real downloads
+trending_down
+30,000+ downloads of fabricated package
+link_off
+Supply Chain
+2025
+expand_more
+
+
+Databricks Red Team
+CRITICAL
+Claude scaffolds multiplayer game with instant RCE via insecure pickle serialization
+trending_down
+Network-wide RCE in functional game
+bug_report
+Insecure AI Code
+2025
+expand_more
+Why this matters
+These failures share a common root cause: code was shipped by people who did not understand it. AI generated something that looked correct, passed a cursory check, and went to production. The result was exposed databases, lost orders, and vulnerabilities that required zero user interaction to exploit.
+
+The pattern is accelerating. CVE entries attributed to AI-generated code jumped from 6 in January 2026 to 35+ in March. A Tenzai study found 69 vulnerabilities across 15 apps built by 5 major AI coding tools. Every single app lacked CSRF protection. Every tool introduced SSRF vulnerabilities.
+
+The antidote is the same as it has always been: understand your code. Data structures, algorithms, system design, and the ability to reason about what software is actually doing. AI is a powerful tool when wielded by someone who understands the output. Without that understanding, it is a liability.
+
+
+Why Vibe Coding Won't Replace Developers
+
+1.7x more bugs, 2.74x more vulnerabilities, 19% slower. The full data-driven analysis with 14 sources.
+
+Read the article ↗
+
+Frequently asked questions
+What is vibe coding?
+expand_more
+What are the biggest vibe coding failures?
+expand_more
+Is vibe coding safe for production?
+expand_more
+How many security vulnerabilities has AI-generated code caused?
+expand_more
+What are common patterns in vibe coding failures?
+expand_more
+Prepare the right way
+Blind 75 vs NeetCode 150
+
+Data-backed comparison of both lists, problem by problem
+
+NeetCode 150 Study Plan
+
+Interactive study planner with progress tracking for all 150 problems
+
+Company Interview Questions
+
+See what 458+ companies actually ask, sorted by topic and difficulty
+
+Why Blind LeetCode Grinding is Stupid
+
+Data from 1,500 real interview questions proves targeted prep wins
+
+© 2026 Crackr AI
+
+Company Questions
+Jobs
+Study Plans
+DSA Tracker
+LeetCode Patterns
+Interview Guides
+Tutorials
+Algorithm Visualizers
+Blog
+Cheat Sheets
+Affiliates
+Privacy
+Terms
+Contact
+
+
+	Hacker Newsnew | past | comments | ask | show | jobs | submit	login
+Vibe coded Lovable-hosted app littered with basic flaws exposed 18K users (theregister.com)
+140 points by nottorp 4 months ago | hide | past | favorite | 35 comments
+
+	
+recursivedoubts 4 months ago | next [–]
+
+I continue to maintain that the best metaphor for the current situation in software development is "The Sorcerers Apprentice" in Fantasia:
+https://www.youtube.com/watch?v=m-W8vUXRfxU
+
+
+	
+firefoxd 4 months ago | prev | next [–]
+
+Lovable is marketed to non developers, so their core users wouldn't understand a security flow if it flashed red. A lot of my non dev friends were posting their cool new apps they built on LinkedIn last year [0]. Several were made on lovable. It's not on their users to understand these flaws
+The apps all look the same with a different color palette, and makes for an engaging AI post on LinkedIn. Now they are mostly abandoned, waiting for the subscription to expire... and their personal data to get exposed I guess
+
+[0]: https://idiallo.com/blog/my-non-programmer-friends-built-app...
+
+
+	
+alfiedotwtf 4 months ago | parent | next [–]
+
+Developers with decades of experience still make basic security holes. The general public are screwed once they start hosting their own apps and serving on the Internet.
+
+	
+cube00 4 months ago | root | parent | next [–]
+
+There's something so innocent about the early days when even Microsoft thought we'd be running Personal Web Servers and hosting our own websites in a peer-to-peer fashion.
+Although cynically, in 1996 Microsoft would probably tell you anything you wanted to hear if it got you using Internet Explorer.
+
+The Personal Web Server is ideal for intranets, homes, schools, small business workgroups and anyone who wants to set up a personal Web server.
+
+https://news.microsoft.com/source/1996/10/24/microsoft-annou...
+
+
+	
+eddythompson80 4 months ago | root | parent | next [–]
+
+I always held the belief that we (as programmers and industry) failed the initial premise of the "distributed internet". On one hand, the core of the internet (whether its arpanet or even tcp/ip) was designed to be fully distributed, trustless, selfhostable, etc. The idea that you if you want an email you do a `pkg_add email`, want a file server, `pkg_add file-server`, want remote access, `pkg_add openssh` and you're done. But what we have today is [1].
+Securing all that got very technical and nuanced with hundreds of complex scenarios and tools and protocols. Tech companies raced to produce services the mass public can use, hiring hordes of very smart, expensive and technical developers to develop and secure, and they still get it wrong frequently. While the FOSS community adopted the "get good or gtfo" approach as in [1].
+
+The average person has no chance. That's why closed wall-gardened platforms like iOS and Android are winning.
+
+1: https://www.youtube.com/watch?v=40SnEd1RWUU
+
+
+	
+geraneum 4 months ago | root | parent | prev | next [–]
+
+> Developers with decades of experience still make basic security holes.
+You see this type of template response copy pasted basically under any post/comment of this kind.
+
+I think at the end of the day we’ll be able to look back and see what/who fared better, based on actual data.
+
+
+	
+carlgreene 4 months ago | prev | next [–]
+
+The hardest part about this stuff is that as a user, you don't necessarily know if an app is vibe-coded or not. Previously, you were able to have _some_ reasonable expectation of security in that trained engineers were the ones building these things out, but that's no longer the case.
+There's a lot of cool stuff being built, but also as a user, it's a scary time to be trying new things.
+
+
+	
+627467 4 months ago | parent | next [–]
+
+The frequency with which I see contemporary apps updating (sometimes multiple times a day) says there's a change in culture that also makes professionals prone to mistakes.
+I get that we'll never ship a perfect release, but if you have to push fixes once a day it seems you've lost perspective.
+
+Vibe coding slopiness is more acceptable now because we've lowered our standards
+
+
+	
+cosmic_cheese 4 months ago | root | parent | next [–]
+
+Devs' newfound ability to patch on the fly is absolutely being overleveraged. It's a wonderful capability to have that can do wonders in terms of disaster mitigation, but it's clearly become a crutch and has resulted in a situation where software has become a horrific amalgamation of haphazardly-developed panic-patches, taking the classic "ball of mud" problem and putting it into overdrive.
+
+	
+yoyohello13 4 months ago | parent | prev | next [–]
+
+Yeah, my trust for new open source projects is in the toilet. Hopefully we will eventually start taking security seriously again after the vibe code gold rush.
+
+	
+dizhn 4 months ago | root | parent | next [–]
+
+This applies to all software not just open source.
+
+	
+esseph 4 months ago | root | parent | prev | next [–]
+
+> Hopefully we will eventually start taking security seriously again after the vibe code gold rush.
+Companies don't take security seriously now (and predating vibe coding)
+
+
+	
+general_reveal 4 months ago | parent | prev | next [–]
+
+The hardest part about this stuff is that as a user, you don't necessarily know if an app is vibe-coded or not
+Hah. Advert of the year. Can’t really tell the difference anymore huh …
+
+
+	
+ctoth 4 months ago | parent | prev | next [–]
+
+I'm sorry, what?
+> Previously, you were able to have _some_ reasonable expectation of security in that trained engineers were the ones building these things
+
+When was this? What world? Did I skip worldlines? Is this a new Universe?
+
+The world I remember is that anybody could write a program and put it on the Internet. Is this not the world you remember?
+
+Further, when those engineers were "trained" ... were there no data breaches before 2022?
+
+
+	
+carlgreene 4 months ago | root | parent | next [–]
+
+Of course there were. Don't be pedantic. Anybody could write a program and put it on the internet. But to get a reasonably polished version with decent features and an enjoyable enough UX for someone to sign up and even pay money more, it generally took people who kind of knew what they were doing.
+Of course shortcuts were taken. They always were and always will be. But don't try to compare shipping software today to even just 3 years ago.
+
+
+	
+kimixa 4 months ago | root | parent | next [–]
+
+Yes - AI has completely destroyed the set of "Signals" people used to judge quality of much software. They weren't ever 100% accurate, sure, but they were often pretty good heuristics for "level of care", what the devs considered important (or didn't consider important) and similar.
+And I mean that as both "end user" software signals, and "library" signals for other devs.
+
+I assume that set of signals will slowly be updated. If one of those ends up being "Any Use of AI At All" is still an open question, depending on if the promised hype actually ends up meeting capability as much as anything.
+
+
+	
+Flashtoo 4 months ago | root | parent | next [–]
+
+This is true beyond software. It used to be that the proof of the thinking process was in the resulting artifact. No longer can you estimate from the existence of a piece of text and the level of polish behind it that the apparent author has put at least a reasonable amount of thought into it. This applies to comments, blogs, emails, and most troublingly I've seen this happen at my job with things like requirement specs. Now, the veneer of quality makes it much harder to know what is the appropriate amount of skepticism to judge the contents with. And it's too tiring to be maximally skeptical about everything.
+
+	
+melecas 4 months ago | prev | next [–]
+
+Vibe coding democratized shipping without democratizing the accountability. The 18,000 users absorbed the downside of a risk they didn't know they were taking.
+
+	
+shimman 4 months ago | parent | next [–]
+
+I don't think you know what democracy means, democracy means that users can reject poorly made apps. If you can't reject or destroy something, it's not a democratic process.
+Having someone dump shitty wares onto the public is only democracy if you think being held unaccountable as democratic.
+
+
+	
+SetTheorist 4 months ago | root | parent | next [–]
+
+One of the meanings of the word "democratization" is "the action of making something accessible to everyone", which is clearly the sense meant here.
+
+	
+dizhn 4 months ago | root | parent | next [–]
+
+It has a more broad meaning of sharing like when a factory is dumping waste in a river, they are democratizing pollution. (i.e they get the benefits but everybody pays the cost.)
+
+	
+warkdarrior 4 months ago | root | parent | next [–]
+
+I believe the phrase is "socialize the risk, privatize the profits". I have never heard used with the word "democratize".
+
+	
+dizhn 4 months ago | root | parent | next [–]
+
+I think I encountered in Chomsky's writings but I might be wrong.
+
+	
+andersmurphy 4 months ago | parent | prev | next [–]
+
+With the power of LLMs anyone can make and sell foot guns.
+
+	
+aitchnyu 4 months ago | prev | next [–]
+
+One dev of a Lovable competitor pointed me to the rules thats supposed to ensure queries are limited to that user's data. This seems like "pretty please?" to my amateur eyes.
+https://github.com/dyad-sh/dyad/blob/de2cc2b48f2c8bfa401608c...
+
+
+	
+ch4s3 4 months ago | prev | next [–]
+
+I've been thinking a bit about how to do security well with my generated code. I've been using tools that check deps for CVEs, static tools that check for sql injection and similar problems, and baking some security requirements into the specs I hand claude. I can't tell yet if this is better than what I did before or just theater. It seems like in this case you'd need/want to specify some tests around access.
+I'm interested to hear how other people approach this.
+
+
+	
+adampunk 4 months ago | parent | next [–]
+
+So the problem I'm having is I don't know what I'm doing vis a vis security, so I can't audit my own understanding by just sitting in a chair, but here's what I've been doing.
+I'm building a desktop app that has has authentication needs because we need to connect our internal agents and also allow the user to connect theirs. We pay for our agents, the user pays for theirs (or pays us to use ours etc.). These are, relatively speaking, VERY SIMPLE PROBLEMS, nevertheless agents are happy to consume and leak secrets, or break things in much stranger ways, like hooking the wrong agent up to the wrong auth which would have charged a user for our API calls. That seemed very unlikely to me until I saw it.
+
+So far what has "worked" (made me feel less anxious, aside from the niggling worry that this is theater) is: 1. Having a really strong and correct understanding of our data flows. That's not about security per se so at least that I can be ok at it. This allows me to... 2. Be aggressive and paranoid about not doing it at all, if it can be helped. Where I actually handle authentication is as minimal as possible (one should have some reasonable way to prove that to yourself). Done right the space is small enough to reason about.
+
+How do I do 1 & 2 while not knowing anything? Painfully and slowly and by reading. The web agents are good if you're honest about your level of knowledge and you ask for help in terms of sources to read. It's much more effective than googling. Ask, read what the agents say, press them for good recommendations for YOU to read, not anyone. Then go out and read those sources. Have I learned enough to supervise a frontier model? No. Absolutely not. Am I doing it anyway? Yes.
+
+
+	
+s_ting765 4 months ago | parent | prev | next [–]
+
+Ask the LLM to create for you a POC for the vulnerability you have in mind. Last time I did this I had to repeatedly make a promise to the LLM that it was for educational purposes as it assumed this information is "dangerous".
+
+	
+ch4s3 4 months ago | root | parent | next [–]
+
+This is actually pretty interesting. I guess I knew you could do this offensively but it didn’t occur to me to use it OWASP style to test my own work.
+
+	
+ctoth 4 months ago | parent | prev | next [–]
+
+Same way you handle preserving any other property you want to preserve while "vibecoding" -- ensure tests capture it, ensure the tests can't be skipped. It really is this simple.
+
+	
+drunken_thor 4 months ago | prev | next [–]
+
+This is a prime example of how lazy vibe coding makes people. Even if they were not technical, some of these bugs would have been caught if they just went through the behaviour by hand at least once. Not an ounce of QA just generate and ship.
+
+	
+Bombthecat 4 months ago | prev | next [–]
+
+AI is perfect for plugins though, for products where security is a stones issue or you don't care ( I created a few modules for foundry vtt for example)
+
+	
+t312227 4 months ago | prev | next [–]
+
+surprised pikachu face ... what did we expect!? ;)
+
+	
+joeyguerra 4 months ago | prev | next [–]
+
+It had 18k users?!
+
+	
+julianlam 4 months ago | prev [–]
+
+> One example of this was a malformed authentication function. The AI that vibe-coded the Supabase backend, which uses remote procedure calls, implemented it with flawed access control logic, essentially blocking authenticated users and allowing access to unauthenticated users.
+Actually sounds like a typical mistake a human developer would make. Forget a `!` or get confused for a second about whether you want true or false returned, and the logic flips.
+
+The difference is a human is more likely to actually test the output of the change.
+
+
+
+
+
+
+Guidelines | FAQ | Lists | API | Security | Legal | Apply to YC | Contact
+
+Search: 
+
+
+Security in "Vibe Coded" Web Apps is a Disaster
+Business Security Questions & Discussion
+r/vibecoding
+•
+9 mo. ago
+Security in "Vibe Coded" Web Apps is a Disaster
+Before you go entering your email and password into the signup form of some flashy, vibe coded web app, take a moment to open up your browser's developer tools and check the Network tab. Look for any PostgREST "Supabase" endpoints in the requests. If you notice an outbound request to an endpoint with a URL looks something like:
+
+xxxxxxxxxxxxxxxx.supabase.co/rest/v1/{table_name}
+then there's a good chance that the app you're looking at hasn't implemented row-level security properly. It's not uncommon for “founders”, aka those who have never so much as smelled a line of code, to leave these glaring security holes wide open. In fact, many of these web apps suffer from the same oversight, a simple security flaw that leaves user data exposed.
+
+I've come across an unbelievable number of vibe coded web apps that rely on Supabase for their backend that suffer from the same negligence to row level security, and all it takes is a minor change to the request URL to realize. For example, simply modifying:
+
+xxxxxxxxxxxxxxx.supabase.co/rest/v1/users?id=eq.{MyGuid}&select=*
+to:
+
+xxxxxxxxxxxxxxx.supabase.co/rest/v1/users?id=not.is.null&select=*
+returns a JSON array containing every single record in the users table, no questions asked. Add the "content-type: application/json" http request header and follow that up with a PUT request, with a body containing:
+
+{"id": <My Guid>, "user_role": "admin"}
+you’ll be granted admin access with a 204 response. It’s that easy. All of this can be done in under a minute if you know what you're looking for, and depending on your typing speed, you could be in the admin seat of some vibe coded disaster in 30 seconds flat.
+
+The blooter? Many of the "founders" who proudly slap the title on their LinkedIn profiles while sipping acai bowls and rigging snippets together with ChatGPT have no idea that they’re opening up their users to massive security risks. Quite frankly, they don't care either. These individuals, who often lack a technical background outside of Minesweeper and Microsoft Word, are more concerned with their "Founder" status than paying someone that knows what they are doing to create a login form you can feel confident about filling out and not concerned about it being the one that leads to more spam phone calls. By entering personal identifying information (PII) into someone's web app, there is a kind of implied unspoken trust you are giving to the site administrator. It's really frustrating when that trust is violated by the failure to implement very basic, day 1 security measures.
+
+In this era of "vibe coding," where everyone from your grandmother to a newborn can throw together a half-functional app and host it on the Internet, I urge you to be cautious before entering any sensitive details into these vibe coded web apps as they become more and more prevalent.
+
+UPDATE: Found another one of these web apps literally some guy on LinkedIn bragging about how his app is 100% vibe coded, and in his defense, aesthetically it wasn't bad, but once I popped open old trusty CTRL + SHIFT + I and saw Supabase I just couldn't help myself but to see if they got it right, and low and behold they did not.
+
+In the images you see the workflow (with all identifiable information redacted, the API key is the "anon" key and is public facing, however row level security is not handled correctly). In the first image, I make the request with the "admin" payload and the response is 204. In the next image I verify that i indeed have the admin role (aka the request was accepted, and the change persisted in the database), and you'll see my user account is now 1 of 2 admins, the other being the vibe founder himself. Then to see just how broken it is, I issue a DELETE request with HIS id in the query and to my surprise, another 204, rendering me as the only user account with the ADMIN role and removing the vibes' database record completely. This is literally happening on the majority of vibecoded apps I'm coming across using this stack, and i can only imagine that is because the same LLM is getting queried the same way and the same answer is being produced, that being one with supabase that doesn't address row level security. This is all after following the login workflow, grabbing the Authorization and Apikey headers from the request in the browser, and using them in the requests below
+
+Finally in the final photo, I send a request for all the users data, (only selecting "id" to protect the privacy of the unfortunate users of this app, but changing select=id to select=* would yield all of the PII. The interesting part of this request is that i removed my Bearer token and replaced it with the value of the Apikey header and still got a 200 OK. This implies that you don't even have to login to extract the user PII if you know what api endpoint you're targeting already.
+
+r/cybersecurity - PUT request with admin payload and my user id
+PUT request with admin payload and my user id
+r/cybersecurity - As you can see by the matching ID to the above PUT request, I am now one of two users with admin priviledges
+As you can see by the matching ID to the above PUT request, I am now one of two users with admin priviledges
+r/cybersecurity - Added bonus: I am able to delete the other legit admin's user account all together
+Added bonus: I am able to delete the other legit admin's user account all together
+r/cybersecurity - response to my anonymous query for every single user profile is accepted, only queried IDs to protect anonymity of users of this app. but a change from select=id to select=* would reveal all of it
+response to my anonymous query for every single user profile is accepted, only queried IDs to protect anonymity of users of this app. but a change from select=id to select=* would reveal all of it
+THIS IS TOO GOOD OF AN UPDATE TO PASS UP: SOMEONE IN THE COMMENTS SUGGESTED A SITE TO TEST YOUR APP, https : // safevibe . codes. AND IT HAS THE SAME SUPABASE STACK, YOU'LL NEVER GUESS WHAT HAPPENS HAVE A LOOK AT THE PHOTO BELOW:
+
+r/cybersecurity - Security in "Vibe Coded" Web Apps is a Disaster
+sending a request to this remote procedure call endpoint specifying your user_uuid and arbitrary credit amount in the request body gives your user acount credits for free as if you just paid for them
+
+629 upvotes · 198 comments
+Archived post. New comments cannot be posted and votes cannot be cast.
+
+Upvote
+20
+
+Downvote
+
+14
+Go to comments
+1
+Repost
+
+Share
+u/tryhackmeuk avatar
+tryhackmeuk
+•
+Promoted
+
+PSA - You can learn cyber skills from scratch straight from your browser with TryHackMe
+Sign Up
+tryhackme.com
+Thumbnail image: PSA - You can learn cyber skills from scratch straight from your browser with TryHackMe
+Sort by:
+
+Best
+
+Search Comments
+Expand comment search
+Comments Section
+u/Efficient-Mec avatar
+Efficient-Mec
+•
+9mo ago
+Security Architect
+"vibe coding" (lord I hate that term) doesn't negate the need for security review, static code analysis, pen testing, etc that are all needed for any application (web or otherwise). And the poster completely ignores that human beings has created much worse code and hosted it online. The stuff I've found running in production because someone copied some code directly from the internet were much worse than this example.
+
+
+Upvote
+17
+
+Downvote
+
+Award
+
+Share
+
+Theonetheycallgreat
+•
+9mo ago
+I keep driving that home too. They want AI to write code, and I tell them it still has to go through all the proper vetting as if any other developer wrote it.
+
+
+Upvote
+1
+
+Downvote
+
+Award
+
+Share
+
+u/Candid-Molasses-6204 avatar
+Candid-Molasses-6204
+•
+9mo ago
+Security Architect
+No, it's not a disaster. It's job security.
+
+
+Upvote
+9
+
+Downvote
+
+Award
+
+Share
+
+throw_awayyawa
+OP
+•
+9mo ago
+i see what you're saying, and i like what i'm seeing. kinda want to pivot into security you guys seem to have a grand old time at DefCon every year. and what do us devs get? JSConf? the Ruby guy giving a presentation with a slide that literally just says "fuck you" on it? yeah im good on all that
+
+
+Upvote
+1
+
+Downvote
+
+Award
+
+Share
+
+[deleted]
+•
+9mo ago
+Comment deleted by user
+
+
+Upvote
+Downvote
+
+Reply
+
+Share
+u/Candid-Molasses-6204 avatar
+Candid-Molasses-6204
+•
+9mo ago
+Security Architect
+Tbh I’m low key psyched. I’m going back to school for compsci to try to lateral into a FT app sec role eventually. It’s what’s kept me out of the roles before despite having coding XP and product security XP
+
+
+Upvote
+4
+
+Downvote
+
+Award
+
+Share
+
+[deleted]
+•
+9mo ago
+Comment deleted by user
+
+
+Upvote
+Downvote
+
+Reply
+
+Share
+u/Candid-Molasses-6204 avatar
+Candid-Molasses-6204
+•
+9mo ago
+Security Architect
+Thank you! I really appreciate it. I think where I'm going to struggle is Calculus, but I'll get there eventually. It's helpful to know it took you eight years. I'm seeing people fly by me and it's disheartening.
+
+
+Upvote
+1
+
+Downvote
+
+Award
+
+Share
+
+
+1 more reply
+TheFlyTechGuy
+•
+9mo ago
+Honestly, security in "standard coded" web apps is frequently a disaster as well. I do enjoy the job security though.
+
+
+Upvote
+4
+
+Downvote
+
+Award
+
+Share
+
+u/danfirst avatar
+danfirst
+•
+9mo ago
+I work at a company that makes a lot of software. One of the guys here, not a software engineer, did this to build a web application to test something. I'm not positive which tool he used, I want to say GitHub co-pilot. When it was done he told it to go back and do a security review and fix anything it found and then document it which it did. Then we handed it off to our internal appsec team who did a full test on it. They came back and said it was really clean. I was kind of shocked, I expected it to be a train wreck. A few informational findings, but nothing really to be overly concerned about.
+
+
+Upvote
+2
+
+Downvote
+
+Award
+
+Share
+
+datOEsigmagrindlife
+•
+9mo ago
+Did people forget that human devs also do the most insane, insecure stupid shit as well?
+
+Everyone likes dumping on AI, but honestly I've seen humans do far more brain dead things.
+
+
+Upvote
+2
+
+Downvote
+
+Award
+
+Share
+
+Expert-Dragonfly-715
+•
+9mo ago
+Spot on… vibecoded “crapplications” are going to be a huge issue for organizations that lack good DevSecOps practices. In addition, imho, broken auth due to poor and rapid integration of vivecoded apps into production systems becomes the highest impact appsec findings, making that the key web app Pentesting goal
+
+
+Upvote
+2
+
+Downvote
+
+Award
+
+Share
+
+hackershead
+•
+9mo ago
+u/ejm7788 avatar
+ejm7788
+•
+9mo ago
+Like mentioned before humans have been the culprit of more security threats than any vibe code. I remember people tried to blame that recent dating app leak on vibe coding when it was created before these recent apps existed.
+
+Anyways coderabbit is the answer to security for vibe and no vibes coding
+
+
+Upvote
+1
+
+Downvote
+
+Award
+
+Share
+
+u/Loptical avatar
+Loptical
+•
+9mo ago
+Water wet
+
+
+Autonoma
+TM
+Product
+How it works
+Pricing
+Blog
+Docs
+GitHub
+Discord
+Login
+Find Your First Bug
+Blog
+AI code editor with security scanner missing a hidden vulnerability that automated testing catches, illustrating the gap between static analysis and behavioral testing
+AI Code Security
+Vibe Coding Security
+QA Automation
+Vibe Coding Security: 53% of AI Code Leaks
+Tom Piaggio
+Tom Piaggio
+Co-Founder at Autonoma
+Mar, 2026
+Vibe coding security risks are real and frequently invisible. Vibe coding tools like Lovable, Bolt, and Base44 let non-engineers ship full applications from plain-language prompts. 53% of teams that shipped AI-generated code later discovered security issues that passed initial review. Across 5,600 vibe-coded apps, researchers found over 2,000 vulnerabilities, 400+ exposed secrets, and 175 instances of exposed PII. Security scanners find known vulnerability patterns in static code. They do not test whether your application actually behaves correctly. Automated testing is the missing layer that catches what scanners cannot: broken auth flows, exposed data through legitimate endpoints, and logic errors that only appear at runtime.
+
+Ten months ago, a developer on the Lovable community forum posted something that made security engineers wince. He had shipped a fully functional B2B SaaS product in a weekend using Lovable. It was live, it had paying customers, and he was proud of it. He had also run it through a security scanner. Clean bill of health. Two weeks later, a researcher pointed out that his Supabase credentials were embedded directly in the client-side bundle, visible to anyone who opened DevTools. He was not an outlier. The same researcher found the same pattern in 10 out of 38 Lovable-built apps they reviewed.
+
+The tool did not fail him. The scanner did not lie. The app just behaved in ways neither was designed to catch.
+
+Vibe Coding Security Risks: The Scale of the Problem
+Vibe coding tools have done something genuinely remarkable. They collapsed the gap between "I have an idea" and "there is a working app." A founder who cannot write a line of code can now describe a user dashboard and get a functional React application connected to a real database. The tools handle routing, authentication boilerplate, API design, and deployment. The promise is real and it is being delivered every day.
+
+The security problem underneath that promise is also real.
+
+In a survey of developers who had shipped AI-generated code, 53% reported discovering security issues that had passed initial review. These were not hypothetical risks identified by automated scanners. They were real vulnerabilities found after the code was already running in production. Research from Georgetown's CSET found that 86% of AI-generated code failed XSS defense mechanisms, and a separate analysis found that 45% of AI-generated code samples introduced OWASP Top 10 vulnerabilities. CodeRabbit's report confirmed the pattern: AI-generated code is 2.74x more likely to introduce XSS vulnerabilities than human-written code. (For the broader quality picture beyond security, including how these defects compound in the vibe coding testing gap, see our companion piece.)
+
+The Escape.tech study of vibe-coded applications gave the most detailed picture. Scanning 5,600 apps built with vibe coding tools, they found over 2,000 vulnerabilities. More alarming than the raw count: 400+ exposed secrets (API keys, credentials, tokens sitting in accessible code) and 175 instances of personally identifiable information exposed through app endpoints. The DEV Community ran a smaller but consistent study, finding 318 vulnerabilities across just 100 vibe-coded apps scanned.
+
+The Moltbook breach made these statistics concrete. Wiz researchers discovered that Moltbook, an AI agent social network, had exposed 1.5 million API authentication tokens, 35,000+ email addresses, and 4,060 private messages, including third-party API credentials shared between agents. The founder had stated publicly: "I didn't write a single line of code for Moltbook. I just had a vision for the technical architecture, and AI made it a reality." The root cause was not a code pattern that any scanner would flag. Moltbook's Supabase public API key was embedded in the client-side bundle, which is a common and normally acceptable configuration. What made it catastrophic was that Row Level Security (RLS) was disabled on the database. With RLS properly configured, the public key is safe. Without it, that key grants full unauthenticated read and write access to every table. A static scanner examining the code would see a credential in the bundle and possibly flag it, but it could not verify whether the database access controls that make that credential safe were actually active. A behavioral test that authenticated as one user and attempted to read another user's data directly through the API would have caught the missing RLS policies immediately.
+
+There is a category of vibe coding vulnerability that gets less attention but carries equal risk: supply-chain issues. AI code generators frequently suggest packages that are deprecated, have known CVEs, or in some cases do not exist at all. When a model hallucinates a package name, an attacker can register that name and publish malicious code under it. Anyone who follows the AI's recommendation installs the attacker's package. Vibe coding tools also tend to leave dependency versions unpinned, which means a compromised update can silently enter a project without any code change on the developer's side. These risks are invisible to application-level security scanners because the vulnerability is in the dependency, not in the code that imports it.
+
+Vibe coding security risks statistics: 53% have security issues, 2000+ vulnerabilities, 400+ exposed secrets in AI-generated code
+
+These numbers deserve some context before jumping to conclusions. AI-generated code is not uniquely insecure. It makes predictable, consistent mistakes. It optimizes for "does this work?" and not "is this safe?" AI coding tools do not spontaneously add rate limiting, parameterized queries, or authentication guards unless explicitly prompted. They produce code that is functionally correct and structurally vulnerable, and that specific combination is what makes the risk hard to catch.
+
+AI-generated code does not fail randomly. It fails in patterns: missing input validation, credentials in client bundles, auth checks that look correct but aren't enforced. The patterns are predictable. The detection requires actually running the app.
+Why Security Scanners Are Not Enough
+The standard advice after reading those statistics is "scan your code." Run SAST tools. Use Snyk or Semgrep. Check for known vulnerability patterns before you ship. This advice is correct and incomplete. Here is why.
+
+Security scanners are pattern matchers. They read your static code and compare it against a database of known vulnerability signatures. They are very good at finding things like hardcoded secrets in environment files, use of deprecated cryptographic functions, SQL string concatenation that could enable injection, and dependency versions with published CVEs. If the code has a textbook SQL injection pattern, a decent scanner will catch it.
+
+What scanners cannot do is run your application. They cannot log in as a user, navigate to the settings page, and try to access another user's data by changing the ID in the URL. They cannot submit a form with unexpected input and observe whether the server validates it on the backend or only on the frontend. They cannot click through a multi-step checkout flow and verify that the payment is actually authorized before the order is confirmed.
+
+This distinction matters enormously for vibe-coded apps because the most dangerous vulnerabilities in those apps are frequently behavioral, not structural. Consider the real vulnerability categories that scanners systematically miss.
+
+Broken object-level authorization (BOLA/IDOR, CWE-639) exploited through legitimate endpoints. This is the most common critical vulnerability in APIs, and scanners almost never catch it. Your code has an endpoint: GET /api/invoices/:id. The scanner reads the code and sees that the endpoint exists and returns data. What the scanner cannot verify is whether the server checks that the requesting user owns the invoice with that ID. The code might look like proper authentication is enforced. At runtime, it might not be. Only a test that actually calls the endpoint as a different user can verify the authorization check actually works.
+
+Auth flows that pass static review but fail dynamically (CWE-613). Consider a password reset flow. The scanner looks at the token generation code, sees it uses a secure random function, and marks it clean. What the scanner cannot check: Does the token actually expire? Can it be reused after the password is changed? Is the old token invalidated when a new one is issued? These are behavioral questions. They require running the flow.
+
+Frontend validation without backend enforcement (CWE-602). Vibe-coded apps frequently implement validation logic in the React component and nowhere else. The scanner reads the component, sees the validation logic, and considers the field validated. The actual API endpoint has no server-side validation. An attacker who calls the API directly bypasses every protection entirely. Testing catches this because a good test calls the API directly, not through the form.
+
+Race conditions in financial or state-critical operations (CWE-362). If two requests hit a "redeem coupon" endpoint simultaneously, does the application handle them correctly? Static code analysis has no way to simulate concurrent requests. A test suite can.
+
+Business logic errors that are invisible to pattern matching. If your free plan allows 5 projects but the limit check runs at creation time and not at upgrade time, a user can create 100 projects by timing their upgrade correctly. No scanner has a signature for "this business rule is not enforced consistently." A test that exercises the upgrade flow at the right moment does.
+
+The Base44 vulnerability illustrates the ceiling of scanner-only approaches at a different level: it was a vulnerability in the platform itself, not in the generated code. The flaw allowed unauthorized users to bypass access controls and register for private applications, exposing every app built on the platform regardless of how carefully the generated code had been reviewed. Base44 patched it within 24 hours, but the window of exposure was real. Users who trusted that the output had been scanned for issues were exposed to a risk that no amount of scanning their own app would have caught.
+
+The Development Environment Is Also an Attack Surface
+The security conversation around vibe coding typically focuses on the code that gets generated. The tools doing the generating are themselves a risk layer that rarely gets discussed.
+
+CVE-2025-54135 (CurXecute) made this concrete. Researchers at AIM Security disclosed a vulnerability in Cursor, the AI code editor, that allowed remote code execution on developers' machines without any user interaction. The flaw exploited Cursor's Model Context Protocol (MCP) auto-start functionality: an attacker could send a crafted message through a connected MCP server (such as a Slack integration), which would silently rewrite Cursor's global configuration and execute attacker-controlled commands before the developer had a chance to review or reject anything. Cursor runs with developer-level privileges, so the blast radius was the entire development machine.
+
+MCP servers more broadly have accumulated a significant CVE backlog. A critical vulnerability in the widely-used mcp-remote package (downloaded over 437,000 times) allowed remote code execution when a developer's environment connected to an untrusted MCP server. Separate vulnerabilities in the Framelink Figma MCP Server and Anthropic's own Filesystem MCP Server allowed attackers to read and write files outside of approved directories.
+
+The implication for vibe coding workflows is straightforward: the attack surface does not begin at the application you are building. It begins at the tool you are using to build it. This is yet another dimension that static code scanners cannot cover. Behavioral testing of the application you ship does not protect against a compromised development environment, but it does mean that even if an attacker modifies your code during development, the tests will catch the resulting behavioral changes before they reach users.
+
+Static security scanner vs behavioral testing for AI code security comparison
+
+Scanners answer: "Does this code contain known bad patterns?" Testing answers: "Does this application actually work the way it should?" Vibe-coded apps need both questions answered.
+Vulnerability Type	What Scanners See	What Testing Catches
+BOLA / IDOR (CWE-639)	Endpoint exists and returns data	Endpoint returns User B's data to User A
+Frontend-only validation (CWE-602)	Validation logic present in component	API accepts invalid input when called directly
+Auth flow failures (CWE-613)	Secure token generation function used	Token never expires or can be reused after reset
+Race conditions (CWE-362)	No detection capability	Concurrent requests bypass single-use checks
+Business logic errors	No signature for incorrect business rules	Free-tier user exceeds limits via direct API call
+Exposed credentials (CWE-798)	Finds hardcoded secrets in source files	Finds credentials accessible in deployed bundle
+The distinction matters most for vibe-coded apps: the security failures that reach users are overwhelmingly behavioral, not structural, and behavior is what tests observe. Autonoma generates end-to-end behavioral tests from your codebase that cover the authorization flows, input validation, and business logic enforcement that scanners cannot verify.
+
+Autonoma
+Vibe code it. Autonoma tests it.
+
+Open-source AI agents that test your app end-to-end on every PR. No test code required.
+
+Find Your First Bug
+Testing: The Missing AI Code Security Layer
+The testing approaches that close the gap scanners leave are not exotic. They are the standard practices of every well-run engineering team, applied specifically to the failure modes of AI-generated code.
+
+End-to-end authentication testing is the highest-value starting point. Write tests that exercise every authentication path: login with valid credentials, login with invalid credentials, access to protected routes without a session, access with an expired session, and account lockout behavior. These tests do not require deep security expertise. They require treating authentication as a feature with expected behavior and verifying that behavior.
+
+The value is in what they catch. A test that attempts to access /dashboard without a valid session and verifies the response is a 401, not a 200, catches the authentication misconfiguration that looks fine in static code. Lovable and similar tools generate authentication boilerplate that often passes visual code review. The test does not care how the code looks. It cares what the server returns.
+
+Authorization testing across user boundaries is where BOLA/IDOR vulnerabilities get caught. For every endpoint that returns or modifies user-scoped data, write a test that authenticates as User A, retrieves a resource ID belonging to User B, and verifies the response is a 403. This pattern takes minutes to write once you have your test framework set up. It is the single most effective test for the most common API vulnerability class.
+
+A vibe-coded app that generates a /users/:id/documents endpoint might look like it has authorization because the route handler checks for a session. The test verifies whether it checks that the session belongs to the right user.
+
+Input validation testing at the API layer (not the form layer). For every data-accepting endpoint, write tests that send inputs the frontend would never send: empty strings where the UI requires values, strings over the expected length, SQL fragments, script tags, negative numbers where positive is expected, and missing required fields. These tests run against the API directly. They bypass the frontend validation entirely.
+
+The gap they close: vibe coding tools routinely implement validation in the component and skip it in the API handler. The form test passes. The API test fails. That failure is a real vulnerability.
+
+State integrity tests for multi-step flows. For checkout flows, subscription management, file uploads with processing, and any other multi-step process, test the intermediate states explicitly. Can a user skip step 2 of a 3-step checkout by calling the step 3 endpoint directly? Does the system correctly handle a user refreshing the page mid-flow? These edge cases cause bugs and security issues equally, and neither scanners nor happy-path tests catch them.
+
+Permission boundary tests for feature flags and plan limits. If your app has a free tier with limits, test that the limits are enforced server-side. Create a free-tier user, hit the limit, then attempt to exceed it by calling the API directly. Vibe-coded apps routinely enforce these limits only in the UI. A test discovers that in seconds.
+
+This is where Autonoma fits as the testing layer that scanners cannot replace. Security scanning finds known vulnerability patterns in your static code. Autonoma connects to your codebase and generates end-to-end tests that verify your application actually behaves correctly, including the authorization checks, input handling, and business logic enforcement that only appear at runtime. The two tools answer different questions and neither makes the other redundant. See how agentic testing works for a deeper look at the approach.
+
+How to Secure a Vibe-Coded App: A Practical Testing Playbook
+How to secure a vibe coded app: five-step security testing playbook
+
+If you have built or are building with a vibe coding tool and want to close the security gap systematically, here is where to start. For the broader picture of why vibe coding creates a structural testing void, including a severity scale for assessing your own risk, see our companion article.
+
+If you are a startup founder navigating these trade-offs, our guide on vibe coding at startups covers the full decision framework for when to vibe code, when to stop, and what to automate.
+
+Before you do anything else: check for exposed credentials. Run a search across your repository and your deployed frontend bundle for any strings matching the pattern of your database connection strings, API keys, and service tokens. This takes five minutes and addresses the most immediately dangerous category of vibe coding vulnerability, the one that affected 400+ apps in the Escape.tech study and 10 of the 38 Lovable apps reviewed independently. If your Supabase URL and anon key appear in your client-side bundle, they are public. The anon key being "designed to be public" is not a complete defense if your row-level security policies have gaps. Verify those too.
+
+Map your trust boundaries. Draw (or just list) every endpoint in your application that accepts input or returns data. For each one, answer: What authentication is required? What authorization check prevents one user from accessing another user's data? What input validation runs on the server (not just the client)? This mapping exercise will surface the gaps before any test is written.
+
+Prioritize your test writing by impact. Not all endpoints carry equal risk. Authentication endpoints, payment flows, user data endpoints, and admin functionality have the highest blast radius if they behave incorrectly. Write tests for these first, before anything else. A broken profile photo upload is annoying. A broken authorization check on your billing endpoint is a breach.
+
+Use your test framework to call the API directly. Do not test your security through your UI. UI tests are valuable for functional flows, but they always inherit the frontend's assumptions about what the user can and cannot do. Security tests should call your API with raw requests, bypassing the frontend entirely. In Playwright, this looks like using request.get() and request.post() directly. In any framework, the pattern is the same: authenticate, get a token, make direct API calls, assert on the response.
+
+Build a regression test for every bug you find. When a scanner flags a vulnerability or manual review uncovers an issue, write a test that would have caught it before fixing it. Run that test. Watch it fail. Fix the vulnerability. Watch it pass. That test now lives in your suite permanently and will catch any regression of the same class. Over time, this builds a security regression suite that is specific to your application's actual failure modes, not generic vulnerability signatures.
+
+Run your tests on every deploy, not just before launch. Vibe-coded apps often evolve rapidly. A prompt that regenerates a component can silently change the authorization logic in that component. Tests that run only at launch miss the ongoing regression risk. Set up your CI pipeline to run the security-focused tests on every pull request and every deploy. Continuous testing is what makes the investment in writing these tests compound over time.
+
+The cost of not testing is not abstract for vibe-coded apps. It is a specific, quantifiable risk: a production incident, a credential rotation scramble, a data exposure notification, or a platform vulnerability you had no visibility into until it was too late.
+
+The Speed Paradox: Why Testing Makes Vibe Coding Faster
+The objection to all of this is predictable: "I'm using vibe coding because I want to move fast. Adding tests slows me down."
+
+This is the wrong frame. The question is not whether tests slow down the first deploy. They do, marginally. The question is what happens to the second, fifth, and twentieth deploy.
+
+A vibe coding workflow without tests looks like this: ship fast, discover bug in production, spend two days debugging and hotfixing, ship a fix, hope nothing else broke. Each incident response cycle consumes more time than the initial time savings from skipping tests. The real cost of a production bug at a small startup runs $8,000 to $25,000 when you account for engineering hours, customer impact, and opportunity cost.
+
+A vibe coding workflow with automated tests looks different. The tests catch the authorization hole before the deploy. The developer sees a failing test, prompts the tool to fix the specific issue the test describes, and ships the corrected version. The entire cycle takes minutes instead of days. The customer never sees the vulnerability.
+
+The iteration risk compounds in a way that is not obvious. Kaspersky research had GPT-4o modify existing code across multiple rounds while scanning each version after every iteration. After just five revisions, the code contained 37% more critical vulnerabilities than the initial generation. Feature-focused prompt iterations produced 158 new vulnerabilities across the test set, including 29 critical ones. Even prompts that explicitly emphasized secure coding still introduced 38 new vulnerabilities, seven of them critical. The implication for vibe coding is uncomfortable: each iteration without continuous testing does not maintain risk at a steady level. It compounds it. The developer who iterates on a vibe-coded app 20 times before shipping has likely ended up with a less secure codebase than the one generated on the first prompt, not because the tool got worse, but because incremental changes introduced incremental gaps that accumulated invisibly.
+
+There is a deeper version of the speed paradox. Vibe coding tools are genuinely excellent at fixing specific, well-described bugs. "The test at line 42 verifies that a user cannot access another user's invoices. It is failing because the endpoint returns 200 instead of 403. Fix the authorization check in the invoice endpoint." That prompt produces a targeted fix. Compare it to "Something is wrong with how invoices work, some users might be seeing other users' data" which produces unfocused investigation.
+
+Tests make the feedback loop faster, not slower. A failing test is a precise bug report. A production incident is an investigation that might run for hours before you even know what broke.
+
+Development timeline comparison showing vibe coding with and without automated testing
+
+The speed paradox resolves simply: vibe coding is fast at building. Incident response is slow. Tests make the difference between the two invisible.
+This is part of the broader vibe coding bubble: a verification gap where building has been democratized but testing has not, and security is the sharpest edge of that gap. It is also why the AI coding agent testing gap is a compounding problem rather than a one-time risk. Every iteration of a vibe-coded app that ships without tests adds more untested surface area. Every iteration that ships with tests tightens the feedback loop and accelerates the next iteration.
+
+The teams getting the most out of vibe coding tools are not the ones who skip testing to go faster. They are the ones who treat testing as part of the prompt engineering workflow. The tool generates code. The tests verify the behavior. When the tests fail, the tool fixes the specific issue the tests describe. That loop is faster than any debugging session.
+
+
+Are vibe coding security risks unique to specific platforms like Lovable or Base44?
+
+
+What are the most common vibe coding vulnerabilities that security scanners miss?
+
+
+How do I scan a vibe-coded app for security vulnerabilities?
+
+
+Is vibe coding safe to use for production applications?
+
+
+What testing framework should I use for a vibe-coded app?
+
+On this page
+Vibe Coding Security Risks: The Scale of the Problem
+Why Security Scanners Are Not Enough
+The Development Environment Is Also an Attack Surface
+Testing: The Missing AI Code Security Layer
+How to Secure a Vibe-Coded App: A Practical Testing Playbook
+The Speed Paradox: Why Testing Makes Vibe Coding Faster
+Are vibe coding security risks unique to specific platforms like Lovable or Base44?
+What are the most common vibe coding vulnerabilities that security scanners miss?
+How do I scan a vibe-coded app for security vulnerabilities?
+Is vibe coding safe to use for production applications?
+What testing framework should I use for a vibe-coded app?
+Related articles
+Startup founder navigating vibe coding security risks with a testing layer bridging the gap between AI code generation and safe production deployment
+Mar, 2026
+Vibe Coding Risks Founders Must Know
+Vibe coding security risks go beyond what scanners catch. Learn the real business costs of shipping untested AI code and how behavioral testing closes the gap.
+
+Founder comparing two paths on a whiteboard: a fully-loaded QA hire budget breakdown versus a tool subscription line item
+Jun, 2026
+The Cost of Hiring Your First QA Engineer vs a Tool
+The fully-loaded cost of a QA hire in 2026 is $168k-$235k in year one, far more than the salary. Compare it against a testing tool and decide what your stage needs.
+
+Sauce Labs pricing breakdown by team size showing virtual-cloud minutes, concurrency tiers, and real-device cost add-ons modeled for small, mid, and large engineering teams
+Jun, 2026
+Sauce Labs Pricing in 2026, Modeled by Team Size
+Sauce labs pricing modeled by team size: see what a 5-dev, 15-dev, and 30-dev team actually pays for virtual-cloud minutes, concurrency, and real-device add-ons in 2026.
+
+AI test theater concept: a green CI dashboard with passing tests masking underlying bugs, illustrating false test coverage from AI-generated tests and AI code review
+Jun, 2026
+AI Test Theater: The Confidence Trap Killing Your Test Suite
+AI test theater is false test coverage: AI-written tests go green while real bugs ship. Learn why AI verification fails and how independent testing fixes it.
+
+Autonoma
+Agentic end-to-end testing platform. High-density data interfaces for modern engineering teams.
+
+SOC 2 Type 2 Verified
+All systems operational
+Product
+Features
+Integrations
+Pricing
+Docs
+Resources
+Documentation
+Blog
+Free Tools
+Company
+Security
+Contact
+© 2026 Autonoma AI Inc. All rights reserved.
+Privacy Policy
+Terms of Service
+
+
+Skip to main content
+what are security flaws that you keep seeing on vibe coded platforms? : r/vibecoding
+
+
+r/vibecoding
+Search in ⁨r/vibecoding⁩
+Advertise on Reddit
+
+Open chat
+Create
+Create post
+Open inbox
+
+User Avatar
+Expand user menu
+Skip to NavigationSkip to Right Sidebar
+
+Back
+
+Go to vibecoding
+r/vibecoding
+•
+2mo ago
+gabebere1
+
+what are security flaws that you keep seeing on vibe coded platforms?
+Hey everyone, I wanted to start this discussion as potentially a checklist for people vibe coding apps and platforms to use as a reference since this is something I'd really appreciate but couldn't find anywhere. What are some security flaws that you see people vibe coding pass by, and how to fix it?
+
+
+Upvote
+2
+
+Downvote
+
+14
+Go to comments
+1
+Repost
+
+Share
+u/duckduckgo avatar
+duckduckgo
+•
+Promoted
+
+Who's with us?
+Learn More
+duckduckgo.com
+Thumbnail image: Who's with us?
+Join the conversation
+Sort by:
+Comments Section
+u/Few-Garlic2725 avatar
+Few-Garlic2725
+•
+2mo ago
+Top misses i see: secrets in frontend, backend endpoints trusting the ui, and no basic abuse controls (rate limits / password reset throttling). start there.
+
+u/LerytGames avatar
+LerytGames
+•
+2mo ago
+My friend working as security consultant, doing penetration testing and such, is seeing significant rise in pretty much all OWASP Top 10 issues (and other similar security issues too). Even in companies which made secure apps like two years ago. Unattended vibe coding is security nightmare.
+
+The fix is easy. Make people responsible for code (again), even if they use AI tools. Review everything that AI generates. Write proper tests for security flaws. If you are bigger company, start bug bounty program.
+
+Good_Roll
+•
+2mo ago
+Ive always found it strange that we've been pushing for AI to replace programmers instead of code reviewers. Frontier models are way better at reviewing code than writing code anyways. You'd think that we'd at least spend the same resources on automated code review as we do on automated code generation.
+
+u/Kindly_Building_8687 avatar
+Kindly_Building_8687
+•
+2mo ago
+Great thread. We just published a study — 2,096 vibe-coded apps scanned across Lovable, Bolt, Replit, v0, and others. 75% had exploitable vulnerabilities. Here's what we keep seeing:
+
+Exposed API keys & secrets (73% of all critical findings) 742 critical secret findings across 356 apps. Supabase service_role keys, Stripe secret keys, OpenAI/Anthropic API keys — shipped in client bundles or committed .env files. The AI writes the integration code, uses the key inline, and never moves it server-side. The developer doesn't know to check.
+
+Broken Access Control (25.6% of apps) 5,312 findings across 537 apps. Supabase tables with real patient records, payment info, and emails readable by anyone with the public anon key. Sequential IDs on API routes with zero authorization middleware. We found a healthcare portal where any user could read and modify all patient records.
+
+Vulnerable Dependencies (44.2% of apps) 9,520 findings across 926 apps. AI tools pin to whatever version was in their training data — often months or years behind. Prototype pollution, ReDoS, path traversal in transitive deps.
+
+LLM-Detected Logic Flaws (163 apps) 274 critical findings that signature-based tools can't catch — auth bypasses, privilege escalation paths, IDORs that look secure in review but fail at runtime. This is the failure mode that's unique to AI-generated code.
+
+Hardcoded secrets in production bundles One ecommerce app had Stripe secret key (not publishable), OpenAI key, and Supabase service_role all in the Webpack bundle. Anyone viewing page source could make charges or run up LLM costs.
+
+u/Useful_Average6176 avatar
+Useful_Average6176
+•
+2mo ago
+AI models often write logically consistent business code but lack security awareness regarding the framework's underlying architecture.
+
+For instance, in a Next.js project I recently audited, the code fetched configs directly from the database and passed them straight to a Client Component. While this ensures the component receives the data needed for rendering, this catch-all approach causes the entire configuration. including sensitive API keys and secrets to be serialized into the RSC payload within the HTML source code.
+
+The most dangerous part of this vulnerability is that the application runs perfectly. It’s nearly impossible to spot the data leak through simple vibe checking even though the sensitive info is now fully exposed to the client side.
+
+Community Info Section
+r/vibecoding
+discord
+Joined
+vibecoding
+fully give in to the vibes. forget that the code even exists.
+Created Feb 8, 2025
+Public
+
+Community Guide
+537K
+vibe coders
+14K
+vibing
+r/vibecoding Rules
+1
+No low effort posts
+2
+Vibe coding dev tools must be approved
+3
+No shilling
+4
+No vibe coding pessimism
+5
+No assholes
+join the vibecoding discord
+
+Moderators
+Message Mods
+u/PopMechanic avatar
+u/PopMechanic
+Vibe Rubin
+u/broccoli
+Tree
+u/ai-moderator avatar
+u/ai-moderator
+u/lfiction avatar
+u/lfiction
+u/bot-bouncer avatar
+u/bot-bouncer
+u/title-rinse avatar
+u/title-rinse
+u/comment-rinse avatar
+u/comment-rinse
+u/ban-purge avatar
+u/ban-purge
+u/joaomsneto
+travelwithnodestin
+u/modmailtodiscord avatar
+u/modmailtodiscord
+View all moderators
+Installed Apps
+🚀 ​​Community Home
+Bot Bouncer
+AI Moderator
+Title Rinse
+Comment Rinse
+Ban Purge
+Modmail To Discord or Slack
+Reddit Rules
+Privacy Policy
+User Agreement
+Accessibility
+Reddit, Inc. © 2026. All rights reserved.
+
+Collapse Navigation
+
+Skip to main content
+What are the most important backend vulnerabilities to look out for when vibecoding? : r/vibecoding
+
+
+r/vibecoding
+Search in ⁨r/vibecoding⁩
+Advertise on Reddit
+
+Open chat
+Create
+Create post
+Open inbox
+
+User Avatar
+Expand user menu
+Skip to NavigationSkip to Right Sidebar
+
+Back
+
+Go to vibecoding
+r/vibecoding
+•
+6mo ago
+trkbdo221
+
+What are the most important backend vulnerabilities to look out for when vibecoding?
+I've been really thorough in trying to avoid vulnerabilities, but I'd love some extra guidance - what are the main things to look out for? Especially in backend when vibecoding. Thanks
+
+
+Upvote
+29
+
+Downvote
+
+30
+Go to comments
+Repost
+
+Share
+u/scrapedo_ avatar
+scrapedo_
+•
+Promoted
+
+No more blocks, no more scraper downtime. Meet the better, faster, stronger web scraping API. Scrape.do beats competition every time.
+Learn More
+scrape.do
+Thumbnail image: No more blocks, no more scraper downtime. Meet the better, faster, stronger web scraping API. Scrape.do beats competition every time.
+Join the conversation
+Sort by:
+
+Best
+
+Search Comments
+Expand comment search
+Comments Section
+u/rttgnck avatar
+rttgnck
+•
+6mo ago
+https://github.com/rttgnck/cvewatch
+
+Clone the repo, prompt for a version for your OS, run it and give it your projects folders (ask an AI to check it for data exfiltration if your don't trust a random Redditor with a 1 star repo). It will scan all your requirements, package files, etc. (outlined in the main.js file) and then provide the CVEs for that project. It probably isn't perfect and I only threw it up a couple days ago, but it is a way to at least see what you are vulnerable to based on the package requirements of your projects.
+
+
+Upvote
+11
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+exitcactus
+•
+6mo ago
+Please, look at my repo, we can work together.. A LOT.
+
+https://github.com/girste/mcp-cybersec-watchdog
+
+Like, making a whole mcp that covers front, back and infra security, something like that.
+
+
+Upvote
+3
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+Glove_Witty
+•
+6mo ago
+Get a static analysis security tool (eg SonarQube) and scan the code after it is generated and feed the output into the AI and have it fix any vulnerabilities discovered. Keep iterating.
+
+
+Upvote
+6
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+WeeklyRestaurant7673
+•
+6mo ago
+My rule of thumb with vibecoding: one model to build, one model to be paranoid and try to break it.
+
+
+Upvote
+8
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+dashingsauce
+•
+6mo ago
+nice, what did you name your schizo model?
+
+
+Upvote
+3
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+DonaldStuck
+•
+6mo ago
+You should ask your AI vibe coding agent to make ABSOLUTELY SURE there are no vulnerabilities. /s (yeah /s because otherwise you still gonna do that)
+
+
+Upvote
+4
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+ConferenceOk6722
+•
+6mo ago
+Auth ≠ just login: every endpoint should re-check who is calling and what they’re allowed to do (object-level checks are where bugs hide).
+
+Input is hostile by default: validate + normalize early (types, length, formats), and never trust client-side checks.
+
+Data access safety: parameterized queries / ORM safe patterns only, plus least-privilege DB users (no “god mode” creds in prod).
+
+Secrets + config: no keys in code/logs; rotate, scope, and store them properly (and watch for “debug mode” leaking env).
+
+Error handling & logs: don’t leak stack traces, SQL errors, tokens, or PII; log what you need, redact what you don’t.
+
+Rate limits + abuse controls: especially on auth, search, file upload, and anything expensive (LLM calls too).
+
+File uploads & parsing: MIME sniffing, size limits, scan/sandbox if needed, and never let user-controlled paths touch your filesystem.
+
+Dependencies & supply chain: pin versions, audit regularly, and be careful with copy-pasted snippets that pull random packages.
+
+CORS / CSRF / sessions: don’t “allow all origins” by habit; cookie + session settings matter more than people think.
+
+Default-deny mindset: the fastest way to stay safe while moving fast is “block by default, open intentionally.”
+
+
+Upvote
+10
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+u/Ok_Cartographer7002 avatar
+Ok_Cartographer7002
+•
+6mo ago
+Become a proper software engineer to be able to audit your software yourself. Without understanding of the basics you will never be able to write secure software, because you don't even know what to look for.
+
+
+Upvote
+2
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+Psionatix
+•
+6mo ago
+This is literally the answer.
+
+AI cannot solve vulnerabilities for you at scale.
+
+Most vulnerabilities are domain specific logic issues, that means they're flaws in logic that is unique and specific to what you're doing, they're things that AI has never seen before in the given context.
+
+The only time I've seen AI write a secure login/logout is when the prompt was so extremely detailed that it already covered all of the security concerns. The prompt was done in a way that the only option the AI had was to generate code exactly as the prompter would have written it had they done it themselves. You can't get security out of that without already knowing what you're doing.
+
+Most people vibecoding don't understand that the primary purpose of a short expiry time on a JWT and a refresh token is to minimise potential attack/abuse window, and thus JWT and refresh tokens shouldn't be stored in the same way, because that means they can be stolen the same way. Using session auth? Most people don't seem to regenerate the session on privilege escalation/de-escalation, and AI typically won't either unless you ask it to.
+
+Go look at CVE's for popular things (Node, Laravel, Django, etc), look at the commits that caused those vulnerabilities, look at the commits that fixed them.
+
+AI can't magically prevent security / logic issues it doesn't know about, and since it doesn't actually think or reason, it can't think about this stuff like an actual software engineer can.
+
+
+Upvote
+1
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+u/Excellent-Sign374 avatar
+u/Excellent-Sign374
+•
+Promoted
+
+GitHub Actions starter pack for Python
+Order Now
+thomasreid4.gumroad.com
+Thumbnail image: GitHub Actions starter pack for Python
+sporbywg
+•
+6mo ago
+All of them? <- all I got
+
+
+Upvote
+1
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+u/mikepun-locol avatar
+mikepun-locol
+•
+6mo ago
+For Claude Code, it's just as simple as asking it to scan for security vulnerabilities. Last time I did this, it gave a fairly comprehensive and detailed report. Only issue is that the explanations were fairly concise and assumed an understanding of security techniques like CORS, security headers, sql injection.
+
+
+Upvote
+1
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+u/willjr200 avatar
+willjr200
+•
+6mo ago
+That's not good enough. What is a security vulnerabilities to Claude Code?Currently Claude Code is not good enough to handle edge cases, especially around architectural approaches and security. It currently is too geared toward completing task as cheaply (in tokens) as possible. Without specifically understanding by the individual prompting and detailed prompts/instructions of what a specific implementation should be, It takes far too many shortcuts or half measures.
+
+Above was a list of steps to help LLM/AI to write more secure code. Here is one of them;
+
+Input is hostile by default: validate + normalize early (types, length, formats), and never trust client-side checks.
+
+What does this actually mean? At the most basic level it means that anything which passes outside of your control is not to be trusted. For most applications/websites, this means that the UI code runs in a browser on the users mobile/laptop/tablet/desktop and has data supplied from a API (Application Programming Interface) which runs on the server. (i.e., the parts of the application which are inside of your area of control)
+
+For example, you are selling wigets on your site. Wiget A, with SKU code of abc-wiget has a prices of 10.00. Through the wiget API when the UI page loads in the browser the details of the wiget is displayed along with an add to cart button. The user clicks add to cart and the wiget is added to the cart to be purchased. This user understand how the browser works. They go to the cart page and hit F12 and access the browser tools. Alter the price from 10.00 to 0.10. Locally in their browser the price is now .10 cent. They hit the buy button and enter their info and buy the wiget for .10 cents, their local version of the wiget was sent to the server and used to buy the wiget. This happens because I trusted the data which I sent outside of my control and did not verify it when was returned to me. The correct implementation would be to take the wiget id and re-look up the pricing info and using that in the buy decision/action regardless of what was received from the browser.
+
+At a more complex level, this could mean things like rate limiting (limiting # of request over a timeframe or in cases where uploads are allowed size per timeframe) Limiting the size/number and allowed characters for fields on forms, etc. All of the various validation are done client side are also done server side (in the APIs)
+
+Without an understanding of what secure and validate inputs means in the context of your application, it would be hard to convert this to something actionable for the LLM.
+
+u/Bob5k avatar
+Bob5k
+•
+6mo ago
+exposed secrets, exposed oauth tokens, basically everything related to authorization of any kind is tragically dangerous. Ensure that everything is hashed in database and not stored as plain values and roll keys frequently.
+
+Snackatttack
+•
+6mo ago
+become an actual software engineer that can audit code because you can understand code. thats how you truly understand vulnerabilities, or else you're just hoping claude catches it.
+
+u/realtechobserver avatar
+realtechobserver
+•
+6mo ago
+Many great points in the comments, also don't forget that basic rate limiting protects you from both attackers and accidental self-DDOS moments.
+
+u/Same_Buy_4367 avatar
+Same_Buy_4367
+•
+6mo ago
+watch out for integer overflow attacks
+
+u/Meshyai avatar
+u/Meshyai
+•
+Promoted
+
+Upload reference photos, get a working 3D prototype. 50% off for new users.
+Sign Up
+meshy.ai
+Thumbnail image: Upload reference photos, get a working 3D prototype. 50% off for new users.
+u/Budget_Low_3289 avatar
+Budget_Low_3289
+•
+6mo ago
+These are the kind of posts I need, sadly they are far and few between as this sub is filled to the brim with constant memes and usage limit complaints.
+
+Thanks for all those that are contributing… this is how we learn.
+
+h____
+Cake icon
+•
+6mo ago
+Trust.
+
+When your backend handle requests from your frontend and trust that they are who they are, that's vulnerable. This is an easy way to start looking for stuff to fix.
+
+u/werdnum avatar
+werdnum
+•
+6mo ago
+It's remarkably similar to how big companies do security engineering assuming that some engineer somewhere will misunderstand it.
+
+Figure out some set of invariants that you can enforce.
+
+For example, if you put your app behind a reverse proxy with mutual tls (or access it over Tailscale only) you've massively decreased the surface area for any attacker.
+
+If you use a framework which can enforce authentication on every endpoint, similar deal.
+
+Figure out (or get ai to figure out) what you need to do to make your app secure by default with auditable exceptions.
+
+Even before AI it was known that the smart approach is not to audit every line of code -- you're better off figuring out what boundaries allow you to have a secure setup even when you don't.
+
+manuelhe
+•
+6mo ago
+You should be periodically be running audits via vibe coding.
+
+ATSFervor
+•
+6mo ago
+Considering the wording and the place you asked the question, you might want to take a step back before hurting yourself.
+
+[deleted]
+•
+6mo ago
+Community Info Section
+r/vibecoding
+discord
+Joined
+vibecoding
+fully give in to the vibes. forget that the code even exists.
+Created Feb 8, 2025
+Public
+
+Community Guide
+537K
+vibe coders
+14K
+vibing
+r/vibecoding Rules
+1
+No low effort posts
+2
+Vibe coding dev tools must be approved
+3
+No shilling
+4
+No vibe coding pessimism
+5
+No assholes
+join the vibecoding discord
+
+Moderators
+Message Mods
+u/PopMechanic avatar
+u/PopMechanic
+Vibe Rubin
+u/broccoli
+Tree
+u/ai-moderator avatar
+u/ai-moderator
+u/lfiction avatar
+u/lfiction
+u/bot-bouncer avatar
+u/bot-bouncer
+u/title-rinse avatar
+u/title-rinse
+u/comment-rinse avatar
+u/comment-rinse
+u/ban-purge avatar
+u/ban-purge
+u/joaomsneto
+travelwithnodestin
+u/modmailtodiscord avatar
+u/modmailtodiscord
+View all moderators
+Installed Apps
+🚀 ​​Community Home
+Bot Bouncer
+AI Moderator
+Title Rinse
+Comment Rinse
+Ban Purge
+Modmail To Discord or Slack
+Reddit Rules
+Privacy Policy
+User Agreement
+Accessibility
+Reddit, Inc. © 2026. All rights reserved.
+
+Collapse Navigation
+
+Skip to main content
+What are the most important backend vulnerabilities to look out for when vibecoding? : r/vibecoding
+
+
+r/vibecoding
+Search in ⁨r/vibecoding⁩
+Advertise on Reddit
+
+Open chat
+Create
+Create post
+Open inbox
+
+User Avatar
+Expand user menu
+Skip to NavigationSkip to Right Sidebar
+
+Back
+
+Go to vibecoding
+r/vibecoding
+•
+6mo ago
+trkbdo221
+
+What are the most important backend vulnerabilities to look out for when vibecoding?
+I've been really thorough in trying to avoid vulnerabilities, but I'd love some extra guidance - what are the main things to look out for? Especially in backend when vibecoding. Thanks
+
+
+Upvote
+29
+
+Downvote
+
+30
+Go to comments
+Repost
+
+Share
+u/scrapedo_ avatar
+scrapedo_
+•
+Promoted
+
+No more blocks, no more scraper downtime. Meet the better, faster, stronger web scraping API. Scrape.do beats competition every time.
+Learn More
+scrape.do
+Thumbnail image: No more blocks, no more scraper downtime. Meet the better, faster, stronger web scraping API. Scrape.do beats competition every time.
+Join the conversation
+Sort by:
+
+Best
+
+Search Comments
+Expand comment search
+Comments Section
+u/rttgnck avatar
+rttgnck
+•
+6mo ago
+https://github.com/rttgnck/cvewatch
+
+Clone the repo, prompt for a version for your OS, run it and give it your projects folders (ask an AI to check it for data exfiltration if your don't trust a random Redditor with a 1 star repo). It will scan all your requirements, package files, etc. (outlined in the main.js file) and then provide the CVEs for that project. It probably isn't perfect and I only threw it up a couple days ago, but it is a way to at least see what you are vulnerable to based on the package requirements of your projects.
+
+
+Upvote
+11
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+exitcactus
+•
+6mo ago
+Please, look at my repo, we can work together.. A LOT.
+
+https://github.com/girste/mcp-cybersec-watchdog
+
+Like, making a whole mcp that covers front, back and infra security, something like that.
+
+
+Upvote
+3
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+Glove_Witty
+•
+6mo ago
+Get a static analysis security tool (eg SonarQube) and scan the code after it is generated and feed the output into the AI and have it fix any vulnerabilities discovered. Keep iterating.
+
+
+Upvote
+6
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+WeeklyRestaurant7673
+•
+6mo ago
+My rule of thumb with vibecoding: one model to build, one model to be paranoid and try to break it.
+
+
+Upvote
+8
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+dashingsauce
+•
+6mo ago
+nice, what did you name your schizo model?
+
+
+Upvote
+3
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+DonaldStuck
+•
+6mo ago
+You should ask your AI vibe coding agent to make ABSOLUTELY SURE there are no vulnerabilities. /s (yeah /s because otherwise you still gonna do that)
+
+
+Upvote
+4
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+ConferenceOk6722
+•
+6mo ago
+Auth ≠ just login: every endpoint should re-check who is calling and what they’re allowed to do (object-level checks are where bugs hide).
+
+Input is hostile by default: validate + normalize early (types, length, formats), and never trust client-side checks.
+
+Data access safety: parameterized queries / ORM safe patterns only, plus least-privilege DB users (no “god mode” creds in prod).
+
+Secrets + config: no keys in code/logs; rotate, scope, and store them properly (and watch for “debug mode” leaking env).
+
+Error handling & logs: don’t leak stack traces, SQL errors, tokens, or PII; log what you need, redact what you don’t.
+
+Rate limits + abuse controls: especially on auth, search, file upload, and anything expensive (LLM calls too).
+
+File uploads & parsing: MIME sniffing, size limits, scan/sandbox if needed, and never let user-controlled paths touch your filesystem.
+
+Dependencies & supply chain: pin versions, audit regularly, and be careful with copy-pasted snippets that pull random packages.
+
+CORS / CSRF / sessions: don’t “allow all origins” by habit; cookie + session settings matter more than people think.
+
+Default-deny mindset: the fastest way to stay safe while moving fast is “block by default, open intentionally.”
+
+
+Upvote
+10
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+u/Ok_Cartographer7002 avatar
+Ok_Cartographer7002
+•
+6mo ago
+Become a proper software engineer to be able to audit your software yourself. Without understanding of the basics you will never be able to write secure software, because you don't even know what to look for.
+
+
+Upvote
+2
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+Psionatix
+•
+6mo ago
+This is literally the answer.
+
+AI cannot solve vulnerabilities for you at scale.
+
+Most vulnerabilities are domain specific logic issues, that means they're flaws in logic that is unique and specific to what you're doing, they're things that AI has never seen before in the given context.
+
+The only time I've seen AI write a secure login/logout is when the prompt was so extremely detailed that it already covered all of the security concerns. The prompt was done in a way that the only option the AI had was to generate code exactly as the prompter would have written it had they done it themselves. You can't get security out of that without already knowing what you're doing.
+
+Most people vibecoding don't understand that the primary purpose of a short expiry time on a JWT and a refresh token is to minimise potential attack/abuse window, and thus JWT and refresh tokens shouldn't be stored in the same way, because that means they can be stolen the same way. Using session auth? Most people don't seem to regenerate the session on privilege escalation/de-escalation, and AI typically won't either unless you ask it to.
+
+Go look at CVE's for popular things (Node, Laravel, Django, etc), look at the commits that caused those vulnerabilities, look at the commits that fixed them.
+
+AI can't magically prevent security / logic issues it doesn't know about, and since it doesn't actually think or reason, it can't think about this stuff like an actual software engineer can.
+
+
+Upvote
+1
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+u/Excellent-Sign374 avatar
+u/Excellent-Sign374
+•
+Promoted
+
+GitHub Actions starter pack for Python
+Order Now
+thomasreid4.gumroad.com
+Thumbnail image: GitHub Actions starter pack for Python
+sporbywg
+•
+6mo ago
+All of them? <- all I got
+
+
+Upvote
+1
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+u/mikepun-locol avatar
+mikepun-locol
+•
+6mo ago
+For Claude Code, it's just as simple as asking it to scan for security vulnerabilities. Last time I did this, it gave a fairly comprehensive and detailed report. Only issue is that the explanations were fairly concise and assumed an understanding of security techniques like CORS, security headers, sql injection.
+
+
+Upvote
+1
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+u/willjr200 avatar
+willjr200
+•
+6mo ago
+That's not good enough. What is a security vulnerabilities to Claude Code?Currently Claude Code is not good enough to handle edge cases, especially around architectural approaches and security. It currently is too geared toward completing task as cheaply (in tokens) as possible. Without specifically understanding by the individual prompting and detailed prompts/instructions of what a specific implementation should be, It takes far too many shortcuts or half measures.
+
+Above was a list of steps to help LLM/AI to write more secure code. Here is one of them;
+
+Input is hostile by default: validate + normalize early (types, length, formats), and never trust client-side checks.
+
+What does this actually mean? At the most basic level it means that anything which passes outside of your control is not to be trusted. For most applications/websites, this means that the UI code runs in a browser on the users mobile/laptop/tablet/desktop and has data supplied from a API (Application Programming Interface) which runs on the server. (i.e., the parts of the application which are inside of your area of control)
+
+For example, you are selling wigets on your site. Wiget A, with SKU code of abc-wiget has a prices of 10.00. Through the wiget API when the UI page loads in the browser the details of the wiget is displayed along with an add to cart button. The user clicks add to cart and the wiget is added to the cart to be purchased. This user understand how the browser works. They go to the cart page and hit F12 and access the browser tools. Alter the price from 10.00 to 0.10. Locally in their browser the price is now .10 cent. They hit the buy button and enter their info and buy the wiget for .10 cents, their local version of the wiget was sent to the server and used to buy the wiget. This happens because I trusted the data which I sent outside of my control and did not verify it when was returned to me. The correct implementation would be to take the wiget id and re-look up the pricing info and using that in the buy decision/action regardless of what was received from the browser.
+
+At a more complex level, this could mean things like rate limiting (limiting # of request over a timeframe or in cases where uploads are allowed size per timeframe) Limiting the size/number and allowed characters for fields on forms, etc. All of the various validation are done client side are also done server side (in the APIs)
+
+Without an understanding of what secure and validate inputs means in the context of your application, it would be hard to convert this to something actionable for the LLM.
+
+
+Upvote
+2
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+u/Bob5k avatar
+Bob5k
+•
+6mo ago
+exposed secrets, exposed oauth tokens, basically everything related to authorization of any kind is tragically dangerous. Ensure that everything is hashed in database and not stored as plain values and roll keys frequently.
+
+
+Upvote
+1
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+Snackatttack
+•
+6mo ago
+become an actual software engineer that can audit code because you can understand code. thats how you truly understand vulnerabilities, or else you're just hoping claude catches it.
+
+
+Upvote
+1
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+u/realtechobserver avatar
+realtechobserver
+•
+6mo ago
+Many great points in the comments, also don't forget that basic rate limiting protects you from both attackers and accidental self-DDOS moments.
+
+
+Upvote
+1
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+u/Same_Buy_4367 avatar
+Same_Buy_4367
+•
+6mo ago
+watch out for integer overflow attacks
+
+u/Meshyai avatar
+u/Meshyai
+•
+Promoted
+
+Upload reference photos, get a working 3D prototype. 50% off for new users.
+Sign Up
+meshy.ai
+Thumbnail image: Upload reference photos, get a working 3D prototype. 50% off for new users.
+u/Budget_Low_3289 avatar
+Budget_Low_3289
+•
+6mo ago
+These are the kind of posts I need, sadly they are far and few between as this sub is filled to the brim with constant memes and usage limit complaints.
+
+Thanks for all those that are contributing… this is how we learn.
+
+h____
+Cake icon
+•
+6mo ago
+Trust.
+
+When your backend handle requests from your frontend and trust that they are who they are, that's vulnerable. This is an easy way to start looking for stuff to fix.
+
+u/werdnum avatar
+werdnum
+•
+6mo ago
+It's remarkably similar to how big companies do security engineering assuming that some engineer somewhere will misunderstand it.
+
+Figure out some set of invariants that you can enforce.
+
+For example, if you put your app behind a reverse proxy with mutual tls (or access it over Tailscale only) you've massively decreased the surface area for any attacker.
+
+If you use a framework which can enforce authentication on every endpoint, similar deal.
+
+Figure out (or get ai to figure out) what you need to do to make your app secure by default with auditable exceptions.
+
+Even before AI it was known that the smart approach is not to audit every line of code -- you're better off figuring out what boundaries allow you to have a secure setup even when you don't.
+
+manuelhe
+•
+6mo ago
+You should be periodically be running audits via vibe coding.
+
+ATSFervor
+•
+6mo ago
+Considering the wording and the place you asked the question, you might want to take a step back before hurting yourself.
+
+[deleted]
+•
+6mo ago
+Community Info Section
+r/vibecoding
+discord
+Joined
+vibecoding
+fully give in to the vibes. forget that the code even exists.
+Created Feb 8, 2025
+Public
+
+Community Guide
+537K
+vibe coders
+14K
+vibing
+r/vibecoding Rules
+1
+No low effort posts
+2
+Vibe coding dev tools must be approved
+3
+No shilling
+4
+No vibe coding pessimism
+5
+No assholes
+join the vibecoding discord
+
+Moderators
+Message Mods
+u/PopMechanic avatar
+u/PopMechanic
+Vibe Rubin
+u/broccoli
+Tree
+u/ai-moderator avatar
+u/ai-moderator
+u/lfiction avatar
+u/lfiction
+u/bot-bouncer avatar
+u/bot-bouncer
+u/title-rinse avatar
+u/title-rinse
+u/comment-rinse avatar
+u/comment-rinse
+u/ban-purge avatar
+u/ban-purge
+u/joaomsneto
+travelwithnodestin
+u/modmailtodiscord avatar
+u/modmailtodiscord
+View all moderators
+Installed Apps
+🚀 ​​Community Home
+Bot Bouncer
+AI Moderator
+Title Rinse
+Comment Rinse
+Ban Purge
+Modmail To Discord or Slack
+Reddit Rules
+Privacy Policy
+User Agreement
+Accessibility
+Reddit, Inc. © 2026. All rights reserved.
+
+Collapse Navigation
+
+Skip to main content
+I audited 4 'Vibe-Coded' startups. All had critical, company-killing flaws : r/vibecoding
+
+
+r/vibecoding
+Search in ⁨r/vibecoding⁩
+Advertise on Reddit
+
+Open chat
+Create
+Create post
+Open inbox
+
+User Avatar
+Expand user menu
+Skip to NavigationSkip to Right Sidebar
+
+Back
+
+Go to vibecoding
+r/vibecoding
+•
+6mo ago
+Ashamed-Web5788
+
+I audited 4 'Vibe-Coded' startups. All had critical, company-killing flaws
+Hey everyone,
+
+I'm not sure why this is not combatted enough, but there have been an alarming amount of vibe-coded apps that are being shipped with 0 security practices in mind, mind you these are real production apps that collect real users sensitive data i.e. from personal phone numbers, to emails, to driver license pictures and much more
+
+I come from a former black-hat turned white-hat background and first got into cybersecurity over a decade ago as a teenager, purely out of curiosity and passion, even back then, manually written applications were still exploitable, what's more alarming to me now is that many of the apps being vibe-coded today are basically a candy store for any black-hats still operating
+
+Now don't get me wrong, I have no problem with vibecoding in the first place, they are undoubtedly a step-up from what life used to be, they're absolutely amazing for getting ideas out into reality, my only problem is when people think it is okay to start collecting real users and scaling with what they got, while having their database essentially open, or a logic flaw out there for anyone to pick at, worst of all, they PAY and LET their own developers they hired to vibe-code new features or logic in the application without really verifying or checking how it might affect architecture, edge-cases, security etc, I understand to an extent as a developer how this ends up happening with deadlines, pressure to ship etc, but this is exactly how bad architecture and tech debt quietly pile up and eventually hit the company’s reputation
+
+I want to share a few anonymized, yet real examples I've personally run into from live companies, names are withheld and everything was disclosed with them privately, but these are real production apps with real users, some in the hundreds of thousands to millions:
+
+A VC-backed crypto exchange actively holding people's personal details, KYC documents and transaction history had a bunch of misconfigured middleware and API routes, as well as that anyone could promote themselves to administrator and through there could control and configure hot wallet addresses that payments are received to, usually tools like Lovable and such have enough measures to prevent something as drastic as this, so I suspect they must of hired a developer and he vibe-coded with ChatGPT manually or CoPilot, the setup looked like it was custom (i.e. not a typical out of box Lovable tool-like setup), but there were some very obvious 'developer 101' things that should of been cleaned up
+
+A popular casino website used and promoted to the masses by various Twitch/Kick streamers had a vibe-coded logic flaw in their backend server networking services, this is ironically patched by default in the underlying library they use, however I inferred from what I saw that they were trying to add some custom functionality to adapt for scale, and parts of this was vibe-coded, by sending certain malformed inputs to these, a nested logic flaw would lead to an internal DoS and because the rest of the site relied heavily on this single networking service and from what I could see, the architecture bundled most core systems into it, the entire front-facing website and backend stack would go down until it was manually restarted, this is pretty typical with vibe-coded systems where everything is tightly coupled, without proper isolation, rate limiting, and fault boundaries, although this was not leaking any data, being a casino this was a pretty severe one due to repeated downtime and direct financial impact
+
+A serious, revenue-generating SaaS vibe-coded its entire stack on top of Supabase, ranging from authentication to subscriptions, and core product logic included, long-story short due to some misconfigured Supabase instances, typically from ignoring Supabase's own security warnings and shipping with overly permissive access controls, I was able to escalate privileges in unintended ways and grant myself paid subscription tiers worth up to $5,000 without payment, alerts, or internal detection, on top of that, their Supabase Storage configuration bundled public-facing assets together with private user uploads, and access rules failed to properly enforce isolation, as a result, personal user content including face photos and other sensitive uploads was publicly accessible
+
+A mental health therapy platform handling extremely sensitive user data had multiple API keys exposed directly in the frontend, one of them being a key for a third-party email service that allowed anyone to impersonate the company and send emails on their behalf, which alone is already bad, the second one was much more subtle and something most pentesters would probably gloss over, a hardcoded HMAC signing key that at first glance looks useless, however when using my own made AI tools for pentesting/analysis to dig through some of the obfuscated frontend code/logic, it became clear that not only was the key exposed, but the actual signing logic itself was implemented client-side, this logic was used to generate authentication payloads that the backend blindly trusted, by recreating that exact signing flow, it was possible to impersonate arbitrary users and access their private data, including support tickets, this is a classic vibe-coding failure where cryptographic keys and auth logic are pushed into the frontend without thinking about trust boundaries, and it usually goes completely unnoticed until someone actually tears the app apart
+
+I've found a lot more stuff than that in my decade of experience, but I've genuinely never seen this volume or this level of basic issues until the recent wave of vibe-coded production apps, for every example above, I disclosed everything privately, worked directly with the companies tech leads, and in some cases had one-on-one conversations with senior management or directors to help close gaps and identify other issues that weren't immediately obvious
+
+On the flip side as well, I'm absolutely not anti-AI or anti-vibecoding at all, AI is extremely helpful when used properly, I literally used it myself to tear apart obfuscated frontend logic and find issues most people would miss, the problem is never the tools, it's only when people start using AI as a complete replacement for ownership and responsibility instead of using it responsibly as something that helps them move faster, code that "works" is not the same as systems that are actually safe, reliable, and ready for real users, and that gap almost always shows up in the most obvious ways possible, either through reputation damage or very real financial losses
+
+If you're a non-technical founder who's been capitalizing on the new wave of vibe-coding, I'd imagine it's very hard to know whether your app is actually safe or just barely holding together, most of the companies above thought they were fine too, until someone actually looked a bit deeper
+
+So I’m doing a handful of these audits for free right now as a way to validate what I'm seeing across vibe-coded apps in the wild and help a few teams at the same time, if you are shipping a website or app you are worried about, I'm offering the first 5 people who DM me, a FREE, private, no-obligation security check, focused on the kinds of issues I mentioned above
+
+If you want one just:
+
+DM me "SECURE"
+
+Send me a link to your site (codebase is optional, the live site alone is fine)
+
+I'll have a look and privately disclose anything I find, can also directly walk you through how to patch or fix your issue one on one
+
+First 5 only, if I don't reply, I've probably already had 5 DMs
+
+
+Upvote
+69
+
+Downvote
+
+41
+Go to comments
+Repost
+
+Share
+Join the conversation
+Sort by:
+
+Best
+
+Search Comments
+Expand comment search
+Comments Section
+DaRandomStoner
+•
+6mo ago
+Thing is before AI the same people that were able to get something together for you to audit would have likely never gotten past the idea phase for all this...
+
+
+Upvote
+17
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+TheWisestJuan
+•
+6mo ago
+Nothing wrong with proof of concepts, but are we really wanting to sacrifice security and privacy for the sake of creativity? If you’re building something for production, it needs guardrails. This has been my biggest issue with vibe-coded projects, and I feel like the general public doesn’t find it troublesome.
+
+
+Upvote
+11
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+DaRandomStoner
+•
+6mo ago
+The answer to that is apparently yes, and at the rate things are going non-ai generated code will be seen as the potential security threat within two years rather than the other way around. If you can push something through that people actually want right now it will likely only get easier from here to maintain it.
+
+
+Upvote
+-1
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+TheWisestJuan
+•
+6mo ago
+Non-AI generated code will not be more of a security threat than AI generated code. That is an absurd take. Also just because something reaches MVP quicker, does not make it easier to maintain. None of what you stated is backed up by any data. What IS backed up by data is the amount of security threatening AI code that has been shoveled out to the public.
+
+
+Upvote
+5
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+DaRandomStoner
+•
+6mo ago
+The wisest Juan will be made a fool in two years time.
+
+
+Upvote
+0
+
+Downvote
+
+Reply
+
+Award
+
+Share
+
+
+1 more reply
+u/ReporterCalm6238 avatar
+ReporterCalm6238
+•
+6mo ago
+Profile Badge for the Achievement Top 1% Commenter Top 1% Commenter
+No need to use paying services to do this, I made a free (non-commercial), collaborative database listing all the vulnerabilities detected in vibe coded software: safevibee.vercel.app
+
+u/Traditional-Poet-240 avatar
+Traditional-Poet-240
+•
+6mo ago
+Cool stuff. Thank you!
+
+u/ReporterCalm6238 avatar
+ReporterCalm6238
+•
+6mo ago
+Profile Badge for the Achievement Top 1% Commenter Top 1% Commenter
+You welcome! Trying to keep it updated
+
+SeaEarth6498
+•
+5mo ago
+"Created with ai" :-)
+
+u/ReporterCalm6238 avatar
+ReporterCalm6238
+•
+5mo ago
+Profile Badge for the Achievement Top 1% Commenter Top 1% Commenter
+Yep 100%! Ahah
+
+u/Northeast_Cuisine avatar
+Northeast_Cuisine
+•
+6mo ago
+Do you have suggestions for how to stress test a vibe coded app to avoid a lot of the largest pitfalls? Or maybe some resources to make a markdown file of the most critical aspects?
+
+I've been working on my site for a couple months now and every time I sit down for a session I ask different models to critique and criticize the codebase, sometimes open ended, sometimes on a specific issue.
+
+They always find something, numerous and major at the beginning, less and less over time. But the fact things continue to pop up leads me to believe asking for the full array of critical checks points would get the response more dialed in.
+
+Sea-Possible-4993
+•
+3mo ago
+Mozilla Observatory and SecurityHeaders.com and Cloudflare
+
+u/Head-Foundation3312 avatar
+Head-Foundation3312
+•
+2mo ago
+Do you have a coding background, or are you just vibing and hoping for the best? Identifying security vulnerabilities is a process, not a one-size-fits-all markdown file lmao.
+
+u/Northeast_Cuisine avatar
+Northeast_Cuisine
+•
+2mo ago
+Not much of a background, mostly geared towards python, pandas, and data.
+
+I'm doing a CRUD website and I'm the only user with a couple testers who want similar tools available on the web. So it's probably not a huge target either.
+
+Not one sized fits all markdown but contextual, with each successive model release I do refactoring passes and learn about the different attack surfaces and log what has been implemented so far.
+
+Probably far from ideal but better than nothing.
+
+u/FAANG_VIBE_CODER avatar
+FAANG_VIBE_CODER
+•
+6mo ago
+•
+Edited 6mo ago
+This is such obvious shilling. Is this actually allowed on the sub?
+
+Edit: I think (tastefully) shilling your vibe coded app should be allowed. But these fake security threat threads pop up every day and they have nothing to do with vibe coding, they just create FUD so they can shill their service, but potentially even worse as these accounts have no post history and want to communicate through DMs
+
+u/bwat47 avatar
+bwat47
+•
+6mo ago
+yeah this sub is an absolute dumpster fire lol, 90% of the posts are some form of shilling
+
+u/Purple-Programmer-7 avatar
+Purple-Programmer-7
+•
+6mo ago
+Please open source your pen testing stack
+
+u/Smooth-Reading-4180 avatar
+Smooth-Reading-4180
+•
+6mo ago
+cool story bro
+
+u/Ashamed-Web5788 avatar
+Ashamed-Web5788
+OP
+•
+6mo ago
+thx!
+
+bearded_bustah
+•
+6mo ago
+This is where more programmers can find a niche. Vibe coding isn't going away. But it will be s good, long time before AI can even remotely handle security. You've got a good idea here!
+
+Brilliant-6688
+•
+6mo ago
+Sorry, you have too much empathy for users and this blocks revenue. You will be fired from Google if you dare raise these concerns.
+
+Lonely-Assumption970
+•
+6mo ago
+Maybe an expert can give me some advice. I'm vibe coding an app. It's a gigs tracker for performers and a contacts book. The overall idea is links contacts to gigs to build relationships etc.
+
+I want it to save all data locally no servers. Will be a back up option to the users personal cloud. Goggle drive etc.
+
+Are there any security concerns I should be worried about in this case. I'm not planning on selling it just giving it away so people can use it. Donations maybe.
+
+From reading the post it seems all the security is from putting it online.
+
+u/Interstellar00700 avatar
+Interstellar00700
+•
+6mo ago
+What were the metrics used for auditing ? Is it just based on your experience or certain standards you map it to ?
+
+u/rd_23 avatar
+rd_23
+•
+6mo ago
+Are these being vibe coded by software engineers or people with no background in programming?
+
+replayzero
+•
+6mo ago
+I think auditing people's apps is going to become a cottage industry - I am building something right now in the health space so security is a massive issue for me - I think about it all the time - So if there are any security flaws in the code base that wouldn't be for a lack of trying to be secure.
+
+u/dylthesurfer avatar
+dylthesurfer
+•
+6mo ago
+How can you test proof and or secure your app/websites before shopping?
+
+u/Fair-Stop9968 avatar
+Fair-Stop9968
+•
+6mo ago
+I’ve never understood how people are able to leave such massive vulnerabilities. I only learned web dev in 2022/2023, when ChatGPT was out but before lovable.
+
+Maybe it’s cause I use sveltekit and not react? So I actually have to learn best practices?
+
+beyerch
+•
+6mo ago
+You don't say? :-)
+
+ThickAd7510
+•
+1mo ago
+They do have 1 r 3 security flaws
+
+u/Turbo-Sloth481 avatar
+Turbo-Sloth481
+Cake icon
+•
+6mo ago
+Great pitch
+
+snowcrashcode
+•
+6mo ago
+great post, i have also noticed that this is a very serious and legit problem that i’ve been interested in for quite some time.
+
+I predict that this issue is here to stay for quite some time; how would you recommend me to go about learning how to identify the patterns and security gaps that vibecoded projects create? Just sort of the common general issues that LLMs tend to create.
+
+UziMcUsername
+•
+6mo ago
+I’m no expert, but concerned like you. I am building a second phase of my project and have the stories written out (“generated”). I asked the LLM to do an audit of my stories after reviewing the OWASP top ten risk buckets and API risks. It came back with a bunch of patches to make to the stories to harden them. I can’t tell you how effective it’s going to be, but it seems like some low hanging fruit that could help you sleep a bit better at night
+
+u/Ashamed-Web5788 avatar
+Ashamed-Web5788
+OP
+•
+6mo ago
+yeah I agree, I don't think this problem is going away anytime soon, if you want to get better at spotting security gaps, I'd say focus less on specific vulnerabilities and more on fundamentals, a lot of problems come from broken assumptions rather than exotic bugs
+
+practically that would mean learning to think in terms of trust boundaries and responsibility, ask yourself questions like what does the client control vs what the server enforces, what data or decisions are being trusted without verification and what happens when inputs aren’t what the system expects, etc, vibe-coded projects often work well on the happy path but fall apart when you consider malformed input, replayed requests, partial failures, or unexpected user behavior
+
+it also helps to look at systems holistically instead of file by file, LLMs are good at generating code that works in isolation, but weaker at reasoning about how components interact under real conditions like scale, concurrency, or failure, getting comfortable with threat modeling, basic architecture patterns, and failure modes will take you much further than memorizing specific exploits
+
+u/Think_Army4302 avatar
+Think_Army4302
+•
+6mo ago
+What's your opinion on automated scanners as a quick and accessible way to get started with security? i've built vibeappscanner.com which is designed to do this. not a comprehensive pen test or code analysis but quick, easy and effective
+
+u/JjyKs avatar
+JjyKs
+•
+6mo ago
+Nice marketing OP :D
+
+u/Think_Army4302 avatar
+Think_Army4302
+•
+6mo ago
+lol i swear it isn't me
+
+u/Ashamed-Web5788 avatar
+Ashamed-Web5788
+OP
+•
+6mo ago
+definitely a great starting point and way better than doing nothing, especially for catching obvious misconfigs and low-hanging issues early on, the problem is when people treat the output of a scanner as secure and stop there, most of the issues I mentioned above weren't things a typical scanner would ever flag, because they lived in logic, trust boundaries, or how different parts of the system interacted
+
+on top of that, I've seen plenty of cases where founders get warnings or suggestions directly from vibe-code tools themselves and just ignore them, not realizing how serious that can be, so yeah, scanners are useful, but they don't replace actually owning how the system behaves in production
+
+Community Info Section
+r/vibecoding
+discord
+Joined
+vibecoding
+fully give in to the vibes. forget that the code even exists.
+Created Feb 8, 2025
+Public
+
+Community Guide
+537K
+vibe coders
+14K
+vibing
+r/vibecoding Rules
+1
+No low effort posts
+2
+Vibe coding dev tools must be approved
+3
+No shilling
+4
+No vibe coding pessimism
+5
+No assholes
+join the vibecoding discord
+
+Moderators
+Message Mods
+u/PopMechanic avatar
+u/PopMechanic
+Vibe Rubin
+u/broccoli
+Tree
+u/ai-moderator avatar
+u/ai-moderator
+u/lfiction avatar
+u/lfiction
+u/bot-bouncer avatar
+u/bot-bouncer
+u/title-rinse avatar
+u/title-rinse
+u/comment-rinse avatar
+u/comment-rinse
+u/ban-purge avatar
+u/ban-purge
+u/joaomsneto
+travelwithnodestin
+u/modmailtodiscord avatar
+u/modmailtodiscord
+View all moderators
+Installed Apps
+🚀 ​​Community Home
+Bot Bouncer
+AI Moderator
+Title Rinse
+Comment Rinse
+Ban Purge
+Modmail To Discord or Slack
+Reddit Rules
+Privacy Policy
+User Agreement
+Accessibility
+Reddit, Inc. © 2026. All rights reserved.
+
+Collapse Navigation
+
