@@ -5,15 +5,22 @@ import { z } from 'zod';
 import { dayNo } from '../../src/engine/daily';
 import { EVALUATE } from '../../src/engine/evaluate';
 import { buildHiddenWords } from '../../src/engine/hiddenWords';
-import { caseOrder, clueKind, SUMS_FROM, typoSeed } from '../../src/engine/journey';
+import { caseOrder, clueKind, SUMS_FROM } from '../../src/engine/journey';
 import { checkDraft, crossesWords, MAKE, WORD_RE } from '../../src/engine/make';
-import { buildMirror, mirrorClue } from '../../src/engine/mirror';
+import { buildMirror } from '../../src/engine/mirror';
+import { buildLiar, type Statement } from '../../src/engine/liar';
+import { buildGroups, type GroupBoard } from '../../src/engine/groups';
+import { buildRelay } from '../../src/engine/relay';
+import { buildSeries } from '../../src/engine/series';
+import { specialClues, type SpecialSources } from '../../src/engine/specials';
 import { passages } from '../../src/engine/passages';
 import { starsFor } from '../../src/engine/stars';
 import { buildSums, sumsClue } from '../../src/engine/sums';
-import { buildTypos, typoClue } from '../../src/engine/typos';
 import pools from '../../data/copy.json';
 import mirrorFile from '../../data/mirrorWords.json';
+import relayFile from '../../data/relayWords.json';
+import liarFile from '../../data/liar.json';
+import groupsFile from '../../data/groups.json';
 import iconTable from '../../data/topicIcons.json';
 import { readsBadly } from '../../src/engine/giveaway';
 import { skillCodes } from '../../src/engine/skill';
@@ -575,8 +582,13 @@ export const PlayBody = z
   })
   .strict();
 
-/** The everyday words Mirror reads by: the same file the client reads. */
-const MIRROR_WORDS: ReadonlySet<string> = new Set(mirrorFile.words.split(' '));
+/** What a pack's special clues are made from: the same files the client reads (src/games/catalog.ts). */
+const SPECIAL_SOURCES: SpecialSources = {
+  mirrorWords: new Set(mirrorFile.words.split(' ')),
+  relayWords: new Set(relayFile.words.split(' ')),
+  liar: Object.fromEntries(Object.entries(liarFile as Record<string, unknown>).filter(([, v]) => Array.isArray(v))) as Record<string, Statement[]>,
+  groups: Object.fromEntries(Object.entries(groupsFile as Record<string, unknown>).filter(([, v]) => Array.isArray(v))) as Record<string, GroupBoard[]>,
+};
 
 async function plays(req: Request, deps: Deps) {
   const user = await currentUser(deps.db, req);
@@ -606,29 +618,35 @@ async function plays(req: Request, deps: Deps) {
     gameId = game.id;
   }
 
-  const g = await deps.db.from('games').select('id, kind, text, dict').eq('id', gameId).maybeSingle();
+  const g = await deps.db.from('games').select('id, kind, category, text, dict').eq('id', gameId).maybeSingle();
   if (g.error || !g.data) throw new HttpError(404, 'unknown_game');
   const puzzle = buildHiddenWords({ text: g.data.text as string, dict: g.data.dict as string[] });
   if (expected && puzzle.answers.map((x) => x.key).join() !== expected.join()) throw new HttpError(500, 'daily_mismatch');
 
   if (game.type === 'game' && game.clue != null) {
     // A clue of a case, made by the same engine the client makes it with and replayed as a game of its own:
-    // a passage, a row of sums or the Mirror clue, by its number. Alone only, catalogue only. It is kept apart
-    // from `plays`, so no board changes.
+    // a passage, a row of sums or a special (Mirror, Relay, Series, Liar), by its number. Alone only, catalogue
+    // only. It is kept apart from `plays`, so no board changes.
     if (room) throw new HttpError(400, 'bad_request');
     const cut = g.data.kind === 'curated' ? passages(puzzle) : [];
-    const mirror = cut.length < 2 ? null : mirrorClue(puzzle, MIRROR_WORDS);
-    const typos = cut.length < 2 ? null : typoClue(puzzle, MIRROR_WORDS, typoSeed(gameId));
-    if (!caseOrder(cut.length, !!mirror, !!typos).includes(game.clue) || game.clue === 0) throw new HttpError(404, 'unknown_clue');
+    const specials = cut.length < 2 ? new Map() : specialClues(puzzle, gameId, String(g.data.category ?? ''), SPECIAL_SOURCES);
+    if (!caseOrder(cut.length, new Set(specials.keys())).includes(game.clue) || game.clue === 0) throw new HttpError(404, 'unknown_clue');
     const kind = clueKind(game.clue);
+    const sp = specials.get(game.clue);
     const c =
       kind === 'sums'
         ? replay(buildSums(sumsClue(`${gameId}~${game.clue}`, game.clue - SUMS_FROM)), log, false, EVALUATE['buried-sums'])
         : kind === 'mirror'
-          ? replay(buildMirror(mirror!), log, false, EVALUATE.mirror)
-          : kind === 'typos'
-            ? replay(buildTypos(typos!), log, false, EVALUATE.typos)
-          : replay(buildHiddenWords({ text: cut[game.clue - 1]!.text, dict: g.data.dict as string[] }), log, false);
+          ? replay(buildMirror(sp!), log, false, EVALUATE.mirror)
+          : kind === 'relay'
+            ? replay(buildRelay(sp!), log, false, EVALUATE.relay)
+            : kind === 'series'
+              ? replay(buildSeries(sp!), log, false, EVALUATE.series)
+              : kind === 'liar'
+                ? replay(buildLiar(sp!), log, false, EVALUATE.liar)
+                : kind === 'groups'
+                  ? replay(buildGroups(sp!), log, false, EVALUATE.groups)
+                : replay(buildHiddenWords({ text: cut[game.clue - 1]!.text, dict: g.data.dict as string[] }), log, false);
     if (!c.ok) throw new HttpError(422, c.reason);
     const stars = starsFor({ finished: true, found: c.found, total: c.total, hints: c.hints, wrongs: c.wrongs });
     const kept = await deps.db.rpc('record_clue', { p_user: user.id, p_game: gameId, p_clue: game.clue, p_stars: stars, p_score: c.score });

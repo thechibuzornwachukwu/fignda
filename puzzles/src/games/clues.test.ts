@@ -1,32 +1,37 @@
-import { buildPath, caseOrder, clueKind, MIRROR_N, SUMS_FROM, TYPOS_N } from '../engine/journey';
+import { buildPath, caseOrder, clueKind, GROUPS_N, LIAR_N, MIRROR_N, RELAY_N, SERIES_N, SUMS_FROM } from '../engine/journey';
 import { HINT_OF, mixedSquad, PARTNERS } from '../engine/partners';
-import { games, getPassage, getPuzzle, MIRROR_WORDS } from './catalog';
+import { games, getPassage, getPuzzle, SPECIAL_SOURCES } from './catalog';
 import { familyOf, registry } from './registry';
 
 describe('the rhythm of a pack', () => {
-  it('is word, word, number, word, then Mirror and the Typo hunt, and nothing after them', () => {
+  it('is word, word, number, word, then Mirror, and nothing after it', () => {
     expect(caseOrder(1)).toEqual([0]);
     expect(caseOrder(2)).toEqual([1, 2, 21]);
     expect(caseOrder(3, true)).toEqual([1, 2, 21, 3, 31]);
-    expect(caseOrder(3, false, true)).toEqual([1, 2, 21, 3, 32]);
     expect(caseOrder(6)).toEqual([1, 2, 21, 3, 4, 5, 22, 6]);
-    expect([0, 1, 19, 21, 29, 31, 32, 40].map(clueKind)).toEqual(['whole', 'words', 'words', 'sums', 'sums', 'mirror', 'typos', 'words']);
+    expect([0, 1, 19, 21, 29, 31, 32, 33, 34, 35, 40].map(clueKind)).toEqual(['whole', 'words', 'words', 'sums', 'sums', 'mirror', 'relay', 'series', 'liar', 'groups', 'words']);
     expect(familyOf('hidden-words')).toBe('verbal');
     expect(familyOf('buried-sums')).toBe('quantitative');
     expect(familyOf('mirror')).toBe('verbal');
-    expect(familyOf('typos')).toBe('verbal');
+  });
+
+  it('the specials sit among the passages: Liar after the first, Relay after the third, Series after the fourth, Groups after the sixth, Mirror last', () => {
+    const all = new Set([MIRROR_N, RELAY_N, SERIES_N, LIAR_N, GROUPS_N]);
+    expect(caseOrder(6, all)).toEqual([1, 34, 2, 21, 3, 32, 4, 33, 5, 22, 6, 35, 31]);
+    // A short pack: what has no passage to follow goes at the end, Mirror still last.
+    expect(caseOrder(2, all)).toEqual([1, 34, 2, 21, 32, 33, 35, 31]);
+    expect(caseOrder(1, all)).toEqual([0]);
   });
 
   it('every catalogue case follows it, and every clue on the path can be played', () => {
-    const path = buildPath(games, MIRROR_WORDS);
+    const path = buildPath(games, SPECIAL_SOURCES);
     const seen: string[] = [];
     let sums = 0;
     let mirrors = 0;
-    let typos = 0;
     for (const c of path.cases) {
       const cut = getPassage(c.id, 1)?.part.count ?? 0;
       const ns = c.clues.map((x) => x.n);
-      expect(ns).toEqual(caseOrder(cut, ns.includes(MIRROR_N), ns.includes(TYPOS_N)));
+      expect(ns).toEqual(caseOrder(cut, new Set(ns.filter((n) => n >= MIRROR_N))));
       // The account keeps a clue under a number from 1 to 40.
       expect(Math.max(...ns)).toBeLessThanOrEqual(40);
       expect(cut).toBeLessThan(SUMS_FROM - 1);
@@ -34,9 +39,11 @@ describe('the rhythm of a pack', () => {
         const clue = getPassage(c.id, n)!;
         expect(clue.part).toEqual({ n, count: cut, at: i + 1, of: ns.length, next: ns[i + 1] ?? 0 });
         const built = registry[clue.def.type].build(clue.def);
-        expect(built.answers.length, `${c.id}~${n}`).toBeGreaterThanOrEqual(3);
+        // A Liar clue hides 1 or 2, a Relay clue 2 or more, the rest 3 or more.
+        const least = clueKind(n) === 'liar' ? 1 : clueKind(n) === 'relay' ? 2 : 3;
+        if (clueKind(n) === 'groups') expect(built.answers).toHaveLength(4);
+        expect(built.answers.length, `${c.id}~${n}`).toBeGreaterThanOrEqual(least);
         if (clueKind(n) === 'sums') sums++;
-        if (clueKind(n) === 'typos') typos++;
         if (clueKind(n) === 'mirror') {
           mirrors++;
           expect(getPuzzle(c.id)!.text).toContain(clue.def.text.slice(0, 40));
@@ -48,7 +55,6 @@ describe('the rhythm of a pack', () => {
     if (process.env.LOOK) console.log(seen.join('\n'), '\n', sums, 'sums clues,', mirrors, 'mirror clues,', path.cases.length, 'cases');
     expect(sums).toBeGreaterThanOrEqual(path.cases.length);
     expect(mirrors).toBeGreaterThan(0);
-    expect(typos).toBeGreaterThan(0);
   });
 });
 
@@ -113,8 +119,8 @@ describe('edges', () => {
 });
 
 describe('no story', () => {
-  it('no pack has an unmasking, and no clue number past the Typo hunt opens anything', () => {
-    for (const g of games) for (const n of [33, 39, 40]) expect(getPassage(g.id, n)).toBeUndefined();
-    expect(Object.keys(registry).sort()).toEqual(['buried-sums', 'hidden-words', 'mirror', 'typos']);
+  it('no pack has an unmasking, and no clue number past the specials opens anything', () => {
+    for (const g of games) for (const n of [36, 39, 40]) expect(getPassage(g.id, n)).toBeUndefined();
+    expect(Object.keys(registry).sort()).toEqual(['buried-sums', 'groups', 'hidden-words', 'liar', 'mirror', 'relay', 'series']);
   });
 });

@@ -454,7 +454,7 @@ Nothing else animates.
 - Buried sums (`src/engine/sums.ts`): a row of digits 1 to 9, and the runs of 2 or more in a row that add up to a target from 10 to 17.
 - Mirror (`src/engine/mirror.ts`): hidden words that read right to left.
 - Packs on the server (`supabase/migrations/20261010000500_cases.sql`, `src/lib/progress.ts`):
-- Roadmap types (not in v1, see Gazecraft Future Games): Liar, Relay, Bury it.
+- Roadmap types (not in v1, see Gazecraft Future Games): Liar, Relay, Trace, Bury it.
 - Families.
 
 ## 10. Accessibility

@@ -3,6 +3,7 @@
 
 import { check, isClose } from './check';
 import type { Answer } from './hiddenWords';
+import { decodePick, tilesOfAnswer } from './groups';
 import { reversed } from './mirror';
 
 export type Evaluation =
@@ -46,11 +47,8 @@ export const evalSums: Evaluate = (p, a, b, found) => {
   return near ? { kind: 'close' } : { kind: 'wrong' };
 };
 
-/**
- * Typo hunt: the word picked is a misspelled one, whole. A pick inside one, or running past it, is a near miss;
- * a word spelled right is wrong.
- */
-export const evalTypos: Evaluate = (p, a, b, found) => {
+/** Relay: the run picked is a whole chain. A pick that overlaps an unfound chain (a link short or long) is close. */
+export const evalRelay: Evaluate = (p, a, b, found) => {
   const [x, y] = a <= b ? [a, b] : [b, a];
   const hit = p.answers.find((k) => k.spans[0]![0] === x && k.spans[0]![1] === y);
   if (hit) return found.has(hit.key) ? { kind: 'already' } : { kind: 'hit', key: hit.key, label: hit.label, span: [x, y] };
@@ -59,4 +57,39 @@ export const evalTypos: Evaluate = (p, a, b, found) => {
   return near ? { kind: 'close' } : { kind: 'wrong' };
 };
 
-export const EVALUATE = { 'hidden-words': evalWords, mirror: evalMirror, 'buried-sums': evalSums, typos: evalTypos } as const;
+/**
+ * Liar: a tap or a pick inside one statement picks that statement. A false one is a hit, its whole span marked; a
+ * true one is wrong. A pick that runs out of a false statement into the next is close.
+ */
+export const evalLiar: Evaluate = (p, a, b, found) => {
+  const [x, y] = a <= b ? [a, b] : [b, a];
+  const inside = p.answers.find(({ spans: [s] }) => x >= s![0] && y <= s![1]);
+  if (inside) return found.has(inside.key) ? { kind: 'already' } : { kind: 'hit', key: inside.key, label: inside.label, span: inside.spans[0]! };
+  const near = unfound(p, found).some(({ spans: [s] }) => x <= s![1] && y >= s![0]);
+  return near ? { kind: 'close' } : { kind: 'wrong' };
+};
+
+/**
+ * Groups: (a, b) is a pick of 4 tiles (src/engine/groups.ts). The 4 of a set is a hit. 3 of 4 from one set still
+ * unfound is close ("one away"): never a wrong pick, so a miss narrows the board instead of only costing.
+ */
+export const evalGroups: Evaluate = (p, a, b, found) => {
+  const tiles = decodePick(a, b);
+  if (!tiles) return { kind: 'ignore' };
+  const hit = p.answers.find((k) => k.spans[0]![0] === a && k.spans[0]![1] === b);
+  if (hit) return found.has(hit.key) ? { kind: 'already' } : { kind: 'hit', key: hit.key, label: hit.label, span: [a, b] };
+  const pick = new Set(tiles);
+  const away = unfound(p, found).some((k) => tilesOfAnswer(k).filter((t) => pick.has(t)).length === 3);
+  return away ? { kind: 'close' } : { kind: 'wrong' };
+};
+
+export const EVALUATE = {
+  'hidden-words': evalWords,
+  mirror: evalMirror,
+  'buried-sums': evalSums,
+  // A series is graded as a sums run is: the exact run, or one digit short or long is close.
+  series: evalSums,
+  relay: evalRelay,
+  liar: evalLiar,
+  groups: evalGroups,
+} as const;

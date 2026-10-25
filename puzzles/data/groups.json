@@ -1,0 +1,41 @@
+{
+  "note": "Groups boards by pack category: 4 sets of 4, shown as pictures (Fluent Emoji 3D, MIT, public/icons/fluent). Each word is the picture's name, read by screen readers and shown once its set is found. No names of people or teams: a board is only for things anyone can recognise from a picture. A board must have exactly one way to fill all 4 sets. The owner reads every change before it ships.",
+  "icons": {
+    "Apple": "red-apple", "Banana": "banana", "Grapes": "grapes", "Watermelon": "watermelon",
+    "Lion": "lion", "Zebra": "zebra", "Elephant": "elephant", "Giraffe": "giraffe",
+    "Sun": "sun", "Cloud": "cloud", "Snowflake": "snowflake", "Rainbow": "rainbow",
+    "Car": "automobile", "Bus": "bus", "Bicycle": "bicycle", "Aeroplane": "airplane",
+    "Planet": "ringed-planet", "Comet": "comet", "Moon": "crescent-moon", "Star": "star",
+    "Test tube": "test-tube", "Microscope": "microscope", "Magnet": "magnet", "Petri dish": "petri-dish",
+    "Lightning": "high-voltage", "Fire": "fire", "Battery": "battery", "Light bulb": "light-bulb",
+    "DNA": "dna", "Microbe": "microbe", "Seedling": "seedling", "Butterfly": "butterfly",
+    "Pill": "pill", "Syringe": "syringe", "Stethoscope": "stethoscope", "Plaster": "adhesive-bandage",
+    "Heart": "anatomical-heart", "Lungs": "lungs", "Brain": "brain", "Tooth": "tooth",
+    "Carrot": "carrot", "Broccoli": "broccoli", "Avocado": "avocado", "Greens": "leafy-green",
+    "Trainer": "running-shoe", "Football": "soccer-ball", "Tennis ball": "tennis", "Basketball": "basketball"
+  },
+  "General": [
+    [
+      { "link": "Fruit", "words": ["Apple", "Banana", "Grapes", "Watermelon"] },
+      { "link": "Safari animals", "words": ["Lion", "Zebra", "Elephant", "Giraffe"] },
+      { "link": "Weather", "words": ["Sun", "Cloud", "Snowflake", "Rainbow"] },
+      { "link": "Transport", "words": ["Car", "Bus", "Bicycle", "Aeroplane"] }
+    ]
+  ],
+  "Science": [
+    [
+      { "link": "Space", "words": ["Planet", "Comet", "Moon", "Star"] },
+      { "link": "In the lab", "words": ["Test tube", "Microscope", "Magnet", "Petri dish"] },
+      { "link": "Energy", "words": ["Lightning", "Fire", "Battery", "Light bulb"] },
+      { "link": "Living things", "words": ["DNA", "Microbe", "Seedling", "Butterfly"] }
+    ]
+  ],
+  "Health": [
+    [
+      { "link": "Medicine", "words": ["Pill", "Syringe", "Stethoscope", "Plaster"] },
+      { "link": "Body parts", "words": ["Heart", "Lungs", "Brain", "Tooth"] },
+      { "link": "Healthy food", "words": ["Carrot", "Broccoli", "Avocado", "Greens"] },
+      { "link": "Sport", "words": ["Trainer", "Football", "Tennis ball", "Basketball"] }
+    ]
+  ]
+}

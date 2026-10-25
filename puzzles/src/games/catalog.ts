@@ -4,19 +4,31 @@ import raw from '../../data/games.json';
 import rawHolidays from '../../data/holidays.json';
 import { dailyGameId, holidayOn, type Calendar, type Holiday } from '../engine/daily';
 import rawMirror from '../../data/mirrorWords.json';
+import rawRelay from '../../data/relayWords.json';
+import rawLiar from '../../data/liar.json';
+import rawGroups from '../../data/groups.json';
 import { buildHiddenWords, type Difficulty, type HiddenWordsPuzzle } from '../engine/hiddenWords';
-import { caseOrder, clueKind, SUMS_FROM, typoSeed } from '../engine/journey';
-import { mirrorClue } from '../engine/mirror';
-import { typoClue } from '../engine/typos';
+import { caseOrder, clueKind, SUMS_FROM } from '../engine/journey';
 import { sumsClue, sumsTarget } from '../engine/sums';
 import { passages } from '../engine/passages';
+import type { Statement } from '../engine/liar';
+import type { GroupBoard } from '../engine/groups';
+import { SPECIAL_NOUN, specialClues, type SpecialSources } from '../engine/specials';
 import { sponsorOf, type Sponsor } from '../engine/sponsor';
 
-export type GameType = 'hidden-words' | 'buried-sums' | 'mirror' | 'typos';
+export type GameType = 'hidden-words' | 'buried-sums' | 'mirror' | 'relay' | 'series' | 'liar' | 'groups';
 
 
 /** The everyday words Mirror reads by. */
 export const MIRROR_WORDS: ReadonlySet<string> = new Set((rawMirror as { words: string }).words.split(' '));
+
+/** What every pack's special clues are made from: Mirror's and Relay's word lists, and the Liar statements. */
+export const SPECIAL_SOURCES: SpecialSources = {
+  mirrorWords: MIRROR_WORDS,
+  relayWords: new Set((rawRelay as { words: string }).words.split(' ')),
+  liar: Object.fromEntries(Object.entries(rawLiar as Record<string, unknown>).filter(([, v]) => Array.isArray(v))) as Record<string, Statement[]>,
+  groups: Object.fromEntries(Object.entries(rawGroups as Record<string, unknown>).filter(([, v]) => Array.isArray(v))) as Record<string, GroupBoard[]>,
+};
 
 export type GameDef = {
   id: string;
@@ -67,9 +79,8 @@ const parts = new Map<string, Map<number, { def: GameDef; part: Part }>>();
 
 /**
  * Clue `n` of a puzzle's case as a game of its own. A passage is the same puzzle with the passage as its text.
- * A sums clue is a row of digits the engine makes from the clue's own name, and the Mirror clue is a stretch of
- * the puzzle read right to left. Memoised, so the same object
- * comes back each time. None when the puzzle is not cut, or its case has no such clue.
+ * A sums clue is a row of digits the engine makes from the clue's own name; a special is whatever
+ * `specialClues` makes for the pack. Memoised, so the same object comes back each time. None when the puzzle is not cut, or its case has no such clue.
  */
 export function getPassage(id: string, n: number): { def: GameDef; part: Part } | undefined {
   let list = parts.get(id);
@@ -80,9 +91,8 @@ export function getPassage(id: string, n: number): { def: GameDef; part: Part } 
     const puzzle = getPuzzle(id);
     if (!def || !puzzle) return undefined;
     const cut = passages(puzzle);
-    const mirror = mirrorClue(puzzle, MIRROR_WORDS);
-    const typos = typoClue(puzzle, MIRROR_WORDS, typoSeed(id));
-    const order = caseOrder(cut.length, !!mirror, !!typos);
+    const specials = specialClues(puzzle, id, def.category, SPECIAL_SOURCES);
+    const order = caseOrder(cut.length, new Set(specials.keys()));
     order.forEach((k, i) => {
       if (k === 0) return;
       const part: Part = { n: k, count: cut.length, at: i + 1, of: order.length, next: order[i + 1] ?? 0 };
@@ -91,10 +101,9 @@ export function getPassage(id: string, n: number): { def: GameDef; part: Part } 
       else if (kind === 'sums') {
         const made = sumsClue(`${id}~${k}`, k - SUMS_FROM);
         list!.set(k, { def: { ...def, type: 'buried-sums', noun: `runs that add up to ${sumsTarget(made)}`, text: made.text, dict: [...made.dict], expectedAnswers: [] }, part });
-      } else if (kind === 'typos') {
-        if (typos) list!.set(k, { def: { ...def, type: 'typos', noun: 'misspelled words', text: typos.text, dict: [...typos.dict], expectedAnswers: [] }, part });
-      } else if (mirror) {
-        list!.set(k, { def: { ...def, type: 'mirror', noun: 'words that read right to left', text: mirror.text, dict: [...mirror.dict], expectedAnswers: [] }, part });
+      } else {
+        const sp = specials.get(k);
+        if (sp) list!.set(k, { def: { ...def, type: sp.type, noun: SPECIAL_NOUN[sp.type], text: sp.text, dict: [...sp.dict], expectedAnswers: [] }, part });
       }
     });
   }

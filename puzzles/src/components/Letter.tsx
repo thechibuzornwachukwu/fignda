@@ -31,6 +31,8 @@ export const Letter = memo(function Letter({ ch, li, state, mate = 0, hint, care
     if (r.top >= HINT_EDGE && r.bottom <= window.innerHeight - HINT_EDGE) return;
     el.scrollIntoView({ block: 'center', behavior: prefersReducedMotion() ? 'auto' : 'smooth' });
   }, [hint]);
+  // A line break in the text (Liar puts each statement on its own line): a break with a little air.
+  if (ch === '\n') return <span className={styles.line} aria-hidden="true" />;
   return (
     <span
       ref={ref}

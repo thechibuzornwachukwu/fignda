@@ -1,0 +1,134 @@
+.board {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-width: 560px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-2);
+}
+/* A word tile: the same pressable tile as the digits of a sums row. */
+.tile {
+  min-width: 0;
+  min-height: var(--sums-tile-h);
+  padding: var(--space-1) var(--space-1h);
+  border: 1px solid var(--line-3);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: 0 var(--ledge) 0 var(--line-3);
+  color: var(--fg);
+  font: inherit;
+  /* Shrinks with a narrow screen so the longest word fits whole: a word is never split across lines. */
+  font-size: clamp(11px, 3.4vw, 16px);
+  font-weight: 800;
+  word-break: keep-all;
+  overflow-wrap: normal;
+  hyphens: none;
+  cursor: pointer;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    background-color var(--dur-letter) var(--ease-std),
+    color var(--dur-letter) var(--ease-std);
+}
+.tile[data-pic] {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 1;
+  padding: var(--space-1h);
+}
+.pic {
+  width: 78%;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+}
+.tile:active:not(:disabled) {
+  transform: translateY(var(--ledge));
+  box-shadow: none;
+}
+.tile[aria-pressed='true'] {
+  background: var(--sel);
+  color: var(--sel-fg);
+  border-color: var(--sel);
+}
+.tile[data-hint] {
+  box-shadow:
+    0 var(--ledge) 0 var(--line-3),
+    inset 0 0 0 2px var(--fg);
+}
+.tile:disabled {
+  cursor: default;
+}
+/* A found set: a row in its colour, the words side by side. Missed sets after the end, muted. */
+.set {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-0h);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--set);
+  color: var(--paper-ink);
+  text-align: center;
+}
+.set[data-set='1'] {
+  --set: var(--accent);
+}
+.set[data-set='2'] {
+  --set: var(--mate-1);
+}
+.set[data-set='3'] {
+  --set: var(--mate-3);
+}
+.set[data-set='4'] {
+  --set: var(--mate-4);
+}
+.set[data-lost] {
+  --set: var(--miss);
+  color: var(--fg);
+}
+.setName {
+  font-size: 15px;
+  font-weight: 800;
+}
+.setWords {
+  font-size: 14px;
+  font-weight: 600;
+}
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  padding-top: var(--space-2);
+}
+.clear,
+.check {
+  width: var(--tap);
+  height: var(--tap);
+  display: grid;
+  place-items: center;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+.clear {
+  border: 1px solid var(--line-2);
+  background: transparent;
+  color: var(--fg);
+}
+.check {
+  border: 0;
+  background: var(--fg);
+  color: var(--bg);
+}
+.clear:disabled,
+.check:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tile:active:not(:disabled) {
+    transform: none;
+  }
+}

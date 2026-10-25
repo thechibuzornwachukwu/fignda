@@ -6,41 +6,58 @@
 
 import { answerDepth } from './depth';
 import { buildHiddenWords, type Difficulty, type HiddenWordsPuzzle } from './hiddenWords';
-import { mirrorClue } from './mirror';
 import { passages } from './passages';
-import { typoClue } from './typos';
+import { GROUPS_N, LIAR_N, MIRROR_N, NO_SOURCES, RELAY_N, SERIES_N, SPECIAL_TYPE, specialClues, type SpecialSources, type SpecialType } from './specials';
 
 export type CatalogueItem = { id: string; category: string; text: string; dict: readonly string[] };
 
 /**
  * A clue's number says what it is, and it is what the account keeps the clue under, so it never moves:
- * 0 the whole puzzle, 1 to 19 a passage, 21 to 29 a sums clue, 31 the Mirror clue, 32 the Typo hunt.
+ * 0 the whole puzzle, 1 to 19 a passage, 21 to 29 a sums clue, 31 to 35 the specials (src/engine/specials.ts).
  */
 export const SUMS_FROM = 21;
-export const MIRROR_N = 31;
-export const TYPOS_N = 32;
-export type ClueKind = 'whole' | 'words' | 'sums' | 'mirror' | 'typos';
+export { MIRROR_N, RELAY_N, SERIES_N, LIAR_N, GROUPS_N };
+export type ClueKind = 'whole' | 'words' | 'sums' | SpecialType;
 export const clueKind = (n: number): ClueKind =>
-  n === 0 ? 'whole' : n === MIRROR_N ? 'mirror' : n === TYPOS_N ? 'typos' : n >= SUMS_FROM && n < MIRROR_N ? 'sums' : 'words';
+  n === 0 ? 'whole' : SPECIAL_TYPE[n] ?? (n >= SUMS_FROM && n < MIRROR_N ? 'sums' : 'words');
 
-/** The seed a pack's Typo hunt is planted from: its own clue id, so it is the same on every device and the server. */
-export const typoSeed = (puzzle: string): string => `${puzzle}~${TYPOS_N}`;
+/** Where each special sits: after this passage, or at the end when the pack is shorter. Mirror closes a pack. */
+const AFTER: ReadonlyArray<[number, number]> = [
+  [LIAR_N, 1],
+  [RELAY_N, 3],
+  [SERIES_N, 4],
+  [GROUPS_N, 6],
+  [MIRROR_N, Infinity],
+];
 
 /**
  * The clues of a pack in the order they are played, by number. The rhythm is fixed: word, word, number, word.
- * So a sums clue follows passages 2, 5, 8 and so on. Then the Mirror clue and the Typo hunt, when the pack has them.
- * A pack ends on its last clue. A puzzle that is not cut is a pack of 1 clue: the whole puzzle.
+ * So a sums clue follows passages 2, 5, 8 and so on. The specials a pack has sit among them: Liar after the first
+ * passage, Relay after the third, Series after the fourth, Groups after the sixth, Mirror last. A puzzle that is not cut is a pack of 1
+ * clue: the whole puzzle. `specials`: the special clue numbers the pack has (`true` is Mirror alone, as before).
  */
-export function caseOrder(passageCount: number, mirror = false, typos = false): number[] {
+export function caseOrder(passageCount: number, specials: boolean | ReadonlySet<number> = false): number[] {
   if (passageCount < 2) return [0];
-  const out: number[] = [];
+  const has = specials === true ? new Set([MIRROR_N]) : specials === false ? new Set<number>() : specials;
+  const base: number[] = [];
   for (let i = 1; i <= passageCount && i < SUMS_FROM - 1; i++) {
-    out.push(i);
-    if (i % 3 === 2 && SUMS_FROM + (i - 2) / 3 < MIRROR_N) out.push(SUMS_FROM + (i - 2) / 3);
+    base.push(i);
+    if (i % 3 === 2 && SUMS_FROM + (i - 2) / 3 < MIRROR_N) base.push(SUMS_FROM + (i - 2) / 3);
   }
-  if (mirror) out.push(MIRROR_N);
-  if (typos) out.push(TYPOS_N);
-  return out;
+  const out = [...base];
+  const tail: number[] = [];
+  for (const [n, after] of AFTER) {
+    if (!has.has(n)) continue;
+    // After the passage itself and the sums clue that follows it, if any, so the rhythm is kept.
+    let at = out.indexOf(after);
+    if (at < 0) {
+      tail.push(n);
+      continue;
+    }
+    if (out[at + 1] !== undefined && out[at + 1]! >= SUMS_FROM && out[at + 1]! < MIRROR_N) at++;
+    out.splice(at + 1, 0, n);
+  }
+  return [...out, ...tail];
 }
 
 /** One sitting. `n` is the clue's number (`clueKind`). */
@@ -71,9 +88,10 @@ export function hardness(p: Pick<HiddenWordsPuzzle, 'difficulty' | 'answers' | '
 
 /**
  * Cases by category, in the order categories first appear, easy to hard inside each. A puzzle that is not cut
- * is a case of 1 clue: the whole puzzle. `mirrorWords` is the list Mirror reads by; without it no case has one.
+ * is a case of 1 clue: the whole puzzle. `src` holds what the specials are made from; without it, a pack's only
+ * special is its Series.
  */
-export function buildPath(catalogue: readonly CatalogueItem[], mirrorWords: ReadonlySet<string> = new Set()): Path {
+export function buildPath(catalogue: readonly CatalogueItem[], src: SpecialSources = NO_SOURCES): Path {
   const cats: string[] = [];
   for (const g of catalogue) if (!cats.includes(g.category)) cats.push(g.category);
 
@@ -81,7 +99,7 @@ export function buildPath(catalogue: readonly CatalogueItem[], mirrorWords: Read
     .map((item) => {
       const puzzle = buildHiddenWords(item);
       const cut = passages(puzzle).length;
-      return { id: item.id, cat: cats.indexOf(item.category), h: hardness(puzzle), order: caseOrder(cut, !!mirrorClue(puzzle, mirrorWords), !!typoClue(puzzle, mirrorWords, typoSeed(item.id))) };
+      return { id: item.id, cat: cats.indexOf(item.category), h: hardness(puzzle), order: caseOrder(cut, new Set(specialClues(puzzle, item.id, item.category, src).keys())) };
     })
     .sort((a, b) => a.cat - b.cat || a.h - b.h || (a.id < b.id ? -1 : 1));
 

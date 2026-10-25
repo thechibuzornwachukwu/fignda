@@ -9,7 +9,7 @@ import { Ring } from '../components/Ring';
 import { TextLink } from '../components/TextLink';
 import { WordList, type WordListHandle, type WordRow } from '../components/WordList';
 import { dayNo } from '../engine/daily';
-import { caseClues, dailyPool, getGameDef, getPassage, getPuzzle, sponsorFor, type GameDef, type Part } from '../games/catalog';
+import { caseClues, dailyPool, getGameDef, getPassage, getPuzzle, sponsorFor, type GameDef, type GameType, type Part } from '../games/catalog';
 import { dailyInfo, dailyLabel } from '../games/daily';
 import { registry } from '../games/registry';
 import { dayHidLine, playFacts, rareLine, recordLines, skillLines, starsUpLine, todayHoldsLine } from '../games/resultLines';
@@ -131,11 +131,45 @@ function Gated(props: ScreenProps) {
   return auth.session ? <GameScreen {...props} /> : <GuestWall />;
 }
 
+/** How each type is played, for a mouse and for a finger. */
+const HOW: Record<GameType, readonly [string, string]> = {
+  'hidden-words': [
+    'Drag across the letters. Answers can run across spaces and punctuation.',
+    'Swipe across the letters. Or tap the first letter of a word, then the last.',
+  ],
+  mirror: ['These words read right to left. Drag across one from either end.', 'These words read right to left. Swipe across one, or tap one end, then the other.'],
+  'buried-sums': [
+    'Drag across digits in a row. A run is 2 or more digits that add up to the target.',
+    'Swipe across digits in a row. Or tap the first digit of a run, then the last.',
+  ],
+  series: [
+    'Drag across 3 or more digits in a row that step by the same amount: 1 3 5 7, or 9 6 3.',
+    'Swipe across 3 or more digits that step by the same amount: 1 3 5 7, or 9 6 3. Or tap the first, then the last.',
+  ],
+  relay: [
+    'Each chain is words in a row, every one starting on the last letter of the one before. Drag across a whole chain.',
+    'Each chain is words in a row, every one starting on the last letter of the one before. Swipe across a whole chain.',
+  ],
+  liar: ['Some of these are false. Click each false statement.', 'Some of these are false. Tap each false statement.'],
+  groups: ['These 16 words are 4 sets of 4. Pick 4 that belong together, then check them.', 'These 16 words are 4 sets of 4. Tap 4 that belong together, then check them.'],
+};
+
+/** The hint under the board while nothing has been said yet. */
+const PROMPT: Record<GameType, readonly [string, string]> = {
+  'hidden-words': ['Drag across the letters', 'Swipe across letters, or tap first then last'],
+  mirror: ['Drag across the letters', 'Swipe across letters, or tap first then last'],
+  'buried-sums': ['Drag across the digits', 'Swipe across digits, or tap first then last'],
+  series: ['Drag across the digits', 'Swipe across digits, or tap first then last'],
+  relay: ['Drag across a whole chain', 'Swipe across a whole chain'],
+  liar: ['Click a false statement', 'Tap a false statement'],
+  groups: ['Pick 4 that belong together', 'Tap 4 that belong together'],
+};
+
 function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** A sitting: `def` is the puzzle with one passage as its text. */ part?: Part }) {
   const mod = registry[def.type];
   const puzzle = useMemo(() => mod.build(def), [mod, def]);
   // Words are what records and skill lines are about. A run of digits or a letter is not one.
-  const wordy = def.type === 'hidden-words' || def.type === 'mirror' || def.type === 'typos';
+  const wordy = def.type === 'hidden-words' || def.type === 'mirror';
   const listRef = useRef<WordListHandle>(null);
   const auth = useAuth();
   const [params] = useSearchParams();
@@ -576,21 +610,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
       <div className={styles.columns}>
         <div className={styles.main}>
           <p id={instructionId} className={styles.instruction}>
-            {def.type === 'buried-sums'
-              ? coarse
-                ? 'Swipe across digits in a row. Or tap the first digit of a run, then the last.'
-                : 'Drag across digits in a row. A run is 2 or more digits that add up to the target.'
-              : def.type === 'typos'
-                ? coarse
-                  ? 'Some words here are misspelled. Swipe across a whole misspelled word, or tap its first letter, then its last.'
-                  : 'Some words here are misspelled. Drag across a whole misspelled word.'
-              : def.type === 'mirror'
-                ? coarse
-                  ? 'These words read right to left. Swipe across one, or tap one end, then the other.'
-                  : 'These words read right to left. Drag across one from either end.'
-                : coarse
-                  ? 'Swipe across the letters. Or tap the first letter of a word, then the last.'
-                  : 'Drag across the letters. Answers can run across spaces and punctuation.'}
+            {HOW[def.type][coarse ? 1 : 0]}
           </p>
           <Board
             {...mod.boardProps(puzzle)}
@@ -621,7 +641,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
 
         <WordList
           ref={listRef}
-          title={finished ? 'Answers' : def.type === 'typos' ? 'Misspelled above' : 'Hidden above'}
+          title={finished ? 'Answers' : def.type === 'liar' ? 'False above' : def.type === 'groups' ? 'Sets' : 'Hidden above'}
           count={count}
           rows={rows}
           moreHiding={daily && !finished}
@@ -664,20 +684,7 @@ function GameScreen({ def, dailyN, part }: { def: GameDef; dailyN?: number; /** 
           progress={hideProgress ? null : progress}
           left={leftLine}
           time={<Elapsed startAt={s.startAt} endAt={s.endAt} />}
-          message={
-            s.msg ||
-            (def.type === 'buried-sums'
-              ? coarse
-                ? 'Swipe across digits, or tap first then last'
-                : 'Drag across the digits'
-              : def.type === 'typos'
-                ? coarse
-                  ? 'Swipe across a misspelled word'
-                  : 'Drag across a misspelled word'
-                : coarse
-                  ? 'Swipe across letters, or tap first then last'
-                  : 'Drag across the letters')
-          }
+          message={s.msg || PROMPT[def.type][coarse ? 1 : 0]}
           pet={pet}
           onHint={g.hint}
           onDone={g.finish}

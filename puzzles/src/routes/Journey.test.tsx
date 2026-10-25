@@ -9,13 +9,13 @@ import { forgetGuestSeed, GUEST_SEED_KEY } from '../avatar/guest';
 import { setAvatarCode } from '../avatar/store';
 import { POOLS } from '../copy';
 import { buildPath, type Path } from '../engine/journey';
-import { games, MIRROR_WORDS } from '../games/catalog';
+import { games, SPECIAL_SOURCES } from '../games/catalog';
 import { Journey, JOURNEY_AT_KEY, type JourneyGame } from './Journey';
 
 const auth = vi.hoisted(() => ({ profile: null as { id: string; name: string; handle: string } | null }));
 vi.mock('../lib/auth', () => ({ useAuth: () => ({ enabled: true, loading: false, profile: auth.profile }) }));
 
-const path = buildPath(games, MIRROR_WORDS);
+const path = buildPath(games, SPECIAL_SOURCES);
 const first = path.cases[0]!;
 const second = path.cases[1]!;
 const ids = first.clues.map((s) => s.id);

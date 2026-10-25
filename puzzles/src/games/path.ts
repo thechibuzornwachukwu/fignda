@@ -5,7 +5,7 @@ import { clampStars } from '../components/starsLabel';
 import { buildPath, clueStates, type Path } from '../engine/journey';
 import { loadFinished } from '../lib/shelves';
 import { loadStars } from '../lib/starStore';
-import { games, MIRROR_WORDS } from './catalog';
+import { games, SPECIAL_SOURCES } from './catalog';
 
 /** Every clue this browser has done: a finished whole puzzle, or anything holding stars. */
 export function doneClues(): Set<string> {
@@ -19,7 +19,7 @@ let path: Path | null = null;
 
 /** Where the next clue on the path is played, for this browser. Null when every pack is done. */
 export function nextClueTo(): string | null {
-  path ??= buildPath(games, MIRROR_WORDS);
+  path ??= buildPath(games, SPECIAL_SOURCES);
   const standing = clueStates(path, doneClues());
   const next = standing.clues.find((c) => c.state === 'next');
   return next ? (next.n ? `/play/${next.puzzle}/${next.n}` : `/play/${next.puzzle}`) : null;

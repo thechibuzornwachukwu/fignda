@@ -1,6 +1,6 @@
 import gamesFile from '../../data/games.json';
 import { buildHiddenWords } from './hiddenWords';
-import { buildPath, caseOrder, clueId, clueStates, hardness, type CatalogueItem, type Path } from './journey';
+import { buildPath, caseOrder, clueId, clueStates, hardness, SERIES_N, type CatalogueItem, type Path } from './journey';
 import { passages } from './passages';
 
 const games = (gamesFile as unknown as { games: CatalogueItem[] }).games;
@@ -14,17 +14,18 @@ describe('buildPath', () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it('a pack is the passages of its puzzle in order with a sums clue after every second of 3, then Mirror and the Typo hunt when present, and no unmasking: it is a drill', () => {
+  it('a pack is the passages of its puzzle in order with a sums clue after every second of 3, and no unmasking: it is a drill', () => {
+    // With no word lists or statements, a pack's only special is its Series, made from its own name.
+    const specials = (cut: number) => new Set(cut >= 2 ? [SERIES_N] : []);
     for (const c of path.cases) {
       const cut = passages(built(c.id)).length;
-      const ns = c.clues.map((s) => s.n);
-      expect(ns).toEqual(caseOrder(cut, ns.includes(31), ns.includes(32)));
+      expect(c.clues.map((s) => s.n)).toEqual(caseOrder(cut, specials(cut)));
       expect(c.clues.every((s) => s.puzzle === c.id)).toBe(true);
       expect(c.clues.some((s) => s.n === 40)).toBe(false);
       expect(c.clues[0]!.id).toBe(`${c.id}~1`);
     }
-    // Mirror and Typo hunt only appear when the pack qualifies; the previous count (without them) is still correct.
-    expect(ids).toHaveLength(games.reduce((n, g) => n + caseOrder(passages(buildHiddenWords(g)).length).length, 0));
+    // No list to read backwards by, so no Mirror clue here.
+    expect(ids).toHaveLength(games.reduce((n, g) => n + caseOrder(passages(buildHiddenWords(g)).length, specials(passages(buildHiddenWords(g)).length)).length, 0));
   });
 
   it('clue ids: a passage under the puzzle and its number, the unmasking under the puzzle alone', () => {

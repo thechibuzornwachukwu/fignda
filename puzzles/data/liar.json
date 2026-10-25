@@ -1,0 +1,112 @@
+{
+  "note": "Liar statements by pack category. t: true or false. src: where it can be checked. Every false one must sound like it could be true, and none may rest on niche knowledge. The owner reads every change before it ships.",
+  "Bible": [
+    { "s": "Noah built an ark before the flood.", "t": true, "src": "Genesis 6" },
+    { "s": "David fought Goliath with a sling and a stone.", "t": true, "src": "1 Samuel 17" },
+    { "s": "Jonah was swallowed by a great fish.", "t": true, "src": "Jonah 1" },
+    { "s": "Moses led the Israelites out of Egypt.", "t": true, "src": "Exodus 12 to 14" },
+    { "s": "The New Testament begins with the Gospel of Matthew.", "t": true, "src": "Order of the New Testament" },
+    { "s": "Jesus was born in Bethlehem.", "t": true, "src": "Matthew 2, Luke 2" },
+    { "s": "The book of Psalms comes before Proverbs.", "t": true, "src": "Order of the Old Testament" },
+    { "s": "Daniel was thrown into a den of bears.", "t": false, "src": "Daniel 6: lions" },
+    { "s": "Solomon was the first king of Israel.", "t": false, "src": "1 Samuel 10: Saul" },
+    { "s": "The Bible has 39 books in all.", "t": false, "src": "66 in Protestant Bibles; 39 is the Old Testament" },
+    { "s": "Samson lost his strength when his sandals were taken.", "t": false, "src": "Judges 16: his hair" }
+  ],
+  "Science": [
+    { "s": "Water boils at 100 degrees Celsius at sea level.", "t": true, "src": "Standard boiling point" },
+    { "s": "The Earth goes round the Sun once a year.", "t": true, "src": "Orbital period" },
+    { "s": "Plants take in carbon dioxide and give out oxygen.", "t": true, "src": "Photosynthesis" },
+    { "s": "Sound travels faster in water than in air.", "t": true, "src": "About 1,480 m/s against 343 m/s" },
+    { "s": "Diamonds are made of carbon.", "t": true, "src": "Diamond" },
+    { "s": "Light from the Sun takes about eight minutes to reach the Earth.", "t": true, "src": "About 8 minutes 20 seconds" },
+    { "s": "Mars is the closest planet to the Sun.", "t": false, "src": "Mercury is" },
+    { "s": "The Moon gives off its own light.", "t": false, "src": "It reflects sunlight" },
+    { "s": "Humans and dinosaurs lived at the same time.", "t": false, "src": "Non-bird dinosaurs died out 66 million years ago" },
+    { "s": "Lightning never strikes the same place twice.", "t": false, "src": "Tall buildings are struck many times a year" }
+  ],
+  "AI": [
+    { "s": "ChatGPT was released by OpenAI in 2022.", "t": true, "src": "OpenAI, November 2022" },
+    { "s": "Machine learning lets computers learn patterns from data.", "t": true, "src": "Definition" },
+    { "s": "A neural network is built from layers of connected units.", "t": true, "src": "Definition" },
+    { "s": "Alan Turing proposed a test of whether a machine can pass for a human.", "t": true, "src": "Turing, 1950" },
+    { "s": "Training a large AI model takes a great deal of computing power.", "t": true, "src": "Common knowledge" },
+    { "s": "An AI can state something false and sound sure of it.", "t": true, "src": "Known as hallucination" },
+    { "s": "Deep Blue beat the world chess champion in 2015.", "t": false, "src": "1997, against Kasparov" },
+    { "s": "The first computers were built in the 1990s.", "t": false, "src": "1940s" },
+    { "s": "An AI model always checks its facts before it answers.", "t": false, "src": "It does not" },
+    { "s": "Alan Turing was born in the United States.", "t": false, "src": "London, England" }
+  ],
+  "History": [
+    { "s": "Nigeria became independent in 1960.", "t": true, "src": "1 October 1960" },
+    { "s": "The Second World War ended in 1945.", "t": true, "src": "1945" },
+    { "s": "The first moon landing was in 1969.", "t": true, "src": "Apollo 11" },
+    { "s": "Nelson Mandela became president of South Africa in 1994.", "t": true, "src": "1994" },
+    { "s": "The pyramids of Giza are in Egypt.", "t": true, "src": "Giza, Egypt" },
+    { "s": "The Great Wall is in China.", "t": true, "src": "China" },
+    { "s": "The Berlin Wall fell in 1979.", "t": false, "src": "1989" },
+    { "s": "Christopher Columbus first sailed to the Americas in 1692.", "t": false, "src": "1492" },
+    { "s": "Lagos is the capital of Nigeria today.", "t": false, "src": "Abuja since 1991" },
+    { "s": "The Titanic sank on its way home from New York.", "t": false, "src": "On its first voyage, to New York" }
+  ],
+  "General": [
+    { "s": "Spiders have eight legs.", "t": true, "src": "Arachnids" },
+    { "s": "Bats are mammals.", "t": true, "src": "Order Chiroptera" },
+    { "s": "A leap year has 366 days.", "t": true, "src": "Calendar" },
+    { "s": "Bananas grow in bunches.", "t": true, "src": "Botany" },
+    { "s": "Red, yellow and blue are the primary colours in painting.", "t": true, "src": "Traditional colour theory" },
+    { "s": "An octopus has eight arms.", "t": true, "src": "Octopus" },
+    { "s": "A spider is an insect.", "t": false, "src": "An arachnid" },
+    { "s": "Penguins live at the North Pole.", "t": false, "src": "Southern Hemisphere" },
+    { "s": "Tomatoes grow under the ground.", "t": false, "src": "On the plant" },
+    { "s": "A whale is a kind of fish.", "t": false, "src": "A mammal" }
+  ],
+  "Names": [
+    { "s": "Chinedu is an Igbo name.", "t": true, "src": "Igbo" },
+    { "s": "Oluwaseun is a Yoruba name.", "t": true, "src": "Yoruba" },
+    { "s": "Ngozi means blessing in Igbo.", "t": true, "src": "Igbo" },
+    { "s": "Pierre is the French form of Peter.", "t": true, "src": "French" },
+    { "s": "Giovanni is the Italian form of John.", "t": true, "src": "Italian" },
+    { "s": "Aisha is a common name in northern Nigeria.", "t": true, "src": "Hausa and Fulani usage" },
+    { "s": "Emeka is a Hausa name.", "t": false, "src": "Igbo" },
+    { "s": "Funmilayo is an Igbo name.", "t": false, "src": "Yoruba" },
+    { "s": "Juan is the German form of John.", "t": false, "src": "Spanish; German is Johann" },
+    { "s": "Sean is the Spanish form of John.", "t": false, "src": "Irish" }
+  ],
+  "Football": [
+    { "s": "A football team has eleven players on the pitch.", "t": true, "src": "Laws of the Game" },
+    { "s": "Nigeria's national team is called the Super Eagles.", "t": true, "src": "NFF" },
+    { "s": "Brazil has won the World Cup five times.", "t": true, "src": "1958, 1962, 1970, 1994, 2002" },
+    { "s": "Nigeria won Olympic football gold in 1996.", "t": true, "src": "Atlanta 1996" },
+    { "s": "A normal match lasts ninety minutes plus added time.", "t": true, "src": "Laws of the Game" },
+    { "s": "A penalty is taken from the penalty mark.", "t": true, "src": "Laws of the Game" },
+    { "s": "The men's World Cup is held every two years.", "t": false, "src": "Every four years" },
+    { "s": "A goal straight from a corner kick never counts.", "t": false, "src": "It counts" },
+    { "s": "A yellow card sends a player off the pitch.", "t": false, "src": "A red card does" },
+    { "s": "Lionel Messi played his whole career at Barcelona.", "t": false, "src": "Also Paris Saint-Germain and Inter Miami" }
+  ],
+  "Health": [
+    { "s": "The heart pumps blood around the body.", "t": true, "src": "Physiology" },
+    { "s": "An adult has 206 bones.", "t": true, "src": "Anatomy" },
+    { "s": "Oranges are a good source of vitamin C.", "t": true, "src": "Nutrition" },
+    { "s": "Washing hands with soap helps stop germs from spreading.", "t": true, "src": "WHO" },
+    { "s": "Malaria is spread by mosquitoes.", "t": true, "src": "WHO" },
+    { "s": "The skin is the body's largest organ.", "t": true, "src": "Anatomy" },
+    { "s": "Antibiotics cure the common cold.", "t": false, "src": "Colds are viral" },
+    { "s": "The blood in your veins is blue.", "t": false, "src": "Always red" },
+    { "s": "People use only ten percent of their brains.", "t": false, "src": "A myth" },
+    { "s": "Insulin is made in the stomach.", "t": false, "src": "The pancreas" }
+  ],
+  "Naija": [
+    { "s": "Abuja is the capital of Nigeria.", "t": true, "src": "Since 1991" },
+    { "s": "Nigeria has 36 states.", "t": true, "src": "Constitution of Nigeria" },
+    { "s": "The naira is Nigeria's currency.", "t": true, "src": "Central Bank of Nigeria" },
+    { "s": "Nollywood is the name for Nigeria's film industry.", "t": true, "src": "Common usage" },
+    { "s": "Fela Kuti is known as a pioneer of Afrobeat.", "t": true, "src": "Music history" },
+    { "s": "Lagos lies on the coast.", "t": true, "src": "Bight of Benin" },
+    { "s": "Nigeria's flag is green, white and red.", "t": false, "src": "Green, white, green" },
+    { "s": "The River Nile flows through Nigeria.", "t": false, "src": "The Niger and the Benue do" },
+    { "s": "Burna Boy was born in Ghana.", "t": false, "src": "Port Harcourt, Nigeria" },
+    { "s": "Nigeria's money is called the cedi.", "t": false, "src": "The cedi is Ghana's" }
+  ]
+}

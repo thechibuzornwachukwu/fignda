@@ -57,6 +57,10 @@
     "One digit off. Check the ends.",
     "Nearly. One digit more or one less."
   ],
+  "closeGroups": [
+    "One away.",
+    "One away. Three of those belong together."
+  ],
   "already": [
     "Already found",
     "Got that one",

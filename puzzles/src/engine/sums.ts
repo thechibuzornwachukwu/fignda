@@ -53,14 +53,11 @@ export function sumsClue(seed: string, level = 0): HiddenWordsDef {
 /** The target a sums puzzle was built for. */
 export const sumsTarget = (def: Pick<HiddenWordsDef, 'dict'>): number => Number(def.dict[0]) || 0;
 
-/**
- * A sums puzzle in the shape every board reads: `S` is the digits, a selection is a run of them, and each
- * answer is one run, named by where it sits ("4-6") and shown as its sum ("3 + 8 + 4").
- */
-export function buildSums<D extends HiddenWordsDef>(def: D): HiddenWordsPuzzle<D> {
+/** A row of digits as board chars: each digit is a tile in the stream, anything else sits between them. */
+export function digitBoard(text: string): { chars: Char[]; S: string } {
   const chars: Char[] = [];
   let S = '';
-  for (const ch of def.text) {
+  for (const ch of text) {
     if (ch >= '0' && ch <= '9') {
       chars.push({ ch, li: S.length });
       S += ch;
@@ -77,6 +74,15 @@ export function buildSums<D extends HiddenWordsDef>(def: D): HiddenWordsPuzzle<D
     if (c.li >= 0) next = c.li;
     else c.next = next;
   }
+  return { chars, S };
+}
+
+/**
+ * A sums puzzle in the shape every board reads: `S` is the digits, a selection is a run of them, and each
+ * answer is one run, named by where it sits ("4-6") and shown as its sum ("3 + 8 + 4").
+ */
+export function buildSums<D extends HiddenWordsDef>(def: D): HiddenWordsPuzzle<D> {
+  const { chars, S } = digitBoard(def.text);
   const answers: Answer[] = runsTo([...S].map(Number), sumsTarget(def)).map(([a, b]) => ({
     key: `${a}-${b}`,
     label: [...S.slice(a, b + 1)].join(' + '),

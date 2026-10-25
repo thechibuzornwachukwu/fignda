@@ -38,6 +38,10 @@ export type PuzzleProps = {
   variant?: 'text' | 'tiles';
   /** Sums: what a run must add up to. Shown above the tiles with a running total of the selection. */
   target?: number;
+  /** One tap is a whole pick (Liar: tap a statement). Dragging still works. */
+  tapPicks?: boolean;
+  /** Groups: each set's link by its (a, b), written on the row once the set is found. */
+  setNames?: Readonly<Record<string, string>>;
 };
 
 type Sel = { a: number; b: number };
@@ -90,6 +94,7 @@ export function Puzzle({
   size = 'game',
   variant = 'text',
   target,
+  tapPicks = false,
 }: PuzzleProps) {
   const boardRef = useRef<HTMLDivElement>(null);
   useEffect(armSound, []);
@@ -116,8 +121,10 @@ export function Puzzle({
   const down = useRef<{ li: number; moved: boolean } | null>(null);
   const keyAnchor = useRef<number | null>(null);
   const tapStartRef = useRef(onTapStart);
+  const tapPicksRef = useRef(tapPicks);
   useLayoutEffect(() => {
     tapStartRef.current = onTapStart;
+    tapPicksRef.current = tapPicks;
   });
   /**
    * Tap or click one letter. First: it becomes the anchor. Same letter again: cancel. Another letter: check the
@@ -135,6 +142,10 @@ export function Puzzle({
   useEffect(() => () => window.clearTimeout(pending.current?.timer), []);
   const tapRef = useRef((li: number) => {
     flushRef.current();
+    if (tapPicksRef.current) {
+      pickRef.current(li, li);
+      return;
+    }
     const a = tapAnchor.current;
     if (a == null) {
       tapAnchor.current = li;

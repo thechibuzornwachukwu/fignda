@@ -11,7 +11,7 @@ import { Stars } from '../components/Stars';
 import { clampStars } from '../components/starsLabel';
 import { pick } from '../copy';
 import { buildPath, clueStates, type CatalogueItem, type ClueState, type Path } from '../engine/journey';
-import { games, getGameDef, MIRROR_WORDS, sponsorFor } from '../games/catalog';
+import { games, getGameDef, SPECIAL_SOURCES, sponsorFor } from '../games/catalog';
 import { useAuth } from '../lib/auth';
 import { PROGRESS_EVENT } from '../lib/progress';
 import { newRoomCode } from '../lib/room';
@@ -53,7 +53,7 @@ const EMPTY: Path = { cases: [] };
 
 function safePath(catalogue: readonly JourneyGame[]): Path {
   try {
-    return buildPath(catalogue, MIRROR_WORDS);
+    return buildPath(catalogue, SPECIAL_SOURCES);
   } catch {
     return EMPTY;
   }

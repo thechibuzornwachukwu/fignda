@@ -9,7 +9,11 @@ import { hintAnswer, type HintKind } from '../engine/hint';
 import { buildMirror } from '../engine/mirror';
 import { revealParts, type RevealPart } from '../engine/reveal';
 import { buildSums, sumsTarget } from '../engine/sums';
-import { buildTypos } from '../engine/typos';
+import { buildLiar } from '../engine/liar';
+import { buildGroups, tilesOfAnswer } from '../engine/groups';
+import { GroupsBoard } from '../components/GroupsBoard';
+import { buildRelay } from '../engine/relay';
+import { buildSeries } from '../engine/series';
 import type { GameDef, GameType } from './catalog';
 
 export type { Evaluation };
@@ -28,7 +32,7 @@ export type GameModule<P> = {
   family: Family;
   build(def: GameDef): P;
   /** Letter count and chars for the board. */
-  boardProps(p: P): Pick<PuzzleProps, 'chars' | 'letters'> & Partial<Pick<PuzzleProps, 'variant' | 'target'>>;
+  boardProps(p: P): Pick<PuzzleProps, 'chars' | 'letters'> & Partial<Pick<PuzzleProps, 'variant' | 'target' | 'tapPicks' | 'setNames'>>;
   answers(p: P): readonly AnswerInfo[];
   /** Evaluate a finished selection. Matching lives in the engine, never in UI. */
   check(p: P, a: number, b: number, found: ReadonlySet<string>): Evaluation;
@@ -44,6 +48,8 @@ export type GameModule<P> = {
   /** Sort key for unfound rows in the word list. */
   listOrder(p: P): (key: string) => number;
   Board: ComponentType<PuzzleProps>;
+  /** Groups: a near miss is told as "one away". */
+  oneAway?: boolean;
 };
 
 type Built = HiddenWordsPuzzle<GameDef>;
@@ -90,11 +96,36 @@ export const registry: Record<GameType, GameModule<Built>> = {
     },
   }),
   mirror: spans({ family: 'verbal', build: (def) => buildMirror(def), evaluate: EVALUATE.mirror, backwards: true, listOrder: byPlace }),
-  typos: spans({ family: 'verbal', build: (def) => buildTypos(def), evaluate: EVALUATE.typos, listOrder: byPlace }),
   'buried-sums': {
     ...spans({ family: 'quantitative', build: (def) => buildSums(def), evaluate: EVALUATE['buried-sums'], listOrder: byPlace }),
     // Digits as tiles, with the target and a running total above them.
     boardProps: (p) => ({ chars: p.chars, letters: p.S.length, variant: 'tiles', target: sumsTarget(p) }),
+  },
+  series: {
+    ...spans({ family: 'quantitative', build: (def) => buildSeries(def), evaluate: EVALUATE.series, listOrder: byPlace }),
+    boardProps: (p) => ({ chars: p.chars, letters: p.S.length, variant: 'tiles' }),
+  },
+  relay: spans({ family: 'verbal', build: (def) => buildRelay(def), evaluate: EVALUATE.relay, listOrder: byPlace }),
+  groups: {
+    ...spans({ family: 'verbal', build: (def) => buildGroups(def), evaluate: EVALUATE.groups, listOrder: byPlace }),
+    // A set is 4 words; its "span" is the (a, b) of its 4 tiles, so lengths, hints and the reveal speak tiles.
+    answers: (p) => p.answers.map((a) => ({ key: a.key, label: a.label, length: 4 })),
+    boardProps: (p) => ({ chars: p.chars, letters: p.S.length, setNames: Object.fromEntries(p.answers.map((a) => [a.spans[0]!.join(','), a.label.split(':')[0]!])) }),
+    hint(p, found, kind, lastAt) {
+      const next = hintAnswer(p.answers, found, kind, lastAt);
+      return next ? { key: next.key, at: Math.min(...tilesOfAnswer(next)) } : null;
+    },
+    reveal: (p, found) =>
+      p.answers
+        .filter((a) => !found.has(a.key))
+        .map((a) => ({ key: a.key, label: a.label, span: a.spans[0]!, parts: [{ text: a.label, hit: false }] })),
+    Board: GroupsBoard,
+    oneAway: true,
+  },
+  liar: {
+    ...spans({ family: 'verbal', build: (def) => buildLiar(def), evaluate: EVALUATE.liar, listOrder: byPlace }),
+    // A statement is picked with one tap.
+    boardProps: (p) => ({ chars: p.chars, letters: p.S.length, tapPicks: true }),
   },
 };
 

@@ -63,9 +63,9 @@ export const newSession = (now: number): Session => ({
 
 export const isFinished = (s: SavedSession) => s.endAt != null;
 
-type Ctx = { now: number; total: number; daily: boolean; copy: Copy; /** A number game: a wrong run is told in its own words. */ sums?: boolean; /** The unmasking: a wrong letter is a try gone. */ unmask?: boolean };
+type Ctx = { now: number; total: number; daily: boolean; copy: Copy; /** A number game: a wrong run is told in its own words. */ sums?: boolean; /** Groups: a near miss is one away. */ groups?: boolean; /** The unmasking: a wrong letter is a try gone. */ unmask?: boolean };
 
-export function applyPick(s: Session, ev: Evaluation, { now, total, daily, copy, sums = false }: Ctx): Session {
+export function applyPick(s: Session, ev: Evaluation, { now, total, daily, copy, sums = false, groups = false }: Ctx): Session {
   if (isFinished(s)) return s;
   switch (ev.kind) {
     case 'hit': {
@@ -96,7 +96,7 @@ export function applyPick(s: Session, ev: Evaluation, { now, total, daily, copy,
       return { ...s, msg: copy.pick('already') };
     case 'close':
       // Near miss: no penalty, streak kept.
-      return { ...s, msg: copy.pick(sums ? 'closeSums' : 'close') };
+      return { ...s, msg: copy.pick(groups ? 'closeGroups' : sums ? 'closeSums' : 'close') };
     case 'wrong':
       return daily
         ? { ...s, streak: 0, misses: s.misses + 1, wrongs: s.wrongs + 1, msg: copy.pick('wrongDaily') }
@@ -303,7 +303,7 @@ export function useGameSession<P>({ mod, puzzle, dailyN, resumeId: resumeAs, sha
       chime();
     }
     const now = Date.now();
-    const picked = applyPick(cur, ev, { now, total, daily, copy, sums: mod.family === 'quantitative' });
+    const picked = applyPick(cur, ev, { now, total, daily, copy, sums: mod.family === 'quantitative', groups: mod.oneAway === true });
     const logged = isLogged(ev)
       ? withLog(picked, cur, (l) => ({ ...l, events: [...l.events, { a, b, t: now - cur.startAt }] }))
       : picked;
