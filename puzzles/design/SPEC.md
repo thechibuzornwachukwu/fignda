@@ -454,7 +454,11 @@ Nothing else animates.
 - Buried sums (`src/engine/sums.ts`): a row of digits 1 to 9, and the runs of 2 or more in a row that add up to a target from 10 to 17.
 - Mirror (`src/engine/mirror.ts`): hidden words that read right to left.
 - Packs on the server (`supabase/migrations/20261010000500_cases.sql`, `src/lib/progress.ts`):
-- Roadmap types (not in v1, see Gazecraft Future Games): Liar, Relay, Trace, Bury it.
+- The specials of a pack (`src/engine/specials.ts`), one function the client and the server both ask. Numbers never move: 31 Mirror, 32 Relay, 33 Series, 34 Liar, 35 Groups. In a pack: Liar after passage 1, Relay after 3, Series after 4, Groups after 6, Mirror last; short packs put the rest at the end.
+- Relay (`src/engine/relay.ts`): chains of 3 or more everyday words in the letter stream, each starting on the last letter of the one before, read once ("kept a pet ermine": KEPT·TAP·PET·TERM·MINE). Words from SCOWL levels 10 and 20 (`data/relayWords.json`, licence `data/SCOWL-LICENSE.txt`). Found in the pack's own passages, so only packs that hide 2 chains have one.
+- Series (`src/engine/series.ts`): a seeded row of digits with 3 runs that step by one amount (not 0, at most 4). Graded as sums are.
+- Liar (`src/engine/liar.ts`, `data/liar.json`): 5 statements a line, 1 or 2 false, picked by seed from the pack category's bank. One tap picks a statement (`tapPicks`). Fairness is editorial: every statement carries a source, every lie is believable, nothing niche.
+- Groups (`src/engine/groups.ts`, `data/groups.json`, `GroupsBoard`): 16 pictures (Fluent Emoji 3D, MIT, `public/icons/fluent`) that are 4 sets of 4. Pick 4 and check: a set locks in with its name; 3 of 4 is "one away", a near miss, never a wrong pick. A pick of 4 tiles travels as the (a, b) every type sends (its rank among the 1820). Only categories that can be pictured have one (General, Science, Health): no names of people or teams.
 - Families.
 
 ## 10. Accessibility

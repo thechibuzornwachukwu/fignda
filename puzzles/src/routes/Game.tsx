@@ -151,7 +151,7 @@ const HOW: Record<GameType, readonly [string, string]> = {
     'Each chain is words in a row, every one starting on the last letter of the one before. Swipe across a whole chain.',
   ],
   liar: ['Some of these are false. Click each false statement.', 'Some of these are false. Tap each false statement.'],
-  groups: ['These 16 words are 4 sets of 4. Pick 4 that belong together, then check them.', 'These 16 words are 4 sets of 4. Tap 4 that belong together, then check them.'],
+  groups: ['These 16 are 4 sets of 4. Pick 4 that belong together, then check them.', 'These 16 are 4 sets of 4. Tap 4 that belong together, then check them.'],
 };
 
 /** The hint under the board while nothing has been said yet. */

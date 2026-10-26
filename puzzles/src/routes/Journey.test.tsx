@@ -85,7 +85,8 @@ describe('Journey', () => {
     expect(doneLink).not.toHaveAttribute('aria-current');
 
     const nextLink = within(clue(container, c)).getByRole('link');
-    expect(nextLink).toHaveAttribute('href', `/play/${long.id}/21`);
+    // Its number, whatever kind of clue sits third in the pack.
+    expect(nextLink).toHaveAttribute('href', `/play/${long.id}/${c.split('~')[1]}`);
     expect(nextLink).toHaveAttribute('aria-current', 'step');
     expect(nextLink.textContent).toContain('Puzzle 3. Next puzzle.');
     expect(container.querySelectorAll('[aria-current="step"]')).toHaveLength(1);
